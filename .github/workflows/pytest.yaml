@@ -10,9 +10,9 @@ on:
     branches: 
     - hzh/unittest
 
-  # workflow_dispatch:
-  #   branches:
-  #   - hzh/unittest
+  workflow_dispatch:
+    branches:
+    - hzh/unittest
 
 permissions:
   contents: read
