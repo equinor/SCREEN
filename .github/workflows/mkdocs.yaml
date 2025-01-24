@@ -9,9 +9,9 @@ on:
     branches:
       - hzh/unittest
 
-  # workflow_dispatch:
-  #   branches:
-  #   - hzh/unittest
+    workflow_dispatch:
+      branches:
+      - hzh/unittest
 
 jobs:
   deploy:
