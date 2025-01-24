@@ -22,7 +22,7 @@ mkdocstrings[python]
 mkdocs-material
 mkdocs-autorefs
 markdown-callouts
-jupyter-server>=2.14.1 # not directly required, pinned by Snyk to avoid a vulnerability
+jupyter-server>=2.11.2 # not directly required, pinned by Snyk to avoid a vulnerability
 pillow>=10.2.0 # not directly required, pinned by Snyk to avoid a vulnerability
 tornado>=6.4.2 # not directly required, pinned by Snyk to avoid a vulnerability
 werkzeug>=3.0.6 # not directly required, pinned by Snyk to avoid a vulnerability
