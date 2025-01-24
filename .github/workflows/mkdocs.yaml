@@ -9,8 +9,8 @@ on:
     branches:
       - hzh/unittest
 
-    workflow_dispatch:
-      branches:
+  workflow_dispatch:
+    branches:
       - hzh/unittest
 
 jobs:
