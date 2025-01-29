@@ -230,38 +230,89 @@ END
 
 !BRINE 0.315 MASS ! 1 ppm = 1E6 kg/kg 
 
-#=========================== Equilibration or flow conditions ==================================
+#=========================== Equilibration or flow conditions =================
 
-FLOW_CONDITION initial_press
-  !Equilibrium with Gas/water contact not allowed. Brine only.
-  TYPE
-    PRESSURE hydrostatic
-  /
+BRINE 0.032 MOLE
 
-  PRESSURE 4.85 Bar  !allow to read pressure as well
-  DATUM_D 49.4  m
+EQUILIBRATION overburden_water
+  
+  DATUM_D 500 m
+  
+  PRESSURE 53.65 Bar
+  
+  TEMPERATURE_TABLE
+    D_UNITS m !cannot be otherwise
+    TEMPERATURE_UNITS C !cannot be otherwise
+
+    RTEMPVD
+     ! Metric
+	 4       3.9
+     312     4.0
+	 362     6.0
+     412     8.0
+	 1012    32.0
+	 1212 	 40.0
+	 1512    52.0
+     1612    56.0
+     1712    60.0
+    /  
+  END
+  
+  SALT_TABLE
+    D_UNITS m
+    CONCENTRATION_UNITS MOLE
+    SALTVD
+     1 0.032
+     2000 0.032
+    /
+  END 
 
   GAS_IN_LIQUID_MOLE_FRACTION 0.0
 
+/
+
+EQUILIBRATION CO2_column
+
+!original with 0.1017 bar/m:
+!  0BAR DEPLETION!	
+!  DATUM_D 1215.0 m  
+!  PRESSURE 123.6 Bar  
+!  WGC_D 1215.0 m  
+
+! DENG 750  
+  DATUM_D 1500.0 m
+  PRESSURE 144.5 Bar
+  WGC_D 1500.0 m
+  
   TEMPERATURE_TABLE
-   D_UNITS m           !cannot be otherwise
+    D_UNITS m !cannot be otherwise
    TEMPERATURE_UNITS C !cannot be otherwise
-   external_file ../include/temperature_gradient.inc / 
+
+    RTEMPVD
+     ! Metric
+	   4       3.9
+     312     4.0
+	   362     6.0
+     412     8.0
+	   1012    32.0
+	   1212 	 40.0
+	   1512    52.0
+     1612    56.0
+     1712    60.0
+    /  
+  END
+  
+  SALT_TABLE
+    D_UNITS m
+    CONCENTRATION_UNITS MOLE
+    SALTVD
+     1 0.032
+     2000 0.032
+    /
   END 
-
-
-! Set hypersaline in the reservoir and low salinity in OVB 
-
-!SALT_TABLE
-!    D_UNITS m
-!    CONCENTRATION_UNITS MASS
-!    SALTVD
-!     10  0.001
-!     1000 0.01
-!     1750 0.20
-!     3500 0.20
-!    /
-!END
+  
+  GAS_IN_LIQUID_MOLE_FRACTION 0.0
+  
 /
 
 
