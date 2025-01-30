@@ -55,6 +55,10 @@ def CARFIN_pipe_with_oph(ID: float,
     print ('--FIPLEG (FIPNUM) defintion',file=O)
     print ('FIPLEG','',6,'',x_min_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_hole,'',k_max_hole,'','/',file=O)
 
+    print ('--EQLNUM defintion',file=O)
+    print ('EQLNUM','',2,'',x_min_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_hole,'',k_max_hole,'','/',file=O)
+
+
     print ('--Transmisibilities of the edge of the pipe set to zero',file=O)
     print ('MULTX','',0,'',x_min_pipe-1,'',x_min_pipe-1,'',y_min_pipe,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
     print ('MULTX','',0,'',x_max_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
