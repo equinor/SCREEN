@@ -4,7 +4,7 @@ pydantic
 numpy
 pandas
 scipy
-resdata
+git+https://github.com/equinor/resdata.git
 CoolProp
 welly
 dash
