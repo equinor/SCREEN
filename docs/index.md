@@ -13,7 +13,8 @@ In addition to adjacent activities run internally and externally, the project ai
  
 The toolbox can be grouped in two main modules: A **pre-processing and preliminary assesment**, and a **detailed simulation workflow** as shown in the figure below.
 
-![fig1](/docs/imgs/screen_workflow.png)
+![fig1](imgs/screen_workflow.png)
+
 
 ### Pre-processing and preliminary assesment
 
