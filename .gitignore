@@ -12,6 +12,8 @@ src/**/data/**/*.grdecl
 *.png 
 *.gif
 *.jpeg
+!docs/imgs/screen_workflow.png
+!docs/imgs/SCREEN_DataFlow.png
 
 # venv
 venv_*/
