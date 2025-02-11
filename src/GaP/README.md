@@ -1,134 +1,47 @@
-# GaP code
+To set up a PFLOTRAN simulation run, users must first complete the pre-processing and preliminary assessment phase, which involves creating Well and Pressure instances. These instances provide the necessary wellbore and pressure data for the simulation. Additionally, users need to have template PFLOTRAN input files that outline the simulation setup (TEMP-0.in) and the grid (TEMP_GRD.grdecl). These templates describe a basic "shoebox" model with a layer cake grid representing the vertical space from mean sea level to the reservoir, including the ocean water column and overburden rocks.
 
-A tool to build legacy well representations on reservoir simulation grids
+The resulting simulation model is a 3D representation of the wellbore, with the well represented in a logically refined grid (LGR) at the center of the model. The zonation and assignment of transport properties in the model reflect the discrete sections of the well (cement bond, cement plugs, open hole). Casings are not discretely represented as grid cells but are modeled using transmissibility multipliers, which are set to zero by default to act as perfect barriers. The transport properties of the cement materials are assigned during the Well instance creation, while the properties of the reservoir and overburden rocks need to be manually set.
 
-## Introduction ##
 
-To be able to model a legacy well in reservoir scale, we need to make sure all of the elements including  multiple casings with different OD, cement bonds, barriers, the open area between barriers inside the casings, etc. are considered.
-Then, the existing simple well models available in the commercial simulators (Eclipse, PFT, IX) are not able to include those details. They just introduce a node where the flow will be discharged from/to the grid to the node.
+![Template Grid and Resulting LGR Grid](imgs/screen_grid_setup.png)
+*Figure 1: Comparison of the template grid with updated overburden thickness (left) and the resulting grid after LGR generation (right).*
 
-The way around it is to define the well as a part of the reservoir by manipulating the local grids (LGR) and properties of the grid, in that setting:
 
-- **The pipes** can be mimicked by a very narrow (in the size of ID of a pipe-20 to 50 cm) and high permeability grids. Those grids could be surrounded by grids with zero transmissibility.
-- **The open hole sections** can be modelled the same as pipe, but without zero transmissibility around the high perm. area to allow moving of fluids side ways from the piper. This is particularly important in the cases where there is a drilled but uncased hole in the setting.
-- **The barriers** can be mimicked by very low permeability with the same size of pipe ID and have their own start and end depth.
-- **The cement bond** can be mimicked by low perm vertical layer adjustment to the casing with given depth and interval.
+Users are encouraged to use the `wildcat-pflotran` dataset located in the `test_data/examples` folder, along with the `pflotran_gap` notebook or the `screen_well_to_gap.py` script. These resources guide users through library dependencies and path setups. The first step is to create copies of the template files and update them with well-specific information and problem setup details. This includes adjusting the thickness of overburden cells and updating equilibration information to initialize the simulation with expected reservoir pressure and temperature gradients.
 
-Each unit above should have specified start and end depths.
+The equilibration is divided into two zones: 'overburden_water' for the brine in the overburden and ocean water column, and 'CO2_column' for the reservoir, defined by a gas-water contact depth and pressure. The simulation is initially set to run for zero days (START_DATE = FINAL_DATE) to perform only an initialization run, which generates the EGRID file necessary for building the LGR.
 
-In this context, the GaP script generates the LGR, changes the properties of the LGR to reflect all requested elements, and isolates reservoir from the overburden, opens the communication between reservroir and overburden only through the well. 
+After the EGRID file is produced, the LGRBuilder functionality is used to set up the LGR, update transport properties, zonation, and equilibration zones. The user must define the upper limit of the 'CO2_column' equilibration zone, which may extend into the wellbore to represent a continuous column of CO2 connecting the wellbore to the reservoir. This upper boundary is typically defined by the base of the first cement plug above the reservoir, but the user must specify this.
 
-## Experiments
-There are a couple of examples for verifying the codes.
+![Input Wellbore and Resulting Grid Representation](imgs/screen_grid_setup_GaP.png)
+*Figure 2: Input wellbore visualization from the `Well` instance (left) and the resulting grid representation colored by permeability in the simulation model (right), with a scale similar to Figure 1.*
 
-### - Configuration format
+Once the LGR is set up, the END_DATE can be updated to the desired simulation end date. Users can opt for an initialization run to verify the well representation in the simulation grid or proceed with a full simulation run. The duration of the simulation results will depend on the complexity of the problem, the number of nodes, and other setup parameters.
 
-We define GaP input `yaml` format similar to `kubernetes`. Here is the sample for `smeaheia` dataset:
-```yaml
-apiVersion: 'gap/v0.1'
+Upon completion of the simulation, the output can be explored using standard PFLOTRAN post-processing tools and techniques. Users have the flexibility to load the simulation results into visualization software such as ResInsight, which provides advanced capabilities for analyzing and interpreting reservoir simulation data. Additionally, users can leverage the modules available in this repository to optimize visualization and gain deeper insights into the simulation outcomes.
 
-metadata:
-  name: 'smeaheia'
-  
-spec:
+## Limitations
 
-  sim_case:
-    folder: "data/smeaheia"
-    filename: "GEN_NOLGR_PH2"
+The SCREEN workflow with PFLOTRAN provides a valuable approach for simulating wellbore dynamics within the context of CCS projects. However, users should be aware of the following limitations:
 
-  lgr_out:
-    folder: "data/smeaheia"
-    filename: "LEG_HIRES"
+- **Porous Media Flow**: PFLOTRAN is primarily designed for porous media flow simulations. While the SCREEN workflow adapts it for wellbore dynamics, it does not include the detailed physics for pipe or open wellbore modeling.
 
-  defaults:
-    mindz_ob: 10.0
+- **Geomechanics**: The current workflow does not include coupled geomechanics. Overburden flow is driven by assigned transport properties without accounting for mechanical deformation.
 
-  casings:
+- **Degradation and Corrosion**: Complex degradation or corrosion processes within the wellbore are not modeled within PFLOTRAN.
 
-    - type: "conductor"
-      ID: 0.762
-      pipe:
-        strt_depth: 312
-        end_depth: 371
-        perm: 10000      # permeability of tube
-      oph:
-        strt_depth: 4
-        end_depth: 376
-      cement:
-        strt_depth: 312
-        end_depth: 371
-        perm: 5          # permeability of cement bond
+- **Vertical Wells**: The method is currently applicable only to vertical wells and does not support deviated or horizontal well trajectories.
 
-    - type: "production"
-      ID: 0.244
-      pipe:
-        strt_depth: 599
-        end_depth: 1114
-        perm: 10000      # permeability of tube
-      oph:
-        strt_depth: 599
-        end_depth: 1622
-      cement:
-        strt_depth: 683
-        end_depth: 1114
-        perm: 5          # permeability of cement bond
+- **Leakage Pathways**: Leakage pathways such as holes in the casing are not automatically handled and must be manually added to the GRDECL file produced by the scripts.
 
-    - type: "surface"
-      ID: 0.3397
-      pipe:
-        strt_depth: 312
-        end_depth: 686
-        perm: 10000      # permeability of tube
-      oph:
-        strt_depth: 312
-        end_depth: 697
-      cement:
-        strt_depth: 312
-        end_depth: 686
-        perm: 5          # permeability of cement bond
+- **CO2 Column Initialization**: The simulation is initialized with a CO2 column, which allows for the focus on long-term leakage but does not consider short-term dynamics.
 
-  barriers:
+- **Boundary Conditions**: The workflow does not support time-varying boundary conditions, which may be relevant for certain simulation scenarios.
 
-    - type: "barrier"
-      ID: 0.3397
-      pipe:
-        strt_depth: 352
-        end_depth: 560
-        perm: 0.5
+- **Grid Representation**: The use of a Cartesian grid to represent a cylindrical wellbore can introduce volumetric errors due to the transformation into a prism shape.
 
-    - type: "barrier"
-      ID: 0.244
-      pipe:
-        strt_depth: 1020
-        end_depth: 1046
-        perm: 100
-```
-Note the input order of casings and barriers doesn't matter. And we intentionally mess up the oder of ```production casing``` and ```sufface casing```. The codes know how to sort them according to their `ID`s. And some of the fields are optional.
+- **Uncertain Parameters**: Cement permeability and transport properties of the overburden are uncertain and can significantly impact simulation results.
 
-### - Run the examples
-There are a couple of ways to test the codes: one is to run the test codes in commandline and the other is to run notebooks in the browser with jupyter app.
+- **Grid Resolution**: Elements smaller than the LGR resolution may not be accurately represented. While cement bonds are fully represented, their thickness might be smaller than the minimum grid size. Casings are modeled as transmissibility multipliers and act as flow barriers, which may not capture the full complexity of wellbore integrity.
 
-To run it in **commandline**, type the following inside the `GaP` directiory:
-```
-$ python -m experiments.GaP_HIRES --config-file data/smeaheia/config.yaml --display
-```
-This is an example for two-barriers. The output by default will be in the same directory as input. To check the differences between the current run with original output, try the following:
-```
-$ diff data/smeaheia/LEG_HIRES.grdecl data/smeaheia/LEG_HIRES.grdecl.original
-```
-Nothing will show up if they are exactly the same. Otherwise, there will be bunch of differences.
-
-For one-barrier example, please try the following:
-```
-$ python -m experiments.GaP_HIRES --config-file data/smeaheia_onepipe/config.yaml --display
-```
-The following will be used for comparisons:
-```
-$ diff data/smeaheia_onepipe/LEG_HIRES_BD_V1.grdecl data/smeaheia_onepipe/LEG_HIRES_BD_V1.grdecl.original
-```
-
-To run the **jupyter** notebooks, change from current directory to the `notebooks` directory, and launch jupyter lab app:
-```
-$ jupyter-lab
-```
-and play with the `demo.ipynb` for details.
+These limitations should be considered when interpreting simulation results and when planning further development of the workflow to ensure that the simulations align with the specific objectives and conditions of the CCS project.
