@@ -22,6 +22,10 @@ venv_*/
 .devcontainer
 
 # pflotran artifacts
+test_data/**/model/*.in
+test_data/**/include/*.grdecl
+!test_data/**/model/TEMP-0.in
+!test_data/**/include/TEMP_GRD.grdecl
 test_data/**/model/*.UNSMRY
 test_data/**/model/*.UNRST
 test_data/**/model/*.LOG
@@ -32,8 +36,8 @@ test_data/**/model/*.SMSPEC
 test_data/**/model/*.ERR
 test_data/**/model/*.gzip
 test_data/**/model/*.run
-# test_data/**/model/*.EGRID
-# test_data/**/model/*.INIT
+test_data/**/model/*.EGRID
+test_data/**/model/*.INIT
 test_data/**/include/*LGR.grdecl
 
 # wildcat-pflotran
