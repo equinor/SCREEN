@@ -1,136 +1,49 @@
-# WELL CLASS for pre-processing well data
-## Data Preparation
-The first step in using the SCREEN method is to gather all the necessary data to build a plugged and abandoned well sketch, along with any relevant subsurface data surrounding the well. This data should be prepared in a CSV file with multiple tables, each separated by a blank line.
+The SCREEN scripts facilitate preliminary analysis by generating two main outputs from the input data:
 
-To collect the data these are some steps that can be followed:
+- A wellbore schematic that integrates geological well tops from subsurface data.
+- A pressure depth plot that models the pressure profile along the wellbore.
 
-- Identify the required data: Review the list of required tables and columns in the input data file to determine what information you need to gather. This includes well header information, drilling intervals, casing and cementing intervals, barriers, geological units, and assumptions.
+Users provide input data in CSV or YAML format, which includes the following required parameters:
 
-- Collect the data: Gather the necessary data from various sources. The information in the first tables should be available from the final well reports. Retrieving the data may involve manually scouting numbers in the reports that could be presented in different places and different formats. Other databases can be referred to retrieve temperature data or updated geological well tops.
+- `well_header`: General well information such as `well_name`, `well_rkb`, `sf_depth_msl`, `well_td_rkb`, `sf_temp`, and `geo_tgrad`.
+- `drilling` table: Interval data for hole sections with top and bottom depths and diameters.
+- `casing_cement` table: Casing and cement records by top and bottom depth, inner diameter, and cement top (TOC) and bottom (BOC) depths. A `shoe` flag and a `permeability` value are included.
+- `barriers` table`: Depths of cement or mechanical plugs with a `permeability` value for modeling.
+- `geology` table`: Geological unit tops, names, and a reservoir indicator. Overburden flow units must be tagged as reservoirs.
+- `reservoir_pressure`: (to be deprecated) Reference for pressure deviations at the reservoir level.
+- `co2_datum`: Depth of the expected base of the gas column, indicating aquifer pressure conditions.
 
-- Verify the data: Check the accuracy and completeness of the data by cross-referencing it with multiple sources and verifying it with domain experts. Ensure that all required tables and columns are included in the input data file and that the data is entered correctly.
-
-- Organize the data: Organize the data into tables according to the structure of the input data file. Use a spreadsheet program or a text editor to create a CSV file with multiple tables, each separated by a blank line.
-
-- Include assumptions: The assumptions depend on the stage of knowledge of the area. If there is a reservoir model in place, this should be used to fill in the information for these tables. Otherwise these should discussed with the subsurface personnel involved in the project.
-
-
-The CSV file shall include the following tables:
-
-- `well_header`: This table contains general information about the well, such as its name (well_name), RKB elevation (well_rkb), depth of the sea floor (sf_depth_msl), total depth (well_td_rkb), sea floor temperature (sf_temp), and geothermal gradient (geo_tgrad).
-
-- `drilling`: This table contains information about the drilling intervals of the well, including the top and bottom depths in RKB (top_rkb, bottom_rkb) and the diameter of the borehole in inches (diameter_in).
-
-- `casing_cement`: This table contains information about the casing and cementing intervals of the well, including the top and bottom depths in RKB (top_rkb, bottom_rkb), diameter of the casing in inches (diameter_in), top  and bottom of cement-bond in RKB (toc_rkb, boc_rkb), and whether or not it has a shoe (shoe).
-
--	`barriers`: This table lists the barriers in the well along with their name (barrier_name), type (barrier_type), and top and bottom depths in RKB (top_rkb, bottom_rkb).
-
--	`geology`: This table lists the geological units encountered in the well along with their top depth in RKB (top_rkb), name (geol_unit), and whether or not they are considered a reservoir (reservoir_flag).
-
--	`assumptions`: This section includes several tables with information about assumptions used in the analysis, such as reservoir pressure scenarios (reservoir_pressure), CO2 datum depth (co2_datum), main barrier name (main_barrier), and barrier permeability values for different quality levels (barrier_permeability).
-
-Here is an example of how the CSV file could be structured, along with explanations for each table:
-
-```
-input_data
-
-well_header
-well_name,wellA
-well_rkb,30
-sf_depth_msl,105
-well_td_rkb,3997
-sf_temp,4
-geo_tgrad,40
-
-drilling
-top_rkb,bottom_rkb,diameter_in
-132,190,36
-190,444,26
-444,1812,17 1/2
-1812,3942,12 1/4
-3942,3997,8 1/2
-
-casing_cement
-top_rkb,bottom_rkb,diameter_in,toc_rkb,boc_rkb,shoe
-132,158,30,132,158,TRUE
-132,439,20,132,439,TRUE
-182,1803,13 3/8,450,1803,TRUE
-
-barriers
-barrier_name,barrier_type,top_rkb,bottom_rkb
-cement plug #3,cplug,132,150
-cement plug #2,cplug,1690,1850
-cement plug #1,cplug,2050,2300
-
-geology
-top_rkb,geol_unit,reservoir_flag
-132,OVERBURDEN,FALSE
-2122,CAP ROCK,FALSE
-2265,RESERVOIR,TRUE
-
-assumptions
-
-reservoir_pressure
-depth_msl,RP1,RP2
-2238,90 110
-
-co2_datum
-co2_msl,2370
-
-main_barrier
-barrier_name,cplug2
-
-barrier_permeability
-quality,kv
-good,0.01
-mid,10
-poor,1.00E+03
-```
-
-
-
-## Data Visualization and Proxy-based Leakage Estimation
-
-Once all the information is tabulated, it can be processed through the well class. 
+Examples in the `test_data` folder can be used as templates for structuring the data. The `pflotran_gap` notebook serves as a reference guide to execute the workflow. The initial step involves using the `Well` data class to construct the well object:
 
 ```python
-#Import CSV tables
-filename = r'csv_file.csv'
+my_well = Well(header       = well_csv['well_header'], 
+               drilling     = well_csv['drilling'],
+               casings      = well_csv['casing_cement'],
+               geology      = well_csv['geology'],
+               barriers     = well_csv['barriers'], 
+               barrier_perm = well_csv['barrier_permeability'],
+               co2_datum    = well_csv['co2_datum'])
 
-well_csv = csv_parser(filename)
-
-#Process well by running well class
-my_well = Well( header       = well_csv['well_header'], 
-                drilling     = well_csv['drilling'],
-                casings      = well_csv['casing_cement'],
-                barriers     = well_csv['barriers'], 
-                reservoir_P  = well_csv['reservoir_pressure'],
-                main_barrier = well_csv['main_barrier'],
-                barrier_perm = well_csv['barrier_permeability'],
-                co2_datum    = well_csv['co2_datum'],
-                geology      = well_csv['geology'],
-           )
 ```
 
-The processing will store the data in memory and use it to produce a hybrid geological well-sketch and a pressure-depth plot displaying the fluid pressures of each phase and the minimum horizontal stress.
+During this process, all inputs are converted to meters, and depth values are harmonized to be expressed in meters below mean sea level (mMSL). After this conversion, it is possible to generate a visualization of the wellbore schematic.
+
+The Well object is then utilized to instantiate the Pressure class and create pressure profiles:
 
 ```python
-#Plot sketch, pressures
-fig, (ax1, ax2) = plt.subplots(1,2, sharey=True)
-my_well.plot_sketch(ax=ax1)
-my_well.plot_pressure(ax=ax2)
-
-fig.tight_layout()
-
+my_pressure = Pressure(header      = well_csv['well_header'],
+                       reservoir_P = well_csv['reservoir_pressure'],
+                       co2_datum   = well_csv['co2_datum'],
+                       pvt_path    = pvt_path)
 ```
+These profiles are approximations derived from a numerical method that computes pressure. The script begins with known temperature and pressure at a reference depth to calculate initial fluid density. It then applies the equation  `ΔP=ρ⋅g⋅dz`, iteratively updating pressure and density over small depth increments. At each step, the new pressure is determined using the updated density and the known temperature gradient, continuing this process throughout the well's depth profile. The integration of differential equations for pressure and density calculations was initially performed using a conventional for loop, but has since been optimized by adopting the solve_ivp method from scipy.integrate, enhancing both efficiency and accuracy.
 
-The well sketch combines both subsurface data and well engineering information. It serves as a starting point to identify the main leakage pathways and illustrate the main risks associated with the well.
+## Limitations
 
-The pressure plot, besides visualizing the provided pressure scenarios, has the necessary input to run a preliminary leakage estimation based on a Darcy-based proxy. This proxy gives an estimate of leakage rates through the main barrier (deepest cement plug). The magnitude will be a function of both the transport properties assigned to the barrier and the resulting phase pressures of each scenario.
+- The wellbore schematic does not have functionalities to represent internal tubing, casing perforations or multiple discrete cemented sections.
+- Identified overburden flow units should be labeled as reservoirs in the input data.
+- Permeability values in the `casing_cement` and `barriers` tables are estimates provided by the user. These values are subject to significant uncertainty due to factors such as cement quality, curing defects, or fractures, and can vary across orders of magnitude. Users are responsible for providing realistic permeability estimates, drawing on professional judgment and available literature in the absence of concrete data.
+- The estimation of fluid pressure using the `Pressure` class is not a full-fledged simulation but a numerical approach that approximates shut-in pressures or a system in equilibrium. It should not be confused with dynamic simulation models that account for transient conditions and fluid flow in the reservoir and wellbore.
 
-<!-- ![well_sketch](https://github.com/equinor/SCREEN/assets/49291809/01544f8f-fcae-4602-b188-bf032a64d20b) -->
 
-![well sketch](docs/imgs/well-sketch.png)
-
-![well sketch](imgs/well-sketch.png)
-
+![Effective permeability range for well cement, highlighting variability and uncertainty.](link-to-attached-figure-permeability-variance)
