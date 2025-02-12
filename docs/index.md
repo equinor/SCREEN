@@ -1,5 +1,3 @@
-## Introduction
-
 The SCript-based Risk Estimation of well leakage in Early phase evaluatioN (SCREEN) project targets legacy well assessment for Carbon Capture and Storage (CCS) projects. Given that abandoned or inactive wells can serve as pathways for CO2 leakage, rigorous risk assessments and integrity evaluations are crucial [1; 2].
 
 SCREEN provides a script-based workflow to streamline analysis in legacy well evaluations, improving data processing and analysis for well integrity engineers and subsurface teams.
