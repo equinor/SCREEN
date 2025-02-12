@@ -5,8 +5,8 @@ numpy
 pandas
 scipy
 git+https://github.com/equinor/resdata.git
-CoolProp
-welly
+# CoolProp
+# welly
 dash
 pyarrow
 fastparquet
