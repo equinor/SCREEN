@@ -57,7 +57,7 @@ def plot_pressure(my_pressure: Pressure,
         pt_df['init'].plot(x='hs_p', y='depth_msl', ax=ax, label='$p_{hs}$', color='steelblue', lw = 0.75)
 
     #Plot minimum horizontal stress
-    pt_df['init'].plot(x='Shmin', y='depth_msl', ax=ax, label='$\sigma_{h min}$', color='k', lw = 0.75)
+    pt_df['init'].plot(x='Shmin', y='depth_msl', ax=ax, label=r'$\sigma_{h min}$', color='k', lw = 0.75)
 
     #Plot fluid pressure scenarios
     ls_list = ['solid','dashed','dashdot', 'dotted']
@@ -82,11 +82,11 @@ def plot_pressure(my_pressure: Pressure,
 
         #define legend if it is a reservoir pressure scenario
         if sc_type == 'reservoir':
-            sc_label = f'$CO_2$ P ($\Delta$P = {sc_delta_p:.0f} bar)'
+            sc_label = rf'$CO_2$ P ($\Delta$P = {sc_delta_p:.0f} bar)'
 
         #define legend if it is a maximum pressure scenario
         elif sc_type == 'max_p':
-            sc_label = f'max $CO_2$ P to ($\Delta$P = {sc_delta_p:.0f} bar)'
+            sc_label = rf'max $CO_2$ P to ($\Delta$P = {sc_delta_p:.0f} bar)'
         
         #include MSAD
         if plot_MSAD:

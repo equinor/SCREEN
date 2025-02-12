@@ -152,8 +152,8 @@ def plot_pt(my_pressure: Pressure,
     xmax = pt_df['init'].query('depth_msl>(@co2_datum)+50')['temp'].iloc[0]
     #xmax = pt_df['temp'].max()
 
-    ax.set_ylabel('p [bar]')
-    ax.set_xlabel('T [$\degree$C]')
+    ax.set_ylabel(r'p [bar]')
+    ax.set_xlabel(r'T [$\degree$C]')
     ax.set_xlim(1, xmax)
     ax.set_ylim(1, ymax)
     fig.colorbar(rho_pcm, label=r'$\rho_{CO_2}$ [$kg/m^3$]')
