@@ -14,8 +14,6 @@ numpy = "1.24.4"
 pandas = "2.0.3"
 scipy = "1.10.1"
 ecl = "^2.14.5"
-CoolProp = "^6.5.0.post1"
-welly = "^0.5.2"
 
 
 [tool.poetry.group.dev.dependencies]

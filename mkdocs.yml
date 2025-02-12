@@ -53,12 +53,10 @@ plugins:
   - autorefs
 
 nav:
-  - Home: index.md
-  - 'User Guides':
-    - GaP: gap.md
-    - WellClass: well_class.md
-    - PressCalc: press_calc.md
-    - WellViz: well_viz.md
+  - 'User Guidelines':
+    - Introduction: index.md
+    - Pre‐processing and Preliminary Assessment: well_class.md
+    - Detailed Simulation workflow: gap.md
   - Developer Guides:
     - MkDocs: mkdocs.md
     - Installation: INSTALLATION.md
