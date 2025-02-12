@@ -52,7 +52,7 @@ plugins:
   - search
   - autorefs
 
-repo_url: 'https://github.com/equinor/SCREEN/wiki'
+repo_url: 'https://github.com/equinor/SCREEN'
 edit_uri_template: '{path_noext}/_edit'
 
 nav:
