@@ -2,34 +2,34 @@ site_name: SCREEN
 theme:
   name: material
   palette:
-  - media: '(prefers-color-scheme: light)'
-    scheme: default
-    primary: teal
-    accent: amber
-    toggle:
-      icon: material/lightbulb
-      name: Switch to dark mode
-  - media: '(prefers-color-scheme: dark)'
-    scheme: slate
-    primary: teal
-    accent: amber
-    toggle:
-      icon: material/lightbulb-outline
-      name: Switch to light mode
+    - media: '(prefers-color-scheme: light)'
+      scheme: default
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/lightbulb
+        name: Switch to dark mode
+    - media: '(prefers-color-scheme: dark)'
+      scheme: slate
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/lightbulb-outline
+        name: Switch to light mode
   features:
-  - search.suggest
-  - search.highlight
-  - content.tabs.link
-  - navigation.indexes
-  - content.tooltips
-  - navigation.path
-  - content.code.annotate
-  - content.code.copy
-  - content.code.select
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - navigation.indexes
+    - content.tooltips
+    - navigation.path
+    - content.code.annotate
+    - content.code.copy
+    - content.code.select
 
 markdown_extensions:
   - toc:
-      permalink: 
+      permalink: 
   - attr_list
   - def_list
   - tables
@@ -54,22 +54,20 @@ plugins:
 
 nav:
   - 'User Guidelines':
-    - Introduction: index.md
-    - Pre‐processing and Preliminary Assessment: well_class.md
-    - Detailed Simulation workflow: gap.md
+      - Introduction: index.md
+      - Pre‐processing and Preliminary Assessment: well_class.md
+      - Detailed Simulation workflow: gap.md
   - Developer Guides:
-    - MkDocs: mkdocs.md
-    - Installation: INSTALLATION.md
-    - Code References:
-      - GaP:
-        - CARFIN: code_references/gap/gap_carfin.md
-        - 'Bounding boxes': code_references/gap/gap_geometry.md
-      - WellClass:
-        - 'Well class': code_references/well_class/well_class.md
-        - 'Well pressure': code_references/well_class/well_pressure.md
-        - 'Models': code_references/well_class/models.md
-        - Grids: 
-          - 'Various grids': code_references/well_class/grids.md
-          - 'LGR builder': code_references/well_class/lgr_builder.md
-
-
+      - MkDocs: mkdocs.md
+      - Installation: INSTALLATION.md
+      - Code References:
+          - GaP:
+              - CARFIN: code_references/gap/gap_carfin.md
+              - 'Bounding boxes': code_references/gap/gap_geometry.md
+          - WellClass:
+              - 'Well class': code_references/well_class/well_class.md
+              - 'Well pressure': code_references/well_class/well_pressure.md
+              - 'Models': code_references/well_class/models.md
+              - Grids: 
+                  - 'Various grids': code_references/well_class/grids.md
+                  - 'LGR builder': code_references/well_class/lgr_builder.md
