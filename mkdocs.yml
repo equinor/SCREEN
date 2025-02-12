@@ -52,11 +52,13 @@ plugins:
   - search
   - autorefs
 
+repo_url: 'https://github.com/equinor/SCREEN/wiki'
+edit_uri_template: '{path_noext}/_edit'
+
 nav:
-  - 'User Guidelines':
-      - Introduction: index.md
-      - Pre‐processing and Preliminary Assessment: well_class.md
-      - Detailed Simulation workflow: gap.md
+  - Introduction: index.md
+  - Pre‐processing and Preliminary Assessment: well_class.md
+  - Detailed Simulation workflow: gap.md
   - Developer Guides:
       - MkDocs: mkdocs.md
       - Installation: INSTALLATION.md
