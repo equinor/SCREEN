@@ -21,14 +21,17 @@ from src.GaP.libs.aux_functions.aux_func_cirrus_eql import setup_equilibration
 # User inputs
 pflotran_working_root = '../test_data/examples/wildcat-pflotran'
 well_input_file = 'smeaheia.yaml'
-template_simcase = 'TEMP-0'
-sim_case_LGR = 'ALPHA'
-pvt_path = '../test_data/pvt_constants/'
-Ali_way = False
+well_input_file = 'wildcat.yaml'
 start_date = datetime(2025, 1, 1)  # Simulation start date
 end_date = datetime(2125, 1, 1) # Simulation end date
 show_well_sketch = True
 scenario_idx = 1  # Pressure scenario index (by default 0)
+sim_case_LGR = 'ALPHA'
+
+# template and constant files
+template_simcase = 'TEMP-0'
+pvt_path = '../test_data/pvt_constants/'
+Ali_way = False
 
 # Configuration
 sim_path = pathlib.Path(pflotran_working_root)
