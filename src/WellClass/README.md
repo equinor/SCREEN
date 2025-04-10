@@ -49,31 +49,39 @@ Additionally, the `plot_pt` function allows for the visualization of profiles in
 *Figure 2: Pressure profile from `Pressure` instance displayed in a Pressure-Temperature Plot with phase boundaries and fluid density as background color.*
 
 
+### Permeability Handling
+Although not used in these visualizations, the data structure used to initialize the Well class contains a handle to store permeability values for both the cement bond (`casing_cement`) and cement plugs (`barriers`). These values are estimates provided by the user and are subject to significant uncertainty due to factors such as cement quality, curing defects, or fractures, and can vary across orders of magnitude. Users are responsible for providing realistic permeability estimates, drawing on professional judgment and available literature in the absence of concrete data.
+
+Flow rates through cement barriers are computed via Darcy’s law using an effective permeability value, which describes the permeability of the entire barrier medium. This effective permeability is higher than the intrinsic permeability of the cement, as it incorporates possible flow paths through cracks and mud channels within the cement. The Hagen-Poiseuille law can be applied to calculate the flow behavior of such composite materials (i.e., cemented pipe/annulus with microannulus) using an equivalent Darcy permeability for laminar flow. The effective permeability of the cemented section, including the microannulus, is obtained by taking the area-weighted averages of the permeabilities of the various components. However, predicting the appropriate microannulus assumptions based on legacy well files can be challenging. The effective permeability of “real-life” cement can vary widely, from microDarcy values for well-cured cement to several darcies for degraded cement. Fortunately, several studies provide estimates of effective well permeabilities based on direct measurements, back-calculation of observed leaking rates, or theoretical studies and modeling tools [1].
+
+![Range of effective permeability magnitude in cement materials from different sources. Laboratory-Measured: A, B, C, D are permeability measured directly on cement samples. Field-Estimated: E, F, G, H are permeability values inferred from field observations and measurements. Used for Modeling: I is permeability ranges or values used as input parameters in numerical simulations.](imgs/cement_perm.png)
+*Figure 3: Range of effective permeability in cement materials. Laboratory-Measured: A[2], B[3], C[4], D[5]. Field-Estimated: E[6], F[7], G[8], H[9]. Used for Modeling: I[10].*
+
+
 ## Limitations
 
 - The wellbore schematic does not have functionalities to represent internal tubing, casing perforations or multiple discrete cemented sections.
 - Identified overburden flow units should be labeled as reservoirs in the input data.
-- Permeability values in the `casing_cement` and `barriers` tables are estimates provided by the user. These values are subject to significant uncertainty due to factors such as cement quality, curing defects, or fractures, and can vary across orders of magnitude. Users are responsible for providing realistic permeability estimates, drawing on professional judgment and available literature in the absence of concrete data.
+- The magnitude of cement permeability is an unconstrained and uncertain parameter.
 - The estimation of fluid pressure using the `Pressure` class is not a full-fledged simulation but a numerical approach that approximates shut-in pressures or a system in equilibrium. It should not be confused with dynamic simulation models that account for transient conditions and fluid flow in the reservoir and wellbore.
 
 
-
-![Range of effective permeability magnitude in cement materials from different sources. Laboratory-Measured: A, B, C, D are permeability measured directly on cement samples. Field-Estimated: E, F, G, H are permeability values inferred from field observations and measurements. Used for Modeling: I is permeability ranges or values used as input parameters in numerical simulations.](imgs/cement_perm.png)
-*Figure 3: Range of effective permeability in cement materials. Laboratory-Measured: A[1], B[2], C[3], D[4]. Field-Estimated: E[5], F[6], G[6], H[6]. Used for Modeling: I[7].*
-
 ## References
 
-1. Beltrán-Jiménez, K., Gardner, D., Kragset, S., Gebremariam, K. F., Reales, O. A. M., Minde, M. W., de Souza, M. I. L., Aasen, J. A., Skadsem, H. J., & Delabroy, L. (2022). Cement properties characterization from a section retrieved from an oil production well after 33 years of downhole exposure. Journal of Petroleum Science and Engineering, 208, 109334. https://doi.org/10.1016/j.petrol.2021.109334
+1. Torsæter, M., Bello-Palacios, A., Borgerud, L. K., Nygård, O.-K., Frost, T. K., Hofstad, K. H., & Andrews, J. S. (2024). Evaluating Legacy Well Leakage Risk in CO2 Storage. SSRN Electronic Journal. https://doi.org/10.2139/ssrn.5062896
 
-2. Gasda, S. E., Celia, M. A., Wang, J. Z., & Duguid, A. (2013). Wellbore Permeability Estimates from Vertical Interference Testing of Existing Wells. Energy Procedia, 37, 5673-5680. https://doi.org/10.1016/j.egypro.2013.06.489
 
-3. Crow, W., Carey, J. W., Gasda, S., Brian Williams, D., & Celia, M. (2010). Wellbore integrity analysis of a natural CO2 producer. International Journal of Greenhouse Gas Control, 4(2), 186-197. https://doi.org/10.1016/j.ijggc.2009.10.010
+2. Beltrán-Jiménez, K., Gardner, D., Kragset, S., Gebremariam, K. F., Reales, O. A. M., Minde, M. W., de Souza, M. I. L., Aasen, J. A., Skadsem, H. J., & Delabroy, L. (2022). Cement properties characterization from a section retrieved from an oil production well after 33 years of downhole exposure. Journal of Petroleum Science and Engineering, 208, 109334. https://doi.org/10.1016/j.petrol.2021.109334
 
-4. Carey, J. W., Wigand, M., Chipera, S. J., WoldeGabriel, G., Pawar, R., Lichtner, P. C., Wehner, S. C., Raines, M. A., & Guthrie, G. D. (2007). Analysis and performance of oil well cement with 30 years of CO2 exposure from the SACROC Unit, West Texas, USA. International Journal of Greenhouse Gas Control, 1(1), 75-85. https://doi.org/10.1016/S1750-5836(06)00004-1
+3. Gasda, S. E., Celia, M. A., Wang, J. Z., & Duguid, A. (2013). Wellbore Permeability Estimates from Vertical Interference Testing of Existing Wells. Energy Procedia, 37, 5673-5680. https://doi.org/10.1016/j.egypro.2013.06.489
 
-5. Kang, M., Baik, E., Miller, A. R., Bandilla, K. W., & Celia, M. A. (2015). Effective Permeabilities of Abandoned Oil and Gas Wells: Analysis of Data from Pennsylvania. Environmental Science & Technology, 49(7), 4757-4764. https://doi.org/10.1021/acs.est.5b00132
+4. Crow, W., Carey, J. W., Gasda, S., Brian Williams, D., & Celia, M. (2010). Wellbore integrity analysis of a natural CO2 producer. International Journal of Greenhouse Gas Control, 4(2), 186-197. https://doi.org/10.1016/j.ijggc.2009.10.010
 
-6. Carey, J. W. (2018). Probability distributions for effective permeability of potentially leaking wells at CO2 sequestration sites. Los Alamos National Lab.(LANL), Los Alamos, NM (United States). https://doi.org/10.18141/1433164
+5. Carey, J. W., Wigand, M., Chipera, S. J., WoldeGabriel, G., Pawar, R., Lichtner, P. C., Wehner, S. C., Raines, M. A., & Guthrie, G. D. (2007). Analysis and performance of oil well cement with 30 years of CO2 exposure from the SACROC Unit, West Texas, USA. International Journal of Greenhouse Gas Control, 1(1), 75-85. https://doi.org/10.1016/S1750-5836(06)00004-1
 
-7. Godoy, R., Fontan, M., Capra, B., Kvalsund, R., & Poupard, O. (2015). Well Integrity Support by Extended Cement Evaluation - Numerical Modeling of Primary Cement Jobs. Abu Dhabi International Petroleum Exhibition and Conference. https://doi.org/10.2118/177612-MS
+6. Kang, M., Baik, E., Miller, A. R., Bandilla, K. W., & Celia, M. A. (2015). Effective Permeabilities of Abandoned Oil and Gas Wells: Analysis of Data from Pennsylvania. Environmental Science & Technology, 49(7), 4757-4764. https://doi.org/10.1021/acs.est.5b00132
+
+7. Carey, J. W. (2018). Probability distributions for effective permeability of potentially leaking wells at CO2 sequestration sites. Los Alamos National Lab.(LANL), Los Alamos, NM (United States). https://doi.org/10.18141/1433164
+
+8. Godoy, R., Fontan, M., Capra, B., Kvalsund, R., & Poupard, O. (2015). Well Integrity Support by Extended Cement Evaluation - Numerical Modeling of Primary Cement Jobs. Abu Dhabi International Petroleum Exhibition and Conference. https://doi.org/10.2118/177612-MS
 
