@@ -1,0 +1,3034 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../../../INSTALLATION/">
+      
+      
+        <link rel="next" href="../gap_geometry/">
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.12">
+    
+    
+      
+        <title>CARFIN - SCREEN</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.2afb09e1.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#src.GaP.libs.carfin.build_grdecl" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="SCREEN" class="md-header__button md-logo" aria-label="SCREEN" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SCREEN
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              CARFIN
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7M9 21v-1h6v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1m3-17a5 5 0 0 0-5 5c0 2.05 1.23 3.81 3 4.58V16h4v-2.42c1.77-.77 3-2.53 3-4.58a5 5 0 0 0-5-5"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/equinor/SCREEN" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="SCREEN" class="md-nav__button md-logo" aria-label="SCREEN" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SCREEN
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/equinor/SCREEN" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../well_class/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Pre‐processing and Preliminary Assessment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../gap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Detailed Simulation workflow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Developer Guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Developer Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mkdocs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    MkDocs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../INSTALLATION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Code References
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            Code References
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4_3_1" id="__nav_4_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    GaP
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            GaP
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    CARFIN
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    CARFIN
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.build_grdecl" class="md-nav__link">
+    <span class="md-ellipsis">
+      build_grdecl
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="build_grdecl">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.build_grdecl.build_grdecl" class="md-nav__link">
+    <span class="md-ellipsis">
+      build_grdecl
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_barrier" class="md-nav__link">
+    <span class="md-ellipsis">
+      CARFIN_barrier
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CARFIN_barrier">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_barrier.CARFIN_barrier" class="md-nav__link">
+    <span class="md-ellipsis">
+      CARFIN_barrier
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_cement_bond" class="md-nav__link">
+    <span class="md-ellipsis">
+      CARFIN_cement_bond
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CARFIN_cement_bond">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_cement_bond.CARFIN_cement_bond" class="md-nav__link">
+    <span class="md-ellipsis">
+      CARFIN_cement_bond
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_core" class="md-nav__link">
+    <span class="md-ellipsis">
+      CARFIN_core
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CARFIN_core">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_core.pre_CARFIN" class="md-nav__link">
+    <span class="md-ellipsis">
+      pre_CARFIN
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_core.CARFIN_keywords" class="md-nav__link">
+    <span class="md-ellipsis">
+      CARFIN_keywords
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_core.coreCARFIN" class="md-nav__link">
+    <span class="md-ellipsis">
+      coreCARFIN
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_core.endCARFIN" class="md-nav__link">
+    <span class="md-ellipsis">
+      endCARFIN
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_core.endCARFIN2" class="md-nav__link">
+    <span class="md-ellipsis">
+      endCARFIN2
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_pipe_with_oph" class="md-nav__link">
+    <span class="md-ellipsis">
+      CARFIN_pipe_with_oph
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CARFIN_pipe_with_oph">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_pipe_with_oph.CARFIN_pipe_with_oph" class="md-nav__link">
+    <span class="md-ellipsis">
+      CARFIN_pipe_with_oph
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_pipe" class="md-nav__link">
+    <span class="md-ellipsis">
+      CARFIN_pipe
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CARFIN_pipe">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_pipe.CARFIN_pipe" class="md-nav__link">
+    <span class="md-ellipsis">
+      CARFIN_pipe
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gap_geometry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Bounding boxes
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3_2" id="__nav_4_3_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    WellClass
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            WellClass
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../well_class/well_class/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Well class
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../well_class/well_pressure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Well pressure
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../well_class/models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Models
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3_2_4" id="__nav_4_3_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Grids
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_4_3_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            Grids
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../well_class/grids/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Various grids
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../well_class/lgr_builder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    LGR builder
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.build_grdecl" class="md-nav__link">
+    <span class="md-ellipsis">
+      build_grdecl
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="build_grdecl">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.build_grdecl.build_grdecl" class="md-nav__link">
+    <span class="md-ellipsis">
+      build_grdecl
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_barrier" class="md-nav__link">
+    <span class="md-ellipsis">
+      CARFIN_barrier
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CARFIN_barrier">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_barrier.CARFIN_barrier" class="md-nav__link">
+    <span class="md-ellipsis">
+      CARFIN_barrier
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_cement_bond" class="md-nav__link">
+    <span class="md-ellipsis">
+      CARFIN_cement_bond
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CARFIN_cement_bond">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_cement_bond.CARFIN_cement_bond" class="md-nav__link">
+    <span class="md-ellipsis">
+      CARFIN_cement_bond
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_core" class="md-nav__link">
+    <span class="md-ellipsis">
+      CARFIN_core
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CARFIN_core">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_core.pre_CARFIN" class="md-nav__link">
+    <span class="md-ellipsis">
+      pre_CARFIN
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_core.CARFIN_keywords" class="md-nav__link">
+    <span class="md-ellipsis">
+      CARFIN_keywords
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_core.coreCARFIN" class="md-nav__link">
+    <span class="md-ellipsis">
+      coreCARFIN
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_core.endCARFIN" class="md-nav__link">
+    <span class="md-ellipsis">
+      endCARFIN
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_core.endCARFIN2" class="md-nav__link">
+    <span class="md-ellipsis">
+      endCARFIN2
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_pipe_with_oph" class="md-nav__link">
+    <span class="md-ellipsis">
+      CARFIN_pipe_with_oph
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CARFIN_pipe_with_oph">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_pipe_with_oph.CARFIN_pipe_with_oph" class="md-nav__link">
+    <span class="md-ellipsis">
+      CARFIN_pipe_with_oph
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_pipe" class="md-nav__link">
+    <span class="md-ellipsis">
+      CARFIN_pipe
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CARFIN_pipe">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.carfin.CARFIN_pipe.CARFIN_pipe" class="md-nav__link">
+    <span class="md-ellipsis">
+      CARFIN_pipe
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+  <h1>CARFIN</h1>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="src.GaP.libs.carfin.build_grdecl" class="doc doc-heading">
+            <code>src.GaP.libs.carfin.build_grdecl</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+        <p>Module to output the .grdecl file for LGR grid</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.GaP.libs.carfin.build_grdecl.build_grdecl" class="doc doc-heading">
+            <code class="highlight language-python">build_grdecl(output_folder: str, LGR_NAME: str, casing_list: List[PipeCementModel], barrier_list: List[ElemModel], LGR_sizes_xy: List[float], LGR_depths: np.ndarray, LGR_numb_z: np.ndarray, min_grd_size: float, NX: int, NY: int, main_grd_i: int, main_grd_j: int, main_grd_min_k: int, main_grd_max_k: int, no_of_layers_in_OB: int) -&gt; None</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Generate grdecl grid</p>
+<p>To be able to model a legacy well in reservoir scale, we need to make sure all of the elements including        multiple casings with different OD, cement bonds, barriers, the open area between barriers inside the casings, etc.        are considered. </p>
+<p>Then, the existing simple well models available in the commercial simulators (Eclipse, PFT, IX) are not  able to\ 
+include those details. They just introduce a node where the flow will be discharged from/to the grid to the node. </p>
+<p>The way around it is to define the well as a part of the reservoir by manipulating the local grids (LGR) and properties of the grid, </p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>output_folder</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>output directory</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>LGR_NAME</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>output filename, without the suffix '.grdecl'</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>casing_list</code></b>
+              (<code><span title="list">list</span>[<span title="src.GaP.libs.models.PipeCementModel">PipeCementModel</span>]</code>)
+          –
+          <div class="doc-md-description">
+            <p>contains list of casing geometry</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>barrier_list</code></b>
+              (<code><span title="list">list</span>[<span title="src.GaP.libs.models.ElemModel">ElemModel</span>]</code>)
+          –
+          <div class="doc-md-description">
+            <p>contains list of barriers</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>LGR_sizes_xy</code></b>
+              (<code><span title="list">list</span>[<span title="float">float</span>]</code>)
+          –
+          <div class="doc-md-description">
+            <p>LGR xy grid intervals</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>LGR_depths</code></b>
+              (<code><span title="numpy.ndarray">ndarray</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>specific size of each LGR grid in the Z direction</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>LGR_numb_z</code></b>
+              (<code><span title="numpy.ndarray">ndarray</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>number of chops for each main DZ</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>min_grd_size</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>minimum grid size</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>NX</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>number of grids in x direction (coarse grid)</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>NY</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>number of grids in y direction (coarse grid)</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>main_grd_i</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>x index of well location in coarse grid</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>main_grd_j</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>y index of well location in coarse grid</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>main_grd_min_k</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>minimum z index in coarse grid</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>main_grd_max_k</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>maximum z index in coarse grid</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>no_of_layers_in_OB</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>number of layers in overburden (coarse grid)</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code>None</code>
+          –
+          <div class="doc-md-description">
+            <p>None</p>
+          </div>
+        </li>
+    </ul>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/GaP/libs/carfin/build_grdecl.py</code></summary>
+              <pre class="highlight"><code class="language-python">def build_grdecl(output_folder: str, 
+                 LGR_NAME: str,
+                 casing_list: List[PipeCementModel],
+                 barrier_list: List[ElemModel], 
+                 LGR_sizes_xy: List[float], 
+                 LGR_depths: np.ndarray,
+                 LGR_numb_z: np.ndarray,
+                 min_grd_size: float,
+                 NX: int, NY: int,
+                 main_grd_i: int, main_grd_j: int,
+                 main_grd_min_k: int, main_grd_max_k: int,
+                 no_of_layers_in_OB: int) -&gt; None:
+    """ Generate grdecl grid
+
+        To be able to model a legacy well in reservoir scale, we need to make sure all of the elements including\
+        multiple casings with different OD, cement bonds, barriers, the open area between barriers inside the casings, etc.\
+        are considered. 
+
+        Then, the existing simple well models available in the commercial simulators (Eclipse, PFT, IX) are not  able to\ 
+        include those details. They just introduce a node where the flow will be discharged from/to the grid to the node. 
+
+        The way around it is to define the well as a part of the reservoir by manipulating the local grids (LGR) and properties of the grid, 
+
+        Args:
+            output_folder (str): output directory
+            LGR_NAME (str): output filename, without the suffix '.grdecl'
+            casing_list (list[PipeCementModel]): contains list of casing geometry
+            barrier_list (list[ElemModel]): contains list of barriers
+            LGR_sizes_xy (list[float]): LGR xy grid intervals
+            LGR_depths (np.ndarray): specific size of each LGR grid in the Z direction
+            LGR_numb_z (np.ndarray): number of chops for each main DZ
+            min_grd_size (float): minimum grid size
+            NX (int): number of grids in x direction (coarse grid)
+            NY (int): number of grids in y direction (coarse grid)
+            main_grd_i (int): x index of well location in coarse grid
+            main_grd_j (int): y index of well location in coarse grid
+            main_grd_min_k (int): minimum z index in coarse grid
+            main_grd_max_k (int): maximum z index in coarse grid
+            no_of_layers_in_OB (int): number of layers in overburden (coarse grid)
+
+        Returns:
+            None             
+    """
+
+    # 0. prepare file for output
+
+    # check output directory
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder, exist_ok=True)
+
+    # generate output file name
+    out_fname = os.path.join(output_folder, LGR_NAME+'.grdecl')
+
+    # open it
+    if os.path.exists(out_fname):
+        O = open(out_fname,"r+")  # noqa: E741
+    else: 
+        O = open(out_fname,"x")  # noqa: E741
+
+    O.truncate(0)
+
+    # 1. start the process
+    pre_CARFIN(LGR_NAME,
+                NX, NY,
+                main_grd_i, main_grd_j, 
+                no_of_layers_in_OB, 
+                O)
+
+    CARFIN_keywords(LGR_NAME,
+                    main_grd_i, main_grd_j, 
+                    main_grd_min_k, main_grd_max_k, 
+                    LGR_sizes_xy, 
+                    LGR_numb_z, 
+                    min_grd_size,
+                    O)
+
+    coreCARFIN(LGR_NAME,
+                casing_list,
+                barrier_list,
+                LGR_sizes_xy, 
+                LGR_depths, 
+                min_grd_size,
+                O)
+
+    # find minimum IDs
+    reopen_ID = sys.float_info.max
+    for casing in casing_list:
+        if casing.ID &lt; reopen_ID:
+            reopen_ID = casing.ID
+
+    endCARFIN(LGR_NAME,
+                reopen_ID,
+                LGR_sizes_xy, 
+                main_grd_min_k, 
+                min_grd_size,
+                no_of_layers_in_OB,
+                O)
+
+    # 2. done
+    O.close()
+
+    # for qc
+    print ('Output LGR CARFIN to: ', os.path.abspath(out_fname))</code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="src.GaP.libs.carfin.CARFIN_barrier" class="doc doc-heading">
+            <code>src.GaP.libs.carfin.CARFIN_barrier</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+        <p>barrier builder</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.GaP.libs.carfin.CARFIN_barrier.CARFIN_barrier" class="doc doc-heading">
+            <code class="highlight language-python">CARFIN_barrier(ID: float, x_min_bar: int, x_max_bar: int, y_min_bar: int, y_max_bar: int, k_min_bar: int, k_max_bar: int, perm: float, LGR_NAME: str, O: TextIO)</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>CARFIN for barrier</p>
+<p>The barriers can be mimicked by very low permeability with the same size of pipe ID and have their own start and end depth. </p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>ID</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>Internal Diameter (m)</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>x_min_bar</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>minimum x</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>x_max_bar</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>maximum x</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>y_min_bar</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>minimum y</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>y_max_bar</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>maximum y</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>k_min_bar</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>minimum k</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>k_max_bar</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>maximum k</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>perm</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>permeability value</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>LGR_NAME</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>LGR name</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>O</code></b>
+              (<code><span title="typing.TextIO">TextIO</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>opened file handle</p>
+          </div>
+        </li>
+    </ul>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/GaP/libs/carfin/CARFIN_barrier.py</code></summary>
+              <pre class="highlight"><code class="language-python">def CARFIN_barrier(ID: float, 
+                     x_min_bar: int, x_max_bar: int,
+                     y_min_bar: int, y_max_bar: int,
+                     k_min_bar: int, k_max_bar: int,
+                     perm: float,
+                     LGR_NAME: str, 
+                     O: TextIO):  # noqa: E741
+    """ CARFIN for barrier
+
+        The barriers can be mimicked by very low permeability with the same size of pipe ID and have their own start and end depth. 
+
+        Args:
+            ID (float): Internal Diameter (m)
+            x_min_bar (int): minimum x
+            x_max_bar (int): maximum x
+            y_min_bar (int): minimum y
+            y_max_bar (int): maximum y
+            k_min_bar (int): minimum k
+            k_max_bar (int): maximum k
+            perm (float): permeability value
+            LGR_NAME (str): LGR name
+            O (TextIO): opened file handle
+    """
+
+    print ('EQUALS',file=O)
+
+    print ('--barrier with ID of',ID*39.37,'and perm of',perm,' were set in',LGR_NAME, file=O)
+    print ('PERMX','',perm,'',x_min_bar,'',x_max_bar,'',y_min_bar,'',y_max_bar,'',k_min_bar,'',k_max_bar,'','/',file=O)
+    print ('PERMY','',perm,'',x_min_bar,'',x_max_bar,'',y_min_bar,'',y_max_bar,'',k_min_bar,'',k_max_bar,'','/',file=O)
+    print ('PERMZ','',perm,'',x_min_bar,'',x_max_bar,'',y_min_bar,'',y_max_bar,'',k_min_bar,'',k_max_bar,'','/',file=O)
+    print ('PORO','','0.01','',x_min_bar,'',x_max_bar,'',y_min_bar,'',y_max_bar,'',k_min_bar,'',k_max_bar,'','/',file=O)
+
+    print ('/',file=O)</code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="src.GaP.libs.carfin.CARFIN_cement_bond" class="doc doc-heading">
+            <code>src.GaP.libs.carfin.CARFIN_cement_bond</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+        <p>cement bond builder</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.GaP.libs.carfin.CARFIN_cement_bond.CARFIN_cement_bond" class="doc doc-heading">
+            <code class="highlight language-python">CARFIN_cement_bond(ID: float, x_min_pipe: int, x_max_pipe: int, y_min_pipe: int, y_max_pipe: int, k_min_CB: int, k_max_CB: int, *, x_bd=1, y_bd=1, perm: float, LGR_NAME: str, O: TextIO)</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>CARFIN for cement bond</p>
+<p>The cement bond can be mimicked by low perm vertical layer adjustment to the casing with given depth and interval. </p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>ID</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>Internal Diameter (m), only for comments, not used in calculation</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>x_min_pipe</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>minimum x for actual internal open hole</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>x_max_pipe</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>maximum x for actual internal open hole</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>y_min_pipe</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>minimum y for actual internal open hole</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>y_max_pipe</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>maximum y for actual internal open hole</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>k_min_CB</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>minimum k for actual internal open hole</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>k_max_CB</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>maximum k for actual internal open hole</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>x_bd</code></b>
+              (<code><span title="int">int</span></code>, default:
+                  <code>1</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>x thickness for out extension, default: 1</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>y_bd</code></b>
+              (<code><span title="int">int</span></code>, default:
+                  <code>1</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>y thickness  for out extension, default: 1</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>perm</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>permeability value</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>LGR_NAME</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>LGR name</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>O</code></b>
+              (<code><span title="typing.TextIO">TextIO</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>opened file handle</p>
+          </div>
+        </li>
+    </ul>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/GaP/libs/carfin/CARFIN_cement_bond.py</code></summary>
+              <pre class="highlight"><code class="language-python">def CARFIN_cement_bond(ID: float, 
+                        x_min_pipe: int, x_max_pipe: int,
+                        y_min_pipe: int, y_max_pipe: int,
+                        k_min_CB: int, k_max_CB: int,
+                        *,
+                        x_bd=1, y_bd=1,
+                        perm: float,
+                        LGR_NAME: str, 
+                        O: TextIO):  # noqa: E741
+    """ CARFIN for cement bond
+
+        The cement bond can be mimicked by low perm vertical layer adjustment to the casing with given depth and interval. 
+
+        Args:
+            ID (float): Internal Diameter (m), only for comments, not used in calculation
+            x_min_pipe (int): minimum x for actual internal open hole
+            x_max_pipe (int): maximum x for actual internal open hole
+            y_min_pipe (int): minimum y for actual internal open hole
+            y_max_pipe (int): maximum y for actual internal open hole
+            k_min_CB (int): minimum k for actual internal open hole
+            k_max_CB (int): maximum k for actual internal open hole
+            x_bd (int): x thickness for out extension, default: 1
+            y_bd (int): y thickness  for out extension, default: 1
+            perm (float): permeability value
+            LGR_NAME (str): LGR name
+            O (TextIO): opened file handle
+    """
+
+    print ('EQUALS',file=O)
+
+    print ('--cement around pipe with ID of',ID*39.37,' and perm of',perm,' were set in',LGR_NAME,file=O)
+    print ('--Top side',file=O)
+    print ('PERMX','',perm,'',x_min_pipe-x_bd,'',x_max_pipe+x_bd,'',y_min_pipe-y_bd,'',y_min_pipe-1,'',k_min_CB,'',k_max_CB,'','/',file=O)
+    print ('PERMY','',perm,'',x_min_pipe-x_bd,'',x_max_pipe+x_bd,'',y_min_pipe-y_bd,'',y_min_pipe-1,'',k_min_CB,'',k_max_CB,'','/',file=O)
+    print ('PERMZ','',perm,'',x_min_pipe-x_bd,'',x_max_pipe+x_bd,'',y_min_pipe-y_bd,'',y_min_pipe-1,'',k_min_CB,'',k_max_CB,'','/',file=O)
+    print ('PORO','', 0.01,'',x_min_pipe-x_bd,'',x_max_pipe+x_bd,'',y_min_pipe-y_bd,'',y_min_pipe-1,'',k_min_CB,'',k_max_CB,'','/',file=O)
+    print ('FIPLEG','',6,'',  x_min_pipe-x_bd,'',x_max_pipe+x_bd,'',y_min_pipe-y_bd,'',y_min_pipe-1,'',k_min_CB,'',k_max_CB,'','/',file=O)
+    print ('EQLNUM','',1,'',  x_min_pipe-x_bd,'',x_max_pipe+x_bd,'',y_min_pipe-y_bd,'',y_min_pipe-1,'',k_min_CB,'',k_max_CB,'','/',file=O)
+
+    print ('',file=O)
+
+    print ('--Bottom side',file=O)
+    print ('PERMX','',perm,'',x_min_pipe-x_bd,'',x_max_pipe+x_bd,'',y_max_pipe+1,'',y_max_pipe+y_bd,'',k_min_CB,'',k_max_CB,'','/',file=O)
+    print ('PERMY','',perm,'',x_min_pipe-x_bd,'',x_max_pipe+x_bd,'',y_max_pipe+1,'',y_max_pipe+y_bd,'',k_min_CB,'',k_max_CB,'','/',file=O)
+    print ('PERMZ','',perm,'',x_min_pipe-x_bd,'',x_max_pipe+x_bd,'',y_max_pipe+1,'',y_max_pipe+y_bd,'',k_min_CB,'',k_max_CB,'','/',file=O)
+    print ('PORO','', 0.01,'',x_min_pipe-x_bd,'',x_max_pipe+x_bd,'',y_max_pipe+1,'',y_max_pipe+y_bd,'',k_min_CB,'',k_max_CB,'','/',file=O)
+    print ('FIPLEG','',6,''  ,x_min_pipe-x_bd,'',x_max_pipe+x_bd,'',y_max_pipe+1,'',y_max_pipe+y_bd,'',k_min_CB,'',k_max_CB,'','/',file=O)
+    print ('EQLNUM','',1,''  ,x_min_pipe-x_bd,'',x_max_pipe+x_bd,'',y_max_pipe+1,'',y_max_pipe+y_bd,'',k_min_CB,'',k_max_CB,'','/',file=O)
+
+    print ('',file=O)
+
+    print ('--Left side',file=O) 
+    print ('PERMX','',perm,'',x_min_pipe-x_bd,'',x_min_pipe-1,'',y_min_pipe,'',y_max_pipe,'',k_min_CB,'',k_max_CB,'','/',file=O)
+    print ('PERMY','',perm,'',x_min_pipe-x_bd,'',x_min_pipe-1,'',y_min_pipe,'',y_max_pipe,'',k_min_CB,'',k_max_CB,'','/',file=O)
+    print ('PERMZ','',perm,'',x_min_pipe-x_bd,'',x_min_pipe-1,'',y_min_pipe,'',y_max_pipe,'',k_min_CB,'',k_max_CB,'','/',file=O)
+    print ('PORO','', 0.01,'',x_min_pipe-x_bd,'',x_min_pipe-1,'',y_min_pipe,'',y_max_pipe,'',k_min_CB,'',k_max_CB,'','/',file=O)
+    print ('FIPLEG','',6,  '',x_min_pipe-x_bd,'',x_min_pipe-1,'',y_min_pipe,'',y_max_pipe,'',k_min_CB,'',k_max_CB,'','/',file=O)
+    print ('EQLNUM','',1,  '',x_min_pipe-x_bd,'',x_min_pipe-1,'',y_min_pipe,'',y_max_pipe,'',k_min_CB,'',k_max_CB,'','/',file=O)
+
+    print ('--Right side',file=O)
+
+    print ('PERMX','',perm,'',x_max_pipe+1,'',x_max_pipe+x_bd,'',y_min_pipe,'',y_max_pipe,'',k_min_CB,'',k_max_CB,'','/',file=O)
+    print ('PERMY','',perm,'',x_max_pipe+1,'',x_max_pipe+x_bd,'',y_min_pipe,'',y_max_pipe,'',k_min_CB,'',k_max_CB,'','/',file=O)
+    print ('PERMZ','',perm,'',x_max_pipe+1,'',x_max_pipe+x_bd,'',y_min_pipe,'',y_max_pipe,'',k_min_CB,'',k_max_CB,'','/',file=O)
+    print ('PORO','', 0.01,'',x_max_pipe+1,'',x_max_pipe+x_bd,'',y_min_pipe,'',y_max_pipe,'',k_min_CB,'',k_max_CB,'','/',file=O)
+    print ('FIPLEG','',6,''  ,x_max_pipe+1,'',x_max_pipe+x_bd,'',y_min_pipe,'',y_max_pipe,'',k_min_CB,'',k_max_CB,'','/',file=O)
+    print ('EQLNUM','',1,''  ,x_max_pipe+1,'',x_max_pipe+x_bd,'',y_min_pipe,'',y_max_pipe,'',k_min_CB,'',k_max_CB,'','/',file=O)
+
+    print ('/',file=O)</code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="src.GaP.libs.carfin.CARFIN_core" class="doc doc-heading">
+            <code>src.GaP.libs.carfin.CARFIN_core</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+        <p>generate grdecl grid</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.GaP.libs.carfin.CARFIN_core.pre_CARFIN" class="doc doc-heading">
+            <code class="highlight language-python">pre_CARFIN(LGR_NAME: str, NX: int, NY: int, main_grd_i: int, main_grd_j: int, no_of_layers_in_OB: int, O: TextIO)</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>preCARFIN</p>
+<p>Before introducing the CARFIN, we need to make sure there is a sealing layer between the overburden and the reservoir.</p>
+<p>We borrow  the topmost layer of the reservoir and make it seal against both vertical (MULTZ=0) and side (MULTX, MULTY= 0) 
+flow toward the overburden. </p>
+<p>But, we still need to make sure that the topmost layer is open in where the LGR is located to allow the only flow communication 
+between the overburden and the reservoir being through the well </p>
+<p>Later we will close the rest of topmost layer inside the LGR and only open an area of LGR where the main pipe is paths.</p>
+<p>Depend on the case, we may want to open the cement bonds in that area.   </p>
+<p>Args:</p>
+<pre class="highlight"><code>LGR_NAME (str): output filename, without the suffix '.grdecl'
+NX (int): number of grids in x direction (coarse grid)
+NY (int): number of grids in y direction (coarse grid)
+main_grd_i (int): x index of well location in coarse grid
+main_grd_j (int): y index of well location in coarse grid
+no_of_layers_in_OB (int): number of layers in overburden (coarse grid)
+O (TextIO): opened file handle</code></pre>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/GaP/libs/carfin/CARFIN_core.py</code></summary>
+              <pre class="highlight"><code class="language-python">def pre_CARFIN(LGR_NAME: str,
+               NX: int, NY: int,
+               main_grd_i: int, main_grd_j: int, 
+               no_of_layers_in_OB: int, 
+               O: TextIO):  # noqa: E741
+    """ preCARFIN
+
+        Before introducing the CARFIN, we need to make sure there is a sealing layer between the overburden and the reservoir.
+
+        We borrow  the topmost layer of the reservoir and make it seal against both vertical (MULTZ=0) and side (MULTX, MULTY= 0) 
+        flow toward the overburden. 
+
+        But, we still need to make sure that the topmost layer is open in where the LGR is located to allow the only flow communication 
+        between the overburden and the reservoir being through the well 
+
+        Later we will close the rest of topmost layer inside the LGR and only open an area of LGR where the main pipe is paths.
+
+        Depend on the case, we may want to open the cement bonds in that area.   
+
+        Args:
+
+            LGR_NAME (str): output filename, without the suffix '.grdecl'
+            NX (int): number of grids in x direction (coarse grid)
+            NY (int): number of grids in y direction (coarse grid)
+            main_grd_i (int): x index of well location in coarse grid
+            main_grd_j (int): y index of well location in coarse grid
+            no_of_layers_in_OB (int): number of layers in overburden (coarse grid)
+            O (TextIO): opened file handle            
+    """
+
+    # PRE-CARFIN, isolates OVB from reservoir 
+    print ('...Prints isolating OVB from reservoir keywords in', LGR_NAME+'.grdecl file')
+
+    print ('--isolating OVB from reservoir', file=O)
+    print ('EQUALS', file = O) 
+    # print ('MULTX  0 ','1 ',NX, '1 ',NY,no_of_layers_in_OB+1,no_of_layers_in_OB+1,'/',file = O)
+    # print ('MULTY  0 ','1 ',NX, '1 ',NY,no_of_layers_in_OB+1,no_of_layers_in_OB+1,'/',file = O)
+    # print ('MULTZ  0 ','1 ',NX, '1 ',NY,no_of_layers_in_OB+1,no_of_layers_in_OB+1,'/',file = O)
+    # print ('MULTX  1 ',main_grd_i, main_grd_i,main_grd_j, main_grd_j, no_of_layers_in_OB+1, no_of_layers_in_OB+1, '/',file =O)
+    # print ('MULTY  1 ',main_grd_i, main_grd_i,main_grd_j, main_grd_j, no_of_layers_in_OB+1, no_of_layers_in_OB+1, '/',file =O)
+    # print ('MULTZ  1 ',main_grd_i, main_grd_i,main_grd_j, main_grd_j, no_of_layers_in_OB+1, no_of_layers_in_OB+1, '/',file =O)
+
+    # TODO(hzh): This should be right
+    print ('MULTZ  0 ','1 ',NX, '1 ',NY,no_of_layers_in_OB,no_of_layers_in_OB,'/',file = O)
+    print ('MULTZ  1 ',main_grd_i, main_grd_i,main_grd_j, main_grd_j, no_of_layers_in_OB, no_of_layers_in_OB, '/',file =O)
+
+    print ('/', file = O) 
+    print (' ', file = O) </code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.GaP.libs.carfin.CARFIN_core.CARFIN_keywords" class="doc doc-heading">
+            <code class="highlight language-python">CARFIN_keywords(LGR_NAME: str, main_grd_i: int, main_grd_j: int, main_grd_min_k: int, main_grd_max_k: int, LGR_sizes_xy: List[float], LGR_numb_z: np.ndarray, min_grd_size: float, O: TextIO)</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>CARFIN main parameters</p>
+<p>CARFIN is the main keyword which introduces LGR into the  grid. </p>
+<p>The keyword has the following parameters which had be filled in: </p>
+<pre class="highlight"><code>LGR Name: the name of LGR that we want to create. 
+          This name is the same as the name that the script uses to generate the output file, i.e. LGRNAME.grdecl
+
+There are 6 parameter which define where the LGR should be located in the main grid which are:
+
+    main grid i-start, main grid i-end, main grid j-start, main grid j-end, main grid k-start, main grid k-end.
+
+In our case, we always have a vertical well, therefore main grid i-start = main grid i-end are the same for j direction.
+
+NXFIN and NYFIN: they dictate how many times per grid (in the same order) should  be chopped. In our case, 
+                 there is only one grid assigned in the X and Y directions. Therefore, the numbers will be the same as 
+                 8th and 9th parameters in CARFIN.
+
+NZFIN: unlike X,Y direcitons, there are multiple grids involved in the Z direction of the main grid. 
+        The main grids in the overburden in the Z direction are hard-coded to be chopped to 10 grids.
+        The main grids in the Z direction in the reservoir should remain un-refined. Therefore, the assigned number of chops should be equal to 1. 
+        This is all already stored in the LGR_numb_z.
+
+HXFIN and HYFIN: They are going to provide multiple sizes in X and Y direction. This is mainly high resolution down to min_grd_size 
+                 in the center of the grid and increasing the size of the grids toward the outermost side of the grid.
+
+                The HXFIN and HYFIN are working not with real sizes but with “ratio”. 
+                The lowest grid size has the ratio equal to min_grd_size/min_grd_size = 1.
+
+                Then the rest of grid sizes are calculated as follows:
+                    Grid size of the refined grid /min_grd_size. 
+                    The min_grid_size presented in slide7   
+                    Grid sizes in x,y direction are presented in the slide 8</code></pre>
+<p>Args:</p>
+<pre class="highlight"><code>LGR_NAME (str): output filename, without the suffix '.grdecl'
+main_grd_i (int): x index of well location in coarse grid
+main_grd_j (int): y index of well location in coarse grid
+main_grd_min_k (int): minimum z index in coarse grid
+main_grd_max_k (int): maximum z index in coarse grid
+LGR_sizes_xy (list[float]): LGR xy grid intervals
+LGR_numb_z (np.ndarray): number of chops for each main DZ
+min_grd_size (float): minimum grid size
+O (TextIO): opened file handle</code></pre>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/GaP/libs/carfin/CARFIN_core.py</code></summary>
+              <pre class="highlight"><code class="language-python">def CARFIN_keywords(LGR_NAME: str,
+                    main_grd_i: int, main_grd_j: int, 
+                    main_grd_min_k: int, main_grd_max_k: int, 
+                    LGR_sizes_xy: List[float], 
+                    LGR_numb_z: np.ndarray, 
+                    min_grd_size: float,
+                    O: TextIO):  # noqa: E741
+    """ CARFIN main parameters
+
+        CARFIN is the main keyword which introduces LGR into the  grid. 
+
+        The keyword has the following parameters which had be filled in: 
+
+            LGR Name: the name of LGR that we want to create. 
+                      This name is the same as the name that the script uses to generate the output file, i.e. LGRNAME.grdecl 
+
+            There are 6 parameter which define where the LGR should be located in the main grid which are:
+
+                main grid i-start, main grid i-end, main grid j-start, main grid j-end, main grid k-start, main grid k-end. 
+
+            In our case, we always have a vertical well, therefore main grid i-start = main grid i-end are the same for j direction.  
+
+            NXFIN and NYFIN: they dictate how many times per grid (in the same order) should  be chopped. In our case, 
+                             there is only one grid assigned in the X and Y directions. Therefore, the numbers will be the same as 
+                             8th and 9th parameters in CARFIN. 
+
+            NZFIN: unlike X,Y direcitons, there are multiple grids involved in the Z direction of the main grid. 
+                    The main grids in the overburden in the Z direction are hard-coded to be chopped to 10 grids.
+                    The main grids in the Z direction in the reservoir should remain un-refined. Therefore, the assigned number of chops should be equal to 1. 
+                    This is all already stored in the LGR_numb_z.
+
+            HXFIN and HYFIN: They are going to provide multiple sizes in X and Y direction. This is mainly high resolution down to min_grd_size 
+                             in the center of the grid and increasing the size of the grids toward the outermost side of the grid. 
+
+                            The HXFIN and HYFIN are working not with real sizes but with “ratio”. 
+                            The lowest grid size has the ratio equal to min_grd_size/min_grd_size = 1. 
+
+                            Then the rest of grid sizes are calculated as follows:
+                                Grid size of the refined grid /min_grd_size. 
+                                The min_grid_size presented in slide7   
+                                Grid sizes in x,y direction are presented in the slide 8
+
+        Args:
+
+            LGR_NAME (str): output filename, without the suffix '.grdecl'
+            main_grd_i (int): x index of well location in coarse grid
+            main_grd_j (int): y index of well location in coarse grid
+            main_grd_min_k (int): minimum z index in coarse grid
+            main_grd_max_k (int): maximum z index in coarse grid
+            LGR_sizes_xy (list[float]): LGR xy grid intervals
+            LGR_numb_z (np.ndarray): number of chops for each main DZ
+            min_grd_size (float): minimum grid size
+            O (TextIO): opened file handle            
+    """
+
+    # prints CARFIN KEYWORD in Eclipse 
+    print ('...Prints CARFIN Keywords in', LGR_NAME+'.grdecl file')
+
+    print ('CARFIN',file=O)
+    print (LGR_NAME ,main_grd_i, main_grd_i, main_grd_j, main_grd_j, main_grd_min_k, main_grd_max_k, len(LGR_sizes_xy), len(LGR_sizes_xy), sum(LGR_numb_z) , '/',file=O)
+
+    print (' ',file=O)
+    print ('NXFIN',file=O)
+    print (len(LGR_sizes_xy),'/',file=O)
+
+    print (' ',file=O)
+    print ('NYFIN',file=O)
+    print (len(LGR_sizes_xy),'/',file=O)
+
+    print (' ',file=O)
+    print ('NZFIN',file=O)
+    print (*LGR_numb_z, '/',file=O)
+    print (' ',file=O)
+    print ('HXFIN',file=O) 
+    print  (*[round (x/ min_grd_size,2) for x in LGR_sizes_xy],'/',file=O) 
+    print (' ',file=O) 
+    print ('HYFIN',file=O)
+    print  (*[round (x/ min_grd_size,2) for x in LGR_sizes_xy],'/',file=O) 
+    print (' ',file=O)
+    print (' ',file=O)</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.GaP.libs.carfin.CARFIN_core.coreCARFIN" class="doc doc-heading">
+            <code class="highlight language-python">coreCARFIN(LGR_NAME: str, casing_list: List[Union[PipeCementModel, ElemModel]], barrier_list: List[ElemModel], LGR_sizes_xy: List[float], LGR_depths: np.ndarray, min_grd_size: float, O: TextIO)</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>CARFIN for the main elements</p>
+<p>Args:</p>
+<pre class="highlight"><code>LGR_NAME (str): output filename, without the suffix '.grdecl'
+casing_list (list[PipeCementModel]): contains list of casing geometry
+barrier_list (list[ElemModel]): contains list of barriers
+LGR_sizes_xy (list[float]): LGR xy grid intervals
+LGR_depths (np.ndarray): specific size of each LGR grid in the Z direction
+min_grd_size (float): minimum grid size
+O (TextIO): opened file handle</code></pre>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/GaP/libs/carfin/CARFIN_core.py</code></summary>
+              <pre class="highlight"><code class="language-python">def coreCARFIN(LGR_NAME: str,
+                casing_list: List[Union[PipeCementModel, ElemModel]],
+                barrier_list: List[ElemModel],
+                LGR_sizes_xy: List[float], 
+                LGR_depths: np.ndarray, 
+                min_grd_size: float,
+                O: TextIO):  # noqa: E741
+    """ CARFIN for the main elements
+
+        Args:
+
+            LGR_NAME (str): output filename, without the suffix '.grdecl'
+            casing_list (list[PipeCementModel]): contains list of casing geometry
+            barrier_list (list[ElemModel]): contains list of barriers
+            LGR_sizes_xy (list[float]): LGR xy grid intervals
+            LGR_depths (np.ndarray): specific size of each LGR grid in the Z direction
+            min_grd_size (float): minimum grid size
+            O (TextIO): opened file handle            
+
+    """
+
+    print ('...Prints Casings, cement bonds and barrie(s) in', LGR_NAME+'.grdecl file')
+
+    # loop around Conductor casing, Surface casing, and Production casing
+    for idx, casing in enumerate(casing_list):
+        if type(casing) is PipeCementModel:
+            CARFIN_pipe_and_cement_bond_builder(casing, 
+                                                LGR_sizes_xy, LGR_depths, 
+                                                min_grd_size,
+                                                LGR_NAME, 
+                                                O)
+        elif type(casing) is ElemModel:
+            CARFIN_oph_builder(casing, 
+                                LGR_sizes_xy, LGR_depths, 
+                                min_grd_size,
+                                LGR_NAME, 
+                                O)
+        else:
+            continue
+
+    # 4. optional: to add barrier inside the well
+    if len(barrier_list):
+
+        for _, barrier in enumerate(barrier_list):
+
+            CARFIN_barrier_builder(barrier, 
+                                    LGR_sizes_xy, LGR_depths, 
+                                    min_grd_size,
+                                    LGR_NAME, 
+                                    O)</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.GaP.libs.carfin.CARFIN_core.endCARFIN" class="doc doc-heading">
+            <code class="highlight language-python">endCARFIN(LGR_NAME: str, reopen_ID: float, LGR_sizes_xy: List[float], main_grd_min_k: float, min_grd_size: float, no_of_layers_in_OB: int, O: TextIO)</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>ENDFIN</p>
+<p>Before we finish the CARFIN with ENDFIN, we will have to close the area around the well inside the LGR:</p>
+<pre class="highlight"><code>As mentioned in the slide 22, we opened the whole LGR in the topmost layer of the reservoir (and closed the rest of topmost layer.
+
+In this stage we will have to make sure there is no flow around the well inside the LGR from the reservoir to the overburden.
+
+To do that we will first close the whole topmost layer inside the LGR:
+
+    The whole LGR grids in the x,y directions should be closed in the topmost layer but inside LGR.
+
+    Then we will  set the MULTX, MULTY and MULTZ multipliers to 0 to make sure the area is whole closed.
+
+Then we re-open the area where the well paths. In order to do that, we will have to (again) find that which pipe (with which ID) 
+is pathing through the caprock (from overburden to the caprock):
+
+    The code always assumes the narrowest pipe passing through the caprock.
+
+    We find X_min, X_max, Y_min, Y_max of the narrowest pipe.
+
+Knowing, how many layer are allocated to overburden and given 10 chops per grid in the Z direction, we can find the k_min and k_max of 
+the pipe where we want to leave it open.
+
+Then, we let the MULTZ (only) equal to one in that domain. We don't want to allow side movement of CO2 in the caprock.</code></pre>
+<p>Args:</p>
+<pre class="highlight"><code>LGR_NAME (str): output filename, without the suffix '.grdecl'
+reopen_ID (str): minimum ID of all casings
+LGR_sizes_xy (list[float]): LGR xy grid intervals
+main_grd_min_k (int): minimum z index in coarse grid
+no_of_layers_in_OB (int): number of layers in overburden (coarse grid)
+O (TextIO): opened file handle</code></pre>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/GaP/libs/carfin/CARFIN_core.py</code></summary>
+              <pre class="highlight"><code class="language-python">def endCARFIN(LGR_NAME: str,
+             reopen_ID: float,
+             LGR_sizes_xy: List[float], 
+             main_grd_min_k: float, 
+             min_grd_size: float,
+             no_of_layers_in_OB: int,
+             O: TextIO):  # noqa: E741
+    """ ENDFIN
+
+        Before we finish the CARFIN with ENDFIN, we will have to close the area around the well inside the LGR:
+
+            As mentioned in the slide 22, we opened the whole LGR in the topmost layer of the reservoir (and closed the rest of topmost layer.
+
+            In this stage we will have to make sure there is no flow around the well inside the LGR from the reservoir to the overburden. 
+
+            To do that we will first close the whole topmost layer inside the LGR:
+
+                The whole LGR grids in the x,y directions should be closed in the topmost layer but inside LGR. 
+
+                Then we will  set the MULTX, MULTY and MULTZ multipliers to 0 to make sure the area is whole closed.
+
+            Then we re-open the area where the well paths. In order to do that, we will have to (again) find that which pipe (with which ID) 
+            is pathing through the caprock (from overburden to the caprock):
+
+                The code always assumes the narrowest pipe passing through the caprock.  
+
+                We find X_min, X_max, Y_min, Y_max of the narrowest pipe.
+
+            Knowing, how many layer are allocated to overburden and given 10 chops per grid in the Z direction, we can find the k_min and k_max of 
+            the pipe where we want to leave it open. 
+
+            Then, we let the MULTZ (only) equal to one in that domain. We don't want to allow side movement of CO2 in the caprock. 
+
+        Args:
+
+            LGR_NAME (str): output filename, without the suffix '.grdecl'
+            reopen_ID (str): minimum ID of all casings
+            LGR_sizes_xy (list[float]): LGR xy grid intervals
+            main_grd_min_k (int): minimum z index in coarse grid
+            no_of_layers_in_OB (int): number of layers in overburden (coarse grid)
+            O (TextIO): opened file handle                 
+    """
+
+    # close the whole topmost layer inside the LGR
+    print ('...Prints isolating OVB from reservoir in the LGR in', LGR_NAME+'.grdecl file')
+
+    #Trans. modification to isolate OVB from Reservoir inside the LGR
+    print ('--isolating OVB from reservoir in the LGR',file = O)
+    print ('EQUALS',file = O ) 
+    print ('MULTX  0 ','1 ',len(LGR_sizes_xy), '1 ',len(LGR_sizes_xy),(no_of_layers_in_OB-main_grd_min_k+1)*10+1,(no_of_layers_in_OB-main_grd_min_k+1)*10+1,'/',file = O )
+    print ('MULTY  0 ','1 ',len(LGR_sizes_xy), '1 ',len(LGR_sizes_xy),(no_of_layers_in_OB-main_grd_min_k+1)*10+1,(no_of_layers_in_OB-main_grd_min_k+1)*10+1,'/',file = O )
+    print ('MULTZ  0 ','1 ',len(LGR_sizes_xy), '1 ',len(LGR_sizes_xy),(no_of_layers_in_OB-main_grd_min_k+1)*10+1,(no_of_layers_in_OB-main_grd_min_k+1)*10+1,'/',file = O )
+
+    # re-open the area where the well paths
+
+    # x
+    no_grd_reopen_x = math.floor(reopen_ID/min_grd_size)
+    x_min_reopen = math.ceil((len (LGR_sizes_xy) - no_grd_reopen_x)/2)
+    x_max_reopen = x_min_reopen + no_grd_reopen_x
+
+    # y
+    no_grd_reopen_y = math.floor(reopen_ID/min_grd_size)  
+    y_min_reopen = math.ceil((len (LGR_sizes_xy) - no_grd_reopen_y)/2)
+    y_max_reopen = y_min_reopen + no_grd_reopen_y 
+
+    print ('MULTZ 1 ', x_min_reopen-1,x_max_reopen+1,y_min_reopen-1 ,y_max_reopen+1 ,(no_of_layers_in_OB-main_grd_min_k+1)*10+1 ,(no_of_layers_in_OB-main_grd_min_k+1)*10+1 ,'/',file = O)
+
+    print ('/', file = O) 
+
+    print ('ENDFIN', file = O)</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.GaP.libs.carfin.CARFIN_core.endCARFIN2" class="doc doc-heading">
+            <code class="highlight language-python">endCARFIN2(LGR_NAME: str, reopen_ID: float, x_min_reopen: int, x_max_reopen: int, nz_ovb: int, LGR_sizes_xy: List[float], O: TextIO)</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>ENDFIN</p>
+<p>Before we finish the CARFIN with ENDFIN, we will have to close the area around the well inside the LGR:</p>
+<pre class="highlight"><code>As mentioned in the slide 22, we opened the whole LGR in the topmost layer of the reservoir (and closed the rest of topmost layer.
+
+In this stage we will have to make sure there is no flow around the well inside the LGR from the reservoir to the overburden.
+
+To do that we will first close the whole topmost layer inside the LGR:
+
+    The whole LGR grids in the x,y directions should be closed in the topmost layer but inside LGR.
+
+    Then we will  set the MULTX, MULTY and MULTZ multipliers to 0 to make sure the area is whole closed.
+
+Then we re-open the area where the well paths. In order to do that, we will have to (again) find that which pipe (with which ID) 
+is pathing through the caprock (from overburden to the caprock):
+
+    The code always assumes the narrowest pipe passing through the caprock.
+
+    We find X_min, X_max, Y_min, Y_max of the narrowest pipe.
+
+Knowing, how many layer are allocated to overburden and given 10 chops per grid in the Z direction, we can find the k_min and k_max of 
+the pipe where we want to leave it open.
+
+Then, we let the MULTZ (only) equal to one in that domain. We don't want to allow side movement of CO2 in the caprock.</code></pre>
+<p>Args:</p>
+<pre class="highlight"><code>LGR_NAME (str): output filename, without the suffix '.grdecl'
+reopen_ID (str): minimum ID of all casings
+LGR_sizes_xy (list[float]): LGR xy grid intervals
+main_grd_min_k (int): minimum z index in coarse grid
+no_of_layers_in_OB (int): number of layers in overburden (coarse grid)
+O (TextIO): opened file handle</code></pre>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/GaP/libs/carfin/CARFIN_core.py</code></summary>
+              <pre class="highlight"><code class="language-python">def endCARFIN2(LGR_NAME: str,
+                reopen_ID: float, 
+                x_min_reopen: int, 
+                x_max_reopen: int, 
+                nz_ovb: int,
+                LGR_sizes_xy: List[float], 
+                O: TextIO):  # noqa: E741
+    """ ENDFIN
+
+        Before we finish the CARFIN with ENDFIN, we will have to close the area around the well inside the LGR:
+
+            As mentioned in the slide 22, we opened the whole LGR in the topmost layer of the reservoir (and closed the rest of topmost layer.
+
+            In this stage we will have to make sure there is no flow around the well inside the LGR from the reservoir to the overburden. 
+
+            To do that we will first close the whole topmost layer inside the LGR:
+
+                The whole LGR grids in the x,y directions should be closed in the topmost layer but inside LGR. 
+
+                Then we will  set the MULTX, MULTY and MULTZ multipliers to 0 to make sure the area is whole closed.
+
+            Then we re-open the area where the well paths. In order to do that, we will have to (again) find that which pipe (with which ID) 
+            is pathing through the caprock (from overburden to the caprock):
+
+                The code always assumes the narrowest pipe passing through the caprock.  
+
+                We find X_min, X_max, Y_min, Y_max of the narrowest pipe.
+
+            Knowing, how many layer are allocated to overburden and given 10 chops per grid in the Z direction, we can find the k_min and k_max of 
+            the pipe where we want to leave it open. 
+
+            Then, we let the MULTZ (only) equal to one in that domain. We don't want to allow side movement of CO2 in the caprock. 
+
+        Args:
+
+            LGR_NAME (str): output filename, without the suffix '.grdecl'
+            reopen_ID (str): minimum ID of all casings
+            LGR_sizes_xy (list[float]): LGR xy grid intervals
+            main_grd_min_k (int): minimum z index in coarse grid
+            no_of_layers_in_OB (int): number of layers in overburden (coarse grid)
+            O (TextIO): opened file handle                 
+    """
+
+    # close the whole topmost layer inside the LGR
+    print ('...Prints isolating OVB from reservoir in the LGR in', LGR_NAME+'.grdecl file')
+
+    print (f'...reopenID = {reopen_ID*39.37:.2f} ...')
+
+    #Trans. modification to isolate OVB from Reservoir inside the LGR
+    print ('--isolating OVB from reservoir in the LGR',file = O)
+    print ('EQUALS',file = O ) 
+
+    # close the last flat ovb surface
+    print ('MULTZ  0 ','1 ',len(LGR_sizes_xy), '1 ',len(LGR_sizes_xy), nz_ovb, nz_ovb,'/',file = O )
+
+
+    # open well borehole at ovb
+    print ('MULTZ 1 ', x_min_reopen, x_max_reopen, x_min_reopen, x_max_reopen, nz_ovb, nz_ovb, '/',file = O)
+
+    print ('/', file = O) 
+
+    print ('ENDFIN', file = O)</code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="src.GaP.libs.carfin.CARFIN_pipe_with_oph" class="doc doc-heading">
+            <code>src.GaP.libs.carfin.CARFIN_pipe_with_oph</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+        <p>pipe builder with open hole sections</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.GaP.libs.carfin.CARFIN_pipe_with_oph.CARFIN_pipe_with_oph" class="doc doc-heading">
+            <code class="highlight language-python">CARFIN_pipe_with_oph(ID: float, x_min_pipe: int, x_max_pipe: int, y_min_pipe: int, y_max_pipe: int, k_min_pipe: int, k_max_pipe: int, k_min_hole: int, k_max_hole: int, perm: float, LGR_NAME: str, O: TextIO)</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>CARFIN for pipe with open hole sections</p>
+<p>The pipes can be mimicked by a very narrow (in the size of ID of a pipe-20 to 50 cm) and high permeability grids. 
+Those grids could be surrounded by grids with zero transmissibility. </p>
+<p>The open hole sections can be modelled the same as pipe, but without zero transmissibility around the high perm. area 
+to allow moving of fluids side ways from the piper. This is particularly important in the cases where there is a 
+drilled but uncased hole in the setting. </p>
+<p>First the pipe (high) permeabilities are assigned to the whole pipe ( casing + openhole section) because both casing and 
+openhole are sharing the highest permeability inner  most layer.</p>
+<p>The SATNUM = 2 is added to prosperities change. The idea is to have linear rel.perms to the second saturation table, so that 
+there will be least resistance for flow in the free pipe. </p>
+<p>Then to mimic the pipe, there should be no flow on the side ways, therefore, the transmisibilities in the X and Y directions 
+in the edge of the pipe are set to zero. </p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>ID</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>Internal Diameter (m)</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>x_min_pipe</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>minimum x</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>x_max_pipe</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>maximum x</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>y_min_pipe</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>minimum y</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>y_max_pipe</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>maximum y</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>k_min_pipe</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>minimum k of pipe</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>k_max_pipe</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>maximum k of pipe</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>k_min_hole</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>minimum k of open hole section</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>k_max_hole</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>maximum k of open hole section</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>perm</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>permeability value</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>LGR_NAME</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>LGR name</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>O</code></b>
+              (<code><span title="typing.TextIO">TextIO</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>opened file handle</p>
+          </div>
+        </li>
+    </ul>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/GaP/libs/carfin/CARFIN_pipe_with_oph.py</code></summary>
+              <pre class="highlight"><code class="language-python">def CARFIN_pipe_with_oph(ID: float,
+                            x_min_pipe: int, x_max_pipe: int,
+                            y_min_pipe: int, y_max_pipe: int,
+                            k_min_pipe: int, k_max_pipe: int,
+                            k_min_hole: int, k_max_hole: int,
+                            perm: float,
+                            LGR_NAME: str,
+                            O: TextIO):  # noqa: E741
+    """ CARFIN for pipe with open hole sections
+
+        The pipes can be mimicked by a very narrow (in the size of ID of a pipe-20 to 50 cm) and high permeability grids. 
+        Those grids could be surrounded by grids with zero transmissibility. 
+
+        The open hole sections can be modelled the same as pipe, but without zero transmissibility around the high perm. area 
+        to allow moving of fluids side ways from the piper. This is particularly important in the cases where there is a 
+        drilled but uncased hole in the setting. 
+
+        First the pipe (high) permeabilities are assigned to the whole pipe ( casing + openhole section) because both casing and 
+        openhole are sharing the highest permeability inner  most layer.
+
+        The SATNUM = 2 is added to prosperities change. The idea is to have linear rel.perms to the second saturation table, so that 
+        there will be least resistance for flow in the free pipe. 
+
+        Then to mimic the pipe, there should be no flow on the side ways, therefore, the transmisibilities in the X and Y directions 
+        in the edge of the pipe are set to zero. 
+
+        Args:
+            ID (float): Internal Diameter (m)
+            x_min_pipe (int): minimum x
+            x_max_pipe (int): maximum x
+            y_min_pipe (int): minimum y
+            y_max_pipe (int): maximum y
+            k_min_pipe (int): minimum k of pipe
+            k_max_pipe (int): maximum k of pipe
+            k_min_hole (int): minimum k of open hole section
+            k_max_hole (int): maximum k of open hole section
+            perm (float): permeability value
+            LGR_NAME (str): LGR name
+            O (TextIO): opened file handle
+
+    """
+
+    print ('EQUALS',file=O)
+
+    print ('--pipe with ID of',ID*39.37,'and perm of',perm,' were set in',LGR_NAME, 'Local Grid refinement',file=O)
+    print ('PERMX','',perm,'',x_min_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_hole,'',k_max_hole,'','/',file=O)
+    print ('PERMY','',perm,'',x_min_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_hole,'',k_max_hole,'','/',file=O)
+    print ('PERMZ','',perm,'',x_min_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_hole,'',k_max_hole,'','/',file=O)
+    print ('PORO','','0.99','',x_min_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_hole,'',k_max_hole,'','/',file=O)
+    print ('SATNUM','',2,'',x_min_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_hole,'',k_max_hole,'','/',file=O)
+    print ('--FIPLEG (FIPNUM) defintion',file=O)
+    print ('FIPLEG','',6,'',x_min_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_hole,'',k_max_hole,'','/',file=O)
+
+    print ('--EQLNUM defintion',file=O)
+    print ('EQLNUM','',2,'',x_min_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_hole,'',k_max_hole,'','/',file=O)
+
+
+    print ('--Transmisibilities of the edge of the pipe set to zero',file=O)
+    print ('MULTX','',0,'',x_min_pipe-1,'',x_min_pipe-1,'',y_min_pipe,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
+    print ('MULTX','',0,'',x_max_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
+
+    # # TODO(hzh): Not sure about the next two lines of codes
+    # print ('MULTX','',0,'',x_min_pipe-1,'',x_max_pipe,'',y_min_pipe-1,'',y_min_pipe-1,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
+    # print ('MULTX','',0,'',x_min_pipe-1,'',x_max_pipe,'',y_max_pipe,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
+
+    print ('MULTY','',0,'',x_min_pipe-1,'',x_max_pipe,'',y_min_pipe-1,'',y_min_pipe-1,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
+    print ('MULTY','',0,'',x_min_pipe-1,'',x_max_pipe,'',y_max_pipe,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
+
+    # # TODO(hzh): Not sure about the next two lines of codes    
+    # print ('MULTY','',0,'',x_min_pipe-1,'',x_min_pipe-1,'',y_min_pipe-1,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
+    # print ('MULTY','',0,'',x_max_pipe,'',x_max_pipe,'',y_min_pipe-1,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
+
+    print ('/',file=O)</code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="src.GaP.libs.carfin.CARFIN_pipe" class="doc doc-heading">
+            <code>src.GaP.libs.carfin.CARFIN_pipe</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+        <p>pipe builder</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.GaP.libs.carfin.CARFIN_pipe.CARFIN_pipe" class="doc doc-heading">
+            <code class="highlight language-python">CARFIN_pipe(ID: float, x_min_pipe: int, x_max_pipe: int, y_min_pipe: int, y_max_pipe: int, k_min_pipe: int, k_max_pipe: int, perm: float, LGR_NAME: str, O: TextIO)</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>CARFIN for pipe</p>
+<p>The pipes can be mimicked by a very narrow (in the size of ID of a pipe-20 to 50 cm) and high permeability grids. 
+Those grids could be surrounded by grids with zero transmissibility. </p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>ID</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>Internal Diameter (m)</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>x_min_pipe</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>minimum x</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>x_max_pipe</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>maximum x</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>y_min_pipe</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>minimum y</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>y_max_pipe</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>maximum y</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>k_min_pipe</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>minimum k</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>k_max_pipe</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>maximum k</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>perm</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>permeability value</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>LGR_NAME</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>LGR name</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>O</code></b>
+              (<code><span title="typing.TextIO">TextIO</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>opened file handle</p>
+          </div>
+        </li>
+    </ul>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/GaP/libs/carfin/CARFIN_pipe.py</code></summary>
+              <pre class="highlight"><code class="language-python">def CARFIN_pipe(ID: float,
+                x_min_pipe: int, x_max_pipe: int,
+                y_min_pipe: int, y_max_pipe: int,
+                k_min_pipe: int, k_max_pipe: int,
+                perm: float,
+                LGR_NAME: str, 
+                O: TextIO):  # noqa: E741
+    """ CARFIN for pipe
+
+        The pipes can be mimicked by a very narrow (in the size of ID of a pipe-20 to 50 cm) and high permeability grids. 
+        Those grids could be surrounded by grids with zero transmissibility. 
+
+        Args:
+            ID (float): Internal Diameter (m)
+            x_min_pipe (int): minimum x
+            x_max_pipe (int): maximum x
+            y_min_pipe (int): minimum y
+            y_max_pipe (int): maximum y
+            k_min_pipe (int): minimum k
+            k_max_pipe (int): maximum k
+            perm (float): permeability value
+            LGR_NAME (str): LGR name
+            O (TextIO): opened file handle
+    """
+
+    print ('EQUALS',file=O)
+    print ('--pipe with ID of',ID*39.37,'and perm of',perm,' were set in',LGR_NAME, 'Local Grid refinement',file=O)
+    print ('PERMX','',perm,'',x_min_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
+    print ('PERMY','',perm,'',x_min_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
+    print ('PERMZ','',perm,'',x_min_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
+    print ('PORO','','0.99','',x_min_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
+
+    print ('--Transmisibilities of the edge of the pipe set to zero',file=O)
+    print ('MULTX','',0,'',x_min_pipe,'',x_min_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
+    print ('MULTX','',0,'',x_max_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
+    print ('MULTX','',0,'',x_min_pipe,'',x_max_pipe,'',y_min_pipe,'',y_min_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
+    print ('MULTX','',0,'',x_min_pipe,'',x_max_pipe,'',y_max_pipe,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
+
+    print ('MULTY','',0,'',x_min_pipe,'',x_max_pipe,'',y_min_pipe,'',y_min_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
+    print ('MULTY','',0,'',x_min_pipe,'',x_max_pipe,'',y_max_pipe,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
+    print ('MULTY','',0,'',x_min_pipe,'',x_min_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
+    print ('MULTY','',0,'',x_max_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
+
+    print ('--New Saturation region for flow in pipe',file=O)
+    print ('SATNUM','',2,'',x_min_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
+    print ('/',file=O)</code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["search.suggest", "search.highlight", "content.tabs.link", "navigation.indexes", "content.tooltips", "navigation.path", "content.code.annotate", "content.code.copy", "content.code.select"], "search": "../../../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.c8b220af.min.js"></script>
+      
+    
+  </body>
+</html>

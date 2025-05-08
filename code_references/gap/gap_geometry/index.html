@@ -1,0 +1,2771 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../gap_carfin/">
+      
+      
+        <link rel="next" href="../../well_class/well_class/">
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.12">
+    
+    
+      
+        <title>Bounding boxes - SCREEN</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.2afb09e1.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#src.GaP.libs.geometry.bbox_barrier" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="SCREEN" class="md-header__button md-logo" aria-label="SCREEN" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SCREEN
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Bounding boxes
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7M9 21v-1h6v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1m3-17a5 5 0 0 0-5 5c0 2.05 1.23 3.81 3 4.58V16h4v-2.42c1.77-.77 3-2.53 3-4.58a5 5 0 0 0-5-5"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/equinor/SCREEN" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="SCREEN" class="md-nav__button md-logo" aria-label="SCREEN" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SCREEN
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/equinor/SCREEN" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../well_class/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Pre‐processing and Preliminary Assessment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../gap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Detailed Simulation workflow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Developer Guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Developer Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mkdocs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    MkDocs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../INSTALLATION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Code References
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            Code References
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4_3_1" id="__nav_4_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    GaP
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            GaP
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gap_carfin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CARFIN
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Bounding boxes
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Bounding boxes
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.bbox_barrier" class="md-nav__link">
+    <span class="md-ellipsis">
+      bbox_barrier
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="bbox_barrier">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.bbox_barrier.bbox_for_barrier" class="md-nav__link">
+    <span class="md-ellipsis">
+      bbox_for_barrier
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.bbox_cement_bond" class="md-nav__link">
+    <span class="md-ellipsis">
+      bbox_cement_bond
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="bbox_cement_bond">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.bbox_cement_bond.bbox_for_cement_bond" class="md-nav__link">
+    <span class="md-ellipsis">
+      bbox_for_cement_bond
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.bbox_pipe_with_oph_sec" class="md-nav__link">
+    <span class="md-ellipsis">
+      bbox_pipe_with_oph_sec
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="bbox_pipe_with_oph_sec">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.bbox_pipe_with_oph_sec.bbox_for_pipe_with_oph_sec" class="md-nav__link">
+    <span class="md-ellipsis">
+      bbox_for_pipe_with_oph_sec
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.bbox_pipe" class="md-nav__link">
+    <span class="md-ellipsis">
+      bbox_pipe
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="bbox_pipe">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.bbox_pipe.bbox_for_pipe" class="md-nav__link">
+    <span class="md-ellipsis">
+      bbox_for_pipe
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.bbox_utils" class="md-nav__link">
+    <span class="md-ellipsis">
+      bbox_utils
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="bbox_utils">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.bbox_utils.BBoxXY" class="md-nav__link">
+    <span class="md-ellipsis">
+      BBoxXY
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.bbox_utils.BBoxZ" class="md-nav__link">
+    <span class="md-ellipsis">
+      BBoxZ
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.LGR_grid_utils" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGR_grid_utils
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LGR_grid_utils">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.LGR_grid_utils.compute_cement_bonds" class="md-nav__link">
+    <span class="md-ellipsis">
+      compute_cement_bonds
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.LGR_grid_utils.compute_min_grid_size" class="md-nav__link">
+    <span class="md-ellipsis">
+      compute_min_grid_size
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.LGR_grid_utils.compute_max_num_of_fine_grid_xy" class="md-nav__link">
+    <span class="md-ellipsis">
+      compute_max_num_of_fine_grid_xy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.LGR_grid_utils.compute_LGR_xy" class="md-nav__link">
+    <span class="md-ellipsis">
+      compute_LGR_xy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.LGR_grid_utils.compute_LGR_z" class="md-nav__link">
+    <span class="md-ellipsis">
+      compute_LGR_z
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.LGR_grid" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGR_grid
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LGR_grid">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.LGR_grid.generate_LGR_grids" class="md-nav__link">
+    <span class="md-ellipsis">
+      generate_LGR_grids
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3_2" id="__nav_4_3_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    WellClass
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            WellClass
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../well_class/well_class/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Well class
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../well_class/well_pressure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Well pressure
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../well_class/models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Models
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3_2_4" id="__nav_4_3_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Grids
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_4_3_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            Grids
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../well_class/grids/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Various grids
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../well_class/lgr_builder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    LGR builder
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.bbox_barrier" class="md-nav__link">
+    <span class="md-ellipsis">
+      bbox_barrier
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="bbox_barrier">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.bbox_barrier.bbox_for_barrier" class="md-nav__link">
+    <span class="md-ellipsis">
+      bbox_for_barrier
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.bbox_cement_bond" class="md-nav__link">
+    <span class="md-ellipsis">
+      bbox_cement_bond
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="bbox_cement_bond">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.bbox_cement_bond.bbox_for_cement_bond" class="md-nav__link">
+    <span class="md-ellipsis">
+      bbox_for_cement_bond
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.bbox_pipe_with_oph_sec" class="md-nav__link">
+    <span class="md-ellipsis">
+      bbox_pipe_with_oph_sec
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="bbox_pipe_with_oph_sec">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.bbox_pipe_with_oph_sec.bbox_for_pipe_with_oph_sec" class="md-nav__link">
+    <span class="md-ellipsis">
+      bbox_for_pipe_with_oph_sec
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.bbox_pipe" class="md-nav__link">
+    <span class="md-ellipsis">
+      bbox_pipe
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="bbox_pipe">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.bbox_pipe.bbox_for_pipe" class="md-nav__link">
+    <span class="md-ellipsis">
+      bbox_for_pipe
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.bbox_utils" class="md-nav__link">
+    <span class="md-ellipsis">
+      bbox_utils
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="bbox_utils">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.bbox_utils.BBoxXY" class="md-nav__link">
+    <span class="md-ellipsis">
+      BBoxXY
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.bbox_utils.BBoxZ" class="md-nav__link">
+    <span class="md-ellipsis">
+      BBoxZ
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.LGR_grid_utils" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGR_grid_utils
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LGR_grid_utils">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.LGR_grid_utils.compute_cement_bonds" class="md-nav__link">
+    <span class="md-ellipsis">
+      compute_cement_bonds
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.LGR_grid_utils.compute_min_grid_size" class="md-nav__link">
+    <span class="md-ellipsis">
+      compute_min_grid_size
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.LGR_grid_utils.compute_max_num_of_fine_grid_xy" class="md-nav__link">
+    <span class="md-ellipsis">
+      compute_max_num_of_fine_grid_xy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.LGR_grid_utils.compute_LGR_xy" class="md-nav__link">
+    <span class="md-ellipsis">
+      compute_LGR_xy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.LGR_grid_utils.compute_LGR_z" class="md-nav__link">
+    <span class="md-ellipsis">
+      compute_LGR_z
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.LGR_grid" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGR_grid
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LGR_grid">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.GaP.libs.geometry.LGR_grid.generate_LGR_grids" class="md-nav__link">
+    <span class="md-ellipsis">
+      generate_LGR_grids
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+  <h1>Bounding boxes</h1>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="src.GaP.libs.geometry.bbox_barrier" class="doc doc-heading">
+            <code>src.GaP.libs.geometry.bbox_barrier</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+        <p>barrier builder</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.GaP.libs.geometry.bbox_barrier.bbox_for_barrier" class="doc doc-heading">
+            <code class="highlight language-python">bbox_for_barrier(cg: ElemModel, LGR_sizes_xy: List[float], LGR_depths: np.ndarray, min_grd_size: float) -&gt; Tuple</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>build bouding box for barrier</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>cg</code></b>
+              (<code><span title="src.GaP.libs.models.ElemModel">ElemModel</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>contains geometrical information of the casing</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>LGR_sizes_xy</code></b>
+              (<code><span title="list">list</span>[<span title="float">float</span>]</code>)
+          –
+          <div class="doc-md-description">
+            <p>LGR xy grid intervals</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>LGR_depths</code></b>
+              (<code><span title="numpy.ndarray">ndarray</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>specific size of each LGR grid in the Z direction</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>min_grd_size</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>minimum grid size</p>
+          </div>
+        </li>
+    </ul>
+        <p>Returns:</p>
+<pre class="highlight"><code>tuple: the 3D bounding box and ID</code></pre>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/GaP/libs/geometry/bbox_barrier.py</code></summary>
+              <pre class="highlight"><code class="language-python">def bbox_for_barrier (cg: ElemModel, 
+                      LGR_sizes_xy: List[float], 
+                      LGR_depths: np.ndarray, 
+                      min_grd_size: float) -&gt; Tuple:
+    """ build bouding box for barrier
+
+        Args:
+            cg (ElemModel): contains geometrical information of the casing
+            LGR_sizes_xy (list[float]): LGR xy grid intervals
+            LGR_depths (np.ndarray): specific size of each LGR grid in the Z direction
+            min_grd_size (float): minimum grid size
+
+        Returns:
+
+            tuple: the 3D bounding box and ID
+
+    """
+
+    # for convenience
+    ID = cg.ID
+
+    # z
+    k_min_bar, k_max_bar = BBoxZ(cg.pipe.strt_depth, cg.pipe.end_depth, LGR_depths)
+
+    # x-y
+    x_min_bar, x_max_bar, y_min_bar, y_max_bar = BBoxXY(ID, LGR_sizes_xy, min_grd_size)
+
+    return ID, x_min_bar, x_max_bar, y_min_bar, y_max_bar, k_min_bar, k_max_bar</code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="src.GaP.libs.geometry.bbox_cement_bond" class="doc doc-heading">
+            <code>src.GaP.libs.geometry.bbox_cement_bond</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+        <p>cemont bond builder</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.GaP.libs.geometry.bbox_cement_bond.bbox_for_cement_bond" class="doc doc-heading">
+            <code class="highlight language-python">bbox_for_cement_bond(cg: PipeCementModel, LGR_sizes_xy: List[float], LGR_depths: np.ndarray, min_grd_size: float) -&gt; tuple</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>build building box for cement bond</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>cg</code></b>
+              (<code><span title="src.GaP.libs.models.PipeCementModel">PipeCementModel</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>contains geometrical information of the casing</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>LGR_sizes_xy</code></b>
+              (<code><span title="list">list</span>[<span title="float">float</span>]</code>)
+          –
+          <div class="doc-md-description">
+            <p>LGR xy grid intervals</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>LGR_depths</code></b>
+              (<code><span title="numpy.ndarray">ndarray</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>specific size of each LGR grid in the Z direction</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>min_grd_size</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>minimum grid size</p>
+          </div>
+        </li>
+    </ul>
+        <p>Returns:</p>
+<pre class="highlight"><code>tuple: the 3D bounding box and ID</code></pre>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/GaP/libs/geometry/bbox_cement_bond.py</code></summary>
+              <pre class="highlight"><code class="language-python">def bbox_for_cement_bond(cg: PipeCementModel, 
+                         LGR_sizes_xy: List[float], 
+                         LGR_depths: np.ndarray, 
+                         min_grd_size: float) -&gt; tuple:
+    """ build building box for cement bond
+
+        Args:
+            cg (PipeCementModel): contains geometrical information of the casing
+            LGR_sizes_xy (list[float]): LGR xy grid intervals
+            LGR_depths (np.ndarray): specific size of each LGR grid in the Z direction
+            min_grd_size (float): minimum grid size
+
+        Returns:
+
+            tuple: the 3D bounding box and ID
+    """
+
+    # for convenience
+    ID = cg.ID
+
+    # z
+    k_min_CB, k_max_CB = BBoxZ(cg.cement.strt_depth, cg.cement.end_depth, LGR_depths)
+
+    # x-y bounding box
+    x_min_pipe, x_max_pipe, y_min_pipe, y_max_pipe = BBoxXY(ID, LGR_sizes_xy, min_grd_size)
+
+    return ID, x_min_pipe, x_max_pipe, y_min_pipe, y_max_pipe, k_min_CB, k_max_CB</code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="src.GaP.libs.geometry.bbox_pipe_with_oph_sec" class="doc doc-heading">
+            <code>src.GaP.libs.geometry.bbox_pipe_with_oph_sec</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+        <p>pipe builder with open hole sections</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.GaP.libs.geometry.bbox_pipe_with_oph_sec.bbox_for_pipe_with_oph_sec" class="doc doc-heading">
+            <code class="highlight language-python">bbox_for_pipe_with_oph_sec(cg: PipeCementModel, LGR_sizes_xy: List[float], LGR_depths: np.ndarray, min_grd_size: float) -&gt; tuple</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>build bounding box for pipe with open hole sections</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>cg</code></b>
+              (<code><span title="src.GaP.libs.models.PipeCementModel">PipeCementModel</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>contains geometrical information of the casing</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>LGR_sizes_xy</code></b>
+              (<code><span title="list">list</span>[<span title="float">float</span>]</code>)
+          –
+          <div class="doc-md-description">
+            <p>LGR xy grid intervals</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>LGR_depths</code></b>
+              (<code><span title="numpy.ndarray">ndarray</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>specific size of each LGR grid in the Z direction</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>min_grd_size</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>minimum grid size</p>
+          </div>
+        </li>
+    </ul>
+        <p>Returns:</p>
+<pre class="highlight"><code>tuple: the 3D bounding box and min/max k hole and ID</code></pre>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/GaP/libs/geometry/bbox_pipe_with_oph_sec.py</code></summary>
+              <pre class="highlight"><code class="language-python">def bbox_for_pipe_with_oph_sec (cg: PipeCementModel,
+                                LGR_sizes_xy: List[float], 
+                                LGR_depths: np.ndarray, 
+                                min_grd_size: float) -&gt; tuple:
+    """ build bounding box for pipe with open hole sections
+
+        Args:
+            cg (PipeCementModel): contains geometrical information of the casing
+            LGR_sizes_xy (list[float]): LGR xy grid intervals
+            LGR_depths (np.ndarray): specific size of each LGR grid in the Z direction
+            min_grd_size (float): minimum grid size
+
+        Returns:
+
+            tuple: the 3D bounding box and min/max k hole and ID
+    """
+
+    # for convenience
+    ID = cg.ID
+
+    # z, pipe
+    k_min_pipe, k_max_pipe = BBoxZ(cg.pipe.strt_depth, cg.pipe.end_depth, LGR_depths)
+
+    # z, open hole section
+    k_min_hole, k_max_hole = BBoxZ(cg.oph.strt_depth, cg.oph.end_depth, LGR_depths)
+
+    # x-y
+    x_min_pipe, x_max_pipe, y_min_pipe, y_max_pipe = BBoxXY(ID, LGR_sizes_xy, min_grd_size)
+
+    return ID, x_min_pipe, x_max_pipe, y_min_pipe, y_max_pipe, k_min_pipe, k_max_pipe, k_min_hole, k_max_hole</code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="src.GaP.libs.geometry.bbox_pipe" class="doc doc-heading">
+            <code>src.GaP.libs.geometry.bbox_pipe</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+        <p>pipe builder</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.GaP.libs.geometry.bbox_pipe.bbox_for_pipe" class="doc doc-heading">
+            <code class="highlight language-python">bbox_for_pipe(cg: PipeCementModel, LGR_sizes_xy: list[float], LGR_depths: np.ndarray, min_grd_size: float) -&gt; tuple</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>build bounding box for the pipe</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>cg</code></b>
+              (<code><span title="src.GaP.libs.models.PipeCementModel">PipeCementModel</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>contains geometrical information of the casing</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>LGR_sizes_xy</code></b>
+              (<code><span title="list">list</span>[<span title="float">float</span>]</code>)
+          –
+          <div class="doc-md-description">
+            <p>LGR xy grid intervals</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>LGR_depths</code></b>
+              (<code><span title="numpy.ndarray">ndarray</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>specific size of each LGR grid in the Z direction</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>min_grd_size</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>minimum grid size</p>
+          </div>
+        </li>
+    </ul>
+        <p>Returns:</p>
+<pre class="highlight"><code>tuple: the 3D bounding box and ID</code></pre>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/GaP/libs/geometry/bbox_pipe.py</code></summary>
+              <pre class="highlight"><code class="language-python">def bbox_for_pipe (cg: PipeCementModel,
+                    LGR_sizes_xy: list[float], 
+                    LGR_depths: np.ndarray, 
+                    min_grd_size: float) -&gt; tuple:
+    """ build bounding box for the pipe
+
+        Args:
+            cg (PipeCementModel): contains geometrical information of the casing
+            LGR_sizes_xy (list[float]): LGR xy grid intervals
+            LGR_depths (np.ndarray): specific size of each LGR grid in the Z direction
+            min_grd_size (float): minimum grid size
+
+        Returns:
+
+            tuple: the 3D bounding box and ID
+    """
+
+    # for convenience
+    ID = cg.ID
+
+    # z
+    # pipe
+    k_min_pipe, k_max_pipe = BBoxZ(cg.pipe.strt_depth, cg.pipe.end_depth, LGR_depths)
+
+    # x-y
+    x_min_pipe, x_max_pipe, y_min_pipe, y_max_pipe = BBoxXY(ID, LGR_sizes_xy, min_grd_size)
+
+    return ID, x_min_pipe, x_max_pipe, y_min_pipe, y_max_pipe, k_min_pipe, k_max_pipe</code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="src.GaP.libs.geometry.bbox_utils" class="doc doc-heading">
+            <code>src.GaP.libs.geometry.bbox_utils</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+        <p>compute bounding boxes for lateral x-y and depth z directions</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.GaP.libs.geometry.bbox_utils.BBoxXY" class="doc doc-heading">
+            <code class="highlight language-python">BBoxXY(ID: float, LGR_sizes_xy: List[float], min_grd_size: float) -&gt; Tuple[int, int, int, int]</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Compute bounding box in x-y directions</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>ID</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>Internal diameter value</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>LGR_sizes_xy</code></b>
+              (<code><span title="list">list</span>[<span title="float">float</span>]</code>)
+          –
+          <div class="doc-md-description">
+            <p>LGR xy grid intervals</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>min_grd_size</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>minimum grid size</p>
+          </div>
+        </li>
+    </ul>
+        <p>Returns:</p>
+<pre class="highlight"><code>tuple: the 2D bounding box, indices, in lateral x-y plane of LGR grid</code></pre>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/GaP/libs/geometry/bbox_utils.py</code></summary>
+              <pre class="highlight"><code class="language-python">def BBoxXY(ID: float,
+            LGR_sizes_xy: List[float], 
+            min_grd_size: float
+           ) -&gt; Tuple[int, int, int, int]:
+    """ Compute bounding box in x-y directions
+
+        Args:
+            ID (float): Internal diameter value
+            LGR_sizes_xy (list[float]): LGR xy grid intervals
+            min_grd_size (float): minimum grid size
+
+        Returns:
+
+            tuple: the 2D bounding box, indices, in lateral x-y plane of LGR grid
+    """
+
+    # x
+    no_grd_elem_x = math.floor(ID/min_grd_size)
+
+    xa = (len (LGR_sizes_xy)-no_grd_elem_x)/2
+    if xa &lt; 0:
+        raise ValueError('ERROR:The ID of barrier is larger than refined area')
+
+    x_min_elem = math.ceil(xa)
+
+    x_max_elem = x_min_elem + no_grd_elem_x 
+
+    # y
+    no_grd_elem_y = math.floor(ID/min_grd_size)
+
+    ya = (len (LGR_sizes_xy)-no_grd_elem_y)/2
+    if ya &lt; 0:
+        raise ValueError('ERROR:The ID of tube is larger than refined area')
+
+    y_min_elem = math.ceil(ya)
+
+    y_max_elem = y_min_elem + no_grd_elem_y 
+
+    return x_min_elem, x_max_elem, y_min_elem, y_max_elem</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.GaP.libs.geometry.bbox_utils.BBoxZ" class="doc doc-heading">
+            <code class="highlight language-python">BBoxZ(strt_depth: float, end_depth: float, LGR_depths: np.ndarray) -&gt; Tuple[int, int]</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Compute bounding box in z direction</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>strt_depth</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>start depth of element, such as pipe, cement-bond, or barrier</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>end_depth</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>end depth of element</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>LGR_depths</code></b>
+              (<code><span title="numpy.ndarray">ndarray</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>specific size of each LGR grid in the Z direction</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+<b><code>tuple</code></b> (              <code><span title="typing.Tuple">Tuple</span>[<span title="int">int</span>, <span title="int">int</span>]</code>
+)          –
+          <div class="doc-md-description">
+            <p>min/max z indices in LGR grid</p>
+          </div>
+        </li>
+    </ul>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/GaP/libs/geometry/bbox_utils.py</code></summary>
+              <pre class="highlight"><code class="language-python">def BBoxZ(strt_depth: float,
+          end_depth: float,
+          LGR_depths: np.ndarray
+          ) -&gt; Tuple[int, int]:
+    """ Compute bounding box in z direction
+
+        Args:
+            strt_depth (float): start depth of element, such as pipe, cement-bond, or barrier
+            end_depth (float): end depth of element
+            LGR_depths (np.ndarray): specific size of each LGR grid in the Z direction
+
+        Returns:
+            tuple: min/max z indices in LGR grid
+    """
+
+    # pipe
+    if (LGR_depths[0] - strt_depth) &gt; 0:
+        k_min_elem = 1 
+    else:
+        k_min_elem = np.argmin(abs(LGR_depths - strt_depth))+ 1 
+
+    if (LGR_depths[-1] - end_depth) &lt; 0:
+        k_max_elem =  len(LGR_depths)
+    else:
+        k_max_elem = np.argmin(abs(LGR_depths - end_depth))+ 1 
+
+    return k_min_elem, k_max_elem</code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="src.GaP.libs.geometry.LGR_grid_utils" class="doc doc-heading">
+            <code>src.GaP.libs.geometry.LGR_grid_utils</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.GaP.libs.geometry.LGR_grid_utils.compute_cement_bonds" class="doc doc-heading">
+            <code class="highlight language-python">compute_cement_bonds(cond_Casing_ID: float, surf_Casing_ID: float, prod_Casing_ID: float) -&gt; Tuple[float, float, float]</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>compute cement bonds</p>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/GaP/libs/geometry/LGR_grid_utils.py</code></summary>
+              <pre class="highlight"><code class="language-python">def compute_cement_bonds(cond_Casing_ID: float, 
+                         surf_Casing_ID: float, 
+                         prod_Casing_ID: float) -&gt; Tuple[float, float, float]:
+    """ compute cement bonds
+    """
+
+    # Calculating the size of grids for cement bond 
+    # TODO(hzh): why multiply 2?
+    cond_bond = cond_Casing_ID - surf_Casing_ID*2
+    surf_bond = surf_Casing_ID - prod_Casing_ID
+    prod_bond = surf_Casing_ID - prod_Casing_ID
+
+    return cond_bond, surf_bond, prod_bond</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.GaP.libs.geometry.LGR_grid_utils.compute_min_grid_size" class="doc doc-heading">
+            <code class="highlight language-python">compute_min_grid_size(cond_Casing_ID: float, surf_Casing_ID: float, prod_Casing_ID: float) -&gt; float</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>compute minimum grid size </p>
+<p>The min. sizes happen when pipes are going into each other:</p>
+<pre class="highlight"><code>From D&amp;W, we know some cosignings (if not all) have overlap with each other and that's why we have annules flow.
+
+In addition, the thickness of the cement bond could be the difference between the casings.
+
+Finally, we don't want to go below 5cm grids, and above 25 cm is unphysically too large. Then we hard-code 
+the minim grid size to 10 cm in those case,
+
+Otherwise, let the code decide on the minimum grid size that we want to have.</code></pre>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>cond_Casing_ID</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>ID of conductor casing</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>surf_Casing_ID</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>ID of surface casing</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>prod_Casing_ID</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>ID of production casing</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+<b><code>float</code></b> (              <code><span title="float">float</span></code>
+)          –
+          <div class="doc-md-description">
+            <p>minimum grid size</p>
+          </div>
+        </li>
+    </ul>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/GaP/libs/geometry/LGR_grid_utils.py</code></summary>
+              <pre class="highlight"><code class="language-python">def compute_min_grid_size(cond_Casing_ID: float, 
+                          surf_Casing_ID: float, 
+                          prod_Casing_ID: float) -&gt; float:
+    """ compute minimum grid size 
+
+    The min. sizes happen when pipes are going into each other:
+
+        From D&amp;W, we know some cosignings (if not all) have overlap with each other and that's why we have annules flow. 
+
+        In addition, the thickness of the cement bond could be the difference between the casings. 
+
+        Finally, we don't want to go below 5cm grids, and above 25 cm is unphysically too large. Then we hard-code 
+        the minim grid size to 10 cm in those case,
+
+        Otherwise, let the code decide on the minimum grid size that we want to have. 
+
+    Args:
+        cond_Casing_ID (float): ID of conductor casing
+        surf_Casing_ID (float): ID of surface casing
+        prod_Casing_ID (float): ID of production casing
+
+    Returns:
+        float: minimum grid size
+    """
+
+    # Conversion of Casing diameter to cartesian system 
+    # dimensions for casings
+    case_dim = [np.sqrt(0.25*np.pi*cond_Casing_ID**2),
+                np.sqrt(0.25*np.pi*surf_Casing_ID**2), 
+                np.sqrt(0.25*np.pi*prod_Casing_ID**2)]
+
+
+    # dimensions for cement bonds
+    bond_dim = compute_cement_bonds(cond_Casing_ID, 
+                                    surf_Casing_ID, 
+                                    prod_Casing_ID)
+
+    # compute the min grid size
+    if round (min(case_dim + bond_dim), 2) &lt; 0.05 or round(min(case_dim + bond_dim), 2) &gt; 0.25:
+        min_grd_size = 0.1 #round (min(case_dim + bond_dim),2)
+    else: 
+        min_grd_size = round (min(case_dim + bond_dim), 2)
+
+    return min_grd_size</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.GaP.libs.geometry.LGR_grid_utils.compute_max_num_of_fine_grid_xy" class="doc doc-heading">
+            <code class="highlight language-python">compute_max_num_of_fine_grid_xy(cond_Casing_ID: float, surf_Casing_ID: float, prod_Casing_ID: float, min_grd_size: float) -&gt; int</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>compute maximum number of the fine grid in x-y direction</p>
+<p>For each casing we have its ID , therefore, the number of grids for each casing we should have round up casing_ID/min_grd_size.</p>
+<p>From the thickness of the cement bond, accordingly we can assume how many grids do we want that for this. </p>
+<p>Then, per casing the total number of grids = number of grids to mimic the pipe + 2 x number of grids for the cement bond. </p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>cond_Casing_ID</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>ID of conductor casing</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>surf_Casing_ID</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>ID of surface casing</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>prod_Casing_ID</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>ID of production casing</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>min_grd_size</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>minimum grid size</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+<b><code>LGR_sizes_xy</code></b> (              <code><span title="list">list</span>[<span title="float">float</span>]</code>
+)          –
+          <div class="doc-md-description">
+            <p>LGR xy grid intervals</p>
+          </div>
+        </li>
+    </ul>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/GaP/libs/geometry/LGR_grid_utils.py</code></summary>
+              <pre class="highlight"><code class="language-python">def compute_max_num_of_fine_grid_xy(cond_Casing_ID: float, 
+                                    surf_Casing_ID: float, 
+                                    prod_Casing_ID: float, 
+                                    min_grd_size: float) -&gt; int:
+    """ compute maximum number of the fine grid in x-y direction
+
+        For each casing we have its ID , therefore, the number of grids for each casing we should have round up casing_ID/min_grd_size.
+
+        From the thickness of the cement bond, accordingly we can assume how many grids do we want that for this. 
+
+        Then, per casing the total number of grids = number of grids to mimic the pipe + 2 x number of grids for the cement bond. 
+
+        Args:
+            cond_Casing_ID (float): ID of conductor casing
+            surf_Casing_ID (float): ID of surface casing
+            prod_Casing_ID (float): ID of production casing
+            min_grd_size (float): minimum grid size
+
+        Returns:
+            LGR_sizes_xy (list[float]): LGR xy grid intervals
+    """
+
+    # Calculating the size of grids for cement bond 
+    cond_bond, surf_bond, prod_bond = compute_cement_bonds(cond_Casing_ID, 
+                                                            surf_Casing_ID, 
+                                                            prod_Casing_ID)
+
+    # Number of refined grids in tubes and cement bonds
+
+    # 1. tubes
+    no_grd_cond_case = math.ceil(cond_Casing_ID/min_grd_size)
+    no_grd_surf_case = math.ceil(surf_Casing_ID/min_grd_size)
+    no_grd_prod_case = math.ceil(prod_Casing_ID/min_grd_size)
+
+    # 2. cement bonds
+    no_grd_cond_bond = math.ceil(cond_bond/min_grd_size)
+    no_grd_surf_bond = math.ceil(surf_bond/min_grd_size)
+    no_grd_prod_bond = math.ceil(prod_bond/min_grd_size)
+
+    # 3. TODO(hzh): why add them together and why multiply 2?
+    no_latral_grd_cond = no_grd_cond_case + no_grd_cond_bond*2
+    no_latral_grd_surf = no_grd_surf_case + no_grd_surf_bond*2
+    no_latral_grd_prod = no_grd_prod_case + no_grd_prod_bond*2
+
+    # print('ooooo', cond_bond, surf_bond, prod_bond)
+    # print('xxxxx', no_latral_grd_cond, no_latral_grd_surf, no_latral_grd_prod)
+    # print('yyyyy', no_grd_cond_case, no_grd_surf_case, no_grd_prod_bond)
+
+    # 4. find maximum of the three
+    no_latral_fine_grd = max(no_latral_grd_cond, no_latral_grd_surf, no_latral_grd_prod)
+
+    return no_latral_fine_grd</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.GaP.libs.geometry.LGR_grid_utils.compute_LGR_xy" class="doc doc-heading">
+            <code class="highlight language-python">compute_LGR_xy(no_latral_fine_grd: int, main_grd_dx: float, min_grd_size: float) -&gt; List[float]</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>LGR grid list in x-y direction</p>
+<p>Thinking laterally we need ones to the right and one to the left</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>no_latral_fine_grd</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>number of LGR lateral fine grids, including casing and cement bond</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>main_grd_dx</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>DX value on coarse grid at the well location</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>min_grd_size</code></b>
+              (<code><span title="float">float</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>minimum grid size</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+<b><code>LGR_sizes_xy</code></b> (              <code><span title="list">list</span>[<span title="float">float</span>]</code>
+)          –
+          <div class="doc-md-description">
+            <p>LGR xy grid interval values</p>
+          </div>
+        </li>
+    </ul>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/GaP/libs/geometry/LGR_grid_utils.py</code></summary>
+              <pre class="highlight"><code class="language-python">def compute_LGR_xy(no_latral_fine_grd: int, 
+                   main_grd_dx: float, 
+                   min_grd_size: float) -&gt; List[float]:
+    """ LGR grid list in x-y direction
+
+        Thinking laterally we need ones to the right and one to the left
+
+        Args:
+            no_latral_fine_grd (int): number of LGR lateral fine grids, including casing and cement bond
+            main_grd_dx (float): DX value on coarse grid at the well location
+            min_grd_size (float): minimum grid size
+
+        Returns:
+            LGR_sizes_xy (list[float]): LGR xy grid interval values
+    """
+
+    # # the fine grid
+    # LGR_size_fine_grd = [min_grd_size]*no_latral_fine_grd
+
+    # 5. the list
+    # add transistion zone between coarse and fine grids
+    LGR_size_no_outer = [min_grd_size*100] + \
+                        [min_grd_size*10] + \
+                        [min_grd_size] * no_latral_fine_grd + \
+                        [min_grd_size*10] + \
+                        [min_grd_size*100]
+
+    # 6. LGR_sizes_xy, adding dx on both sides to make it one cell size
+    LGR_sizes_xy = [(main_grd_dx - sum(LGR_size_no_outer))/2] + LGR_size_no_outer + [(main_grd_dx - sum(LGR_size_no_outer))/2]
+
+    return LGR_sizes_xy</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.GaP.libs.geometry.LGR_grid_utils.compute_LGR_z" class="doc doc-heading">
+            <code class="highlight language-python">compute_LGR_z(main_DZ, ref_depth, main_grd_min_k, main_grd_max_k, no_of_layers_in_OB) -&gt; Tuple[np.ndarray, np.ndarray]</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>LGR grid in z direction</p>
+<p>The idea is not to refine too much in the Z direction, mainly because of the computational time. </p>
+<p>However, it we don't refine at all, the resolution in the Z direction in overburden might be too low. Then, it would limit 
+our access to a specific depth, when we want to set start and end depth of each casing. </p>
+<p>First we define how many grids do we want? </p>
+<pre class="highlight"><code>We hard-coded the number of grids in overburden to 10 per layer. i.e. each layer is refined into 10 layers. 
+For example, if we have 5 coarse grids in the overburden, in the LGR we will have 5x10=50 layers.
+
+Then we convert the list to numpy array to be able to do calculation on that.
+
+Later we will see the LGR_numb_z can directly be used in the NZFIN keyword under CARFIN</code></pre>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>main_DZ</code></b>
+              (<code><span title="numpy.ndarray">ndarray</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>thickness or interval of each layer (coarse grid)</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>main_grd_min_k</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>minimum z index (coarse grid)</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>main_grd_max_k</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>maximum z index (coarse grid)</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>no_of_layers_in_OB</code></b>
+              (<code><span title="int">int</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>number of layers in Overburden (coarse grid)</p>
+          </div>
+        </li>
+    </ul>
+        <p>Returns:</p>
+<pre class="highlight"><code>LGR_depths (np.ndarray): depth values of each LGR z 
+LGR_numb_z (np.ndarray): number of refined layers in each coarse layer</code></pre>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/GaP/libs/geometry/LGR_grid_utils.py</code></summary>
+              <pre class="highlight"><code class="language-python">def compute_LGR_z(main_DZ,
+                    ref_depth,
+                    main_grd_min_k, main_grd_max_k, 
+                    no_of_layers_in_OB) -&gt; Tuple[np.ndarray, np.ndarray]:
+    """ LGR grid in z direction
+
+    The idea is not to refine too much in the Z direction, mainly because of the computational time. 
+
+    However, it we don't refine at all, the resolution in the Z direction in overburden might be too low. Then, it would limit 
+    our access to a specific depth, when we want to set start and end depth of each casing. 
+
+    First we define how many grids do we want? 
+
+        We hard-coded the number of grids in overburden to 10 per layer. i.e. each layer is refined into 10 layers. 
+        For example, if we have 5 coarse grids in the overburden, in the LGR we will have 5x10=50 layers. 
+
+        Then we convert the list to numpy array to be able to do calculation on that.
+
+        Later we will see the LGR_numb_z can directly be used in the NZFIN keyword under CARFIN  
+
+    Args:
+        main_DZ (np.ndarray): thickness or interval of each layer (coarse grid)
+        main_grd_min_k (int): minimum z index (coarse grid)
+        main_grd_max_k (int): maximum z index (coarse grid)
+        no_of_layers_in_OB (int): number of layers in Overburden (coarse grid)
+
+    Returns:
+
+        LGR_depths (np.ndarray): depth values of each LGR z 
+        LGR_numb_z (np.ndarray): number of refined layers in each coarse layer        
+    """
+
+    #all Z grids in OB is devided into 10 grids (hard coded), grids in reservoir remained unchanged
+
+    #LGR_numb_z = (no_of_layers_in_OB-main_grd_min_k + 1) * [10] + (main_grd_max_k - main_grd_min_k + 1 -(no_of_layers_in_OB-main_grd_min_k+1) ) *[1] 
+
+    # TODO(hzh): the number 10 is hard-coded?
+    # refine only coarse grid in ovb, and keep reservoir grid unchanged
+    LGR_numb_z = (no_of_layers_in_OB - main_grd_min_k + 1) * [10] + (main_grd_max_k - no_of_layers_in_OB) * [1] 
+    LGR_numb_z = np.array(LGR_numb_z)
+
+    #
+    assert LGR_numb_z.size == main_DZ.size, 'dimension should match'
+    # **** LGR_size_z
+    LGR_size_z = np.divide(main_DZ, LGR_numb_z)
+
+    # 
+    LGR_intvl  = np.zeros((LGR_numb_z.sum(),0))
+    # LGR_depths = np.zeros((LGR_numb_z.sum(),0))
+
+    # LGR_index_z = np.arange(1, LGR_numb_z.sum()+1)
+
+    for i in range (0, LGR_numb_z.shape[0]): 
+        LGR_intvl= np.append(LGR_intvl, np.repeat(LGR_size_z[i], LGR_numb_z[i]))
+
+    # Depth conversion from field to metric. sample .EGRID model is in Field unit
+    # TODO(hzh): why add ref_depth?
+    LGR_intvl [0] = LGR_intvl[0] + ref_depth
+    LGR_depths = (np.cumsum(LGR_intvl))
+
+    # main_DZ[0] = ref_depth + main_DZ[0]
+    # MAIN_depths = (np.cumsum (main_DZ))
+
+    return LGR_depths, LGR_numb_z</code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="src.GaP.libs.geometry.LGR_grid" class="doc doc-heading">
+            <code>src.GaP.libs.geometry.LGR_grid</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+        <p>generate fine grid from well casing geometries</p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.GaP.libs.geometry.LGR_grid.generate_LGR_grids" class="doc doc-heading">
+            <code class="highlight language-python">generate_LGR_grids(casing_IDs: List[float], main_grd_dx, main_DZ, ref_depth: float, main_grd_min_k: int, main_grd_max_k: int, no_of_layers_in_OB: int, use_default_grid_size=True) -&gt; Tuple[List[float], np.ndarray, np.ndarray, float]</code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>generate LGR grid information</p>
+<p>Args:</p>
+<pre class="highlight"><code>casing_IDs (list[float]): list of IDs of conductor, surface and production
+main_grd_dx (float): dx for the cell (coarse grid) at the well location 
+main_DZ (np.ndarray): thickness of each layer in the Z direction (coarse grid)
+main_grd_min_k (int): minimum z index (coarse grid)
+main_grd_max_k (int): maximum z index (coarse grid)
+no_of_layers_in_OB (int): number of layers in Overburden
+use_default_grid_size (bool): flag for using default grid size, which is 5cm</code></pre>
+<p>Returns:</p>
+<pre class="highlight"><code>LGR_sizes_xy (list[float]): LGR xy grid intervals
+LGR_depths (np.ndarray): specific size of each LGR grid in the Z direction
+LGR_numb_z (np.ndarray): number of chops for each main DZ
+min_grd_size (float): minimum dz value (LGR grid)</code></pre>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/GaP/libs/geometry/LGR_grid.py</code></summary>
+              <pre class="highlight"><code class="language-python">def generate_LGR_grids(casing_IDs: List[float],
+                        main_grd_dx, main_DZ,
+                        ref_depth: float,
+                        main_grd_min_k: int, main_grd_max_k: int, 
+                        no_of_layers_in_OB: int,
+                        use_default_grid_size=True) -&gt; Tuple[List[float], np.ndarray, np.ndarray, float]:
+    """ generate LGR grid information
+
+    Args:
+
+        casing_IDs (list[float]): list of IDs of conductor, surface and production
+        main_grd_dx (float): dx for the cell (coarse grid) at the well location 
+        main_DZ (np.ndarray): thickness of each layer in the Z direction (coarse grid)
+        main_grd_min_k (int): minimum z index (coarse grid)
+        main_grd_max_k (int): maximum z index (coarse grid)
+        no_of_layers_in_OB (int): number of layers in Overburden
+        use_default_grid_size (bool): flag for using default grid size, which is 5cm 
+
+    Returns:
+
+        LGR_sizes_xy (list[float]): LGR xy grid intervals
+        LGR_depths (np.ndarray): specific size of each LGR grid in the Z direction
+        LGR_numb_z (np.ndarray): number of chops for each main DZ
+        min_grd_size (float): minimum dz value (LGR grid)
+    """
+
+    # for convenience
+    cond_Casing_ID = casing_IDs[0]
+    surf_Casing_ID = casing_IDs[1]
+    prod_Casing_ID = casing_IDs[2]
+
+    # 0. grid size for fine grid
+    if use_default_grid_size:
+
+        # TODO(hzh): fixed value???????
+        min_grd_size = 0.05
+
+    else:
+        # compute min grid size
+        min_grd_size = compute_min_grid_size(cond_Casing_ID, 
+                                             surf_Casing_ID, 
+                                             prod_Casing_ID)
+
+    # 1. number of fine grids for the well core
+    no_latral_fine_grd = compute_max_num_of_fine_grid_xy(cond_Casing_ID, 
+                                                         surf_Casing_ID, 
+                                                         prod_Casing_ID, 
+                                                         min_grd_size)
+    # 2. refine grid in x-y directions
+    LGR_sizes_xy = compute_LGR_xy(no_latral_fine_grd, 
+                                    main_grd_dx,
+                                    min_grd_size)
+
+    # 3. refine grid in z direction
+    LGR_depths, LGR_numb_z = compute_LGR_z(main_DZ,
+                                            ref_depth,
+                                            main_grd_min_k, main_grd_max_k, 
+                                            no_of_layers_in_OB)
+
+    return LGR_sizes_xy, LGR_depths, LGR_numb_z, min_grd_size</code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["search.suggest", "search.highlight", "content.tabs.link", "navigation.indexes", "content.tooltips", "navigation.path", "content.code.annotate", "content.code.copy", "content.code.select"], "search": "../../../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.c8b220af.min.js"></script>
+      
+    
+  </body>
+</html>

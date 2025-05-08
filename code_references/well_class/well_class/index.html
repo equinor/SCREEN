@@ -1,0 +1,1755 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../../gap/gap_geometry/">
+      
+      
+        <link rel="next" href="../well_pressure/">
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.12">
+    
+    
+      
+        <title>Well class - SCREEN</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.2afb09e1.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#src.WellClass.libs.well_class.well_raw" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="SCREEN" class="md-header__button md-logo" aria-label="SCREEN" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SCREEN
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Well class
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7M9 21v-1h6v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1m3-17a5 5 0 0 0-5 5c0 2.05 1.23 3.81 3 4.58V16h4v-2.42c1.77-.77 3-2.53 3-4.58a5 5 0 0 0-5-5"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/equinor/SCREEN" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="SCREEN" class="md-nav__button md-logo" aria-label="SCREEN" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SCREEN
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/equinor/SCREEN" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../well_class/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Pre‐processing and Preliminary Assessment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../gap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Detailed Simulation workflow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Developer Guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Developer Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mkdocs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    MkDocs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../INSTALLATION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Code References
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            Code References
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3_1" id="__nav_4_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    GaP
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            GaP
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gap/gap_carfin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CARFIN
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gap/gap_geometry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Bounding boxes
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4_3_2" id="__nav_4_3_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    WellClass
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            WellClass
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Well class
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Well class
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#src.WellClass.libs.well_class.well_raw" class="md-nav__link">
+    <span class="md-ellipsis">
+      well_raw
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="well_raw">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.well_class.well_raw.WellRaw" class="md-nav__link">
+    <span class="md-ellipsis">
+      WellRaw
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="WellRaw">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.well_class.well_raw.WellRaw.__post_init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __post_init__
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.WellClass.libs.well_class.well_class" class="md-nav__link">
+    <span class="md-ellipsis">
+      well_class
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="well_class">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.well_class.well_class.Well" class="md-nav__link">
+    <span class="md-ellipsis">
+      Well
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Well">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.well_class.well_class.Well.compute_barrier_props" class="md-nav__link">
+    <span class="md-ellipsis">
+      compute_barrier_props
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../well_pressure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Well pressure
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Models
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3_2_4" id="__nav_4_3_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Grids
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_4_3_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            Grids
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../grids/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Various grids
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lgr_builder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    LGR builder
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#src.WellClass.libs.well_class.well_raw" class="md-nav__link">
+    <span class="md-ellipsis">
+      well_raw
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="well_raw">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.well_class.well_raw.WellRaw" class="md-nav__link">
+    <span class="md-ellipsis">
+      WellRaw
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="WellRaw">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.well_class.well_raw.WellRaw.__post_init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __post_init__
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.WellClass.libs.well_class.well_class" class="md-nav__link">
+    <span class="md-ellipsis">
+      well_class
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="well_class">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.well_class.well_class.Well" class="md-nav__link">
+    <span class="md-ellipsis">
+      Well
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Well">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.well_class.well_class.Well.compute_barrier_props" class="md-nav__link">
+    <span class="md-ellipsis">
+      compute_barrier_props
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+  <h1>Well class</h1>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="src.WellClass.libs.well_class.well_raw" class="doc doc-heading">
+            <code>src.WellClass.libs.well_class.well_raw</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+        <p>How to initialize:</p>
+<pre class="highlight"><code>import well_class
+
+INDATA          = &lt;path to a csv-file with the well-data&gt;
+
+#Reads the csv-file and organize the data into a dict of dataframes
+
+well_df         = well_class.csv_parser(INDATA)                          </code></pre>
+<p>Then the class is initialized with a lot of explicit calls. (Bad structure - should been done in one go: <code>mywell = Well(INDATA)</code>)</p>
+<pre class="highlight"><code>mywell          = well_class.Well(
+                       header       = well_df['well_header'],
+                       reservoir_P  = well_df['reservoir_pressure'],
+                       drilling     = well_df['drilling'],
+                       casings      = well_df['casing_cement'],
+                       barriers     = well_df['barriers'],
+                       geology      = well_df['geology'],
+                       main_barrier = well_df['main_barrier'],
+                       barrier_perm = well_df['barrier_permeability'],
+                       co2_datum    = well_df['co2_datum']
+                   )</code></pre>
+<p>Now additional functionalities that can be explicitely called are 
+<pre class="highlight"><code>   .plot_pt()
+
+   .plot_pressure()  + plt.show()
+
+   .plot_sketch()    + plt.show()</code></pre></p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="src.WellClass.libs.well_class.well_raw.WellRaw" class="doc doc-heading">
+            <code>WellRaw</code>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+
+        <p>Basic user input well information</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>header</code></b>
+              (<code><span title="dict">dict</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>well header</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>drilling</code></b>
+              (<code><span title="dict">dict</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>drilling well</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>casings</code></b>
+              (<code><span title="dict">dict</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>well casing</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>barriers</code></b>
+              (<code><span title="dict">dict</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>barrier information</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>barrier_perm</code></b>
+              (<code><span title="dict">dict</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>barrier permeabilities</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>geology</code></b>
+              (<code><span title="dict">dict</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>gelogical formation</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>co2_datum</code></b>
+              (<code><span title="float">float</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>co2 datum value</p>
+          </div>
+        </li>
+    </ul>
+
+
+
+
+
+
+
+              <details class="quote">
+                <summary>Source code in <code>src/WellClass/libs/well_class/well_raw.py</code></summary>
+                <pre class="highlight"><code class="language-python">@dataclass              # @dataclass(kw_only=True)
+class WellRaw:
+    """ Basic user input well information
+
+        Args:
+            header (dict): well header
+            drilling (dict): drilling well
+            casings (dict): well casing
+            barriers (dict): barrier information
+            barrier_perm (dict): barrier permeabilities
+            geology (dict): gelogical formation
+            co2_datum (float): co2 datum value
+    """
+    header        : dict = None
+    drilling      : dict = None
+    casings       : dict = None
+    barriers      : dict = None
+    barrier_perm  : dict = None
+    geology       : dict = None
+    co2_datum     : Union[float, int] = None
+    inventory     : dict = None
+
+    def __post_init__(self):
+        """ compute basic well information
+        """
+        self._check_inventory()
+        self._process_drilling()
+        self._process_casings()
+        self._process_barriers()
+        self._process_geology()
+
+    def _check_inventory(self):
+
+        """
+        process to keep track of what has been declared as input.
+        """
+        self.inventory = dict()
+
+        self.inventory['drilling'] = True
+        self.inventory['casings']  = True
+        self.inventory['barriers'] = True
+
+        if self.drilling == None:
+            print('No drilling table declared.')
+            """
+            If no drilling table is declared, ignore the casings table as well
+            """
+            self.inventory['drilling'] = False
+            self.inventory['casings'] = False
+
+        if self.casings == None:
+            print('No casings table declared.')
+            self.inventory['casings'] = False
+
+        if self.barriers == None:
+            print('No barriers table declared.')
+            self.inventory['barriers'] = False
+
+
+
+
+
+
+    def _process_drilling(self):
+
+        if not self.inventory['drilling']:
+            """
+            If no drilling table is declared, create a dummy well with info from the header
+            """
+            _well_rkb = self.header['well_rkb']
+            _well_td_rkb = self.header['well_td_rkb']
+            _sf_depth_msl = self.header['sf_depth_msl']
+
+            self.drilling = [{'top_rkb': _sf_depth_msl + _well_rkb, 'bottom_rkb': _well_td_rkb, 'diameter_in': 17.5, 'oh_perm': 10000}] 
+
+        drilling_df = pd.DataFrame(self.drilling)
+
+        drilling_df['diameter_m'] = drilling_df['diameter_in'] * scipy.constants.inch       #0.0254
+        drilling_df['top_msl']    = drilling_df['top_rkb'] - self.header['well_rkb']
+        drilling_df['bottom_msl'] = drilling_df['bottom_rkb'] - self.header['well_rkb']
+
+        # validate drilling
+        valid_drilling(drilling_df)
+
+        self.drilling = drilling_df.to_dict()
+
+    def _process_casings(self):
+
+        if not self.inventory['casings']:
+            """
+            If no casings table is declared, create a dummy well with info from the header
+            """
+            _well_rkb = self.header['well_rkb']
+            _well_td_rkb = self.header['well_td_rkb']
+            _sf_depth_msl = self.header['sf_depth_msl']
+            _diameter_in = pd.DataFrame(self.drilling)['diameter_in'].min() - 2
+
+            self.casings = [{'top_rkb': _sf_depth_msl + _well_rkb,
+                             'bottom_rkb': _well_td_rkb,
+                             'diameter_in': _diameter_in,
+                             'toc_rkb': _sf_depth_msl + _well_rkb,
+                             'boc_rkb': _well_td_rkb,
+                             'shoe': True,
+                             'cb_perm': 0.05}]
+
+
+        casings_df = pd.DataFrame(self.casings)
+
+        casings_df['diameter_m'] = casings_df['diameter_in'] * scipy.constants.inch         #0.0254
+        casings_df['top_msl']    = casings_df['top_rkb']    - self.header['well_rkb']
+        casings_df['bottom_msl'] = casings_df['bottom_rkb'] - self.header['well_rkb']
+        casings_df['toc_msl']    = casings_df['toc_rkb']    - self.header['well_rkb']
+        casings_df['boc_msl']    = casings_df['boc_rkb']    - self.header['well_rkb']
+
+        # validate casings
+        valid_casings(casings_df)
+
+        self.casings = casings_df.to_dict()
+
+    def _process_barriers(self):
+
+        if self.inventory['barriers']:
+
+            barriers_df = pd.DataFrame(self.barriers)
+
+            barriers_df['top_msl']    = barriers_df['top_rkb']    - self.header['well_rkb']
+            barriers_df['bottom_msl'] = barriers_df['bottom_rkb'] - self.header['well_rkb']
+
+            # barriers_df.set_index('barrier_name', inplace=True)
+            self.barriers = barriers_df.to_dict()
+
+    def _process_geology(self):
+
+        geology_df = pd.DataFrame(self.geology)
+
+        geology_df = geology_df.dropna(how='all')
+        geology_df = geology_df.reset_index(drop=True)
+
+        geology_df['top_msl']  = geology_df['top_rkb'] - self.header['well_rkb']
+        geology_df['base_msl'] = geology_df['top_msl'] - geology_df['top_msl'].diff(periods=-1)
+        geology_df.loc[geology_df.index.max(), 'base_msl'] = self.header['well_td_rkb'] - self.header['well_rkb']
+
+        self.geology = geology_df.to_dict()
+
+    @property
+    def to_json(self):
+        return json.dumps(self.__dict__, indent=4)</code></pre>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="src.WellClass.libs.well_class.well_raw.WellRaw.__post_init__" class="doc doc-heading">
+            <code class="highlight language-python">__post_init__()</code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>compute basic well information</p>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/WellClass/libs/well_class/well_raw.py</code></summary>
+              <pre class="highlight"><code class="language-python">def __post_init__(self):
+    """ compute basic well information
+    """
+    self._check_inventory()
+    self._process_drilling()
+    self._process_casings()
+    self._process_barriers()
+    self._process_geology()</code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="src.WellClass.libs.well_class.well_class" class="doc doc-heading">
+            <code>src.WellClass.libs.well_class.well_class</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+        <p>How to initialize:</p>
+<pre class="highlight"><code>import well_class
+
+INDATA          = &lt;path to a csv-file with the well-data&gt;
+
+#Reads the csv-file and organize the data into a dict of dataframes
+
+well_df         = well_class.csv_parser(INDATA)                          </code></pre>
+<p>Then the class is initialized with a lot of explicit calls. (Bad structure - should been done in one go: <code>mywell = Well(INDATA)</code>)
+<pre class="highlight"><code>mywell          = well_class.Well(
+                       header       = well_df['well_header'],
+                       reservoir_P  = well_df['reservoir_pressure'],
+                       drilling     = well_df['drilling'],
+                       casings      = well_df['casing_cement'],
+                       barriers     = well_df['barriers'],
+                       geology      = well_df['geology'],
+                       main_barrier = well_df['main_barrier'],
+                       barrier_perm = well_df['barrier_permeability'],
+                       co2_datum    = well_df['co2_datum']
+                   )</code></pre></p>
+<p>Now additional functionalities that can be explicitely called are 
+<pre class="highlight"><code>   .plot_pt()
+
+   .plot_pressure()  + plt.show()
+
+   .plot_sketch()    + plt.show()</code></pre></p>
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="src.WellClass.libs.well_class.well_class.Well" class="doc doc-heading">
+            <code>Well</code>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="&lt;code&gt;WellRaw&lt;/code&gt;
+
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-dataclass&quot;&gt;&lt;code&gt;dataclass&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;src.WellClass.libs.well_class.well_raw.WellRaw&lt;/code&gt;)" href="#src.WellClass.libs.well_class.well_raw.WellRaw">WellRaw</a></code></p>
+
+
+        <p>This contains not only the basic well information but also its computed information.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>borehole</code></b>
+              (<code><span title="dict">dict</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>for borehole information</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>cement_bond</code></b>
+              (<code><span title="dict">dict</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>contains information about cement bond</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>annulus</code></b>
+              (<code><span title="dict">dict</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>gap between casing and openhole</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>barriers_mod</code></b>
+              (<code><span title="dict">dict</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>extra information about barriers</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>barriers_names</code></b>
+              (<code><span title="dict">dict</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>reorgainze barrier names</p>
+          </div>
+        </li>
+    </ul>
+
+
+
+
+
+
+
+              <details class="quote">
+                <summary>Source code in <code>src/WellClass/libs/well_class/well_class.py</code></summary>
+                <pre class="highlight"><code class="language-python">@dataclass              # @dataclass(kw_only=True)
+class Well(WellRaw):
+    """ This contains not only the basic well information but also its computed information.
+
+        Args:
+            borehole (dict): for borehole information
+            cement_bond (dict): contains information about cement bond
+            annulus (dict): gap between casing and openhole
+            barriers_mod (dict): extra information about barriers
+            barriers_names (dict): reorgainze barrier names
+    """
+    borehole      : dict = None
+    cement_bond   : dict = None
+    annulus       : dict = None
+    barriers_mod  : dict = None
+    barriers_names: dict = None
+
+    def __post_init__(self):
+
+        super().__post_init__()
+
+        self._compute_well()
+
+    def _compute_well(self):
+        """ compute extra well information
+        """
+
+        self.borehole = compute_borehole(self.casings, self.drilling)
+        self.cement_bond = compute_cement_bond(self.casings, self.drilling)
+        self.annulus= compute_annulus(self.casings, self.drilling)
+
+        if self.inventory['barriers']:
+            self.barriers_mod = compute_barriers_diam(self.barriers, self.borehole)
+            self.barriers_names = get_barriers_names(self.barriers_mod)
+
+    def compute_barrier_props(self, barrier_name: str) -&gt; dict:
+        """ Compute barrier geometrical information
+
+            Args:
+               barrier_name (str): barrier name 
+        """
+
+        # for convenience
+        barriers_mod = self.barriers_mod
+        barriers_names = self.barriers_names
+
+        # properties
+        barrier_props = {}
+
+        # height/depth
+        barrier_h_d = get_barrier_height_and_depth(barriers_mod, barriers_names, barrier_name)
+        barrier_props.update(barrier_h_d)
+
+        # radius
+        barrier_r = get_barrier_radius(barriers_mod, barriers_names, barrier_name)
+        barrier_props.update(barrier_r)
+
+        return barrier_props
+
+    @property
+    def to_json(self):
+        return json.dumps(self.__dict__, indent=4)</code></pre>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="src.WellClass.libs.well_class.well_class.Well.compute_barrier_props" class="doc doc-heading">
+            <code class="highlight language-python">compute_barrier_props(barrier_name: str) -&gt; dict</code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Compute barrier geometrical information</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>barrier_name</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>barrier name</p>
+          </div>
+        </li>
+    </ul>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/WellClass/libs/well_class/well_class.py</code></summary>
+              <pre class="highlight"><code class="language-python">def compute_barrier_props(self, barrier_name: str) -&gt; dict:
+    """ Compute barrier geometrical information
+
+        Args:
+           barrier_name (str): barrier name 
+    """
+
+    # for convenience
+    barriers_mod = self.barriers_mod
+    barriers_names = self.barriers_names
+
+    # properties
+    barrier_props = {}
+
+    # height/depth
+    barrier_h_d = get_barrier_height_and_depth(barriers_mod, barriers_names, barrier_name)
+    barrier_props.update(barrier_h_d)
+
+    # radius
+    barrier_r = get_barrier_radius(barriers_mod, barriers_names, barrier_name)
+    barrier_props.update(barrier_r)
+
+    return barrier_props</code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["search.suggest", "search.highlight", "content.tabs.link", "navigation.indexes", "content.tooltips", "navigation.path", "content.code.annotate", "content.code.copy", "content.code.select"], "search": "../../../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.c8b220af.min.js"></script>
+      
+    
+  </body>
+</html>

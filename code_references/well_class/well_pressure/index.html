@@ -1,0 +1,1465 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../well_class/">
+      
+      
+        <link rel="next" href="../models/">
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.12">
+    
+    
+      
+        <title>Well pressure - SCREEN</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.2afb09e1.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#src.WellClass.libs.well_pressure.pressure" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="SCREEN" class="md-header__button md-logo" aria-label="SCREEN" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SCREEN
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Well pressure
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7M9 21v-1h6v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1m3-17a5 5 0 0 0-5 5c0 2.05 1.23 3.81 3 4.58V16h4v-2.42c1.77-.77 3-2.53 3-4.58a5 5 0 0 0-5-5"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/equinor/SCREEN" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="SCREEN" class="md-nav__button md-logo" aria-label="SCREEN" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SCREEN
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/equinor/SCREEN" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../well_class/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Pre‐processing and Preliminary Assessment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../gap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Detailed Simulation workflow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Developer Guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Developer Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mkdocs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    MkDocs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../INSTALLATION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Code References
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            Code References
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3_1" id="__nav_4_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    GaP
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            GaP
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gap/gap_carfin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CARFIN
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gap/gap_geometry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Bounding boxes
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4_3_2" id="__nav_4_3_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    WellClass
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            WellClass
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../well_class/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Well class
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Well pressure
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Well pressure
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#src.WellClass.libs.well_pressure.pressure" class="md-nav__link">
+    <span class="md-ellipsis">
+      pressure
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pressure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.well_pressure.pressure.Pressure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pressure
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pressure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.well_pressure.pressure.Pressure.compute_barrier_leakage" class="md-nav__link">
+    <span class="md-ellipsis">
+      compute_barrier_leakage
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Models
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3_2_4" id="__nav_4_3_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Grids
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_4_3_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            Grids
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../grids/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Various grids
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lgr_builder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    LGR builder
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#src.WellClass.libs.well_pressure.pressure" class="md-nav__link">
+    <span class="md-ellipsis">
+      pressure
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pressure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.well_pressure.pressure.Pressure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pressure
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pressure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.well_pressure.pressure.Pressure.compute_barrier_leakage" class="md-nav__link">
+    <span class="md-ellipsis">
+      compute_barrier_leakage
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+  <h1>Well pressure</h1>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="src.WellClass.libs.well_pressure.pressure" class="doc doc-heading">
+            <code>src.WellClass.libs.well_pressure.pressure</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="src.WellClass.libs.well_pressure.pressure.Pressure" class="doc doc-heading">
+            <code>Pressure</code>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+
+        <p>This is used to compute leakeage rate of legacy well</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>header</code></b>
+              (<code><span title="dict">dict</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>well header</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>reservoir_P</code></b>
+              (<code><span title="dict">dict</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>reservoir pressure</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>co2_datum</code></b>
+              (<code><span title="float">float</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>co2 datum depth</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>pvt_path</code></b>
+              (<code><span title="str">str</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>directory where PVT files are located.</p>
+          </div>
+        </li>
+    </ul>
+
+
+
+
+
+
+
+              <details class="quote">
+                <summary>Source code in <code>src/WellClass/libs/well_pressure/pressure.py</code></summary>
+                <pre class="highlight"><code class="language-python">@dataclass              # @dataclass(kw_only=True)
+class Pressure:
+    """ This is used to compute leakeage rate of legacy well
+
+        Args:
+            header (dict): well header
+            reservoir_P (dict): reservoir pressure
+            co2_datum (float): co2 datum depth
+            pvt_path (str): directory where PVT files are located.            
+    """
+    header          : dict = None
+    reservoir_P     : dict = None    
+    co2_datum       : dict = None
+    pvt_path        : str  = None
+    barriers        : dict = None
+    max_pressure_pos: Union[dict, list, float, int] = None
+    pressure_scenarios : dict = None
+
+    def __post_init__(self):
+        self._check_init_pressure()
+        self._check_scenarios()
+        self._compute_CO2_pressures()
+
+
+    # TODO(hzh): non-pure function!!!
+    def _check_init_pressure(self):
+        '''
+        Calculates hydrostatic pressure at 
+        reservoir_P is the entry looking something like this:
+
+        reservoir_pressure		
+        depth_msl	RP1	RP2
+        2238		        20
+
+        then P_init['depth_msl'] is the reference depth 2238
+
+        Also delta-pressures RP1 and RP2 are read and used later for leakage calculations. (self.reservoir_P[])
+
+        Note: The interpretation of the numbers set for RP1 and RP2 is a bit unclear. RP means reservoir pressure - but for the current
+              implementation it is interpreted as delta pressure: delta wrt hydrostatic pressure. 
+              Initial implementation had the possibility to have absolute pressure AND a delta-pressure. But the delta-pressure had to be 
+              given as a string "+ 20" or "- 15". Bit the + and - tended to create problems. 
+              So alternatively one could distingwuish between RP and DP  if it is important to give in absolute pressure as well.
+              But the most interesting input IS actually the change in pressure compared with hydrostatic pressure.
+
+        '''
+        P_init = self.reservoir_P
+
+        #Get hydrostatic pressure
+        ref_z        = P_init['depth_msl']                                                  #A reference depth given in the input, e.g. top reservoir
+        hydrostaticP = get_hydrostatic_P(self.header, pvt_path=self.pvt_path)               #Calculate depth, temp(depth) hydrostatic_pressure(depth), H2ORHO(depth for hydrostatic pressure)
+
+
+        ref_p        = np.interp(ref_z, hydrostaticP['depth_msl'], hydrostaticP[ 'hs_p'])    #Hydrostatic pressure at that depth
+        print(f"Hydrostatic pressure at reference depth {ref_z:.0f} is {ref_p:.2f}")
+
+        self.reservoir_P['hydrostatic_pressure'] = ref_p
+
+
+        self.pressure_CO2 = hydrostaticP #store table as pressure_CO2
+
+    def _check_scenarios(self):
+
+        MAX_PRESSURE_NAME = 'max_p'
+
+        self.pressure_scenarios = {}
+
+        ref_p = self.reservoir_P['hydrostatic_pressure']
+        scenario_counter = 1
+
+        #Iterate over reservoir pressure scenarios (values under reservoir_P table)
+        for sc_name, sc_pressure in self.reservoir_P.items():
+
+            if sc_name == 'RP1':
+                if sc_pressure is None or np.isnan(sc_pressure):
+                    print(f'RP1 set as hydrostatic P = {ref_p:.2f} bar')
+                    magnitude = ref_p
+
+                else:
+                    print(f'RP1 is set as delta pressure, which yields P = {ref_p:.2f} {sc_pressure:+.2f} = {ref_p + sc_pressure:.2f} bar')
+                    magnitude = ref_p + sc_pressure
+
+
+                self.pressure_scenarios[scenario_counter] = {'name': sc_name, 'p_resrv': magnitude, 'type': 'reservoir'}
+                scenario_counter += 1
+
+            elif sc_name.startswith('RP'):
+
+
+                magnitude = sc_pressure
+
+                try:
+                    if isinstance(magnitude, str):
+                        magnitude = magnitude.replace(" ", "")
+
+                    magnitude = float(magnitude)
+
+                except Exception:
+                    pass
+
+                if isinstance(magnitude, float) or isinstance(magnitude, int):
+                    # p = ref_p + RP                          #self.reservoir_P['RP1'] + RP
+                    print(f'{sc_name} is set as delta pressure, which yields P = {ref_p:.2f} {magnitude:+.2f} = {ref_p + magnitude:.2f} bar')
+                    magnitude = ref_p + magnitude
+
+                    self.pressure_scenarios[scenario_counter] = {'name': sc_name, 'p_resrv': magnitude, 'type': 'reservoir'}
+                    scenario_counter += 1
+
+                else:
+                    print(sc_name, 'ignored')
+                    continue 
+
+        #Iterate over maximum pressure scenarios (values entered under max_pressure_pos)
+        if isinstance(self.max_pressure_pos, dict):   #Then max_pressure_pos is the same as barriers - and max pressure is calcualted for each barrier
+            print(f'max_pressure_pos is a dictionary of barrriers')
+            for idx, key in self.max_pressure_pos['barrier_name'].items():
+                barr_depth = self.max_pressure_pos['bottom_msl'][idx]
+                sc_name = f"{MAX_PRESSURE_NAME}_{key}"
+
+                self.pressure_scenarios[scenario_counter] = {'name': sc_name, 'z_MSAD': barr_depth, 'type': 'max_p'}
+                scenario_counter += 1
+
+        elif isinstance(self.max_pressure_pos, (list, float, int)):
+            print(f'max_pressure_pos is a value')
+            if isinstance(self.max_pressure_pos, (float, int)): #Make it a list with one element
+                self.max_pressure_pos = [self.max_pressure_pos]
+
+            for depth in self.max_pressure_pos:
+
+                sc_name = f"{MAX_PRESSURE_NAME}_at_{int(depth)}" 
+                self.pressure_scenarios[scenario_counter] = {'name': sc_name, 'z_MSAD': depth, 'type': 'max_p'}
+                scenario_counter += 1
+
+    def _compute_CO2_pressures(self):
+
+        '''
+        The pressure and density for H2O and CO2  along the columns are calculated using an approximate integration
+        Hydrostatic pressure - caculatong downwards from msl
+        Pressure and density assuming a water column - starting at top reservoir and the given overpressure RP
+        Pressure and density assuming a CO2   column - starting at CO2-reference level (CO2-column could start below top reservoir) and the given overpressure RP
+        Shmin
+
+        Input:
+        max_pressure_pos is a depth from where max pressure (wrt Shmin) is calculated. It can be a dict (my_well.barriers) a list of numbers or scalars.
+                If my_well.barriers is given then it is calculated from the base of each barrier
+
+        Columns are
+            |--------------------init---------------------------------------------|---------------------RPx----------------------------------|
+            depth_msl        temp          hs_p          RHOH20            Shmin   h2o            h20_rho         co2                            RPx_co2_rho     RPx_h2o_rho_in_co2_column
+            depth below msl   temperature   hydrostatic  water density             hs_p+          densities at    Pressure given a CO2 column        Corresponding   water densitites if we are
+            depth ref for                   pressure     at hydrostatic            overpressure   RPx_h20         and overpressure RP                CO2 densities   in a CO2-column.
+            all other values                column       pressure                  RPx
+
+
+
+        ---&gt; The RP are all RP-input + hydrostatic_pressure. Hence if e.g. RP1 is hydrostatic pressure RP1-columns and hydrostatic_pressure-columns are identical.
+        '''
+
+
+        self.pressure_CO2 = _get_shmin(self.header, self.pressure_CO2)
+
+
+        #Retrieve pressure, temperature and density fields for CO2 and H2O
+        pvt_T, pvt_P, pvt_RHO_CO2, pvt_RHO_H2O =  get_pvt(self.pvt_path)
+
+        #An interpolator. Used later to look-up densities given pressure p and temperature t
+        get_rho_h2o = RectBivariateSpline(pvt_P, pvt_T, pvt_RHO_H2O)
+        get_rho_co2 = RectBivariateSpline(pvt_P, pvt_T, pvt_RHO_CO2)
+
+
+        #Define and assign a multiindex that groups columns generic for all scenarios: depth_msl, temp, hs_p, RHOH2O and Shmin 
+        index_init = pd.MultiIndex.from_product([['init'], self.pressure_CO2.columns])
+        self.pressure_CO2.columns = index_init
+
+        #iterate over pressure scenarios to compute tables:
+        for press_sc in self.pressure_scenarios:
+            sc_name = self.pressure_scenarios[press_sc]['name']
+            sc_type = self.pressure_scenarios[press_sc]['type']
+
+            if sc_type == 'reservoir':
+                p_resrv = self.pressure_scenarios[press_sc]['p_resrv']
+                sc_pressure = FluidP_scenario( header = self.header,
+                                               ref_P = self.pressure_CO2['init'],
+                                               rho_H2O = get_rho_h2o,
+                                               rho_CO2 = get_rho_co2,
+                                               p_name = sc_name,
+                                               p_resrv = p_resrv,
+                                               z_resrv = self.reservoir_P['depth_msl'],
+                                               z_CO2_datum = self.co2_datum)
+
+                self.pressure_scenarios[press_sc]['p_MSAD'] = sc_pressure.p_MSAD
+                self.pressure_scenarios[press_sc]['z_MSAD'] = sc_pressure.z_MSAD
+                self.pressure_scenarios[press_sc]['z_resrv'] = sc_pressure.z_resrv
+                self.pressure_scenarios[press_sc]['p_delta'] = sc_pressure.p_delta
+
+
+
+            elif sc_type == 'max_p':
+                msad = self.pressure_scenarios[press_sc]['z_MSAD']
+
+                sc_pressure = FluidP_scenario( header = self.header,
+                                               ref_P = self.pressure_CO2['init'],
+                                               rho_H2O = get_rho_h2o,
+                                               rho_CO2 = get_rho_co2,
+                                               p_name = sc_name,
+                                               z_MSAD = msad,
+                                               z_CO2_datum = self.co2_datum)
+
+                self.pressure_scenarios[press_sc]['p_MSAD'] = sc_pressure.p_MSAD
+                self.pressure_scenarios[press_sc]['p_resrv'] = sc_pressure.p_resrv
+                self.pressure_scenarios[press_sc]['z_resrv'] = sc_pressure.z_resrv
+                self.pressure_scenarios[press_sc]['p_delta'] = sc_pressure.p_delta
+
+
+            else:
+                continue
+
+            #Drop repeated columns
+            sc_pressure.P_table = sc_pressure.P_table.drop(columns = self.pressure_CO2['init'].columns)
+
+            #Setup multiindex
+            index_table = pd.MultiIndex.from_product([[sc_name], sc_pressure.P_table.columns])
+            sc_pressure.P_table.columns = index_table
+
+            #Concatenate init table with scenario table
+            self.pressure_CO2 = pd.concat([self.pressure_CO2, sc_pressure.P_table], axis= 1)
+
+
+
+
+    def compute_barrier_leakage(self, well: Well, barrier_name: str) -&gt; pd.DataFrame:
+        """ Compute leakage rate from the given barrier
+
+            Args:
+                well (Well): well information
+                barrier_name (str): barrier to check the leakage rate
+        """
+
+        # for convenience
+        barrier_perm = well.barrier_perm
+
+        # barrier geometries
+        barrier_props = well.compute_barrier_props(barrier_name)
+
+        # Estimate CO2 leakage in [tons/day] after a trancient period
+        barrier_leakage = compute_barrier_leakage(barrier_perm, self.pressure_scenarios, self.pressure_CO2, barrier_props)
+
+        return barrier_leakage
+
+    @property
+    def to_json(self):
+        return json.dumps(self.__dict__, indent=4)</code></pre>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="src.WellClass.libs.well_pressure.pressure.Pressure.compute_barrier_leakage" class="doc doc-heading">
+            <code class="highlight language-python">compute_barrier_leakage(well: Well, barrier_name: str) -&gt; pd.DataFrame</code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Compute leakage rate from the given barrier</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>well</code></b>
+              (<code><a class="autorefs autorefs-internal" title="&lt;code&gt;Well&lt;/code&gt;
+
+
+  &lt;span class=&quot;doc doc-labels&quot;&gt;
+      &lt;small class=&quot;doc doc-label doc-label-dataclass&quot;&gt;&lt;code&gt;dataclass&lt;/code&gt;&lt;/small&gt;
+  &lt;/span&gt; (&lt;code&gt;src.WellClass.libs.well_class.well_class.Well&lt;/code&gt;)" href="../well_class/#src.WellClass.libs.well_class.well_class.Well">Well</a></code>)
+          –
+          <div class="doc-md-description">
+            <p>well information</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>barrier_name</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>barrier to check the leakage rate</p>
+          </div>
+        </li>
+    </ul>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/WellClass/libs/well_pressure/pressure.py</code></summary>
+              <pre class="highlight"><code class="language-python">def compute_barrier_leakage(self, well: Well, barrier_name: str) -&gt; pd.DataFrame:
+    """ Compute leakage rate from the given barrier
+
+        Args:
+            well (Well): well information
+            barrier_name (str): barrier to check the leakage rate
+    """
+
+    # for convenience
+    barrier_perm = well.barrier_perm
+
+    # barrier geometries
+    barrier_props = well.compute_barrier_props(barrier_name)
+
+    # Estimate CO2 leakage in [tons/day] after a trancient period
+    barrier_leakage = compute_barrier_leakage(barrier_perm, self.pressure_scenarios, self.pressure_CO2, barrier_props)
+
+    return barrier_leakage</code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["search.suggest", "search.highlight", "content.tabs.link", "navigation.indexes", "content.tooltips", "navigation.path", "content.code.annotate", "content.code.copy", "content.code.select"], "search": "../../../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.c8b220af.min.js"></script>
+      
+    
+  </body>
+</html>

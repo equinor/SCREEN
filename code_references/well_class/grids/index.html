@@ -1,0 +1,3099 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../models/">
+      
+      
+        <link rel="next" href="../lgr_builder/">
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.12">
+    
+    
+      
+        <title>Various grids - SCREEN</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.2afb09e1.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#src.WellClass.libs.grid_utils.grid_coarse" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="SCREEN" class="md-header__button md-logo" aria-label="SCREEN" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SCREEN
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Various grids
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7M9 21v-1h6v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1m3-17a5 5 0 0 0-5 5c0 2.05 1.23 3.81 3 4.58V16h4v-2.42c1.77-.77 3-2.53 3-4.58a5 5 0 0 0-5-5"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/equinor/SCREEN" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="SCREEN" class="md-nav__button md-logo" aria-label="SCREEN" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SCREEN
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/equinor/SCREEN" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../well_class/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Pre‐processing and Preliminary Assessment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../gap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Detailed Simulation workflow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Developer Guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Developer Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mkdocs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    MkDocs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../INSTALLATION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Code References
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            Code References
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3_1" id="__nav_4_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    GaP
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            GaP
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gap/gap_carfin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CARFIN
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gap/gap_geometry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Bounding boxes
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4_3_2" id="__nav_4_3_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    WellClass
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            WellClass
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../well_class/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Well class
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../well_pressure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Well pressure
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Models
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_2_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4_3_2_4" id="__nav_4_3_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Grids
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_4_3_2_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_3_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            Grids
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Various grids
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Various grids
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_coarse" class="md-nav__link">
+    <span class="md-ellipsis">
+      grid_coarse
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="grid_coarse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_coarse.GridCoarse" class="md-nav__link">
+    <span class="md-ellipsis">
+      GridCoarse
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GridCoarse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_coarse.GridCoarse.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_coarse.GridCoarse.extract_xz_corn_coords" class="md-nav__link">
+    <span class="md-ellipsis">
+      extract_xz_corn_coords
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_coarse.GridCoarse.extract_xz_slice" class="md-nav__link">
+    <span class="md-ellipsis">
+      extract_xz_slice
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_refine" class="md-nav__link">
+    <span class="md-ellipsis">
+      grid_refine
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="grid_refine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_refine.GridRefine" class="md-nav__link">
+    <span class="md-ellipsis">
+      GridRefine
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GridRefine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_refine.GridRefine.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_refine.GridRefine.build_LGR" class="md-nav__link">
+    <span class="md-ellipsis">
+      build_LGR
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_refine.GridRefine.extract_xz_corn_coords" class="md-nav__link">
+    <span class="md-ellipsis">
+      extract_xz_corn_coords
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_refine.GridRefine.extract_xz_slice" class="md-nav__link">
+    <span class="md-ellipsis">
+      extract_xz_slice
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_refine_base" class="md-nav__link">
+    <span class="md-ellipsis">
+      grid_refine_base
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="grid_refine_base">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_refine_base.GridRefineBase" class="md-nav__link">
+    <span class="md-ellipsis">
+      GridRefineBase
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GridRefineBase">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_refine_base.GridRefineBase.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_lgr" class="md-nav__link">
+    <span class="md-ellipsis">
+      grid_lgr
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="grid_lgr">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_lgr.GridLGR" class="md-nav__link">
+    <span class="md-ellipsis">
+      GridLGR
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GridLGR">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_lgr.GridLGR.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_lgr.GridLGR.extract_xz_corn_coords" class="md-nav__link">
+    <span class="md-ellipsis">
+      extract_xz_corn_coords
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_lgr.GridLGR.extract_xz_slice" class="md-nav__link">
+    <span class="md-ellipsis">
+      extract_xz_slice
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lgr_builder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    LGR builder
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_coarse" class="md-nav__link">
+    <span class="md-ellipsis">
+      grid_coarse
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="grid_coarse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_coarse.GridCoarse" class="md-nav__link">
+    <span class="md-ellipsis">
+      GridCoarse
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GridCoarse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_coarse.GridCoarse.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_coarse.GridCoarse.extract_xz_corn_coords" class="md-nav__link">
+    <span class="md-ellipsis">
+      extract_xz_corn_coords
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_coarse.GridCoarse.extract_xz_slice" class="md-nav__link">
+    <span class="md-ellipsis">
+      extract_xz_slice
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_refine" class="md-nav__link">
+    <span class="md-ellipsis">
+      grid_refine
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="grid_refine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_refine.GridRefine" class="md-nav__link">
+    <span class="md-ellipsis">
+      GridRefine
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GridRefine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_refine.GridRefine.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_refine.GridRefine.build_LGR" class="md-nav__link">
+    <span class="md-ellipsis">
+      build_LGR
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_refine.GridRefine.extract_xz_corn_coords" class="md-nav__link">
+    <span class="md-ellipsis">
+      extract_xz_corn_coords
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_refine.GridRefine.extract_xz_slice" class="md-nav__link">
+    <span class="md-ellipsis">
+      extract_xz_slice
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_refine_base" class="md-nav__link">
+    <span class="md-ellipsis">
+      grid_refine_base
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="grid_refine_base">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_refine_base.GridRefineBase" class="md-nav__link">
+    <span class="md-ellipsis">
+      GridRefineBase
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GridRefineBase">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_refine_base.GridRefineBase.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_lgr" class="md-nav__link">
+    <span class="md-ellipsis">
+      grid_lgr
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="grid_lgr">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_lgr.GridLGR" class="md-nav__link">
+    <span class="md-ellipsis">
+      GridLGR
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GridLGR">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_lgr.GridLGR.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_lgr.GridLGR.extract_xz_corn_coords" class="md-nav__link">
+    <span class="md-ellipsis">
+      extract_xz_corn_coords
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.WellClass.libs.grid_utils.grid_lgr.GridLGR.extract_xz_slice" class="md-nav__link">
+    <span class="md-ellipsis">
+      extract_xz_slice
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+  <h1>Various grids</h1>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="src.WellClass.libs.grid_utils.grid_coarse" class="doc doc-heading">
+            <code>src.WellClass.libs.grid_utils.grid_coarse</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="src.WellClass.libs.grid_utils.grid_coarse.GridCoarse" class="doc doc-heading">
+            <code>GridCoarse</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+
+
+
+
+
+
+
+              <details class="quote">
+                <summary>Source code in <code>src/WellClass/libs/grid_utils/grid_coarse.py</code></summary>
+                <pre class="highlight"><code class="language-python">class GridCoarse:
+
+    def __init__(self, simcase: str):
+        """ Loading the model
+
+             - Load the PFT grid, init and restart files
+
+             - Grid contains geometry specs
+
+             - INIT contains static properties (i.e. poro., perm., transmissibilities)
+
+             - RST contains dynamic properties (i.e. saturations, pressure)
+
+            Args:
+                simcase (str): name prefix for ECL grid
+        """
+
+        #Get grid dimensions and coordinates
+        grid = EclGrid(simcase + ".EGRID") 
+        #init = EclGrid(simcase + ".INIT") 
+        init = EclInitFile(grid, simcase + ".INIT")
+        # restart file
+        # rst = EclRestartFile(grid, simcase + ".UNRST")
+
+        # ## The grid dimensions
+        self.NX, self.NY, self.NZ, _ = grid.get_dims()
+
+        print(f'Coarse grid dimension: nx={self.NX}, ny={self.NY}, nz={self.NZ}')
+
+        # # Store INIT parameters into a Pandas Dataframe: grid_init
+
+        self.grid_init = grid.export_index()
+
+        # Static properties Dataframe
+        for key in init.keys():
+                try:
+                        self.grid_init[key] = init[key][0].numpy_view()
+                except Exception:
+                        continue
+
+        # set up other grid-related information
+        self._set_grid_info(self.grid_init)
+
+        # set up cell coordinates
+        self._set_cell_coords(self.grid_init)
+
+    def _set_cell_coords(self, grid_init: pd.DataFrame):
+        """ Create cell coordinate X, Y, Z
+
+            Args:
+                grid_init (pd.DataFrame): dataframe containing coarse grid information
+        """
+
+        # generate cell coordinates by shifting half cell size
+        xcoord = (grid_init.query("j==0&amp;k==0").DX.cumsum() - grid_init.query("j==0&amp;k==0").DX/2).values
+        ycoord = (grid_init.query("i==0&amp;k==0").DY.cumsum() - grid_init.query("i==0&amp;k==0").DY/2).values
+        zcoord = (grid_init.query("i==0&amp;j==0").DZ.cumsum() - grid_init.query("i==0&amp;j==0").DZ/2).values
+
+        # TODO(hzh): a bug?
+        # map_X = dict(zip(grid_init.query("j==0&amp;j==0")['i'], xcoord))
+        map_X = dict(zip(grid_init.query("j==0&amp;k==0")['i'], xcoord))
+        map_Y = dict(zip(grid_init.query("i==0&amp;k==0")['j'], ycoord))
+        map_Z = dict(zip(grid_init.query("i==0&amp;j==0")['k'], zcoord))
+
+        # save cell coordinates to DataFrame
+        grid_init['X'] = grid_init['i'].map(map_X)
+        grid_init['Y'] = grid_init['j'].map(map_Y)
+        grid_init['Z'] = grid_init['k'].map(map_Z)
+
+        # mid values
+        mid_i = self.main_grd_i
+        mid_j = self.main_grd_j
+
+        self.xcoord0 = xcoord[mid_i]
+        self.ycoord0 = ycoord[mid_j]
+
+    def _set_grid_info(self, grid_init: pd.DataFrame):
+        """ Grid information for coarse grid
+
+            Args:
+                grid_init (pd.DataFrame): dataframe containing coarse grid information
+        """
+
+        # Retrieve coarse x-y grid indexes where LGR will be placed
+        # i.e., center grid
+        self.main_grd_i = grid_init.i.max()//2
+        self.main_grd_j = grid_init.j.max()//2
+
+        # Rettrieve min and max k-index for column where LGR will be placed
+        self.main_grd_min_k = grid_init.k.min()
+        self.main_grd_max_k = grid_init.k.max()
+
+        # Retrieve coarse cell sizes
+        self._set_main_grd_dx_dy(grid_init, self.main_grd_i, self.main_grd_j)
+
+        # Retrieve refdepth where LGR starts
+        self._set_ref_depth(grid_init, self.main_grd_i, self.main_grd_j)
+
+        # Retrieve number of cells representing water column and overburden
+        self._set_no_layers(grid_init, self.main_grd_i, self.main_grd_j)
+
+        self._set_DZ_rsrv_ovb(grid_init, self.main_grd_i, self.main_grd_j)
+
+    def _set_main_grd_dx_dy(self, 
+                            grid_init: pd.DataFrame, 
+                            main_grd_i: int, 
+                            main_grd_j: int):
+        """ coarse cell size at the center grid
+
+            Args:
+                grid_init (pd.DataFrame): dataframe containing coarse grid information
+                main_grd_i (int): index of center x grid
+                main_grd_j (int): index of center y grid
+        """
+
+        self.main_grd_dx = grid_init.query('i == @main_grd_i &amp; j == @main_grd_j &amp; k == k.min()')['DX'].iloc[0]
+        self.main_grd_dy = grid_init.query('i == @main_grd_i &amp; j == @main_grd_j &amp; k == k.min()')['DY'].iloc[0]
+
+    def _set_ref_depth(self, 
+                        grid_init: pd.DataFrame, 
+                        main_grd_i: int, 
+                        main_grd_j: int):
+        """ set reference depth for LGR grid
+
+            Args:
+                grid_init (pd.DataFrame): dataframe containing coarse grid information
+                main_grd_i (int): index of center x grid
+                main_grd_j (int): index of center y grid
+        """
+
+        # Retrieve all DZ in coarse grid, not used
+        main_DZ    = grid_init.query('i == @main_grd_i &amp; j == @main_grd_j')['DZ'].values
+
+        main_DEPTH = grid_init.query('i == @main_grd_i &amp; j == @main_grd_j')['DEPTH'].values
+
+        # depth where LGR starts
+        self.ref_depth = main_DEPTH[0] - 0.5*main_DZ[0]
+
+    def _set_no_layers(self, 
+                        grid_init: pd.DataFrame, 
+                        main_grd_i: int, 
+                        main_grd_j: int):
+        """ Retrieve number of cells representing water column and overburden
+
+            Args:
+                grid_init (pd.DataFrame): dataframe containing coarse grid information
+                main_grd_i (int): index of center x grid
+                main_grd_j (int): index of center y grid
+        """
+
+        self.no_of_layers_in_OB    = grid_init.query('i==@main_grd_i &amp; j == @main_grd_j &amp; DZ &gt;  10')['DZ'].shape[0]
+        self.no_of_layers_below_OB = grid_init.query('i==@main_grd_i &amp; j == @main_grd_j &amp; DZ &lt;= 10')['DZ'].shape[0]
+
+    def _set_DZ_rsrv_ovb(self, 
+                         grid_init: pd.DataFrame, 
+                         main_grd_i: int, 
+                         main_grd_j: int, 
+                         dz0: Union[float, int] =10):
+        """ DZs for rsrv and ovb
+
+            Args:
+                grid_init (pd.DataFrame): dataframe containing coarse grid information
+                main_grd_i (int): index of center x grid
+                main_grd_j (int): index of center y grid
+                dz0 (float): the dz value to distinguish zones between reservoir and ovb
+        """
+
+        # 3.1 DZs for reservoir
+        self.DZ_rsrv = grid_init.query('i==@main_grd_i &amp; j == @main_grd_j &amp; DZ &lt;= @dz0')['DZ'].values
+
+        # 3.2 DZs for coarse grid
+        self.DZ_ovb_coarse = grid_init.query('i==@main_grd_i &amp; j == @main_grd_j &amp; DZ &gt; @dz0')['DZ'].values
+
+
+    def extract_xz_corn_coords(self) -&gt; Tuple[np.ndarray, np.ndarray]:
+        """ generate xcorn and zcorn coordinates
+        """
+
+        # for convenience
+        grid_init = self.grid_init
+
+        # shift grid coordinates half-length in x-y directions, i.e., [0, 3900] =&gt; [-1900, 2100]
+        # but not in z direction
+        sDX = self.xcoord0
+        sDY = self.ycoord0
+
+        # generate grid coordinates for plotting
+        xcorn, zcorn = extract_xz_corn_coords(grid_init, sDX, sDY)
+
+        return xcorn, zcorn 
+
+    def extract_xz_slice(self, prop='PERMX') -&gt; np.ndarray:
+        """ generate x-z PERM slice
+
+            Args:
+                prop (str): the property name, default: PERMX
+
+            Returns:
+                np.ndarray: x-z slice of the property
+        """
+        # for convenience
+        grid_init = self.grid_init
+
+        # extract permeability
+        Z = extract_xz_prop_slice(grid_init, prop=prop)
+
+        return Z</code></pre>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="src.WellClass.libs.grid_utils.grid_coarse.GridCoarse.__init__" class="doc doc-heading">
+            <code class="highlight language-python">__init__(simcase: str)</code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Loading the model</p>
+<ul>
+<li>
+<p>Load the PFT grid, init and restart files</p>
+</li>
+<li>
+<p>Grid contains geometry specs</p>
+</li>
+<li>
+<p>INIT contains static properties (i.e. poro., perm., transmissibilities)</p>
+</li>
+<li>
+<p>RST contains dynamic properties (i.e. saturations, pressure)</p>
+</li>
+</ul>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>simcase</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>name prefix for ECL grid</p>
+          </div>
+        </li>
+    </ul>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/WellClass/libs/grid_utils/grid_coarse.py</code></summary>
+              <pre class="highlight"><code class="language-python">def __init__(self, simcase: str):
+    """ Loading the model
+
+         - Load the PFT grid, init and restart files
+
+         - Grid contains geometry specs
+
+         - INIT contains static properties (i.e. poro., perm., transmissibilities)
+
+         - RST contains dynamic properties (i.e. saturations, pressure)
+
+        Args:
+            simcase (str): name prefix for ECL grid
+    """
+
+    #Get grid dimensions and coordinates
+    grid = EclGrid(simcase + ".EGRID") 
+    #init = EclGrid(simcase + ".INIT") 
+    init = EclInitFile(grid, simcase + ".INIT")
+    # restart file
+    # rst = EclRestartFile(grid, simcase + ".UNRST")
+
+    # ## The grid dimensions
+    self.NX, self.NY, self.NZ, _ = grid.get_dims()
+
+    print(f'Coarse grid dimension: nx={self.NX}, ny={self.NY}, nz={self.NZ}')
+
+    # # Store INIT parameters into a Pandas Dataframe: grid_init
+
+    self.grid_init = grid.export_index()
+
+    # Static properties Dataframe
+    for key in init.keys():
+            try:
+                    self.grid_init[key] = init[key][0].numpy_view()
+            except Exception:
+                    continue
+
+    # set up other grid-related information
+    self._set_grid_info(self.grid_init)
+
+    # set up cell coordinates
+    self._set_cell_coords(self.grid_init)</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="src.WellClass.libs.grid_utils.grid_coarse.GridCoarse.extract_xz_corn_coords" class="doc doc-heading">
+            <code class="highlight language-python">extract_xz_corn_coords() -&gt; Tuple[np.ndarray, np.ndarray]</code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>generate xcorn and zcorn coordinates</p>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/WellClass/libs/grid_utils/grid_coarse.py</code></summary>
+              <pre class="highlight"><code class="language-python">def extract_xz_corn_coords(self) -&gt; Tuple[np.ndarray, np.ndarray]:
+    """ generate xcorn and zcorn coordinates
+    """
+
+    # for convenience
+    grid_init = self.grid_init
+
+    # shift grid coordinates half-length in x-y directions, i.e., [0, 3900] =&gt; [-1900, 2100]
+    # but not in z direction
+    sDX = self.xcoord0
+    sDY = self.ycoord0
+
+    # generate grid coordinates for plotting
+    xcorn, zcorn = extract_xz_corn_coords(grid_init, sDX, sDY)
+
+    return xcorn, zcorn </code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="src.WellClass.libs.grid_utils.grid_coarse.GridCoarse.extract_xz_slice" class="doc doc-heading">
+            <code class="highlight language-python">extract_xz_slice(prop='PERMX') -&gt; np.ndarray</code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>generate x-z PERM slice</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>prop</code></b>
+              (<code><span title="str">str</span></code>, default:
+                  <code>&#39;PERMX&#39;</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>the property name, default: PERMX</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><span title="numpy.ndarray">ndarray</span></code>
+          –
+          <div class="doc-md-description">
+            <p>np.ndarray: x-z slice of the property</p>
+          </div>
+        </li>
+    </ul>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/WellClass/libs/grid_utils/grid_coarse.py</code></summary>
+              <pre class="highlight"><code class="language-python">def extract_xz_slice(self, prop='PERMX') -&gt; np.ndarray:
+    """ generate x-z PERM slice
+
+        Args:
+            prop (str): the property name, default: PERMX
+
+        Returns:
+            np.ndarray: x-z slice of the property
+    """
+    # for convenience
+    grid_init = self.grid_init
+
+    # extract permeability
+    Z = extract_xz_prop_slice(grid_init, prop=prop)
+
+    return Z</code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="src.WellClass.libs.grid_utils.grid_refine" class="doc doc-heading">
+            <code>src.WellClass.libs.grid_utils.grid_refine</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="src.WellClass.libs.grid_utils.grid_refine.GridRefine" class="doc doc-heading">
+            <code>GridRefine</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="&lt;code&gt;GridRefineBase&lt;/code&gt; (&lt;code&gt;src.WellClass.libs.grid_utils.grid_refine_base.GridRefineBase&lt;/code&gt;)" href="#src.WellClass.libs.grid_utils.grid_refine_base.GridRefineBase">GridRefineBase</a></code></p>
+
+
+
+
+
+
+
+
+              <details class="quote">
+                <summary>Source code in <code>src/WellClass/libs/grid_utils/grid_refine.py</code></summary>
+                <pre class="highlight"><code class="language-python">class GridRefine(GridRefineBase):
+
+    def __init__(self, 
+                 grid_coarse: GridCoarse,
+                 LGR_sizes_x: List[float], 
+                 LGR_sizes_y: List[float], 
+                 LGR_sizes_z: np.ndarray,
+                 min_grd_size: float):
+        """ class for LGR mesh for the center coarse cell
+
+            Args:
+
+                grid_coarse (GridCoarse): information on coarse grid
+                LGR_sizes_x (list[float]): LGR x grid intervals
+                LGR_sizes_y (list[float]): LGR y grid intervals
+                LGR_sizes_z (np.ndarray): LGR DZ inernals
+                min_grd_size (float): minimize grid size
+        """
+
+        super().__init__(grid_coarse, 
+                         LGR_sizes_x, LGR_sizes_y, LGR_sizes_z,
+                         min_grd_size)
+
+    # TODO(hzh): Here the input will be modified. 
+    # This is not a good practice of programming!!! 
+    # Will come back to this.
+    def build_LGR(self, 
+                  drilling_df: pd.DataFrame, 
+                  casings_df: pd.DataFrame, 
+                  barriers_mod_df: pd.DataFrame) -&gt; None:
+        """ assign material types to corresponding permeabilities.
+
+            Args:
+
+                drilling_df (pd.DataFrame): information about drilling
+                casings_df (pd.DataFrame): information about casings and cement-bond
+                barriers_mod_df (pd.DataFrame): information about barrier 
+
+            Returns:
+                an updated dataframe specifically for GaP code                 
+        """
+
+        # 1. compute lateral number of refined grid
+        self._compute_num_lateral_fine_grd(drilling_df, casings_df, barriers_mod_df)
+
+        # 2. set bounding box
+        self._compute_bbox(drilling_df, casings_df, barriers_mod_df)
+
+        # 3. set material type
+        self._set_material_type(drilling_df, casings_df, barriers_mod_df)
+
+        # 4. set permeability
+        self._set_permeability(drilling_df, casings_df, barriers_mod_df)
+
+        # 0. for GaP code
+        gap_casing_df = self._compute_bbox_gap_casing(casings_df)
+
+        return gap_casing_df
+
+    def extract_xz_corn_coords(self) -&gt; Tuple[np.ndarray, np.ndarray]:
+        """ generate xcorn and zcorn coordinates
+        """
+
+        # for convenience
+        mesh_df = self.mesh_df
+
+        # for shifting
+        sDX = self.main_grd_dx/2
+        sDY = self.main_grd_dy/2
+
+        # generate grid coordinates for plotting
+        xcorn, zcorn = extract_xz_corn_coords(mesh_df, sDX, sDY)
+
+        return xcorn, zcorn
+
+    def extract_xz_slice(self, prop='PERMX') -&gt; np.ndarray:
+        """ generate x-z PERM slice
+
+            Args:
+                prop (str): the property name, default: PERMX
+
+            Returns:
+                np.ndarray: x-z slice of the property
+        """
+        # for convenience
+        mesh_df = self.mesh_df
+
+        # extract permeability
+        Z = extract_xz_prop_slice(mesh_df, prop=prop)
+
+        return Z </code></pre>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="src.WellClass.libs.grid_utils.grid_refine.GridRefine.__init__" class="doc doc-heading">
+            <code class="highlight language-python">__init__(grid_coarse: GridCoarse, LGR_sizes_x: List[float], LGR_sizes_y: List[float], LGR_sizes_z: np.ndarray, min_grd_size: float)</code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>class for LGR mesh for the center coarse cell</p>
+<p>Args:</p>
+<pre class="highlight"><code>grid_coarse (GridCoarse): information on coarse grid
+LGR_sizes_x (list[float]): LGR x grid intervals
+LGR_sizes_y (list[float]): LGR y grid intervals
+LGR_sizes_z (np.ndarray): LGR DZ inernals
+min_grd_size (float): minimize grid size</code></pre>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/WellClass/libs/grid_utils/grid_refine.py</code></summary>
+              <pre class="highlight"><code class="language-python">def __init__(self, 
+             grid_coarse: GridCoarse,
+             LGR_sizes_x: List[float], 
+             LGR_sizes_y: List[float], 
+             LGR_sizes_z: np.ndarray,
+             min_grd_size: float):
+    """ class for LGR mesh for the center coarse cell
+
+        Args:
+
+            grid_coarse (GridCoarse): information on coarse grid
+            LGR_sizes_x (list[float]): LGR x grid intervals
+            LGR_sizes_y (list[float]): LGR y grid intervals
+            LGR_sizes_z (np.ndarray): LGR DZ inernals
+            min_grd_size (float): minimize grid size
+    """
+
+    super().__init__(grid_coarse, 
+                     LGR_sizes_x, LGR_sizes_y, LGR_sizes_z,
+                     min_grd_size)</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="src.WellClass.libs.grid_utils.grid_refine.GridRefine.build_LGR" class="doc doc-heading">
+            <code class="highlight language-python">build_LGR(drilling_df: pd.DataFrame, casings_df: pd.DataFrame, barriers_mod_df: pd.DataFrame) -&gt; None</code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>assign material types to corresponding permeabilities.</p>
+<p>Args:</p>
+<pre class="highlight"><code>drilling_df (pd.DataFrame): information about drilling
+casings_df (pd.DataFrame): information about casings and cement-bond
+barriers_mod_df (pd.DataFrame): information about barrier</code></pre>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code>None</code>
+          –
+          <div class="doc-md-description">
+            <p>an updated dataframe specifically for GaP code</p>
+          </div>
+        </li>
+    </ul>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/WellClass/libs/grid_utils/grid_refine.py</code></summary>
+              <pre class="highlight"><code class="language-python">def build_LGR(self, 
+              drilling_df: pd.DataFrame, 
+              casings_df: pd.DataFrame, 
+              barriers_mod_df: pd.DataFrame) -&gt; None:
+    """ assign material types to corresponding permeabilities.
+
+        Args:
+
+            drilling_df (pd.DataFrame): information about drilling
+            casings_df (pd.DataFrame): information about casings and cement-bond
+            barriers_mod_df (pd.DataFrame): information about barrier 
+
+        Returns:
+            an updated dataframe specifically for GaP code                 
+    """
+
+    # 1. compute lateral number of refined grid
+    self._compute_num_lateral_fine_grd(drilling_df, casings_df, barriers_mod_df)
+
+    # 2. set bounding box
+    self._compute_bbox(drilling_df, casings_df, barriers_mod_df)
+
+    # 3. set material type
+    self._set_material_type(drilling_df, casings_df, barriers_mod_df)
+
+    # 4. set permeability
+    self._set_permeability(drilling_df, casings_df, barriers_mod_df)
+
+    # 0. for GaP code
+    gap_casing_df = self._compute_bbox_gap_casing(casings_df)
+
+    return gap_casing_df</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="src.WellClass.libs.grid_utils.grid_refine.GridRefine.extract_xz_corn_coords" class="doc doc-heading">
+            <code class="highlight language-python">extract_xz_corn_coords() -&gt; Tuple[np.ndarray, np.ndarray]</code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>generate xcorn and zcorn coordinates</p>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/WellClass/libs/grid_utils/grid_refine.py</code></summary>
+              <pre class="highlight"><code class="language-python">def extract_xz_corn_coords(self) -&gt; Tuple[np.ndarray, np.ndarray]:
+    """ generate xcorn and zcorn coordinates
+    """
+
+    # for convenience
+    mesh_df = self.mesh_df
+
+    # for shifting
+    sDX = self.main_grd_dx/2
+    sDY = self.main_grd_dy/2
+
+    # generate grid coordinates for plotting
+    xcorn, zcorn = extract_xz_corn_coords(mesh_df, sDX, sDY)
+
+    return xcorn, zcorn</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="src.WellClass.libs.grid_utils.grid_refine.GridRefine.extract_xz_slice" class="doc doc-heading">
+            <code class="highlight language-python">extract_xz_slice(prop='PERMX') -&gt; np.ndarray</code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>generate x-z PERM slice</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>prop</code></b>
+              (<code><span title="str">str</span></code>, default:
+                  <code>&#39;PERMX&#39;</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>the property name, default: PERMX</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><span title="numpy.ndarray">ndarray</span></code>
+          –
+          <div class="doc-md-description">
+            <p>np.ndarray: x-z slice of the property</p>
+          </div>
+        </li>
+    </ul>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/WellClass/libs/grid_utils/grid_refine.py</code></summary>
+              <pre class="highlight"><code class="language-python">def extract_xz_slice(self, prop='PERMX') -&gt; np.ndarray:
+    """ generate x-z PERM slice
+
+        Args:
+            prop (str): the property name, default: PERMX
+
+        Returns:
+            np.ndarray: x-z slice of the property
+    """
+    # for convenience
+    mesh_df = self.mesh_df
+
+    # extract permeability
+    Z = extract_xz_prop_slice(mesh_df, prop=prop)
+
+    return Z </code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="src.WellClass.libs.grid_utils.grid_refine_base" class="doc doc-heading">
+            <code>src.WellClass.libs.grid_utils.grid_refine_base</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="src.WellClass.libs.grid_utils.grid_refine_base.GridRefineBase" class="doc doc-heading">
+            <code>GridRefineBase</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+
+
+
+
+
+
+
+              <details class="quote">
+                <summary>Source code in <code>src/WellClass/libs/grid_utils/grid_refine_base.py</code></summary>
+                <pre class="highlight"><code class="language-python">class GridRefineBase:
+
+    def __init__(self, 
+                 grid_coarse: GridCoarse,
+                 LGR_sizes_x: List[float], 
+                 LGR_sizes_y: List[float], 
+                 LGR_sizes_z: np.ndarray,
+                 min_grd_size: float):
+        """ dataframe for LGR mesh for the center coarse cell
+
+            Args:
+
+                grid_coarse (GridCoarse): information on coarse grid
+                LGR_sizes_x (list[float]): LGR x grid intervals
+                LGR_sizes_y (list[float]): LGR y grid intervals
+                LGR_sizes_z (np.ndarray): LGR DZ inernals
+                min_grd_size (float): minimize grid size
+        """
+
+        self.min_grd_size = min_grd_size
+
+        # dx/dy of coarse grid
+        self.main_grd_dx = grid_coarse.main_grd_dx
+        self.main_grd_dy = grid_coarse.main_grd_dy
+
+        # LGR dimensions
+        nx = len(LGR_sizes_x)
+        ny = len(LGR_sizes_y)
+        nz = len(LGR_sizes_z)
+
+        print(f'LGR dimension: nx={nx}, ny={ny}, nz={nz}')
+
+        # set dimensions
+        self.nx, self.ny, self.nz = nx, ny, nz
+
+        #Create i, j, k indices
+        cell_ijk = np.indices((nx, ny, nz))
+        cell_ijk = cell_ijk.reshape((3, nx * ny * nz)).T
+
+        #Create LGR Dataframe with indices
+        mesh_df = pd.DataFrame(data = cell_ijk, columns = ['i', 'j', 'k'])
+
+        # TODO(hzh): why not in the order of ['k', 'j']?
+        mesh_df.sort_values(by=['k', 'i'], inplace = True)
+        mesh_df.reset_index(inplace=True, drop=True)
+
+        #
+        self.mesh_df = mesh_df
+
+        # set up fields
+        self._set_cell_intervals(self.mesh_df, 
+                                 LGR_sizes_x, 
+                                 LGR_sizes_y, 
+                                 LGR_sizes_z)
+        self._set_cell_coords(self.mesh_df)
+        self._set_z_corners(self.mesh_df)       
+
+        # indices for center finer grid
+        mid_i = grid_coarse.main_grd_i
+        mid_j = grid_coarse.main_grd_j
+
+        self._upscale_properties(grid_coarse.grid_init, mid_i, mid_j)
+
+    def _set_cell_intervals(self, 
+                            mesh_df: pd.DataFrame, 
+                            LGR_sizes_x: List[float], 
+                            LGR_sizes_y: List[float], 
+                            LGR_sizes_z: np.ndarray):
+        """ Creat DX, DY, DZ for LGR mesh
+
+            Args:
+
+                mesh_df (pd.DataFrame): dataframe for LGR mesh of the center coarse cell
+                LGR_sizes_x (list[float]): LGR x grid intervals
+                LGR_sizes_y (list[float]): LGR y grid intervals
+                LGR_sizes_z (np.ndarray): LGR DZ grid inernals
+        """
+
+        # mesh
+        DX_grid, DZ_grid, DY_grid = np.meshgrid(LGR_sizes_x, LGR_sizes_z, LGR_sizes_y)
+
+        # internals
+        mesh_df['DX'] = DX_grid.flatten()
+        mesh_df['DY'] = DY_grid.flatten()
+        mesh_df['DZ'] = DZ_grid.flatten()
+
+    def _set_cell_coords(self, mesh_df):
+        """ Create cell coordinate X, Y, Z for LGR mesh
+
+            Args:
+
+                mesh_df (pd.DataFrame): dataframe for LGR mesh of the center coarse cell
+        """
+
+        # cell coordinates
+        xcoord = (mesh_df.query("j==0&amp;k==0").DX.cumsum() - mesh_df.query("j==0&amp;k==0").DX/2).values
+        ycoord = (mesh_df.query("i==0&amp;k==0").DY.cumsum() - mesh_df.query("i==0&amp;k==0").DY/2).values
+        zcoord = (mesh_df.query("i==0&amp;j==0").DZ.cumsum() - mesh_df.query("i==0&amp;j==0").DZ/2).values
+
+        # TODO(hzh): a bug?
+        # map_X = dict(zip(mesh_df.query("j==0&amp;j==0")['i'], xcoord))
+        map_X = dict(zip(mesh_df.query("j==0&amp;k==0")['i'], xcoord))
+        map_Y = dict(zip(mesh_df.query("i==0&amp;k==0")['j'], ycoord))
+        map_Z = dict(zip(mesh_df.query("i==0&amp;j==0")['k'], zcoord))
+
+        # save cell coordinates X, Y, Z to dataframe
+        mesh_df['X'] = mesh_df['i'].map(map_X)
+        mesh_df['Y'] = mesh_df['j'].map(map_Y)
+        mesh_df['Z'] = mesh_df['k'].map(map_Z)
+
+    def _set_z_corners(self, mesh_df):
+        """ save Corner Z points to dataframe
+
+            Args:
+
+                mesh_df (pd.DataFrame): dataframe for LGR mesh of the center coarse cell
+        """
+
+        mesh_df['Zcorn_top'] = mesh_df['Z'] - mesh_df['DZ']/2
+        mesh_df['Zcorn_bottom'] = mesh_df['Z'] + mesh_df['DZ']/2
+
+    def _upscale_properties(self, 
+                            grid_coarse: GridCoarse, 
+                            mid_i: int, 
+                            mid_j: int):
+        """ Upscale coarse properties to LGR mesh
+
+            Args:
+                grid_coarse (GridCoarse): information on coarse grid
+                mid_i (int): x index of center cell on the coarse grid
+                mid_j (int): y index of center cell on the coarse grid
+        """
+
+        # for convenience only
+        mesh_df = self.mesh_df
+
+        # properties
+        fields = ['PORV', 
+                  'PERMX', 'PERMY', 'PERMZ', 
+                  'MULTX', 'MULTY', 'MULTZ', 
+                  'MULTX-', 'MULTY-', 'MULTZ-', 
+                  'PORO']
+
+        # Upscale coarse properties to LGR grids
+
+        for field in fields:
+            # mesh_df[field] = np.nan
+            mesh_df[field] = 0.0                    # TODO(hzh): what should I put here?
+
+        for idx, row in grid_coarse.query('i==@mid_i &amp; j==@mid_j').iterrows():
+
+            # switch to corner coords, coarse grid
+            top  = row.Z - row.DZ/2
+            base = row.Z + row.DZ/2
+
+            for field in fields:
+
+                mesh_df.loc[(mesh_df['Z']&gt;=top) &amp; (mesh_df['Z']&lt;base), field] = row[field]
+
+    def _set_material_type(self, 
+                            drilling_df: pd.DataFrame, 
+                            casings_df: pd.DataFrame, 
+                            barriers_mod_df: pd.DataFrame) -&gt; None:
+        """ Assign material types, such as openholes, overburden, cement bond, etc.
+
+            Args:
+                drilling_df (pd.DataFrame): information about drilling
+                casings_df (pd.DataFrame): information about casings and cement-bond
+                barriers_mod_df (pd.DataFrame): information about barrier    
+        """
+
+        # only for convenience
+        mesh_df = self.mesh_df
+
+        # set default material to 'overburden'
+        mesh_df['material'] = 'overburden'
+
+        # ### 1. Drilling
+        for idx, row in drilling_df.iterrows():
+
+            top, bottom = row['top_msl'], row['bottom_msl']  # noqa: F841
+
+            if top &lt; mesh_df['Zcorn_bottom'].max():
+
+                # extract bounding box
+                k_min, k_max = row['k_min'], row['k_max']
+                ij_min, ij_max = row['ij_min'], row['ij_max']
+
+                # 1.1 set material type to openhole
+                criteria =  '(k &gt;= @k_min)  &amp; (k &lt;= @k_max) &amp; \
+                             (i &gt;= @ij_min) &amp; (i &lt;= @ij_max) &amp; \
+                             (j &gt;= @ij_min) &amp; (j &lt;= @ij_max)'
+                mesh_df.loc[mesh_df.eval(criteria), 'material'] = 'openhole'
+
+        # ### 2. Casings
+        for ic, (idx, row) in enumerate(casings_df.iterrows()):
+
+            # extract bounding box
+            k_min, k_max = row['k_min'], row['k_max']  # noqa: F841
+            ij_min, ij_max = row['ij_min'], row['ij_max']  # noqa: F841
+            toc_k_min, toc_k_max = row['toc_k_min'], row['toc_k_max']  # noqa: F841
+
+            # 2.1 set material type to annulus
+            # x
+            criteria_i =  '(material == "openhole") &amp; \
+                           (k &gt;= @k_min) &amp; (k &lt;= @k_max) &amp; \
+                            ((i &lt; @ij_min) | (i &gt; @ij_max))'
+            mesh_df.loc[mesh_df.eval(criteria_i), 'material'] = 'annulus'
+            # y
+            criteria_j =  '(material == "openhole") &amp; \
+                           (k &gt;= @k_min) &amp; (k &lt;= @k_max) &amp; \
+                           ((j &lt; @ij_min) | (j &gt; @ij_max))'
+            mesh_df.loc[mesh_df.eval(criteria_j), 'material'] = 'annulus'
+
+            # 2.2 set material type to cement_bond
+            criteria = '(material == "annulus") &amp; \
+                        (k &gt;= @toc_k_min) &amp; (k &lt;= @toc_k_max)' 
+            mesh_df.loc[mesh_df.eval(criteria), 'material'] = f'cement_bond_{ic}'
+
+            # 2.3 set material type to openhole
+            criteria = '(material == "annulus")'  
+            mesh_df.loc[mesh_df.eval(criteria), 'material'] = 'openhole'
+            # mesh_df.loc[mesh_df.eval(criteria_j), 'material'] = 'cementbond'   
+
+        # ### 3. Barriers
+        for ib, (idx, row) in enumerate(barriers_mod_df.iterrows()):
+
+            b_k_min, b_k_max = row['k_min'], row['k_max']  # noqa: F841
+
+            criteria = '(material == "openhole") &amp; \
+                        (k &gt;= @b_k_min) &amp; (k &lt;= @b_k_max)' 
+            mesh_df.loc[mesh_df.eval(criteria), 'material'] = f'barrier_{ib}'
+
+
+    def _set_permeability(self, 
+                            drilling_df: pd.DataFrame, 
+                            casings_df: pd.DataFrame, 
+                            barriers_mod_df: pd.DataFrame) -&gt; None:
+        """ Actual function to assign permeability according to material type
+
+            Args:
+                drilling_df (pd.DataFrame): information about drilling
+                casings_df (pd.DataFrame): information about casings and cement-bond
+                barriers_mod_df (pd.DataFrame): information about barrier    
+        """
+
+        # for convenience only
+        mesh_df = self.mesh_df
+
+        # set permeability according to material type
+
+        # 1. openhole
+        oh_perm = drilling_df['oh_perm'].iloc[0]
+        criteria = 'material == "openhole"'
+        mesh_df.loc[mesh_df.eval(criteria), 'PERMX'] = oh_perm
+
+        # 2. cement bond
+        for ic, (_, row) in enumerate(casings_df.iterrows()):
+            cb_perm = row['cb_perm']
+            criteria = f'material == "cement_bond_{ic}"'
+            mesh_df.loc[mesh_df.eval(criteria), 'PERMX'] = cb_perm
+
+        # 3. barrier
+        for ib, (_, row) in enumerate(barriers_mod_df.iterrows()):
+            barrier_perm = row['barrier_perm']
+            criteria = f'material == "barrier_{ib}"'
+            mesh_df.loc[mesh_df.eval(criteria), 'PERMX'] = barrier_perm
+
+    def _compute_num_lateral_fine_grd(self, 
+                                        drilling_df: pd.DataFrame, 
+                                        casings_df: pd.DataFrame, 
+                                        barriers_mod_df: pd.DataFrame):
+        """ compute number of fine grid in x-y directions
+
+            Args:
+                drilling_df (pd.DataFrame): information about drilling
+                casings_df (pd.DataFrame): information about casings and cement-bond
+                barriers_mod_df (pd.DataFrame): information about barrier            
+        """
+        # for convenience
+        min_grd_size = self.min_grd_size
+
+        # n_grd_id for well elements
+        drilling_df['n_grd_id']  = drilling_df['diameter_m'].map(lambda x: compute_ngrd(x, min_grd_size))
+        casings_df[ 'n_grd_id']  = casings_df['diameter_m'].map(lambda x: compute_ngrd(x, min_grd_size))
+        barriers_mod_df['n_grd_id'] = barriers_mod_df['diameter_m'].map(lambda x: compute_ngrd(x, min_grd_size))
+
+        # borehole_df['n_grd_id'] = borehole_df['id_m'].map(lambda x: compute_ngrd(x, min_grd_size))
+
+    def _compute_bbox(self, 
+                        drilling_df: pd.DataFrame, 
+                        casings_df: pd.DataFrame, 
+                        barriers_mod_df: pd.DataFrame) -&gt; None:
+        """ Compute bounding boxes for drillings, casings and barriers.
+
+            Args:
+                drilling_df (pd.DataFrame): information about drilling
+                casings_df (pd.DataFrame): information about casings and cement-bond
+                barriers_mod_df (pd.DataFrame): information about barrier       
+        """
+
+        # for convenience
+        mesh_df = self.mesh_df
+        nxy = self.nx
+
+        # depth cut off
+        maxDepth = mesh_df['Zcorn_bottom'].max()
+
+        # ### 1. Drillings
+        compute_bbox(mesh_df, drilling_df, nxy=nxy, maxDepth=maxDepth)
+
+        # ### 2. Casings
+        compute_bbox(mesh_df, casings_df, nxy=nxy, maxDepth=maxDepth, is_casing=True)
+
+        # ### 3. Barriers
+        compute_bbox(mesh_df, barriers_mod_df, nxy=nxy, maxDepth=maxDepth)
+
+    def _compute_bbox_gap_casing(self, 
+                                 casings_df: pd.DataFrame) -&gt; pd.DataFrame:
+        """ compute bbox of casing for GaP 
+
+            Args:
+                casings_df (pd.DataFrame): information about casings and cement-bond
+
+            Returns:
+                an updated dataframe specifically for GaP code
+        """
+
+        # for convenience
+        mesh_df = self.mesh_df
+        nxy = self.nx
+        min_grd_size = self.min_grd_size
+
+        # generate new pd.DataFrame by trimming casings
+        # gap_casing_df = trim_casings_cement(casings_df)
+        gap_casing_df = casings_df
+
+        # compute number of lateral grid (refined)
+        gap_casing_df[ 'n_grd_id']  = casings_df['diameter_m'].map(lambda x: compute_ngrd(x, min_grd_size))
+
+        # Casings
+        compute_bbox(mesh_df, gap_casing_df, nxy=nxy, is_casing=True)
+
+        return gap_casing_df</code></pre>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="src.WellClass.libs.grid_utils.grid_refine_base.GridRefineBase.__init__" class="doc doc-heading">
+            <code class="highlight language-python">__init__(grid_coarse: GridCoarse, LGR_sizes_x: List[float], LGR_sizes_y: List[float], LGR_sizes_z: np.ndarray, min_grd_size: float)</code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>dataframe for LGR mesh for the center coarse cell</p>
+<p>Args:</p>
+<pre class="highlight"><code>grid_coarse (GridCoarse): information on coarse grid
+LGR_sizes_x (list[float]): LGR x grid intervals
+LGR_sizes_y (list[float]): LGR y grid intervals
+LGR_sizes_z (np.ndarray): LGR DZ inernals
+min_grd_size (float): minimize grid size</code></pre>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/WellClass/libs/grid_utils/grid_refine_base.py</code></summary>
+              <pre class="highlight"><code class="language-python">def __init__(self, 
+             grid_coarse: GridCoarse,
+             LGR_sizes_x: List[float], 
+             LGR_sizes_y: List[float], 
+             LGR_sizes_z: np.ndarray,
+             min_grd_size: float):
+    """ dataframe for LGR mesh for the center coarse cell
+
+        Args:
+
+            grid_coarse (GridCoarse): information on coarse grid
+            LGR_sizes_x (list[float]): LGR x grid intervals
+            LGR_sizes_y (list[float]): LGR y grid intervals
+            LGR_sizes_z (np.ndarray): LGR DZ inernals
+            min_grd_size (float): minimize grid size
+    """
+
+    self.min_grd_size = min_grd_size
+
+    # dx/dy of coarse grid
+    self.main_grd_dx = grid_coarse.main_grd_dx
+    self.main_grd_dy = grid_coarse.main_grd_dy
+
+    # LGR dimensions
+    nx = len(LGR_sizes_x)
+    ny = len(LGR_sizes_y)
+    nz = len(LGR_sizes_z)
+
+    print(f'LGR dimension: nx={nx}, ny={ny}, nz={nz}')
+
+    # set dimensions
+    self.nx, self.ny, self.nz = nx, ny, nz
+
+    #Create i, j, k indices
+    cell_ijk = np.indices((nx, ny, nz))
+    cell_ijk = cell_ijk.reshape((3, nx * ny * nz)).T
+
+    #Create LGR Dataframe with indices
+    mesh_df = pd.DataFrame(data = cell_ijk, columns = ['i', 'j', 'k'])
+
+    # TODO(hzh): why not in the order of ['k', 'j']?
+    mesh_df.sort_values(by=['k', 'i'], inplace = True)
+    mesh_df.reset_index(inplace=True, drop=True)
+
+    #
+    self.mesh_df = mesh_df
+
+    # set up fields
+    self._set_cell_intervals(self.mesh_df, 
+                             LGR_sizes_x, 
+                             LGR_sizes_y, 
+                             LGR_sizes_z)
+    self._set_cell_coords(self.mesh_df)
+    self._set_z_corners(self.mesh_df)       
+
+    # indices for center finer grid
+    mid_i = grid_coarse.main_grd_i
+    mid_j = grid_coarse.main_grd_j
+
+    self._upscale_properties(grid_coarse.grid_init, mid_i, mid_j)</code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="src.WellClass.libs.grid_utils.grid_lgr" class="doc doc-heading">
+            <code>src.WellClass.libs.grid_utils.grid_lgr</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="src.WellClass.libs.grid_utils.grid_lgr.GridLGR" class="doc doc-heading">
+            <code>GridLGR</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+
+
+
+
+
+
+
+              <details class="quote">
+                <summary>Source code in <code>src/WellClass/libs/grid_utils/grid_lgr.py</code></summary>
+                <pre class="highlight"><code class="language-python">class GridLGR:
+
+    def __init__(self, sim_case: Union[str, pathlib.Path]) -&gt; None:
+        """ This is used to process .EGRID file
+
+            Args:
+                sim_case (str): name prefix for eclipse/pflotran case
+        """
+
+        # convert it to string, in case it is pathlib.Path
+        sim_case = str(sim_case)
+
+        #Get grid dimensions and coordinates
+        grid = EclGrid(sim_case + ".EGRID") 
+        #init = EclGrid(simcase + ".INIT") 
+        init = EclInitFile(grid, sim_case + ".INIT")
+
+        # the coarse grid dimensions
+        self.NX, self.NY, self.NZ, _ = grid.get_dims()
+
+        #Process init file
+        lgr_name = grid.get_lgr(0).get_name()
+        lgr_grid = grid.get_lgr(lgr_name)
+
+        # # Store INIT parameters into a Pandas Dataframe
+
+        lgr_index = lgr_grid.export_index()
+
+        # Static properties Dataframe
+        for key in init.keys():
+            try:
+                lgr_index[key] = init[key][1].numpy_view()
+            except Exception:
+                continue
+
+        # 
+        self.lgr_index = lgr_index
+
+        # compute middle index for extraction of DX and DY
+        mid_i = lgr_index.i.max()//2  # noqa: F841
+        mid_j = lgr_index.j.max()//2  # noqa: F841
+
+        # compute DX and DY on the coarse grid by summing LGR grid
+        self.main_grd_dx = lgr_index.query("j==@mid_j&amp;k==0").DX.sum()
+        self.main_grd_dy = lgr_index.query("i==@mid_i&amp;k==0").DY.sum()
+
+    def extract_xz_corn_coords(self) -&gt; Tuple[np.ndarray, np.ndarray]:
+        """ generate xcorn and zcorn coordinates
+        """
+
+        # for convenience
+        lgr_index = self.lgr_index
+
+        # shifting half coarse grid
+        sDX = self.main_grd_dx/2
+        sDY = self.main_grd_dy/2
+
+        # generate corner grid coordinates for plotting
+        xcorn, zcorn = extract_xz_corn_coords(lgr_index, sDX, sDY)
+
+        return xcorn, zcorn 
+
+    def extract_xz_slice(self, prop='PERMX') -&gt; np.ndarray:
+        """ generate x-z PERM slice
+
+            Args:
+                prop (str): the property name, default: PERMX
+
+            Returns:
+                np.ndarray: x-z slice of the property
+        """
+        # for convenience
+        lgr_index = self.lgr_index
+
+        # extract permeability
+        Z = extract_xz_prop_slice(lgr_index, prop=prop)
+
+        return Z </code></pre>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="src.WellClass.libs.grid_utils.grid_lgr.GridLGR.__init__" class="doc doc-heading">
+            <code class="highlight language-python">__init__(sim_case: Union[str, pathlib.Path]) -&gt; None</code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>This is used to process .EGRID file</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>sim_case</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>name prefix for eclipse/pflotran case</p>
+          </div>
+        </li>
+    </ul>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/WellClass/libs/grid_utils/grid_lgr.py</code></summary>
+              <pre class="highlight"><code class="language-python">def __init__(self, sim_case: Union[str, pathlib.Path]) -&gt; None:
+    """ This is used to process .EGRID file
+
+        Args:
+            sim_case (str): name prefix for eclipse/pflotran case
+    """
+
+    # convert it to string, in case it is pathlib.Path
+    sim_case = str(sim_case)
+
+    #Get grid dimensions and coordinates
+    grid = EclGrid(sim_case + ".EGRID") 
+    #init = EclGrid(simcase + ".INIT") 
+    init = EclInitFile(grid, sim_case + ".INIT")
+
+    # the coarse grid dimensions
+    self.NX, self.NY, self.NZ, _ = grid.get_dims()
+
+    #Process init file
+    lgr_name = grid.get_lgr(0).get_name()
+    lgr_grid = grid.get_lgr(lgr_name)
+
+    # # Store INIT parameters into a Pandas Dataframe
+
+    lgr_index = lgr_grid.export_index()
+
+    # Static properties Dataframe
+    for key in init.keys():
+        try:
+            lgr_index[key] = init[key][1].numpy_view()
+        except Exception:
+            continue
+
+    # 
+    self.lgr_index = lgr_index
+
+    # compute middle index for extraction of DX and DY
+    mid_i = lgr_index.i.max()//2  # noqa: F841
+    mid_j = lgr_index.j.max()//2  # noqa: F841
+
+    # compute DX and DY on the coarse grid by summing LGR grid
+    self.main_grd_dx = lgr_index.query("j==@mid_j&amp;k==0").DX.sum()
+    self.main_grd_dy = lgr_index.query("i==@mid_i&amp;k==0").DY.sum()</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="src.WellClass.libs.grid_utils.grid_lgr.GridLGR.extract_xz_corn_coords" class="doc doc-heading">
+            <code class="highlight language-python">extract_xz_corn_coords() -&gt; Tuple[np.ndarray, np.ndarray]</code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>generate xcorn and zcorn coordinates</p>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/WellClass/libs/grid_utils/grid_lgr.py</code></summary>
+              <pre class="highlight"><code class="language-python">def extract_xz_corn_coords(self) -&gt; Tuple[np.ndarray, np.ndarray]:
+    """ generate xcorn and zcorn coordinates
+    """
+
+    # for convenience
+    lgr_index = self.lgr_index
+
+    # shifting half coarse grid
+    sDX = self.main_grd_dx/2
+    sDY = self.main_grd_dy/2
+
+    # generate corner grid coordinates for plotting
+    xcorn, zcorn = extract_xz_corn_coords(lgr_index, sDX, sDY)
+
+    return xcorn, zcorn </code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="src.WellClass.libs.grid_utils.grid_lgr.GridLGR.extract_xz_slice" class="doc doc-heading">
+            <code class="highlight language-python">extract_xz_slice(prop='PERMX') -&gt; np.ndarray</code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>generate x-z PERM slice</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>prop</code></b>
+              (<code><span title="str">str</span></code>, default:
+                  <code>&#39;PERMX&#39;</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>the property name, default: PERMX</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><span title="numpy.ndarray">ndarray</span></code>
+          –
+          <div class="doc-md-description">
+            <p>np.ndarray: x-z slice of the property</p>
+          </div>
+        </li>
+    </ul>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/WellClass/libs/grid_utils/grid_lgr.py</code></summary>
+              <pre class="highlight"><code class="language-python">def extract_xz_slice(self, prop='PERMX') -&gt; np.ndarray:
+    """ generate x-z PERM slice
+
+        Args:
+            prop (str): the property name, default: PERMX
+
+        Returns:
+            np.ndarray: x-z slice of the property
+    """
+    # for convenience
+    lgr_index = self.lgr_index
+
+    # extract permeability
+    Z = extract_xz_prop_slice(lgr_index, prop=prop)
+
+    return Z </code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["search.suggest", "search.highlight", "content.tabs.link", "navigation.indexes", "content.tooltips", "navigation.path", "content.code.annotate", "content.code.copy", "content.code.select"], "search": "../../../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.c8b220af.min.js"></script>
+      
+    
+  </body>
+</html>
