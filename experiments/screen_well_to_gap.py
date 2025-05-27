@@ -19,14 +19,16 @@ from src.WellClass.libs.plotting import plot_grid, plot_sketch, plot_pressure
 from src.GaP.libs.aux_functions.aux_func_cirrus_eql import setup_equilibration
 
 # User inputs
-pflotran_working_root = '../test_data/examples/wildcat-pflotran'
+root_input_folder = '../test_data/examples/wildcat-pflotran'
+root_output_folder = '../test_data/examples/wildcat-pflotran'
 well_input_file = 'smeaheia.yaml'
-well_input_file = 'wildcat.yaml'
+# well_input_file = 'wildcat.yaml'
 start_date = datetime(2025, 1, 1)  # Simulation start date
 end_date = datetime(2125, 1, 1) # Simulation end date
 show_well_sketch = True
 scenario_idx = 1  # Pressure scenario index (by default 0)
-sim_case_LGR = 'ALPHA'
+sim_case_name = 'ALPHA'
+LGR_NAME = 'LW_LGR'
 
 # template and constant files
 template_simcase = 'TEMP-0'
@@ -34,56 +36,67 @@ pvt_path = '../test_data/pvt_constants/'
 Ali_way = False
 
 # Configuration
-sim_path = pathlib.Path(pflotran_working_root)
+input_sim_path = pathlib.Path(root_input_folder)
 well_input = pathlib.Path(well_input_file)
+output_sim_path = pathlib.Path(root_output_folder)
 file_extension = well_input.suffix
 use_yaml = file_extension in ['.yaml', '.yml']
 
 # Paths
-model_dir = sim_path / 'model'
-include_dir = sim_path / 'include'
-temp_simcase = model_dir / template_simcase #template PFLOTRAN file
-simcase = model_dir / sim_case_LGR
-template_grdecl = include_dir / 'TEMP_GRD.grdecl'
-simcase_grdecl = include_dir / f'{sim_case_LGR}_GRD.grdecl'
+template_model_dir = input_sim_path / 'model'
+template_include_dir = input_sim_path / 'include'
+temp_simcase = template_model_dir / template_simcase #template PFLOTRAN file
+template_grdecl = template_include_dir / 'TEMP_GRD.grdecl'
+
+co2_database = template_include_dir / r'co2_db_new.dat'
+
+output_model_dir = output_sim_path / 'model'
+output_include_dir = output_sim_path / 'include'
+
+output_simcase = output_model_dir / sim_case_name
+output_simcase_grdecl = output_include_dir / f'{sim_case_name}_GRD.grdecl'
 
 
 ############ Copy template files and update based on user inputs ######################
 
 # Create directories if they do not exist
-model_dir.mkdir(parents=True, exist_ok=True)
-include_dir.mkdir(parents=True, exist_ok=True)
+output_model_dir.mkdir(parents=True, exist_ok=True)
+output_include_dir.mkdir(parents=True, exist_ok=True)
 
 # Read and modify template files
 # Update template GRDECL file
 with open(template_grdecl) as file:
     lines = file.readlines()
 lines[5] = f'--{lines[5]}'  # comment out line to include LGR grdecl file
-with simcase_grdecl.open('w') as file:
+with output_simcase_grdecl.open('w') as file:
     file.writelines(lines)
 
+# Copy CO2 database to output include directory
+output_co2_database = output_include_dir / co2_database.name
+with open(co2_database, 'r') as src, open(output_co2_database, 'w') as dst:
+    dst.write(src.read())
 
 with open(temp_simcase.with_suffix('.in')) as file:
     lines = file.readlines()
 
-title = f'{sim_case_LGR} LEGACY Well SCREEN simulation'
+title = f'{sim_case_name} LEGACY Well SCREEN simulation'
 lines[1] = f'!{title}\n'
 lines[34] = f' START_DATE  {start_date.strftime("%d %b %Y").upper()}\n'   #Set start date
 lines[35] = f' FINAL_DATE  {start_date.strftime("%d %b %Y").upper()} \n'  #Set end date equal to start date so only equilibration is run
-lines[23] = f'  TYPE grdecl ../include/{simcase_grdecl.name} \n'          #Update grdecl file include path to new one
+lines[23] = f'  TYPE grdecl ../include/{output_simcase_grdecl.name} \n'          #Update grdecl file include path to new one
 
-with simcase.with_suffix('.in').open('w') as file:
+with output_simcase.with_suffix('.in').open('w') as file:
     file.writelines(lines)
 
 ############ Load Well Data - Config file and visualize ################################
 
 # Load well configuration file
-well_name = sim_path / well_input
+well_file_path = input_sim_path / well_input
 if use_yaml:
-    well_model = yaml_parser(well_name)
+    well_model = yaml_parser(well_file_path)
     well_csv = json.loads(well_model.spec.model_dump_json())
 else:
-    well_csv = csv_parser(well_name)
+    well_csv = csv_parser(well_file_path)
 
 # Build Well class
 my_well = Well(
@@ -122,7 +135,7 @@ plot_pressure(
 fig.tight_layout()
 fig.subplots_adjust(wspace=0)
 
-fig.savefig(sim_path / f'well_sketch_{well_input.stem}.png')
+fig.savefig(output_sim_path / f'well_sketch_{well_input.stem}.png')
 
 if show_well_sketch:
 	plt.show()
@@ -145,7 +158,7 @@ cells_overburden_dz = grid_coarse_thickness // 9
 cell_overbuden_dz_top = grid_coarse_thickness - (cells_overburden_dz * 8)
 
 # Write the tops file
-tops_file = include_dir / 'tops_dz.inc'
+tops_file = output_include_dir / 'tops_dz.inc'
 with open(tops_file, 'w') as f:
     f.write("EQUALS\n")
     f.write("TOPS 4 4* 1 1 /\n")
@@ -186,7 +199,7 @@ for z, t in zip(z_RTEMPVT, temp_RTEMPVT):
     new_rtempvd_section += f"{z:11.2f} {t:8.2f}\n"
 
 # Open CIRRUS input file and update equilibration section
-with open(simcase.with_suffix('.in')) as file:
+with open(output_simcase.with_suffix('.in')) as file:
     lines = file.readlines()
 
 equil_pmts = {
@@ -208,23 +221,21 @@ for name, pmts in equil_pmts.items():
     new_lines += equil_lines
 new_lines += lines[316:]
 
-with simcase.with_suffix('.in').open('w') as file:
+with output_simcase.with_suffix('.in').open('w') as file:
     file.writelines(new_lines)
 
 ############ Run coarse simulation to retrieve EGRID file and build LGR ##################
 # Run coarse simulation
-run_config_coarse = simcase.with_suffix('.in')
+run_config_coarse = output_simcase.with_suffix('.in')
 os.system(f"runcirrus -i -nm 6 {run_config_coarse}")
 
 # Build LGR
-lgr = LGRBuilder(simcase, annulus_df, drilling_df, Ali_way)
-LGR_NAME = 'LW_LGR'
-output_dir = sim_path / 'include'
-gap_casing_df = lgr.build_grdecl(output_dir, LGR_NAME, drilling_df, casings_df, barriers_mod_df)
+lgr = LGRBuilder(output_simcase, annulus_df, drilling_df, Ali_way)
+gap_casing_df = lgr.build_grdecl(output_include_dir, LGR_NAME, drilling_df, casings_df, barriers_mod_df)
 
 # Update EQLNUM
 top_eql_k = barriers_mod_df.iloc[0]['k_max'] + 1
-with open((output_dir / LGR_NAME).with_suffix('.grdecl')) as lgr_file:
+with open((output_include_dir / LGR_NAME).with_suffix('.grdecl')) as lgr_file:
     lines = lgr_file.readlines()
 for idx, line in enumerate(lines):
     if line.startswith('EQLNUM'):
@@ -235,28 +246,28 @@ for idx, line in enumerate(lines):
             lines[idx] = f'--{line}'
         elif magnitude == 2 and k_min < top_eql_k:
             lines[idx] = f'{keyword} {magnitude} {i_min} {i_max} {j_min} {j_max} {top_eql_k} {k_max} /\n'
-with (output_dir / LGR_NAME).with_suffix('.grdecl').open('w') as file:
+with (output_include_dir / LGR_NAME).with_suffix('.grdecl').open('w') as file:
     file.writelines(lines)
 
 ############ Run coarse simulation to retrieve EGRID file and build LGR ##################
 # Run LGR simulation
-with open(simcase_grdecl) as file:
+with open(output_simcase_grdecl) as file:
     lines = file.readlines()
 lines[5] = f'external_file ../include/{LGR_NAME}.grdecl / \n'
-with simcase_grdecl.open('w') as file:
+with output_simcase_grdecl.open('w') as file:
     file.writelines(lines)
 
-with open(simcase.with_suffix('.in')) as file:
+with open(output_simcase.with_suffix('.in')) as file:
     lines = file.readlines()
 lines[35] = f' FINAL_DATE  {end_date.strftime("%d %b %Y").upper()} \n'
-with simcase.with_suffix('.in').open('w') as file:
+with output_simcase.with_suffix('.in').open('w') as file:
     file.writelines(lines)
 
-run_config_lgr = simcase.with_suffix('.in')
+run_config_lgr = output_simcase.with_suffix('.in')
 os.system(f"runcirrus -i -nm 6 {run_config_lgr}")
 
 # Load files from PFLOTRAN simulation
-grid_lgr = GridLGR(simcase)
+grid_lgr = GridLGR(output_simcase)
 
 # Visualization
 grid_coarse = lgr.grid_coarse
