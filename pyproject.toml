@@ -18,7 +18,7 @@ ecl = "^2.14.5"
 
 [tool.poetry.group.dev.dependencies]
 jupyter = "^1.0.0"
-jupyterlab = "^4.0.9"
+jupyterlab = "^4.3.8"
 jupyter-dash = "^0.4.2"
 ipympl = "^0.9.3"
 
@@ -38,7 +38,7 @@ ruff = "^0.1.6"
 
 
 [tool.poetry.group.dash.dependencies]
-dash = "^2.14.1"
+dash = "^2.15.0"
 pyarrow = "^14.0.1"
 fastparquet = "^2023.10.1"
 
