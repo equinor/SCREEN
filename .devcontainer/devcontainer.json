@@ -11,7 +11,7 @@
         "UV_LINK_MODE": "copy"
     },
     "postAttachCommand": {
-        "backend": "uv sync --all-groups",
+        "backend": "uv sync --all-groups"
     },
     "customizations": {
         "vscode": {
@@ -36,8 +36,7 @@
                 "editor.formatOnSave": true,
                 // Python specific settings
                 "notebook.formatOnSave.enabled": true,
-                "python.defaultInterpreterPath": ".venv/bin/python",
-
+                "python.defaultInterpreterPath": ".venv/bin/python"
             },
             // Extensions that is handy to have in the devcontainer
             "extensions": [
