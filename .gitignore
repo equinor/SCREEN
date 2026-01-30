@@ -19,7 +19,7 @@ venv_*/
 .venv_*/
 
 # codespaces
-.devcontainer
+# .devcontainer
 
 # pflotran artifacts
 test_data/**/model/*.in
