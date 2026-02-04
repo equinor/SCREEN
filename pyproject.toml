@@ -1,47 +1,40 @@
-[tool.poetry]
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
 name = "screen"
 version = "0.1.0"
-description = "SCREEN: A tool to build legacy well representations on reservoir simulation grids"
-authors = ["Your Name <you@example.com>"]
+description = "Add your description here"
 readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "jsonpickle>=4.1.1",
+    "numpy>=2.4.1",
+    "pandas>=3.0.0",
+    "pydantic>=2.12.5",
+    "pyyaml>=6.0.3",
+    "resdata>=6.2.4",
+    "scipy>=1.17.0",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.8,<3.12"
-jsonpickle = "^3.0.2"
-PyYAML = "^6.0.1"
-pydantic = "^2.5.2"
-numpy = "1.24.4"
-pandas = "2.0.3"
-scipy = "1.10.1"
-ecl = "^2.14.5"
+[dependency-groups]
+dev = [
+    "ipykernel>=7.1.0",
+    "ipympl==0.9.3",
+    "jupyter==1.0.0",
+    "jupyter-dash==0.4.2",
+    "jupyterlab==4.3.8",
+]
+docs = [
+    "markdown-callouts==0.3.0",
+    "mkdocs==1.5.3",
+    "mkdocs-autorefs==0.5.0",
+    "mkdocs-material==9.4.14",
+    "mkdocstrings[python]==0.24.0",
+]
+test = ["pytest==7.4.3", "pytest-cov==4.1.0", "ruff==0.1.6"]
 
-
-[tool.poetry.group.dev.dependencies]
-jupyter = "^1.0.0"
-jupyterlab = "^4.3.8"
-jupyter-dash = "^0.4.2"
-ipympl = "^0.9.3"
-
-
-[tool.poetry.group.docs.dependencies]
-mkdocs = "^1.5.3"
-mkdocstrings = {extras = ["python"], version = "^0.24.0"}
-mkdocs-material = "^9.4.14"
-mkdocs-autorefs = "^0.5.0"
-markdown-callouts = "^0.3.0"
-
-
-[tool.poetry.group.test.dependencies]
-pytest = "^7.4.3"
-pytest-cov = "^4.1.0"
-ruff = "^0.1.6"
-
-
-[tool.poetry.group.dash.dependencies]
-dash = "^2.15.0"
-pyarrow = "^14.0.1"
-fastparquet = "^2023.10.1"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]

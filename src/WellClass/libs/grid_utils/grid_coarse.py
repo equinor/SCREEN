@@ -5,8 +5,8 @@ from typing import Union, Tuple
 import numpy as np
 import pandas as pd
 
-from ecl.grid import EclGrid
-from ecl.eclfile import EclInitFile
+from resdata.grid import Grid
+from resdata.resfile import ResdataInitFile
 
 # from ecl.eclfile import EclFile, EclRestartFile
 #import rips 
@@ -34,9 +34,9 @@ class GridCoarse:
         """
 
         #Get grid dimensions and coordinates
-        grid = EclGrid(simcase + ".EGRID") 
+        grid = Grid(simcase + ".EGRID") 
         #init = EclGrid(simcase + ".INIT") 
-        init = EclInitFile(grid, simcase + ".INIT")
+        init = ResdataInitFile(grid, simcase + ".INIT")
         # restart file
         # rst = EclRestartFile(grid, simcase + ".UNRST")
 

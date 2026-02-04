@@ -47,49 +47,56 @@ pip install -r requirements.txt
 ```
 You should now be ready to play with the source codes.
 
-## Poetry for dependency management
-`poetry`, as an alternative tool for dependency management, is required in Equinor to be compliant with IT policy.
+## uv for dependency management
+This code has been tested with Python versions 3.9 through 3.12. The recommended way to install and manage Python is using `uv`.
 
-### 1. Installation of poetry
-In case that `poetry` is not available in the system, you may have to download and install it yourself. Somehow the newer version of `poetry` doesn't work with python `3.8`. So we have to get an earlier of `poetry`, such as `1.2.0` with the following command: 
+### 1. Installation of uv
+**Equinor users:** Please follow the internal guidelines available at: https://wiki.equinor.com/wiki/Using_Python_on_Windows_11_with_uv
+
+For Windows users, install `uv` using winget:
 ```
-curl -sSL https://install.python-poetry.org | python3 - --version 1.2.0
+winget install --id=astral-sh.uv -e
 ```
-This should install `poetry` in your home directory. For example, in my case, it is installed at `/private/hzh/.local/bin`. Make sure to set this path as an environment variable in your `.cshrc` or `.bashrc` file so that you can access `poetry` from anywhere.
+
+For Linux/macOS users:
+```
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Once `uv` is installed, reload your terminal and install Python:
+```
+uv python install 3.12
+```
+
+For other installation methods, see the [uv installation docs](https://docs.astral.sh/uv/getting-started/installation/).
 
 You can test that everything is set up by executing:
-
 ```
-poetry --version
+uv --version
 ```
 
 ### 2. Installation of python dependencies
-To install python dependencies, run the following command<strong>*</strong>:
+To install python dependencies, run the following command:
 ```
-poetry install
+uv sync
 ```
 
 To check what packages have been installed, try the following command:
 ```
-poetry show --tree
+uv pip list
 ```
 
-To show where the virtual environment is located, run
+To show where the virtual environment is located, run:
 ```
-poetry env info
+uv venv --help
 ```
-This will display the python path for the activated virtual environment. The executable path can be used in VS Code to set up python interpreter path for builtin jupyter notebooks.
+This will display information about the virtual environment. The executable path can be used in VS Code to set up python interpreter path for builtin jupyter notebooks.
 
-The virtual envrionment can be activated with the command<strong>*</strong>:
+The virtual environment can be activated with the command:
 ```
-poetry shell
+source .venv/bin/activate
 ```
 This generated shell will be used to run standalone python scripts.
-
-> Note: For whatever reason, in case you decide to uninstall `poetry` package, you can do it with
-> ```
-> curl -sSL https://install.python-poetry.org | python3 - --uninstall
-> ```
 
 ## Experiments
 There are at least two ways to make experimenal runs of the codes. One is to run the experiments with Jupyter lab, and the other is commandline option. While Jupyter notebooks are mainly for QC tests and research purposes, the commandline option is aiming for production run.
