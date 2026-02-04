@@ -1,6 +1,6 @@
 {
   "name": "Full-stack devcontainer (Backend & Frontend)",
-  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "image": "mcr.microsoft.com/devcontainers/universal:latest",
 
   "hostRequirements": { "cpus": 8, "memory": "8gb", "storage": "32gb" },
 
