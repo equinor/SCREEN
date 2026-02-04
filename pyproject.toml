@@ -24,7 +24,7 @@ dev = [
     "ipympl==0.9.3",
     "jupyter==1.0.0",
     "jupyter-dash==0.4.2",
-    "jupyterlab==4.3.8",
+    "jupyterlab==4.4.8",
 ]
 docs = [
     "markdown-callouts==0.3.0",
