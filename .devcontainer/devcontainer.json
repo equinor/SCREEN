@@ -1,8 +1,55 @@
 {
-    "name":"SCREEN container",
-    "image":"mcr.microsoft.com/devcontainers/universal:2",
-    "containerEnv": {
-        "UV_LINK_MODE": "copy"
-    },
-    "postAttachCommand": "uv sync --all-groups"
+  "name": "Full-stack devcontainer (Backend & Frontend)",
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+
+  "hostRequirements": { "cpus": 8, "memory": "8gb", "storage": "32gb" },
+
+  "containerEnv": {
+    "UV_LINK_MODE": "copy"
+  },
+
+  // Run after VS Code attaches to the container – now at workspace root
+  "postAttachCommand": "uv sync --all-groups",
+
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "[toml]": {
+          "editor.defaultFormatter": "tamasfe.even-better-toml",
+          "editor.formatOnSave": true
+        },
+        "[json][jsonc]": {
+          "editor.defaultFormatter": "vscode.json-language-features",
+          "editor.formatOnSave": true
+        },
+        "[python]": {
+          "editor.formatOnSave": true,
+          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit",
+            "source.fixAll": "explicit"
+          }
+        },
+        "editor.formatOnSave": true,
+        "notebook.formatOnSave.enabled": true,
+
+        // Keep using the in-repo virtual environment that uv creates
+        "python.defaultInterpreterPath": ".venv/bin/python"
+      },
+      "extensions": [
+        "charliermarsh.ruff",
+        "ms-python.python",
+        "ms-toolsai.jupyter",
+        "tamasfe.even-better-toml",
+        "eamodio.gitlens",
+        "streetsidesoftware.code-spell-checker",
+        "streetsidesoftware.code-spell-checker-norwegian-bokmal",
+        "streetsidesoftware.code-spell-checker-scientific-terms"
+      ]
+    }
+  },
+
+  "features": {
+    "ghcr.io/va-h/devcontainers-features/uv:1": {}
+  }
 }
