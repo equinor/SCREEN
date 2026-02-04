@@ -2,19 +2,19 @@
 """
 import numpy as np
 
-from ecl.grid import EclGrid
-from ecl.eclfile import EclInitFile
+from resdata.grid import Grid
+from resdata.resfile import ResdataInitFile
 
 
-def make_stat_3d_main(grid: EclGrid, 
-                      init: EclInitFile, 
+def make_stat_3d_main(grid: Grid, 
+                      init: ResdataInitFile, 
                       vec: str, 
                       default_val=-1)->np.ndarray:
     """ making the 3D grid
 
         Args:
-            grid (EclGrid): Eclipse grid information  
-            init (EclInitFile): Eclipse init grid information
+            grid (Grid): Eclipse grid information  
+            init (ResdataInitFile): Eclipse init grid information
             vec (str): property name
             default_val (float): default is -1
 

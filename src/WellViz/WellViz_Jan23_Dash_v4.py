@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import os
-from ecl.eclfile import EclInitFile, EclRestartFile
-from ecl.grid import EclGrid
+from resdata.resfile import ResdataInitFile, ResdataRestartFile
+from resdata.grid import Grid
 import numpy as np
 import sys
 import pandas as pd
@@ -38,9 +38,9 @@ if os.path.isfile(file_rst_df) and os.path.isfile(file_init_df):
 
 #Start processing
 #Get grid dimensions and coordinates
-grid = EclGrid(simcase + ".EGRID")
-init = EclInitFile(grid ,simcase + ".INIT")
-rst = EclRestartFile(grid ,simcase + ".UNRST")
+grid = Grid(simcase + ".EGRID")
+init = ResdataInitFile(grid ,simcase + ".INIT")
+rst = ResdataRestartFile(grid ,simcase + ".UNRST")
 
 #Process init file
 lgr_name = grid.get_lgr(0).get_name()
