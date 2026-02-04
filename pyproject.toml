@@ -33,7 +33,7 @@ docs = [
     "mkdocs-material==9.4.14",
     "mkdocstrings[python]==0.24.0",
 ]
-test = ["pytest==7.4.3", "pytest-cov==4.1.0", "ruff==0.1.6"]
+test = ["pytest==7.4.3", "pytest-cov==4.1.0", "ruff==0.5.3"]
 
 [tool.setuptools.packages.find]
 where = ["."]
