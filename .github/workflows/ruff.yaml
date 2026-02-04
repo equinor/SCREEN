@@ -8,11 +8,14 @@ on:
 
   push:
     branches: 
-    - hzh/unittest
+    - main
+    - gpb/dev
 
   workflow_dispatch:
     branches:
-    - hzh/unittest
+    - main
+    - gpb/dev
+
 
 permissions:
   contents: read
@@ -22,18 +25,25 @@ jobs:
 
     runs-on: ubuntu-latest
 
+
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    - name: Lint with Ruff
-      run: |
-        pip install ruff
-        ruff --output-format=github .
-      continue-on-error: true
+      - uses: actions/checkout@v4
+
+      # Install uv (fast Python toolchain & package manager)
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      # Create env from your pyproject; install ruff via dependencies or group
+      - name: Sync dependencies (lint group if you use it)
+        run: |
+          # If you keep dev/lint deps under an optional group:
+          #   uv sync --group lint
+          # Otherwise, just:
+          uv sync
+          # Ensure ruff is present if you haven’t added it in pyproject:
+          uv add --dev ruff
+
+      # Run Ruff with GitHub-friendly output
+      - name: Lint with Ruff
+        run: uv run ruff check --output-format=github .
+        continue-on-error: true
