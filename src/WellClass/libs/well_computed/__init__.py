@@ -1,11 +1,13 @@
 
 from .borehole import compute_borehole
-from .cement_bond import compute_cement_bond
 from .annulus import compute_annulus
 
-from .barriers_mod import compute_barriers_diam
+from .plugs_diameter import compute_plugs_diameter
 from .barriers_names import get_barriers_names
-from .barrier_props import (
-    get_barrier_height_and_depth,
-    get_barrier_radius,
+from .plug_properties import compute_plug_properties
+
+
+from .well_path import (
+    build_wellpath_object,
+    md2tvd_interpolator,
 )

@@ -1,51 +1,65 @@
-
+from typing import Callable, Dict, List, Optional, Any
 import numpy as np
-import pandas as pd
 
-def compute_annulus(casings: dict, drilling: dict) -> dict:
-    """ Compute annulus fields. For simplicty it assumes 
-        annulus between casing and openhole as entire annulus
+def compute_annulus(
+    holes: List[Dict], casings: List[Dict], md2tvd: Callable[[float], float], cement_bond: Optional[List[Dict]], 
+    solve_cement_bond: bool = False
+) -> List[Dict[str, Any]]:
+    holes_casings_merged = holes + casings
+    annulus_intervals = []
 
-        Args:
-            casings (dict): contains casing information
-            drilling (dict): contains drilling information
+    # Determine which intervals to process based on solve_cement_bond flag and availability of cement_bond data
+    intervals_to_process = cement_bond if solve_cement_bond and cement_bond is not None else casings
 
-        Returns:
-            annulus (dict): contains annulus information
-    """
+    for cb in reversed(intervals_to_process):
+        cb_top = cb["top_rkb"]
+        cb_bottom = cb["bottom_rkb"]
+        cb_id = cb["diameter_m"]
+        cb_id_in = cb["diameter_in"]
 
-    casings_df  = pd.DataFrame(casings)
-    drilling_df = pd.DataFrame(drilling)
+        holes_larger = [
+            item for item in holes_casings_merged if item["diameter_m"] > cb_id and item["bottom_rkb"] > cb_top and item["top_rkb"] < cb_bottom
+        ]
+        holes_larger_sorted = sorted(holes_larger, key=lambda x: x["diameter_m"])
 
-    annulus_fields = []
-    # casing
-    for idx, row in casings_df[::-1].iterrows():
+        cb_remaining_top = cb_top
+        cb_remaining_bottom = cb_bottom
 
-        # get id from casing
-        d, top, bottom = row[['diameter_m', 'top_msl', 'bottom_msl']]
+        for hl in holes_larger_sorted:
+            cb_overlap_top = max(hl["top_rkb"], cb_remaining_top)
+            cb_overlap_bottom = min(hl["bottom_rkb"], cb_remaining_bottom)
+            cb_overlap_od = hl["diameter_m"]
+            cb_overlap_od_in = hl["diameter_in"]
 
-        # get od from drilling
-        hole = drilling_df[drilling_df['diameter_m'] > d].iloc[-1]
-    
-        # extract the fields
-        hole_top, hole_bottom, hole_d = hole[['top_msl', 'bottom_msl', 'diameter_m']]
+            if cb_overlap_bottom <= cb_overlap_top:
+                # no valid overlap,
+                continue
 
-        # collect them
-        annulus_fields.append((hole_d, d, hole_top, hole_bottom))
+            # Shrink remaining interval by removing the overlap just processed
+            if cb_overlap_bottom < cb_remaining_bottom:
+                cb_remaining_top = cb_overlap_bottom
 
-    # make a dataframe
-    annulus_df = pd.DataFrame(data=annulus_fields, columns=['ann_od_m', 'ann_id_m', 'top_msl', 'bottom_msl'])
-    # sorted it
-    annulus_df = annulus_df.sort_values(by=['ann_od_m'], ascending=False, ignore_index=True)
+            if cb_overlap_top > cb_remaining_top:
+                cb_remaining_bottom = cb_overlap_top
 
-    #Compute inner area
-    annulus_df['A_i'] = np.pi * (annulus_df['ann_id_m']/2)**2
+            # if cb_remaining_length > 0:
+            annulus_intervals.append(
+                {
+                    "top_rkb": cb_overlap_top,
+                    "bottom_rkb": cb_overlap_bottom,
+                    "top_tvd_msl": md2tvd(cb_overlap_top),
+                    "bottom_tvd_msl": md2tvd(cb_overlap_bottom),
+                    "id_m": cb_id,
+                    "od_m": cb_overlap_od,
+                    "id_in": cb_id_in,
+                    "od_in": cb_overlap_od_in,
+                    'A_i_m2': np.pi * (cb_id/2)**2,
+                    'A_o_m2': np.pi * (cb_overlap_od/2)**2,
+                    'an_thickness_m': (cb_overlap_od - cb_id) / 2,
+                }
+            )
 
-    #Compute outer area
-    annulus_df['A_o'] = np.pi * (annulus_df['ann_od_m']/2)**2
+    # Sort intervals by top_rkb ascending, then id_in descending
+    annulus_intervals = sorted(annulus_intervals, key=lambda x: (x["top_rkb"], -x["id_in"]))
 
-    # annulus thickness: (od-id)/2
-    annulus_df['thick_m'] = (annulus_df['ann_od_m'] - annulus_df['ann_id_m'])/2
-
-    return annulus_df.to_dict()
-
+    return annulus_intervals

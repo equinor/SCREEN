@@ -1,121 +1,141 @@
+from typing import List, Optional, Tuple, Dict
 
-import pandas as pd
+import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle
 import matplotlib.ticker as plticker
+from matplotlib.patches import Rectangle
 
-from ..well_class.well_class import Well
 from ..utils.fraction_float import float_to_fraction_inches
+from ..well_class.well_class import Well
 
-def hole_plotter(axis, df, hole_bool, fill_bool = True, z_order = 0):
 
+def split_hole_casings(data: list[dict]) -> dict[str, list[dict]]:
+    hole = [item for item in data if item["type"] == "hole"]
+    casing = [item for item in data if item["type"] == "casing"]
+    casing_cement = [item for item in data if item["type"] == "casing cement"]
+    return {"holes": hole, "casing": casing, "casing_cement": casing_cement}
+
+
+def hole_plotter(ax: matplotlib.axes.Axes, 
+                 data: List[Dict], 
+                 hole_bool: bool, 
+                 fill_bool: bool = True, 
+                 z_order: int = 0) -> None:
     """
     Draws all open hole elements. Applies for both drilling and borehole dataframes
     """
 
     if hole_bool:
-        for idx, row in df.iterrows():
-                xy = (-row['diameter_m']/2, row['top_msl'])
-                width = row['diameter_m']
-                height = row['bottom_msl'] - row['top_msl']
-                axis.add_patch(Rectangle(xy, width, height, zorder=z_order, fill = fill_bool, facecolor=r'#CB8A58'))
+        for row in data:
+            xy = (-row["diameter_m"] / 2, row["tvd_msl_top"])
+            width = row["diameter_m"]
+            height = row["tvd_msl_bottom"] - row["tvd_msl_top"]
+            ax.add_patch(Rectangle(xy, width, height, zorder=z_order, fill=fill_bool, facecolor=r"#CB8A58"))
 
 
- 
-
-def casings_plotter(axis, df, color_tone, txt_size, x_txt_pos,
-                 annot_bool, casings_bool, c_shoe_bool, c_weld_bool):
-    
-    
+def casings_plotter(ax: matplotlib.axes.Axes, 
+                    data: List[Dict],
+                    color_tone: str, 
+                    txt_size: int, 
+                    x_txt_pos: float, 
+                    annot_bool: bool, 
+                    casings_bool: bool, 
+                    c_shoe_bool: bool, 
+                    c_weld_bool: bool) -> None:
     """
     Draws all components linked to the tubular assembly:
     - Casings
     - Casing shoes/welded transitions
     - Annotations
     """
-    
-    y_base  =  df['bottom_msl']
-    y_top   =  df['top_msl']
-    x_left  = -df['diameter_m']/2
-    x_right =  df['diameter_m']/2
+
+    y_base = [item["tvd_msl_bottom"] for item in data]
+    y_top = [item["tvd_msl_top"] for item in data]
+    x_left = [-item["diameter_m"] / 2 for item in data]
+    x_right = [item["diameter_m"] / 2 for item in data]
     shoe_size = 3
-
-
 
     # Create marker for casing shoe
     left_shoe = [[0, 0], [-shoe_size, 0], [0, shoe_size], [0, 0]]
     right_shoe = [[0, 0], [shoe_size, 0], [0, shoe_size], [0, 0]]
 
-    
     # query dataframe for shoe items
-    shoe_query = df[df['shoe']]
+    shoe_items = [item for item in data if item.get("shoe", False)]
 
     # define x and y positions
-    x_pos_shoe = shoe_query['diameter_m']/2
-    y_pos_shoe = shoe_query['bottom_msl']
+    y_pos_shoe = [item["tvd_msl_bottom"] for item in shoe_items]
+    right_x_pos_shoe = [item["diameter_m"] / 2 for item in shoe_items]
+    left_x_pos_shoe = [-item["diameter_m"] / 2 for item in shoe_items]
 
     # query dataframe for welded sections
-    weld_query = df[~df['shoe'].astype(bool)]
-    
+    weld_items = [item for item in data if not item.get("shoe", False)]
+
     # Draw casings
     if casings_bool:
-        #draw right hand casing
-        axis.vlines(x =  x_right, ymin = y_top, ymax = y_base,  color = color_tone, lw= 1.5, zorder = 10)
+        for x_l, x_r, y_t, y_b in zip(x_left, x_right, y_top, y_base):
+            # draw right hand casing
+            ax.vlines(x=x_right, ymin=y_top, ymax=y_base, color=color_tone, lw=1.5, zorder=10)
 
-        #draw left hand casing
-        axis.vlines(x =  x_left,  ymin = y_top, ymax = y_base,  color = color_tone, lw= 1.5, zorder = 10)
+            # draw left hand casing
+            ax.vlines(x=x_left, ymin=y_top, ymax=y_base, color=color_tone, lw=1.5, zorder=10)
 
     # Draw casing shoes
     if c_shoe_bool:
-        #draw left casing shoe
-        axis.scatter( x_pos_shoe, y_pos_shoe, marker = right_shoe, c=color_tone, zorder=10)
+        # draw left casing shoe
+        ax.scatter(left_x_pos_shoe, y_pos_shoe, marker=left_shoe, c=color_tone, zorder=10)
 
-        #draw right casing shoe
-        axis.scatter(-x_pos_shoe, y_pos_shoe, marker = left_shoe,  c=color_tone, zorder=10)
+        # draw right casing shoe
+        ax.scatter(right_x_pos_shoe, y_pos_shoe, marker=right_shoe, c=color_tone, zorder=10)
 
     # Draw welded
     if c_weld_bool:
-        
-        for idx, row in weld_query.iterrows():
-                max_D = row['diameter_m']
-                max_Z = row['bottom_msl']
+        for item in weld_items:
+            max_D = item["diameter_m"]
+            max_Z = item["tvd_msl_bottom"]
 
-                query = casings_df.query('diameter_m<@max_D & top_msl==@max_Z')
-                min_D = query.iloc[0]['diameter_m']
+            candidates = [c for c in data if c["diameter_m"] < max_D and c["tvd_msl_top"] == max_Z]
+            if not candidates:
+                continue
 
-                axis.plot([ max_D/2,  min_D/2], [max_Z]*2, c=color_tone, zorder=10)
-                axis.plot([-max_D/2, -min_D/2], [max_Z]*2, c=color_tone, zorder=10)
-          
+            min_D = min(c["diameter_m"] for c in candidates)
+
+            ax.plot([max_D / 2, min_D / 2], [max_Z] * 2, c=color_tone, zorder=10)
+            ax.plot([-max_D / 2, -min_D / 2], [max_Z] * 2, c=color_tone, zorder=10)
 
     # Draw annotations
     if annot_bool:
-        for idx, row in shoe_query.iterrows():
-                ycoord = row['bottom_msl']
-                d_in =   row['diameter_in']
-                shoe_label = float_to_fraction_inches(d_in)+' shoe'
-                
-                axis.annotate(shoe_label, xy = (x_txt_pos, ycoord), fontsize = txt_size, va = 'center', ha='right')
+        for item in shoe_items:
+            ycoord = item["tvd_msl_bottom"]
+            d_in = item["diameter_in"]
+            shoe_label = float_to_fraction_inches(d_in) + " shoe"
+
+            ax.annotate(shoe_label, xy=(x_txt_pos, ycoord), fontsize=txt_size, va="center", ha="right")
 
 
-def cement_bond_plotter(axis, df, cement_bond_bool):
+def cement_bond_plotter(ax: matplotlib.axes.Axes, 
+                        data: List[Dict], 
+                        cement_bond_bool: bool) -> None:
     if cement_bond_bool:
-        for idx, row in df.iterrows():
-            width = (row['od_m'] - row['id_m'])/2
-            height = row['bottom_msl'] - row['top_msl']
+        for row in data:
+            width = (row["od_m"] - row["id_m"]) / 2
+            height = row["bottom_tvd_msl"] - row["top_tvd_msl"]
 
-            right_xy = (row['id_m']/2, row['top_msl'])
-            left_xy = (-row['od_m']/2, row['top_msl'])
+            right_xy = (row["id_m"] / 2, row["top_tvd_msl"])
+            left_xy = (-row["od_m"] / 2, row["top_tvd_msl"])
 
-            axis.add_patch(Rectangle(right_xy, width, height, facecolor='lightgray', zorder=5, hatch='\\\\\\'))
-            axis.add_patch(Rectangle(left_xy, width, height, facecolor='lightgray', zorder=5 , hatch='///'))
-            
-      
+            ax.add_patch(Rectangle(right_xy, width, height, facecolor="lightgray", zorder=5, hatch="\\\\\\"))
+            ax.add_patch(Rectangle(left_xy, width, height, facecolor="lightgray", zorder=5, hatch="///"))
 
-def cement_plug_plotter(axis, df_barriers, df_barriers_mod, plug_bool, annot_bool, txt_size):
 
+def cement_plug_plotter(ax: matplotlib.axes.Axes, 
+                        plugs: List[Dict], 
+                        processed_plugs: List[Dict], 
+                        plug_bool: bool, 
+                        annot_bool: bool, 
+                        txt_size: int) -> None:
     """
     axis: Matplotlib object where items will be plotted
-    df_barriers: Dataframe listing the barriers 
+    df_barriers: Dataframe listing the barriers
     df_barriers_mod: Dataframe that describes the visual display of barriers.
     plug_bool: Boolean if barriers are to be displayed
     annot_bool: Boolean if annotations are to be included
@@ -123,119 +143,130 @@ def cement_plug_plotter(axis, df_barriers, df_barriers_mod, plug_bool, annot_boo
     """
 
     if plug_bool:
-        for idx, row in df_barriers_mod.iterrows():
-
-                xy = (-row['diameter_m']/2, row['top_msl'])
-                width = row['diameter_m']
-                height = row['bottom_msl'] - row['top_msl']
-                axis.add_patch(Rectangle(xy, width, height, facecolor='gray', zorder=1))
+        for row in processed_plugs:
+            xy = (-row["diameter_m"] / 2, row["top_tvd_msl"])
+            width = row["diameter_m"]
+            height = row["bottom_tvd_msl"] - row["top_tvd_msl"]
+            ax.add_patch(Rectangle(xy, width, height, facecolor="gray", zorder=1))
 
     if annot_bool:
-        for idx, row in df_barriers.iterrows():
-                ycoord = (row['top_msl'] + row['bottom_msl'])/2
-                axis.annotate(text = row['barrier_name'], xy = (0, ycoord), fontsize = txt_size, va = 'center', ha='center')
+        for row in plugs:
+            ycoord = (row["tvd_msl_top"] + row["tvd_msl_bottom"]) / 2
+            ax.annotate(text=row["name"], xy=(0, ycoord), fontsize=txt_size, va="center", ha="center")
 
-def geology_plotter(axis, df_geol, w_header, geol_bool, annot_bool, width, x_txt_pos, txt_size):
+
+def stratigraphy_plotter(ax: matplotlib.axes.Axes, 
+                         data: List[Dict], 
+                         w_header: Dict, 
+                         geol_bool: bool, 
+                         annot_bool: bool, 
+                         width: float, 
+                         x_txt_pos: float, 
+                         txt_size: int) -> None:
+    tops_hlines = [item["tvd_msl_top"] for item in data]
+
     if geol_bool:
-        axis.hlines(y=df_geol['top_msl'], xmin=-width, xmax=width, zorder=-4, lw=.25, color='k')
-        axis.axhspan(0, w_header['sf_depth_msl'], color='lightblue', alpha=0.5, zorder=-20)
-        axis.axhspan(w_header['sf_depth_msl'], w_header['well_td_rkb'], color='tan', alpha=0.5, zorder=-20)
+        ax.hlines(y=tops_hlines, xmin=-width, xmax=width, zorder=-4, lw=0.25, color="k")
+        ax.axhspan(0, w_header["ground_elevation"], color="lightblue", alpha=0.5, zorder=-20)
+        ax.axhspan(w_header["ground_elevation"], w_header["total_depth_rkb"], color="tan", alpha=0.5, zorder=-20)
 
     if annot_bool:
-        for index, row in df_geol.iterrows():
-                if row['reservoir_flag']:
-                        axis.axhspan(row['top_msl'], row['base_msl'], color='yellow', zorder=-10)
-        
-                ycoord = (row['top_msl'] + row['base_msl'])/2
-                axis.annotate(text = row['geol_unit'], xy = (x_txt_pos, ycoord), fontsize = txt_size, va = 'center')
+        for row in data:
+            # if row["reservoir_flag"]:
+            #     axis.axhspan(row["tvd_msl_top"], row["tvd_msl_bottom"], color="yellow", zorder=-10)
+
+            ycoord = (row["tvd_msl_top"] + row["tvd_msl_bottom"]) / 2
+            ax.annotate(text=row["name"], xy=(x_txt_pos, ycoord), fontsize=txt_size, va="center")
 
 
-def plot_sketch(mywell: Well, ax=None, 
-                *, 
-                draw_drillings=True,
-                draw_casings=True,
-                draw_casing_shoes=True,
-                draw_open_hole=False,    # Note: default is False
-                draw_welded=True,
-                draw_cement_bond=True,
-                draw_barriers=True,
-                draw_geology=True,
-                draw_annotation=True,
-                save_file=None):
-
-    """ 
+def plot_sketch(
+    mywell: Well,
+    ax: Optional[matplotlib.axes.Axes]=None,
+    *,
+    save_file: Optional[str] = None,
+    **kwargs,
+    ) -> Tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]:
+    """
     plot well sketch
-    
+
     """
 
     if ax is None:
         fig, ax = plt.subplots()
+    else:
+        fig = ax.figure
 
-    #Automatically define the y scale in 250 m intervals
-    loc = plticker.MultipleLocator(base=250) # this locator puts ticks at regular intervals
+    # Automatically define the y scale in 250 m intervals
+    loc = plticker.MultipleLocator(base=250)  # this locator puts ticks at regular intervals
     ax.yaxis.set_major_locator(loc)
-            
 
-    drilling_df =     pd.DataFrame(mywell.drilling)
-    casings_df =      pd.DataFrame(mywell.casings)
-    cb_df =           pd.DataFrame(mywell.cement_bond)
-    borehole_df =     pd.DataFrame(mywell.borehole)
-    barriers_df =     pd.DataFrame(mywell.barriers)
-    barriers_fmt_df = pd.DataFrame(mywell.barriers_mod)
-    geology_df =      pd.DataFrame(mywell.geology)
-    well_header =     mywell.header
+    hole_casings = split_hole_casings(mywell.hole_casings)
 
+    hole_data = hole_casings["holes"]
+    casing_data = hole_casings["casing"]
+    cement_bond = mywell.cement_bond
+    borehole_data = mywell.borehole
+    plugs_data = mywell.plugs
+    processed_plugs_data = mywell.processed_plugs
+    stratigraphy_data = mywell.stratigraphy
 
-
-    #define plot spatial references
-    AX_WIDTH = 2 * drilling_df['diameter_m'].max()/2 #plot width
-    XCOORD_LEFT = -drilling_df['diameter_m'].max()/2 #well construction text
-    XCOORD_RIGHT = drilling_df['diameter_m'].max()/2 #geology text
+    # define plot spatial references
+    max_diameter = max([item["diameter_m"] for item in hole_data])
+    AX_WIDTH = max_diameter  # plot width
+    XCOORD_LEFT = -max_diameter / 2  # well construction text
+    XCOORD_RIGHT = max_diameter / 2  # geology text
     TXT_FS_LEFT = 7
     TXT_FS_RIGHT = 6
-    STEELCOLOR = '#702F00'
-    base_deepest_rsrv = geology_df[geology_df.reservoir_flag]['base_msl'].max()
-    ymax = max([base_deepest_rsrv,mywell.co2_datum])+100
+    STEELCOLOR = "#702F00"
+    # base_deepest_rsrv = stratigraphy_data[stratigraphy_data.reservoir_flag]["base_msl"].max()
+    ymax = max([item["tvd_msl_bottom"] for item in stratigraphy_data])
 
     # Draw drilling (Bit size)
-    hole_plotter(axis = ax, df = drilling_df,  hole_bool=draw_drillings)    
-   
-    #Draw casings
-    casings_plotter(axis = ax, df = casings_df, color_tone=STEELCOLOR, txt_size=TXT_FS_LEFT,
-                 x_txt_pos=XCOORD_LEFT, annot_bool=draw_annotation, casings_bool=draw_casings,
-                 c_shoe_bool = draw_casing_shoes, c_weld_bool=draw_welded)
+    hole_plotter(ax, hole_data, kwargs.get("draw_hole", True))
 
+    # Draw casings
+    casings_plotter(
+        ax=ax,
+        data=casing_data,
+        color_tone=STEELCOLOR,
+        txt_size=TXT_FS_LEFT,
+        x_txt_pos=XCOORD_LEFT,
+        annot_bool=kwargs.get("draw_annotation", True),
+        casings_bool=kwargs.get("draw_casings", True),
+        c_shoe_bool=kwargs.get("draw_casing_shoes", True),
+        c_weld_bool=kwargs.get("draw_welded", True),
+    )
 
-    #Draw cement bond
-    cement_bond_plotter(axis = ax, df = cb_df, cement_bond_bool=draw_cement_bond)
+    # Draw cement bond
+    cement_bond_plotter(ax, cement_bond, kwargs.get("draw_cement_bond", True))
 
+    # draw barriers
+    cement_plug_plotter(ax, plugs_data, processed_plugs_data, kwargs.get("draw_barriers", True), kwargs.get("draw_annotation", True), TXT_FS_LEFT)
 
-    #draw barriers
-    cement_plug_plotter(axis = ax, df_barriers=barriers_df, df_barriers_mod=barriers_fmt_df, plug_bool = draw_barriers,
-                        annot_bool = draw_annotation, txt_size= TXT_FS_LEFT)
+    # Draw open hole (borehole/pipe) for testing only
+    hole_plotter(ax, borehole_data, kwargs.get("draw_open_hole", False), fill_bool=False, z_order=100)
 
-    #Draw open hole (borehole/pipe) for testing only
-    hole_plotter(axis = ax, df = borehole_df,  hole_bool=draw_open_hole, fill_bool=False, z_order = 100)    
-
-
-    #Draw geological information
-    geology_plotter(axis = ax, df_geol = geology_df, w_header = well_header, geol_bool=draw_geology, 
-                    annot_bool=draw_annotation, width = AX_WIDTH, x_txt_pos=XCOORD_RIGHT, txt_size=TXT_FS_RIGHT)
-
+    # Draw geological information
+    stratigraphy_plotter(
+        ax,
+        stratigraphy_data,
+        mywell.header,
+        kwargs.get("draw_geology", True),
+        kwargs.get("draw_annotation", True),
+        AX_WIDTH,
+        XCOORD_RIGHT,
+        TXT_FS_RIGHT,
+    )
 
     ax.set_xlim(-AX_WIDTH, AX_WIDTH)
     ax.set_ylim(0, ymax)
     ax.invert_yaxis()
-    ax.set_ylabel('depth [mMSL]')
-    ax.set_xlabel('radius [m]')
-    
+    ax.set_ylabel("depth [mMSL]")
+    ax.set_xlabel("radius [m]")
+
     # save figure to the disk
     if save_file:
-          plt.savefig(save_file)
+        fig.savefig(save_file)
 
-    if 'fig' in locals():
-            return fig, ax
-    else:
-            return ax
-    
 
+    return fig, ax

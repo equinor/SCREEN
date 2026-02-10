@@ -1,7 +1,7 @@
 
 import yaml
 
-from ..models import WellModel
+from ..models.well_model import WellModel
 
 def yaml_parser(yaml_file: str) -> WellModel:
     """ load a yaml file

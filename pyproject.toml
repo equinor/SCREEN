@@ -16,6 +16,7 @@ dependencies = [
     "pyyaml>=6.0.3",
     "resdata>=6.2.4",
     "scipy>=1.17.0",
+    "wellpathpy>=0.5.2",
 ]
 
 [dependency-groups]
