@@ -132,7 +132,7 @@ class WellProcessed(Well):
     def _compute_plug_properties(self, eval_plug: str):
         return compute_plug_properties(self.processed_plugs, self.plug_names, eval_plug)
 
-    def plot(self, ax=None, **kwargs):
+    def plot_sketch(self, ax=None, **kwargs):
         from src.WellClass.libs.plotting.plot_sketch import plot_sketch
 
         fig, ax = plot_sketch(self, ax=ax, **kwargs)
