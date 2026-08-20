@@ -102,15 +102,42 @@ This adapter is useful, but it should be a named transition. New WellClass code 
 
 ## What Is Working Today
 
-- The current Python test suite passes: `8 passed`.
+- The current Python test suite passes: `44 passed`, with two expected warnings from sparse Shmin data extrapolation.
 - The WellClass-to-GaP adapter has a controlled vertical-well regression test.
 - A real Wildcat input can be converted into `hole_casings`, processed, adapted, and passed through `LGRBuilder` to produce a GRDECL artifact.
 - The three canonical notebooks now cover WellClass, GaP grid primitives, and the end-to-end path:
   - [`01_wellclass.ipynb`](../notebooks/01_wellclass.ipynb)
   - [`02_gap_grid.ipynb`](../notebooks/02_gap_grid.ipynb)
   - [`03_wellclass_to_gap.ipynb`](../notebooks/03_wellclass_to_gap.ipynb)
+- The canonical WellClass notebook now shows a one-page sketch, hydrostatic water and CO2 pressure profiles, and a CO2 P-T density plot.
+- The notebook CI workflow executes all three canonical notebooks with the locked `uv` environment.
+- The WellClass-to-GaP vocabulary has been migrated incrementally: `holes_df`, `plugs_df`, `barrier_regions_df`, `casing_cement`, `cement_bond`, and canonical `plug_positions` are available while legacy aliases remain at compatibility boundaries.
+- PVT hydrostatic calculations accept canonical WellClass depth headers as well as legacy headers.
+- Pressure intersection, pressure integration, pressure scenarios, PressureTable, plug geometry, borehole plotting, GaP bounding boxes, CARFIN writers, and mesh material assignment have focused regression coverage.
 
 These are important smoke paths, not yet a complete production guarantee.
+
+### Checkpoint: 2026-08-20
+
+The repository is in a better-observed state, but not a finished or fully standardized state. The main workflow can now be followed and tested from WellClass input through GaP GRDECL generation. The remaining work should be planned from the contracts and vocabulary above, not from another broad refactor.
+
+Completed during this pass:
+
+- Established three canonical workflow notebooks with visual QC.
+- Added CI execution for the canonical notebooks.
+- Added explicit WellClass-to-GaP permeability inputs.
+- Fixed feet-to-metre normalization before TVD derivation.
+- Fixed discontinuous-hole validation and cement-material preservation.
+- Added pressure, PVT, plug, intersection, CARFIN, mesh-material, and grid-boundary tests.
+- Removed broken legacy documentation links and pinned the compatible MkDocs documentation stack.
+
+Known residual risks:
+
+- Legacy aliases and terminology still exist in the adapter, CSV parser, comments, historical scripts, and old notebooks.
+- The pressure/PVT examples use explicit illustrative assumptions where the Frigg fixture has no reservoir scenario or temperature-gradient fields.
+- The simulator workflows still require external `runpflotran1.8`/`runcirrus` tools and are not part of the pure-Python test suite.
+- Strict MkDocs still reports existing docstring/deprecation warnings even though the non-strict build succeeds.
+- Overall source coverage remains low outside the paths now tested; pressure and geometry coverage is better, but plotting and simulator orchestration are not comprehensively verified.
 
 ## The Main Risks
 
@@ -185,6 +212,8 @@ The repository needs a support classification before cleanup:
 
 **Exit criterion:** a fresh environment can say, automatically, which part of the workflow works and which external tool is missing.
 
+**Status:** substantially complete. The canonical notebook CI smoke workflow exists and runs with `uv.lock`; simulator dependency reporting and dry-run behavior remain.
+
 ### Phase 1: Lock down the WellClass contract
 
 1. Add parameterized vertical wells: no casing, one casing, multiple casing overlaps, cement gaps, plugs, and no survey.
@@ -195,6 +224,8 @@ The repository needs a support classification before cleanup:
 6. Move permeability and other modeling assumptions into an explicit configuration model.
 
 **Exit criterion:** WellClass can be trusted independently of GaP and produces documented, stable records.
+
+**Status:** core geometry, unit, validation, plug, pressure, and PVT contracts are covered. Remaining work is broader deviated-well and pressure/PVT scenario coverage plus explicit modeling assumptions.
 
 ### Phase 2: Test GaP as a pure transformation
 
@@ -207,6 +238,8 @@ The repository needs a support classification before cleanup:
 
 **Exit criterion:** GaP can prove that a known dataframe and grid produce a known mesh artifact without running PFLOTRAN/Cirrus.
 
+**Status:** substantially complete for current bounding-box, material, CARFIN, and end-to-end smoke paths. A smaller committed grid fixture and broader material edge cases remain.
+
 ### Phase 3: Make the boundary intentional
 
 1. Rename `WellDataFrame` to a clearly transitional adapter or move it into a GaP input module.
@@ -216,6 +249,8 @@ The repository needs a support classification before cleanup:
 5. Add one end-to-end test comparing the current and refactored vertical-well geometry.
 
 **Exit criterion:** WellClass does not know GaP’s historical dataframe vocabulary, and GaP has one documented input contract.
+
+**Status:** in progress. Canonical aliases and internal `holes_df`/`barrier_regions_df` names exist, but legacy aliases and dataframe contracts are still present.
 
 ### Phase 4: Clarify operational workflows
 
