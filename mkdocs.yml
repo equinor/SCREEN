@@ -60,6 +60,7 @@ nav:
   - Pre‐processing and Preliminary Assessment: well_class.md
   - Detailed Simulation workflow: gap.md
   - Developer Guides:
+      - Architecture Manifesto: architecture_manifesto.md
       - MkDocs: mkdocs.md
       - Installation: INSTALLATION.md
       - Code References:
