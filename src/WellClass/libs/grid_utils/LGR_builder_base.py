@@ -15,7 +15,7 @@ class LGRBuilderBase:
         LGR_NAME: str,
         holes_df: pd.DataFrame,
         casings_df: pd.DataFrame,
-        barriers_mod_df: pd.DataFrame,
+        barrier_regions_df: pd.DataFrame,
         NX: int,
         NY: int,
         main_grd_i: int,
@@ -54,7 +54,7 @@ class LGRBuilderBase:
         # 3. the pipes/openholes/barriers
         df_to_gap_casing(holes_df, casings_df, LGR_NAME, O)
 
-        df_to_gap_barrier(barriers_mod_df, LGR_NAME, O)
+        df_to_gap_barrier(barrier_regions_df, LGR_NAME, O)
 
         # 4. handle reopen hole
         nz_ovb = 10 * no_of_layers_in_OB  # total number of ovb layers (refined grid)

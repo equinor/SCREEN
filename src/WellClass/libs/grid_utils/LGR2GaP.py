@@ -126,19 +126,19 @@ def df_to_gap_casing(holes_df: pd.DataFrame, casings_df: pd.DataFrame, LGR_NAME:
             )
 
 
-def df_to_gap_barrier(barriers_mod_df: pd.DataFrame, LGR_NAME: str, O: TextIO) -> None:  # noqa: E741
+def df_to_gap_barrier(barrier_regions_df: pd.DataFrame, LGR_NAME: str, O: TextIO) -> None:  # noqa: E741
     """convert barrier dataframe to gap format
 
     Args:
-        barriers_mod_df (pd.DataFrame): dataframe for barriers
+        barrier_regions_df (pd.DataFrame): dataframe for GaP barrier regions
         LGR_NAME (str): LGR name
         O (TextIO): opened file handle
     """
 
-    for idx, row in barriers_mod_df.iterrows():
+    for idx, row in barrier_regions_df.iterrows():
         # bbox for barrier
         columns = ["diameter_m", "ij_min", "ij_max", "k_min", "k_max", "barrier_perm"]
-        ID, ij_min_bar, ij_max_bar, k_min_bar, k_max_bar, bar_perm = barriers_mod_df.loc[idx, columns]
+        ID, ij_min_bar, ij_max_bar, k_min_bar, k_max_bar, bar_perm = barrier_regions_df.loc[idx, columns]
 
         # qc it
         # print('barrier===>', idx, ID, strt_depth, end_depth, barrier_perms)

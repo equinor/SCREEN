@@ -35,7 +35,7 @@ class LGRBuilder(LGRBuilderBase):
         )
 
     def build_grdecl(
-        self, output_folder: str, LGR_NAME: str, holes_df: pd.DataFrame, casings_df: pd.DataFrame, barriers_mod_df: pd.DataFrame
+        self, output_folder: str, LGR_NAME: str, holes_df: pd.DataFrame, casings_df: pd.DataFrame, barrier_regions_df: pd.DataFrame
     ) -> pd.DataFrame:
         """build .grdecl file and output it
 
@@ -45,11 +45,11 @@ class LGRBuilder(LGRBuilderBase):
             LGR_NAME (str): output file name
             holes_df (pd.DataFrame): drilled-hole intervals
             casings_df (pd.DataFrame): information about casings and cement-bond
-            barriers_mod_df (pd.DataFrame): information about barrier
+            barrier_regions_df (pd.DataFrame): GaP barrier material regions
         """
 
         ##### 4. build LGR
-        gap_casing_df = self.grid_refine.build_LGR(holes_df, casings_df, barriers_mod_df)
+        gap_casing_df = self.grid_refine.build_LGR(holes_df, casings_df, barrier_regions_df)
 
         ##### 5. output LGR
         self._build_grdecl(
@@ -57,7 +57,7 @@ class LGRBuilder(LGRBuilderBase):
             LGR_NAME,
             holes_df,
             gap_casing_df,  # casings_df,
-            barriers_mod_df,
+            barrier_regions_df,
             self.grid_coarse.NX,
             self.grid_coarse.NY,
             self.grid_coarse.main_grd_i,

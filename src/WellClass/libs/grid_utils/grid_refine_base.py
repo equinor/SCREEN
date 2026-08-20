@@ -145,13 +145,13 @@ class GridRefineBase:
             for field in fields:
                 mesh_df.loc[(mesh_df["Z"] >= top) & (mesh_df["Z"] < base), field] = row[field]
 
-    def _set_material_type(self, holes_df: pd.DataFrame, casings_df: pd.DataFrame, barriers_mod_df: pd.DataFrame) -> None:
+    def _set_material_type(self, holes_df: pd.DataFrame, casings_df: pd.DataFrame, barrier_regions_df: pd.DataFrame) -> None:
         """Assign material types, such as openholes, overburden, cement bond, etc.
 
         Args:
             holes_df (pd.DataFrame): drilled-hole intervals
             casings_df (pd.DataFrame): information about casings and cement-bond
-            barriers_mod_df (pd.DataFrame): information about barrier
+            barrier_regions_df (pd.DataFrame): GaP barrier material regions
         """
 
         # only for convenience
@@ -200,20 +200,20 @@ class GridRefineBase:
             mesh_df.loc[mesh_df.eval(criteria), "material"] = f"cement_bond_{ic}"
 
         # ### 3. Barriers
-        for ib, (idx, row) in enumerate(barriers_mod_df.iterrows()):
+        for ib, (idx, row) in enumerate(barrier_regions_df.iterrows()):
             b_k_min, b_k_max = row["k_min"], row["k_max"]  # noqa: F841
 
             criteria = '(material == "openhole") & \
                         (k >= @b_k_min) & (k <= @b_k_max)'
             mesh_df.loc[mesh_df.eval(criteria), "material"] = f"barrier_{ib}"
 
-    def _set_permeability(self, holes_df: pd.DataFrame, casings_df: pd.DataFrame, barriers_mod_df: pd.DataFrame) -> None:
+    def _set_permeability(self, holes_df: pd.DataFrame, casings_df: pd.DataFrame, barrier_regions_df: pd.DataFrame) -> None:
         """Actual function to assign permeability according to material type
 
         Args:
             holes_df (pd.DataFrame): drilled-hole intervals
             casings_df (pd.DataFrame): information about casings and cement-bond
-            barriers_mod_df (pd.DataFrame): information about barrier
+            barrier_regions_df (pd.DataFrame): GaP barrier material regions
         """
 
         # for convenience only
@@ -233,18 +233,18 @@ class GridRefineBase:
             mesh_df.loc[mesh_df.eval(criteria), "PERMX"] = cb_perm
 
         # 3. barrier
-        for ib, (_, row) in enumerate(barriers_mod_df.iterrows()):
+        for ib, (_, row) in enumerate(barrier_regions_df.iterrows()):
             barrier_perm = row["barrier_perm"]
             criteria = f'material == "barrier_{ib}"'
             mesh_df.loc[mesh_df.eval(criteria), "PERMX"] = barrier_perm
 
-    def _compute_num_lateral_fine_grd(self, holes_df: pd.DataFrame, casings_df: pd.DataFrame, barriers_mod_df: pd.DataFrame):
+    def _compute_num_lateral_fine_grd(self, holes_df: pd.DataFrame, casings_df: pd.DataFrame, barrier_regions_df: pd.DataFrame):
         """compute number of fine grid in x-y directions
 
         Args:
             holes_df (pd.DataFrame): drilled-hole intervals
             casings_df (pd.DataFrame): information about casings and cement-bond
-            barriers_mod_df (pd.DataFrame): information about barrier
+            barrier_regions_df (pd.DataFrame): GaP barrier material regions
         """
         # for convenience
         min_grd_size = self.min_grd_size
@@ -252,17 +252,17 @@ class GridRefineBase:
         # n_grd_id for well elements
         holes_df["n_grd_id"] = holes_df["diameter_m"].map(lambda x: compute_ngrd(x, min_grd_size))
         casings_df["n_grd_id"] = casings_df["diameter_m"].map(lambda x: compute_ngrd(x, min_grd_size))
-        barriers_mod_df["n_grd_id"] = barriers_mod_df["diameter_m"].map(lambda x: compute_ngrd(x, min_grd_size))
+        barrier_regions_df["n_grd_id"] = barrier_regions_df["diameter_m"].map(lambda x: compute_ngrd(x, min_grd_size))
 
         # borehole_df['n_grd_id'] = borehole_df['id_m'].map(lambda x: compute_ngrd(x, min_grd_size))
 
-    def _compute_bbox(self, holes_df: pd.DataFrame, casings_df: pd.DataFrame, barriers_mod_df: pd.DataFrame) -> None:
+    def _compute_bbox(self, holes_df: pd.DataFrame, casings_df: pd.DataFrame, barrier_regions_df: pd.DataFrame) -> None:
         """Compute bounding boxes for drillings, casings and barriers.
 
         Args:
             holes_df (pd.DataFrame): drilled-hole intervals
             casings_df (pd.DataFrame): information about casings and cement-bond
-            barriers_mod_df (pd.DataFrame): information about barrier
+            barrier_regions_df (pd.DataFrame): GaP barrier material regions
         """
 
         # for convenience
@@ -279,7 +279,7 @@ class GridRefineBase:
         compute_bbox(mesh_df, casings_df, nxy=nxy, maxDepth=maxDepth, is_casing=True)
 
         # ### 3. Barriers
-        compute_bbox(mesh_df, barriers_mod_df, nxy=nxy, maxDepth=maxDepth)
+        compute_bbox(mesh_df, barrier_regions_df, nxy=nxy, maxDepth=maxDepth)
 
     def _compute_bbox_gap_casing(self, casings_df: pd.DataFrame) -> pd.DataFrame:
         """compute bbox of casing for GaP
