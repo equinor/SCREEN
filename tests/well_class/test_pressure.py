@@ -1,7 +1,9 @@
 import numpy as np
 import pandas as pd
+import pytest
 
 from src.WellClass.libs.well_pressure.co2_pressure import _get_max_pressure, _get_shmin
+from src.WellClass.libs.well_pressure.pressure import Pressure
 
 
 def make_pressure_table():
@@ -61,3 +63,19 @@ def test_canonical_plug_positions_match_legacy_barrier_table():
     canonical_result = _get_max_pressure(table, canonical, constant_density, header)
 
     assert canonical_result["max_pressure_cement_plug"].equals(legacy_result["max_pressure_cement_plug"])
+
+
+def test_pressure_accepts_canonical_plug_positions(monkeypatch):
+    monkeypatch.setattr(Pressure, "_check_init_pressure", lambda self: None)
+    monkeypatch.setattr(Pressure, "_check_scenarios", lambda self: None)
+    monkeypatch.setattr(Pressure, "_compute_CO2_pressures", lambda self: None)
+    positions = [{"name": "cement_plug", "base_tvd_msl": 10.0}]
+
+    pressure = Pressure(plug_positions=positions)
+
+    assert pressure.max_pressure_pos == positions
+
+
+def test_pressure_rejects_ambiguous_plug_position_arguments():
+    with pytest.raises(ValueError, match="plug_positions or max_pressure_pos"):
+        Pressure(plug_positions=[], max_pressure_pos=[])

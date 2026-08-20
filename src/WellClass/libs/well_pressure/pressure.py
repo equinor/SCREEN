@@ -30,9 +30,14 @@ class Pressure:
     pvt_path: str = None
     barriers: dict = None
     max_pressure_pos: Union[dict, list, float, int] = None
+    plug_positions: Union[dict, list, float, int] = None
     pressure_scenarios: dict = None
 
     def __post_init__(self):
+        if self.plug_positions is not None and self.max_pressure_pos is not None:
+            raise ValueError("Provide plug_positions or max_pressure_pos, not both")
+        if self.plug_positions is not None:
+            self.max_pressure_pos = self.plug_positions
         self._check_init_pressure()
         self._check_scenarios()
         self._compute_CO2_pressures()
