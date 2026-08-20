@@ -31,6 +31,11 @@ class WellProcessed(Well):
     processed_plugs: Optional[List[Dict[str, Any]]] = None
     plug_names: Optional[List[str]] = None
 
+    @property
+    def casing_cement(self) -> List[Dict[str, Any]]:
+        """Return processed input intervals describing cement placement."""
+        return [record for record in self.hole_casings or [] if record["type"] == "casing cement"]
+
     def __post_init__(self):
         # invoke parent post_init to compute wellpath and md2tvd
         super().__post_init__()
@@ -130,11 +135,11 @@ class WellProcessed(Well):
 
         casings = splitted_hole_casing["casing"]
         holes = splitted_hole_casing["holes"]
-        cement_bond = splitted_hole_casing["casing_cement"]
+        casing_cement = splitted_hole_casing["casing_cement"]
 
         self.borehole = compute_borehole(holes, casings, self.md2tvd)
-        self.cement_bond = compute_annulus(holes=holes, casings=casings, cement_bond=cement_bond, md2tvd=self.md2tvd, solve_cement_bond=True)
-        self.annulus = compute_annulus(holes=holes, casings=casings, cement_bond=cement_bond, md2tvd=self.md2tvd)
+        self.cement_bond = compute_annulus(holes=holes, casings=casings, cement_bond=casing_cement, md2tvd=self.md2tvd, solve_cement_bond=True)
+        self.annulus = compute_annulus(holes=holes, casings=casings, cement_bond=casing_cement, md2tvd=self.md2tvd)
 
         if self.inventory["plugs"]:
             self.processed_plugs = compute_plugs_diameter(self.plugs, self.borehole)

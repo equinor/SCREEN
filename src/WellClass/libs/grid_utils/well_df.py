@@ -41,7 +41,7 @@ class WellDataFrame:
         records = my_well.hole_casings or []
         holes = [record for record in records if record["type"] == "hole"]
         casings = [record for record in records if record["type"] == "casing"]
-        cement = [record for record in records if record["type"] == "casing cement"]
+        casing_cement = [record for record in records if record["type"] == "casing cement"]
 
         self.drilling_df = self._interval_frame(
             holes,
@@ -53,7 +53,7 @@ class WellDataFrame:
         self._require_permeability(self.drilling_df, "oh_perm", "oh_perm")
 
         casing_frame = self._interval_frame(casings, diameter_field="diameter_m")
-        cement_frame = self._interval_frame(cement, diameter_field="diameter_m")
+        cement_frame = self._interval_frame(casing_cement, diameter_field="diameter_m")
         casing_rows = []
         for _, casing in casing_frame.iterrows():
             matching_cement = cement_frame[

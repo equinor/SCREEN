@@ -70,12 +70,12 @@ def verify_item(data: list[dict], item: str) -> None:
         raise AssertionError(f"Bottom depth must match next top depth in {item} intervals")
 
 
-def verify_casings_cement(casings: list[dict], cement_bond: list[dict]) -> None:
+def verify_casings_cement(casings: list[dict], casing_cement: list[dict]) -> None:
     casings_sorted = sorted(casings, key=lambda x: x["top_rkb"], reverse=True)
-    cement_bond_sorted = sorted(cement_bond, key=lambda x: x["top_rkb"], reverse=True)
+    casing_cement_sorted = sorted(casing_cement, key=lambda x: x["top_rkb"], reverse=True)
 
     # Ensure that there are at least as many cement bond intervals as casing intervals
-    if len(cement_bond_sorted) < len(casings_sorted):
+    if len(casing_cement_sorted) < len(casings_sorted):
         raise AssertionError("There must be at least as many cement bond intervals as casing intervals")
 
     for casing in casings:
@@ -83,7 +83,7 @@ def verify_casings_cement(casings: list[dict], cement_bond: list[dict]) -> None:
         casing_bottom_rkb = casing["bottom_rkb"]
         casing_diameter = casing["diameter_in"]
 
-        for cement in cement_bond:
+        for cement in casing_cement:
             cement_top_rkb = cement["top_rkb"]
             cement_bottom_rkb = cement["bottom_rkb"]
             cement_diameter = cement["diameter_in"]
