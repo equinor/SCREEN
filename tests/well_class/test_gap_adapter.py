@@ -51,6 +51,8 @@ def make_vertical_well() -> WellProcessed:
 def test_processed_vertical_well_exposes_gap_contract():
     frames = WellDataFrame(make_vertical_well(), oh_perm=10000.0, cb_perm=0.05, barrier_perm=0.05)
 
+    assert frames.holes_df is frames.drilling_df
+    assert frames.barrier_regions_df is frames.barriers_mod_df
     assert list(frames.drilling_df["top_msl"]) == [0.0, 600.0]
     assert list(frames.drilling_df["bottom_msl"]) == [600.0, 1000.0]
     assert np.allclose(frames.drilling_df["diameter_m"], [0.4445, 0.31115])

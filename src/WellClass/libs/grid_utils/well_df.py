@@ -3,7 +3,12 @@ import pandas as pd
 
 class WellDataFrame:
     def __init__(self, my_well, *, oh_perm=None, cb_perm=None, barrier_perm=None):
-        """This is a container class"""
+        """Expose GaP dataframe inputs with canonical and legacy names.
+
+        ``holes_df`` and ``barrier_regions_df`` are the canonical names. The
+        legacy ``drilling_df`` and ``barriers_mod_df`` attributes remain aliases
+        while GaP callers are migrated.
+        """
 
         if hasattr(my_well, "drilling"):
             self._from_legacy_well(my_well)
@@ -26,6 +31,7 @@ class WellDataFrame:
         # and for the barriers
         self.barriers_df = pd.DataFrame(my_well.barriers)
         self.barriers_mod_df = pd.DataFrame(my_well.barriers_mod)
+        self._set_canonical_aliases()
 
     def _from_processed_well(self, my_well, oh_perm, cb_perm, barrier_perm):
         """Adapt WellProcessed records to the fields consumed by GaP."""
@@ -83,6 +89,11 @@ class WellDataFrame:
         self.geology_df = pd.DataFrame(my_well.stratigraphy or [])
         self.barriers_df = pd.DataFrame(my_well.plugs or [])
         self.barriers_mod_df = self._processed_barriers(my_well, barrier_perm)
+        self._set_canonical_aliases()
+
+    def _set_canonical_aliases(self):
+        self.holes_df = self.drilling_df
+        self.barrier_regions_df = self.barriers_mod_df
 
     @staticmethod
     def _interval_frame(records, diameter_field=None, permeability_field=None, default_permeability=None):
