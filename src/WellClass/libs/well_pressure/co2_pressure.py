@@ -49,7 +49,12 @@ def _get_rho_in_pressure_column(pt_df_in: pd.DataFrame, colname_p: str, colname_
     return pt_df
 
 
-def _get_max_pressure(pt_df_in: pd.DataFrame, max_pressure_pos: Union[dict, list, float, int], get_rho: callable) -> pd.DataFrame:
+def _get_max_pressure(
+    pt_df_in: pd.DataFrame,
+    max_pressure_pos: Union[dict, list, float, int],
+    get_rho: callable,
+    well_header: dict,
+) -> pd.DataFrame:
     """
     Calculates downwards maximum pressure at a depth deeper than the input depth.
     I.e. the pressure at deeper locations such that witha CO2-column the pressure will be equal to Shmin at the "start/input"-depth
@@ -67,7 +72,7 @@ def _get_max_pressure(pt_df_in: pd.DataFrame, max_pressure_pos: Union[dict, list
             print(f"Calculating max pressure below plug {key} from depth {plug_depth}")
             p0 = np.interp(plug_depth, pt_df["depth_msl"], pt_df[SHMIN_NAME])
 
-            pt_df = _integrate_pressure(pt_df, get_rho, plug_depth, p0, "down", colname_p)
+            pt_df = _integrate_pressure(well_header, pt_df, get_rho, plug_depth, p0, "down", colname_p)
     elif isinstance(max_pressure_pos, (list, float, int)):
         print("max_pressure_pos is a value")
         if isinstance(max_pressure_pos, (float, int)):  # Make it a list with one element
@@ -76,7 +81,7 @@ def _get_max_pressure(pt_df_in: pd.DataFrame, max_pressure_pos: Union[dict, list
             colname_p = f"{MAX_PRESSURE_NAME}_at_{int(depth)}"
             print(f"Calculating max pressure from depth {depth}")
             p0 = np.interp(float(depth), pt_df["depth_msl"], pt_df[SHMIN_NAME])
-            pt_df = _integrate_pressure(pt_df, get_rho, float(depth), p0, "down", colname_p)
+            pt_df = _integrate_pressure(well_header, pt_df, get_rho, float(depth), p0, "down", colname_p)
 
     return pt_df
 
@@ -223,10 +228,8 @@ def _integrate_pressure(
     if direction.lower() == "up":
         query = pt_df.query("depth_msl<=@reference_depth")
         query = query[::-1]
-        sign = -1
     elif direction.lower() == "down":
         query = pt_df.query("depth_msl>=@reference_depth")
-        sign = 1
     else:
         print(f"ERROR: Not a valid direction. It should be 'up' or 'down'. You wrote {direction.lower()}")
 
