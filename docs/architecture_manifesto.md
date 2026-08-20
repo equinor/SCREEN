@@ -19,6 +19,39 @@ SCREEN is currently four overlapping products in one repository:
 
 The code is not yet organized around those boundaries. The branch refactor improved the WellClass data model, but the GaP side still consumes legacy pandas-shaped tables.
 
+## Physical Vocabulary
+
+The well model should use the physical construction sequence as its source of truth:
+
+1. **Borehole / drilled hole**: the void created by drilling. It has a boundary and a diameter, but no material assigned inside it.
+2. **Casing**: a pipe installed inside the drilled hole.
+3. **Annulus**: the remaining space between the casing outside diameter and the borehole boundary.
+4. **Cement bond**: the portion of the annulus occupied by injected cement over a depth interval.
+5. **Plug**: a cement or mechanical plug occupying a section of the remaining wellbore.
+6. **Material region**: the mesh-level classification assigned by GaP, such as `openhole`, `annulus`, `cement_bond_N`, or `barrier_N`.
+
+The terminology must distinguish geometry from material:
+
+- A **hole** is a geometric interval.
+- An **annulus** is a geometric region created by casing placement.
+- A **cement bond** is a material-filled subregion of an annulus.
+- A **plug** is a material-filled interval in the remaining wellbore.
+- A **barrier** is a functional or mesh classification; it is not automatically synonymous with a plug.
+
+### Naming map
+
+| Current name | Problem | Canonical direction |
+| --- | --- | --- |
+| `drilling`, `drilling_df` | Describes the activity, not the resulting hole geometry | `holes`, `holes_df` |
+| `hole_casings` | Current combined input collection | Keep as the input container; split into `holes`, `casings`, and `casing_cement` records internally |
+| `borehole` | Used for a derived effective opening and sometimes for the original drilled hole | Reserve `borehole` for the derived effective open-wellbore geometry; use `holes` for drilled input intervals |
+| `casings`, `casings_df` | Usually clear, but often carries cement fields too | `casings` for pipe geometry; `casing_cement` for cement input/intervals |
+| `cement_bond` | Used for both input cement intervals and derived annulus output | Use `casing_cement` for input; `cement_bond` for derived material intervals |
+| `barriers`, `barriers_mod_df` | Can mean plugs, functional barriers, or mesh regions | Use `plugs` for physical plugs; use `barrier_regions` for mesh/functional barriers |
+| `material == "openhole"` | Mesh material name can be confused with the original hole | Keep as a GaP material label, but document it as a mesh classification |
+
+This is a vocabulary contract, not a request for a repository-wide rename in one change. First document and test the mapping, then rename one ownership boundary at a time. The `WellDataFrame` adapter is the current compatibility seam where legacy names can be translated without leaking them back into WellClass.
+
 ```mermaid
 flowchart LR
     Input[JSON / YAML / legacy CSV] --> Model[Pydantic WellModel]
@@ -124,6 +157,8 @@ Other semantic questions need a written contract:
 - What is the unit of permeability and pressure at each boundary?
 - Are casing cement intervals matched by diameter, name, or explicit identifier?
 
+The physical vocabulary above is part of the input contract. Every interval should also make its coordinate system, units, and role explicit. A name such as `top_tvd_msl` should not be silently interchanged with `top_rkb`, and a mesh material label should not be used as if it were a physical input type.
+
 ### 5. File and package structure obscures the supported product
 
 `src/PressCalc`, `src/WellViz`, `src/_originals`, historical GaP scripts, root experiments, and many notebooks coexist with the current code. This makes it hard to know what should be imported, tested, or supported.
@@ -216,6 +251,8 @@ These are good discrete issues, ordered by leverage:
 8. **Migrate GaP mesh functions away from legacy `drilling_df` naming.**
 9. **Classify and archive historical modules and notebooks.**
 10. **Update README/MkDocs around the three supported workflows.**
+11. **Publish and enforce the wellbore physical vocabulary.**
+12. **Rename the WellClass-to-GaP boundary from drilling/casings/barriers to holes/casings/barrier regions.**
 
 ## Decision Rules
 
@@ -237,5 +274,7 @@ If only three items can be done next, do these:
 1. **CI smoke test the canonical notebooks and the end-to-end GRDECL artifact.**
 2. **Add WellClass geometry contract tests for vertical, deviated, unit-converted, and invalid wells.**
 3. **Add GaP transformation tests for bounding boxes, material assignment, and CARFIN text.**
+
+The next naming task after these tests is to create a small typed boundary model or named adapter result using the vocabulary above. Do not start with a global search-and-replace; use the adapter and its tests to make each rename observable.
 
 Those three create the feedback loop needed to improve the rest of the repository without guessing whether behavior changed.
