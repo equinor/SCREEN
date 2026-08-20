@@ -64,10 +64,10 @@ def _get_max_pressure(
     """
 
     pt_df = pt_df_in.copy()
-    if isinstance(max_pressure_pos, dict):
-        print("max_pressure_pos is a dictionary of plug positions")
-        for idx, key in max_pressure_pos["barrier_name"].items():
-            plug_depth = max_pressure_pos["bottom_msl"][idx]
+    plug_positions = _normalize_plug_positions(max_pressure_pos)
+    if plug_positions is not None:
+        print("max_pressure_pos is a collection of plug positions")
+        for key, plug_depth in plug_positions:
             colname_p = f"{MAX_PRESSURE_NAME}_{key}"
             print(f"Calculating max pressure below plug {key} from depth {plug_depth}")
             p0 = np.interp(plug_depth, pt_df["depth_msl"], pt_df[SHMIN_NAME])
@@ -84,6 +84,26 @@ def _get_max_pressure(
             pt_df = _integrate_pressure(well_header, pt_df, get_rho, float(depth), p0, "down", colname_p)
 
     return pt_df
+
+
+def _normalize_plug_positions(max_pressure_pos):
+    """Normalize canonical and legacy plug-position records."""
+    if isinstance(max_pressure_pos, dict):
+        if "barrier_name" in max_pressure_pos:
+            return [(name, max_pressure_pos["bottom_msl"][index]) for index, name in max_pressure_pos["barrier_name"].items()]
+        if "name" in max_pressure_pos and "base_tvd_msl" in max_pressure_pos:
+            return [(max_pressure_pos["name"], max_pressure_pos["base_tvd_msl"])]
+        raise ValueError("Plug positions require name and base_tvd_msl fields")
+
+    if isinstance(max_pressure_pos, list) and max_pressure_pos and all(isinstance(item, dict) for item in max_pressure_pos):
+        positions = []
+        for item in max_pressure_pos:
+            if "name" not in item or "base_tvd_msl" not in item:
+                raise ValueError("Plug positions require name and base_tvd_msl fields")
+            positions.append((item["name"], item["base_tvd_msl"]))
+        return positions
+
+    return None
 
 
 def _integrate_pressure(

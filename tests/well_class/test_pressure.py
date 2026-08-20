@@ -49,3 +49,15 @@ def test_max_pressure_uses_plug_base_for_position_table():
 
     assert "max_pressure_cement_plug" in result
     assert result.loc[1, "max_pressure_cement_plug"] == table.loc[1, "Shmin"]
+
+
+def test_canonical_plug_positions_match_legacy_barrier_table():
+    header = {"sf_temp": 4.0, "sf_depth_msl": 0.0, "geo_tgrad": 40.0}
+    table = _get_shmin(header, make_pressure_table())
+    legacy = {"barrier_name": {0: "cement_plug"}, "bottom_msl": {0: 10.0}}
+    canonical = [{"name": "cement_plug", "base_tvd_msl": 10.0}]
+
+    legacy_result = _get_max_pressure(table, legacy, constant_density, header)
+    canonical_result = _get_max_pressure(table, canonical, constant_density, header)
+
+    assert canonical_result["max_pressure_cement_plug"].equals(legacy_result["max_pressure_cement_plug"])
