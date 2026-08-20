@@ -4,6 +4,7 @@ import pytest
 
 from src.WellClass.libs.well_pressure.co2_pressure import _get_max_pressure, _get_shmin, _integrate_pressure
 from src.WellClass.libs.well_pressure.pressure import Pressure
+from src.WellClass.libs.well_pressure.pressure_scenario import FluidP_scenario
 
 
 def make_pressure_table():
@@ -92,3 +93,23 @@ def test_pressure_integration_increases_downward_and_decreases_upward():
     assert downward.loc[3, "downward"] > downward.loc[1, "downward"]
     assert upward.loc[2, "upward"] == pytest.approx(100.0)
     assert upward.loc[0, "upward"] < upward.loc[2, "upward"]
+
+
+def test_fluid_pressure_scenario_builds_downward_max_pressure_table():
+    header = {"sf_temp": 4.0, "sf_depth_msl": 0.0, "geo_tgrad": 40.0}
+    reference = _get_shmin(header, make_pressure_table())
+
+    scenario = FluidP_scenario(
+        header=header,
+        ref_P=reference,
+        rho_CO2=constant_density,
+        rho_H2O=constant_density,
+        p_name="max_plug_pressure",
+        z_MSAD=10.0,
+        z_CO2_datum=20.0,
+    )
+
+    assert scenario.P_table is not None
+    assert {"co2", "h2o", "h2o_rho_in_co2_column"} <= set(scenario.P_table)
+    assert scenario.p_MSAD == pytest.approx(reference.loc[1, "Shmin"])
+    assert scenario.z_resrv == 20.0
