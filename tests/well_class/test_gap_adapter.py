@@ -53,6 +53,7 @@ def test_processed_vertical_well_exposes_gap_contract():
     frames = WellDataFrame(well, oh_perm=10000.0, cb_perm=0.05, barrier_perm=0.05)
 
     assert frames.holes_df is frames.drilling_df
+    assert frames.plugs_df is frames.barriers_df
     assert frames.barrier_regions_df is frames.barriers_mod_df
     assert len(well.casing_cement) == 1
     assert len(well.cement_bond) == 1

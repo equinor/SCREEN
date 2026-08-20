@@ -5,8 +5,8 @@ class WellDataFrame:
     def __init__(self, my_well, *, oh_perm=None, cb_perm=None, barrier_perm=None):
         """Expose GaP dataframe inputs with canonical and legacy names.
 
-        ``holes_df`` and ``barrier_regions_df`` are the canonical names. The
-        legacy ``drilling_df`` and ``barriers_mod_df`` attributes remain aliases
+        ``holes_df``, ``plugs_df``, and ``barrier_regions_df`` are the canonical
+        names. Legacy dataframe attributes remain aliases while callers migrate.
         while GaP callers are migrated.
         """
 
@@ -93,6 +93,7 @@ class WellDataFrame:
 
     def _set_canonical_aliases(self):
         self.holes_df = self.drilling_df
+        self.plugs_df = self.barriers_df
         self.barrier_regions_df = self.barriers_mod_df
 
     @staticmethod
