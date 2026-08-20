@@ -141,14 +141,14 @@ class Pressure:
                     print(sc_name, 'ignored')
                     continue 
 
-        #Iterate over maximum pressure scenarios (values entered under max_pressure_pos)
-        if isinstance(self.max_pressure_pos, dict):   #Then max_pressure_pos is the same as barriers - and max pressure is calcualted for each barrier
-            print(f'max_pressure_pos is a dictionary of barrriers')
+        # Iterate over maximum pressure scenarios (values entered under max_pressure_pos)
+        if isinstance(self.max_pressure_pos, dict):
+            print("max_pressure_pos is a dictionary of plug positions")
             for idx, key in self.max_pressure_pos['barrier_name'].items():
-                barr_depth = self.max_pressure_pos['bottom_msl'][idx]
+                plug_depth = self.max_pressure_pos['bottom_msl'][idx]
                 sc_name = f"{MAX_PRESSURE_NAME}_{key}"
                 
-                self.pressure_scenarios[scenario_counter] = {'name': sc_name, 'z_MSAD': barr_depth, 'type': 'max_p'}
+                self.pressure_scenarios[scenario_counter] = {'name': sc_name, 'z_MSAD': plug_depth, 'type': 'max_p'}
                 scenario_counter += 1
 
         elif isinstance(self.max_pressure_pos, (list, float, int)):
@@ -172,8 +172,8 @@ class Pressure:
         Shmin
 
         Input:
-        max_pressure_pos is a depth from where max pressure (wrt Shmin) is calculated. It can be a dict (my_well.barriers) a list of numbers or scalars.
-                If my_well.barriers is given then it is calculated from the base of each barrier
+        max_pressure_pos is a depth from where max pressure (wrt Shmin) is calculated. It can be a plug-position table, a list of numbers, or a scalar.
+            If a plug-position table is given, pressure is calculated from the base of each plug.
 
         Columns are
             |--------------------init---------------------------------------------|---------------------RPx----------------------------------|

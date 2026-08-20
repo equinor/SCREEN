@@ -57,20 +57,20 @@ def _get_max_pressure(pt_df_in: pd.DataFrame, max_pressure_pos: Union[dict, list
     Calculates downwards maximum pressure at a depth deeper than the input depth.
     I.e. the pressure at deeper locations such that witha CO2-column the pressure will be equal to Shmin at the "start/input"-depth
     Input:
-      max_pressure_pos is a depth from where max pressure (wrt Shmin) is calculated. It can be a dict (my_well.barriers) a list of numbers or scalars.
-      If my_well.barriers is given then it is calculated from the base of each barrier
+    max_pressure_pos is a depth from where max pressure (wrt Shmin) is calculated. It can be a plug-position table, a list of numbers, or a scalar.
+    If a plug-position table is given, it is calculated from the base of each plug.
     '''
 
     pt_df = pt_df_in.copy()
-    if isinstance(max_pressure_pos, dict):   #Then max_pressure_pos is the same as barriers - and max pressure is calcualted for each barrier
-        print(f'max_pressure_pos is a dictionary of barrriers')
+    if isinstance(max_pressure_pos, dict):
+        print("max_pressure_pos is a dictionary of plug positions")
         for idx, key in max_pressure_pos['barrier_name'].items():
-            barr_depth = max_pressure_pos['bottom_msl'][idx]
+            plug_depth = max_pressure_pos['bottom_msl'][idx]
             colname_p = f"{MAX_PRESSURE_NAME}_{key}"
-            print(f"Calculating max pressure below barrier {key} from depth {barr_depth}")
-            p0 = np.interp(barr_depth, pt_df['depth_msl'], pt_df[SHMIN_NAME])
+            print(f"Calculating max pressure below plug {key} from depth {plug_depth}")
+            p0 = np.interp(plug_depth, pt_df['depth_msl'], pt_df[SHMIN_NAME])
             
-            pt_df = _integrate_pressure(pt_df, get_rho, barr_depth, p0, 'down', colname_p)
+            pt_df = _integrate_pressure(pt_df, get_rho, plug_depth, p0, 'down', colname_p)
     elif isinstance(max_pressure_pos, (list, float, int)):
         print(f'max_pressure_pos is a value')
         if isinstance(max_pressure_pos, (float, int)): #Make it a list with one element
