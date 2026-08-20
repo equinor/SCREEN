@@ -1,0 +1,45 @@
+name: SCREEN-notebooks
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+      - gpb/dev
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  execute:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Sync dependencies
+        run: uv sync --locked --all-groups
+
+      - name: Execute canonical notebooks
+        run: |
+          mkdir -p /tmp/screen-notebook-results
+          for notebook in \
+            notebooks/01_wellclass.ipynb \
+            notebooks/02_gap_grid.ipynb \
+            notebooks/03_wellclass_to_gap.ipynb
+          do
+            PYTHONPATH=. uv run jupyter nbconvert \
+              --to notebook \
+              --execute "$notebook" \
+              --output "$(basename "$notebook")" \
+              --output-dir /tmp/screen-notebook-results \
+              --ExecutePreprocessor.timeout=180 \
+              --ExecutePreprocessor.kernel_name=python
+          done
