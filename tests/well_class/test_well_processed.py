@@ -1,5 +1,8 @@
 import numpy as np
 import pytest
+import matplotlib
+
+matplotlib.use("Agg")
 
 from src.WellClass.libs.well_class import WellProcessed
 
@@ -90,3 +93,12 @@ def test_inverted_stratigraphy_is_rejected():
         make_well(
             stratigraphy=[{"name": "unit", "top_rkb": 800.0, "bottom_rkb": 700.0}],
         )
+
+
+def test_processed_well_sketch_draws_canonical_borehole_records():
+    well = WellProcessed.from_json("test_data/examples/frigg/frigg.json")
+
+    figure, axis = well.plot_sketch(draw_open_hole=True)
+
+    assert figure is axis.figure
+    assert len(axis.patches) > 0

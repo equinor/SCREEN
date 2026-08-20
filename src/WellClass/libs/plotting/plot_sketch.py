@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple, Dict
+from typing import Dict, List, Optional, Tuple
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -16,32 +16,35 @@ def split_hole_casings(data: list[dict]) -> dict[str, list[dict]]:
     return {"holes": hole, "casing": casing, "casing_cement": casing_cement}
 
 
-def hole_plotter(ax: matplotlib.axes.Axes, 
-                 data: List[Dict], 
-                 hole_bool: bool, 
-                 fill_bool: bool = True, 
-                 z_order: int = 0) -> None:
+def hole_plotter(ax: matplotlib.axes.Axes, data: List[Dict], hole_bool: bool, fill_bool: bool = True, z_order: int = 0) -> None:
     """
     Draws all open hole elements. Applies for both drilling and borehole dataframes
     """
 
     if hole_bool:
         for row in data:
-            xy = (-row["diameter_m"] / 2, row["tvd_msl_top"])
+            top = row.get("top_tvd_msl", row.get("tvd_msl_top"))
+            bottom = row.get("bottom_tvd_msl", row.get("tvd_msl_bottom"))
+            if top is None or bottom is None:
+                raise KeyError("Hole records require top and bottom TVD MSL fields")
+
+            xy = (-row["diameter_m"] / 2, top)
             width = row["diameter_m"]
-            height = row["tvd_msl_bottom"] - row["tvd_msl_top"]
+            height = bottom - top
             ax.add_patch(Rectangle(xy, width, height, zorder=z_order, fill=fill_bool, facecolor=r"#CB8A58"))
 
 
-def casings_plotter(ax: matplotlib.axes.Axes, 
-                    data: List[Dict],
-                    color_tone: str, 
-                    txt_size: int, 
-                    x_txt_pos: float, 
-                    annot_bool: bool, 
-                    casings_bool: bool, 
-                    c_shoe_bool: bool, 
-                    c_weld_bool: bool) -> None:
+def casings_plotter(
+    ax: matplotlib.axes.Axes,
+    data: List[Dict],
+    color_tone: str,
+    txt_size: int,
+    x_txt_pos: float,
+    annot_bool: bool,
+    casings_bool: bool,
+    c_shoe_bool: bool,
+    c_weld_bool: bool,
+) -> None:
     """
     Draws all components linked to the tubular assembly:
     - Casings
@@ -112,9 +115,7 @@ def casings_plotter(ax: matplotlib.axes.Axes,
             ax.annotate(shoe_label, xy=(x_txt_pos, ycoord), fontsize=txt_size, va="center", ha="right")
 
 
-def cement_bond_plotter(ax: matplotlib.axes.Axes, 
-                        data: List[Dict], 
-                        cement_bond_bool: bool) -> None:
+def cement_bond_plotter(ax: matplotlib.axes.Axes, data: List[Dict], cement_bond_bool: bool) -> None:
     if cement_bond_bool:
         for row in data:
             width = (row["od_m"] - row["id_m"]) / 2
@@ -127,12 +128,9 @@ def cement_bond_plotter(ax: matplotlib.axes.Axes,
             ax.add_patch(Rectangle(left_xy, width, height, facecolor="lightgray", zorder=5, hatch="///"))
 
 
-def cement_plug_plotter(ax: matplotlib.axes.Axes, 
-                        plugs: List[Dict], 
-                        processed_plugs: List[Dict], 
-                        plug_bool: bool, 
-                        annot_bool: bool, 
-                        txt_size: int) -> None:
+def cement_plug_plotter(
+    ax: matplotlib.axes.Axes, plugs: List[Dict], processed_plugs: List[Dict], plug_bool: bool, annot_bool: bool, txt_size: int
+) -> None:
     """
     axis: Matplotlib object where items will be plotted
     df_barriers: Dataframe listing the barriers
@@ -155,14 +153,9 @@ def cement_plug_plotter(ax: matplotlib.axes.Axes,
             ax.annotate(text=row["name"], xy=(0, ycoord), fontsize=txt_size, va="center", ha="center")
 
 
-def stratigraphy_plotter(ax: matplotlib.axes.Axes, 
-                         data: List[Dict], 
-                         w_header: Dict, 
-                         geol_bool: bool, 
-                         annot_bool: bool, 
-                         width: float, 
-                         x_txt_pos: float, 
-                         txt_size: int) -> None:
+def stratigraphy_plotter(
+    ax: matplotlib.axes.Axes, data: List[Dict], w_header: Dict, geol_bool: bool, annot_bool: bool, width: float, x_txt_pos: float, txt_size: int
+) -> None:
     tops_hlines = [item["tvd_msl_top"] for item in data]
 
     if geol_bool:
@@ -181,11 +174,11 @@ def stratigraphy_plotter(ax: matplotlib.axes.Axes,
 
 def plot_sketch(
     mywell: Well,
-    ax: Optional[matplotlib.axes.Axes]=None,
+    ax: Optional[matplotlib.axes.Axes] = None,
     *,
     save_file: Optional[str] = None,
     **kwargs,
-    ) -> Tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]:
+) -> Tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]:
     """
     plot well sketch
 
@@ -267,6 +260,5 @@ def plot_sketch(
     # save figure to the disk
     if save_file:
         fig.savefig(save_file)
-
 
     return fig, ax
