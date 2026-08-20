@@ -66,7 +66,7 @@ def verify_item(data: list[dict], item: str) -> None:
     if any(t >= b for t, b in zip(tops, bottoms)):
         raise AssertionError(f"Each {item} interval top_rkb must be less than bottom_rkb")
 
-    if item == "hole" and (any(bottoms[i] != tops[i + 1] for i in range(len(bottoms) - 1))):
+    if item == "holes" and any(bottoms[i] != tops[i + 1] for i in range(len(bottoms) - 1)):
         raise AssertionError(f"Bottom depth must match next top depth in {item} intervals")
 
 

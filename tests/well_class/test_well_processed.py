@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from src.WellClass.libs.well_class import WellProcessed
 
@@ -53,3 +54,39 @@ def test_deviated_survey_produces_tvd_below_measured_depth():
     )
 
     assert float(well.md2tvd(1000.0)) < 1000.0
+
+
+def test_non_contiguous_holes_are_rejected():
+    with pytest.raises(AssertionError, match="Bottom depth must match next top"):
+        make_well(
+            hole_casings=[
+                {"name": "upper", "type": "hole", "top_rkb": 0.0, "bottom_rkb": 400.0, "diameter_in": 17.5},
+                {"name": "lower", "type": "hole", "top_rkb": 450.0, "bottom_rkb": 1000.0, "diameter_in": 12.25},
+            ]
+        )
+
+
+def test_cement_outside_casing_is_rejected():
+    with pytest.raises(AssertionError, match="cannot be shallower"):
+        make_well(
+            hole_casings=[
+                {"name": "hole", "type": "hole", "top_rkb": 0.0, "bottom_rkb": 1000.0, "diameter_in": 17.5},
+                {"name": "casing", "type": "casing", "top_rkb": 100.0, "bottom_rkb": 600.0, "diameter_in": 13.375},
+                {"name": "cement", "type": "casing cement", "top_rkb": 50.0, "bottom_rkb": 600.0, "diameter_in": 13.375},
+            ]
+        )
+
+
+def test_plug_shallower_than_ground_is_rejected():
+    with pytest.raises(AssertionError, match="shallower than ground elevation"):
+        make_well(
+            header={"ground_elevation": 100.0},
+            plugs=[{"name": "plug", "type": "cement", "top_rkb": 50.0, "bottom_rkb": 150.0}],
+        )
+
+
+def test_inverted_stratigraphy_is_rejected():
+    with pytest.raises(AssertionError, match="top_rkb.*bottom_rkb"):
+        make_well(
+            stratigraphy=[{"name": "unit", "top_rkb": 800.0, "bottom_rkb": 700.0}],
+        )
