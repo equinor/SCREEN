@@ -39,14 +39,14 @@ class GridRefine(GridRefineBase):
     # This is not a good practice of programming!!! 
     # Will come back to this.
     def build_LGR(self, 
-                  drilling_df: pd.DataFrame, 
+                  holes_df: pd.DataFrame,
                   casings_df: pd.DataFrame, 
                   barriers_mod_df: pd.DataFrame) -> None:
         """ assign material types to corresponding permeabilities.
 
             Args:
 
-                drilling_df (pd.DataFrame): information about drilling
+                holes_df (pd.DataFrame): drilled-hole intervals
                 casings_df (pd.DataFrame): information about casings and cement-bond
                 barriers_mod_df (pd.DataFrame): information about barrier 
 
@@ -55,16 +55,16 @@ class GridRefine(GridRefineBase):
         """
 
         # 1. compute lateral number of refined grid
-        self._compute_num_lateral_fine_grd(drilling_df, casings_df, barriers_mod_df)
+        self._compute_num_lateral_fine_grd(holes_df, casings_df, barriers_mod_df)
 
         # 2. set bounding box
-        self._compute_bbox(drilling_df, casings_df, barriers_mod_df)
+        self._compute_bbox(holes_df, casings_df, barriers_mod_df)
 
         # 3. set material type
-        self._set_material_type(drilling_df, casings_df, barriers_mod_df)
+        self._set_material_type(holes_df, casings_df, barriers_mod_df)
 
         # 4. set permeability
-        self._set_permeability(drilling_df, casings_df, barriers_mod_df)
+        self._set_permeability(holes_df, casings_df, barriers_mod_df)
 
         # 0. for GaP code
         gap_casing_df = self._compute_bbox_gap_casing(casings_df)

@@ -20,7 +20,7 @@ class LGRBuilderBase:
     def _build_grdecl(self, 
                       output_folder: str, 
                       LGR_NAME: str,
-                      drilling_df: pd.DataFrame, 
+                      holes_df: pd.DataFrame,
                       casings_df: pd.DataFrame, 
                       barriers_mod_df: pd.DataFrame,
                       NX: int, NY: int,
@@ -66,7 +66,7 @@ class LGRBuilderBase:
                         O)
 
         # 3. the pipes/openholes/barriers
-        df_to_gap_casing(drilling_df, 
+        df_to_gap_casing(holes_df,
                          casings_df,
                          LGR_NAME,
                          O)
@@ -80,7 +80,7 @@ class LGRBuilderBase:
 
         # bbox
         reopen_ID, x_min_reopen, x_max_reopen = \
-        compute_bbox_for_reopen(drilling_df, 
+        compute_bbox_for_reopen(holes_df,
                                 casings_df,
                                 nz_ovb)
 

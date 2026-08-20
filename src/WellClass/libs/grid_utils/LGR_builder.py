@@ -14,14 +14,14 @@ class LGRBuilder (LGRBuilderBase):
     def __init__(self,
                  simcase: str, 
                  annulus_df: pd.DataFrame,
-                 drilling_df: pd.DataFrame, 
+                 holes_df: pd.DataFrame,
                  Ali_way: bool):
         """ Builder for generating LGR grid
 
             Args:
                 simcase (str): simulation case, information about coarse grid
                 annulus_df (pd.DataFrame): information about annulus
-                drilling_df (pd.DataFrame): information about drilling
+                holes_df (pd.DataFrame): drilled-hole intervals
                 Ali_way (bool): use Ali's algorithm to compute lateral grids and apply refdepth in z direction
         """
 
@@ -33,7 +33,7 @@ class LGRBuilder (LGRBuilderBase):
         # LGR grid information in x, y, z directions
         self.lgr_info = LGRGridInfo(self.grid_coarse,
                                     annulus_df,
-                                    drilling_df,
+                                    holes_df,
                                     Ali_way)
 
         ##### 3. LGR refined grid
@@ -47,7 +47,7 @@ class LGRBuilder (LGRBuilderBase):
     def build_grdecl(self, 
                      output_folder: str, 
                      LGR_NAME: str,
-                     drilling_df: pd.DataFrame, 
+                     holes_df: pd.DataFrame,
                      casings_df: pd.DataFrame, 
                      barriers_mod_df: pd.DataFrame) -> pd.DataFrame:
         """ build .grdecl file and output it
@@ -56,20 +56,20 @@ class LGRBuilder (LGRBuilderBase):
 
                 output_folder (str): output folder
                 LGR_NAME (str): output file name
-                drilling_df (pd.DataFrame): information about drilling
+                holes_df (pd.DataFrame): drilled-hole intervals
                 casings_df (pd.DataFrame): information about casings and cement-bond
                 barriers_mod_df (pd.DataFrame): information about barrier                 
         """
 
         ##### 4. build LGR
-        gap_casing_df = self.grid_refine.build_LGR(drilling_df, 
+        gap_casing_df = self.grid_refine.build_LGR(holes_df,
                                                    casings_df, 
                                                    barriers_mod_df)
         
         ##### 5. output LGR
         self._build_grdecl(output_folder, 
                             LGR_NAME,
-                            drilling_df,
+                            holes_df,
                             gap_casing_df,    # casings_df,
                             barriers_mod_df,
                             self.grid_coarse.NX, self.grid_coarse.NY,

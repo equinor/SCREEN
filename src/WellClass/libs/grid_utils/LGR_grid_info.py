@@ -17,14 +17,14 @@ class LGRGridInfo:
     def __init__(self,
                  grid_coarse: GridCoarse, 
                  annulus_df: pd.DataFrame,
-                 drilling_df: pd.DataFrame, 
+                 holes_df: pd.DataFrame,
                  Ali_way: bool):
         """ LGR grid information in x, y, z directions. We are going to compute the grid sizes in lateral (x and y) and vertical directions
 
             Args:
                 grid_coarse (GridCoarse): all information about coarse grid
                 annulus_df (pd.DataFrame): information about annulus
-                drilling_df (pd.DataFrame): information about drilling
+                holes_df (pd.DataFrame): drilled-hole intervals
                 Ali_way (bool): use Ali's algorithm to compute lateral grids and apply refdepth in z direction
         """
 
@@ -52,7 +52,7 @@ class LGRGridInfo:
         self.min_grd_size = self._compute_min_grd_size(annulus_df, Ali_way)
 
         # #### 2. Compute number of cells of horizontal LGR
-        self.num_lateral_fine_grd = self._compute_num_lateral_fine_grd(drilling_df)
+        self.num_lateral_fine_grd = self._compute_num_lateral_fine_grd(holes_df)
 
         # #### 3. compute LGR sizes
 
@@ -93,12 +93,12 @@ class LGRGridInfo:
         return min_grd_size
     
     def _compute_num_lateral_fine_grd(self, 
-                                      drilling_df: pd.DataFrame) -> float:
+                                      holes_df: pd.DataFrame) -> float:
         """ compute number of LGR lateral grids
 
             Args:
 
-                drilling_df (pd.DataFrame): information about drilling
+                holes_df (pd.DataFrame): drilled-hole intervals
 
             Returns:
                 float: number of LGR lateral grids
@@ -108,7 +108,7 @@ class LGRGridInfo:
         min_grd_size = self.min_grd_size
 
         # 
-        drilling_series = drilling_df['diameter_m'].map(lambda x: compute_ngrd(x, min_grd_size))
+        drilling_series = holes_df['diameter_m'].map(lambda x: compute_ngrd(x, min_grd_size))
 
         return drilling_series.max()
     

@@ -152,13 +152,13 @@ def compute_bbox_xy(xxx_df: pd.DataFrame,
 
         return reopen_ID, x_min_reopen, x_max_reopen
 
-def compute_bbox_for_reopen(drilling_df: pd.DataFrame, 
+def compute_bbox_for_reopen(holes_df: pd.DataFrame,
                             casings_df: pd.DataFrame,
                             nz_ovb: int) -> Tuple[float, int, int]:
         """ calculate bbox for the hole reopen at the bottom of the well
 
             Args:
-                drilling_df (pd.DataFrame): dataframe for drilling
+                holes_df (pd.DataFrame): dataframe for drilled-hole intervals
                 casings_df (pd.DataFrame): dataframe for casings
                 nz_ovb (int): number of layers in overburden (refined grid)
 
@@ -175,7 +175,7 @@ def compute_bbox_for_reopen(drilling_df: pd.DataFrame,
 
         if reopen_ID is None:
                 # check drilling
-                reopen_ID, x_min_reopen, x_max_reopen = compute_bbox_xy(drilling_df, k_ovb_refine)
+                reopen_ID, x_min_reopen, x_max_reopen = compute_bbox_xy(holes_df, k_ovb_refine)
                 assert reopen_ID is not None
                 
         return reopen_ID, x_min_reopen, x_max_reopen

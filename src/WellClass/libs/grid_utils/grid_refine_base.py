@@ -145,11 +145,11 @@ class GridRefineBase:
             for field in fields:
                 mesh_df.loc[(mesh_df["Z"] >= top) & (mesh_df["Z"] < base), field] = row[field]
 
-    def _set_material_type(self, drilling_df: pd.DataFrame, casings_df: pd.DataFrame, barriers_mod_df: pd.DataFrame) -> None:
+    def _set_material_type(self, holes_df: pd.DataFrame, casings_df: pd.DataFrame, barriers_mod_df: pd.DataFrame) -> None:
         """Assign material types, such as openholes, overburden, cement bond, etc.
 
         Args:
-            drilling_df (pd.DataFrame): information about drilling
+            holes_df (pd.DataFrame): drilled-hole intervals
             casings_df (pd.DataFrame): information about casings and cement-bond
             barriers_mod_df (pd.DataFrame): information about barrier
         """
@@ -161,7 +161,7 @@ class GridRefineBase:
         mesh_df["material"] = "overburden"
 
         # ### 1. Drilling
-        for idx, row in drilling_df.iterrows():
+        for idx, row in holes_df.iterrows():
             top, bottom = row["top_msl"], row["bottom_msl"]  # noqa: F841
 
             if top < mesh_df["Zcorn_bottom"].max():
@@ -207,11 +207,11 @@ class GridRefineBase:
                         (k >= @b_k_min) & (k <= @b_k_max)'
             mesh_df.loc[mesh_df.eval(criteria), "material"] = f"barrier_{ib}"
 
-    def _set_permeability(self, drilling_df: pd.DataFrame, casings_df: pd.DataFrame, barriers_mod_df: pd.DataFrame) -> None:
+    def _set_permeability(self, holes_df: pd.DataFrame, casings_df: pd.DataFrame, barriers_mod_df: pd.DataFrame) -> None:
         """Actual function to assign permeability according to material type
 
         Args:
-            drilling_df (pd.DataFrame): information about drilling
+            holes_df (pd.DataFrame): drilled-hole intervals
             casings_df (pd.DataFrame): information about casings and cement-bond
             barriers_mod_df (pd.DataFrame): information about barrier
         """
@@ -222,7 +222,7 @@ class GridRefineBase:
         # set permeability according to material type
 
         # 1. openhole
-        oh_perm = drilling_df["oh_perm"].iloc[0]
+        oh_perm = holes_df["oh_perm"].iloc[0]
         criteria = 'material == "openhole"'
         mesh_df.loc[mesh_df.eval(criteria), "PERMX"] = oh_perm
 
@@ -238,11 +238,11 @@ class GridRefineBase:
             criteria = f'material == "barrier_{ib}"'
             mesh_df.loc[mesh_df.eval(criteria), "PERMX"] = barrier_perm
 
-    def _compute_num_lateral_fine_grd(self, drilling_df: pd.DataFrame, casings_df: pd.DataFrame, barriers_mod_df: pd.DataFrame):
+    def _compute_num_lateral_fine_grd(self, holes_df: pd.DataFrame, casings_df: pd.DataFrame, barriers_mod_df: pd.DataFrame):
         """compute number of fine grid in x-y directions
 
         Args:
-            drilling_df (pd.DataFrame): information about drilling
+            holes_df (pd.DataFrame): drilled-hole intervals
             casings_df (pd.DataFrame): information about casings and cement-bond
             barriers_mod_df (pd.DataFrame): information about barrier
         """
@@ -250,17 +250,17 @@ class GridRefineBase:
         min_grd_size = self.min_grd_size
 
         # n_grd_id for well elements
-        drilling_df["n_grd_id"] = drilling_df["diameter_m"].map(lambda x: compute_ngrd(x, min_grd_size))
+        holes_df["n_grd_id"] = holes_df["diameter_m"].map(lambda x: compute_ngrd(x, min_grd_size))
         casings_df["n_grd_id"] = casings_df["diameter_m"].map(lambda x: compute_ngrd(x, min_grd_size))
         barriers_mod_df["n_grd_id"] = barriers_mod_df["diameter_m"].map(lambda x: compute_ngrd(x, min_grd_size))
 
         # borehole_df['n_grd_id'] = borehole_df['id_m'].map(lambda x: compute_ngrd(x, min_grd_size))
 
-    def _compute_bbox(self, drilling_df: pd.DataFrame, casings_df: pd.DataFrame, barriers_mod_df: pd.DataFrame) -> None:
+    def _compute_bbox(self, holes_df: pd.DataFrame, casings_df: pd.DataFrame, barriers_mod_df: pd.DataFrame) -> None:
         """Compute bounding boxes for drillings, casings and barriers.
 
         Args:
-            drilling_df (pd.DataFrame): information about drilling
+            holes_df (pd.DataFrame): drilled-hole intervals
             casings_df (pd.DataFrame): information about casings and cement-bond
             barriers_mod_df (pd.DataFrame): information about barrier
         """
@@ -273,7 +273,7 @@ class GridRefineBase:
         maxDepth = mesh_df["Zcorn_bottom"].max()
 
         # ### 1. Drillings
-        compute_bbox(mesh_df, drilling_df, nxy=nxy, maxDepth=maxDepth)
+        compute_bbox(mesh_df, holes_df, nxy=nxy, maxDepth=maxDepth)
 
         # ### 2. Casings
         compute_bbox(mesh_df, casings_df, nxy=nxy, maxDepth=maxDepth, is_casing=True)
