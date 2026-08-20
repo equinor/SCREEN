@@ -57,15 +57,26 @@ class WellProcessed(Well):
 
         if self.header.get("depth_reference_rkb_unit") == "ft":
             self.header["depth_reference_rkb_unit"] = "m"
+            self.header["depth_reference_rkb"] *= const.foot
+
+        depth_unit = self.header.get("total_depth_rkb_unit")
+        if depth_unit == "ft":
+            self._convert_depth_records(const.foot)
+            self.header["total_depth_rkb_unit"] = "m"
             self.header["total_depth_rkb"] *= const.foot
 
         if self.header.get("ground_elevation_unit") == "ft":
             self.header["ground_elevation_unit"] = "m"
             self.header["ground_elevation"] *= const.foot
 
-        if self.header.get("total_depth_rkb_unit") == "ft":
-            self.header["total_depth_rkb_unit"] = "m"
-            self.header["total_depth_rkb"] *= const.foot
+    def _convert_depth_records(self, factor: float) -> None:
+        if self.survey:
+            self.survey["md_rkb"] = [depth * factor for depth in self.survey["md_rkb"]]
+
+        for records in (self.hole_casings, self.plugs, self.stratigraphy):
+            for record in records or []:
+                record["top_rkb"] *= factor
+                record["bottom_rkb"] *= factor
 
     def _build_wellpath(self) -> wp.position_log:
         return build_wellpath_object(survey=self.survey, total_depth=self.header["total_depth_rkb"], survey_bool=self.inventory["survey"])
