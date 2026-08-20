@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.WellClass.libs.well_pressure.co2_pressure import _get_max_pressure, _get_shmin
+from src.WellClass.libs.well_pressure.co2_pressure import _get_max_pressure, _get_shmin, _integrate_pressure
 from src.WellClass.libs.well_pressure.pressure import Pressure
 
 
@@ -79,3 +79,16 @@ def test_pressure_accepts_canonical_plug_positions(monkeypatch):
 def test_pressure_rejects_ambiguous_plug_position_arguments():
     with pytest.raises(ValueError, match="plug_positions or max_pressure_pos"):
         Pressure(plug_positions=[], max_pressure_pos=[])
+
+
+def test_pressure_integration_increases_downward_and_decreases_upward():
+    header = {"sf_temp": 4.0, "sf_depth_msl": 0.0, "geo_tgrad": 40.0}
+    table = make_pressure_table()
+
+    downward = _integrate_pressure(header, table, constant_density, 10.0, 100.0, "down", "downward")
+    upward = _integrate_pressure(header, table, constant_density, 20.0, 100.0, "up", "upward")
+
+    assert downward.loc[1, "downward"] == pytest.approx(100.0)
+    assert downward.loc[3, "downward"] > downward.loc[1, "downward"]
+    assert upward.loc[2, "upward"] == pytest.approx(100.0)
+    assert upward.loc[0, "upward"] < upward.loc[2, "upward"]
