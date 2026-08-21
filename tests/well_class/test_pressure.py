@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
 import pytest
@@ -8,8 +6,9 @@ from src.WellClass.libs.well_pressure.co2_pressure import _get_max_pressure, _ge
 from src.WellClass.libs.well_pressure.pressure import Pressure
 from src.WellClass.libs.well_pressure.pressure_scenario import PressureScenario
 from src.WellClass.libs.well_pressure.pressure_table import PressureTable
+from src.WellClass.libs.pvt.pvt import default_pvt_path
 
-PVT_PATH = Path(__file__).resolve().parents[2] / "test_data" / "pvt_constants"
+PVT_PATH = default_pvt_path()
 
 
 def make_pressure_table():
@@ -291,6 +290,20 @@ def test_pressure_builds_default_scenario_from_co2_datum(tmp_path=None):
 
     assert "default" in pressure.scenarios
     assert pressure.scenarios["default"].z_fluid_datum == 500.0
+    assert not np.isnan(pressure.scenarios["default"].p_MSAD)
+
+
+def test_pressure_uses_bundled_pvt_when_path_is_not_supplied():
+    header = {"ground_elevation": 100.0, "total_depth_rkb": 1000.0, "depth_reference_rkb": 25.0}
+
+    pressure = Pressure(
+        header=header,
+        co2_datum=500.0,
+        ground_temperature=4.0,
+        geothermal_gradient=40.0,
+    )
+
+    assert pressure.pvt_path == str(default_pvt_path())
     assert not np.isnan(pressure.scenarios["default"].p_MSAD)
 
 
