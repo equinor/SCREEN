@@ -12,6 +12,7 @@ sys.path.append(code_path)
 from src.GaP.libs.aux_functions.aux_func_cirrus_eql import setup_equilibration
 from src.WellClass.libs.grid_utils import GridLGR, LGRBuilder, WellDataFrame
 from src.WellClass.libs.plotting import plot_grid, plot_pressure, plot_sketch
+from src.WellClass.libs.pvt.pvt import default_pvt_path
 from src.WellClass.libs.utils import csv_parser, yaml_parser
 from src.WellClass.libs.well_class import Well
 from src.WellClass.libs.well_pressure import Pressure
@@ -30,7 +31,7 @@ LGR_NAME = "LW_LGR"
 
 # template and constant files
 template_simcase = "TEMP-0"
-pvt_path = "../test_data/pvt_constants/"
+pvt_path = str(default_pvt_path())
 Ali_way = False
 
 # Configuration

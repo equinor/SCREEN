@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 from typing import Callable, Tuple, Union
 
 import numpy as np
@@ -11,7 +11,12 @@ from scipy.interpolate import RectBivariateSpline
 G = const.g  # 9.81 m/s2 gravity acceleration
 
 
-def get_pvt(pvt_path: str) -> tuple:
+def default_pvt_path() -> Path:
+    """Return the bundled CO2 PVT collection shipped with WellClass."""
+    return Path(__file__).resolve().parents[2] / "data" / "pvt" / "co2"
+
+
+def get_pvt(pvt_path: str | Path | None = None) -> tuple:
     """Reads the vectors for pressure and temperature and the matrix for rho
     Note that the values for temperature and rho must be aligned with values in rho
     Note also for rho: One temperature for each column
@@ -23,10 +28,11 @@ def get_pvt(pvt_path: str) -> tuple:
     1141-1151.
     https://www.calsep.com/13-density-of-brine/
     """
-    fn_temp = os.path.join(pvt_path, "temperature.txt")
-    fn_pres = os.path.join(pvt_path, "pressure.txt")
-    fn_rho_co2 = os.path.join(pvt_path, "rho_co2.txt")
-    fn_rho_h2o = os.path.join(pvt_path, "rho_h2o.txt")
+    pvt_root = Path(pvt_path) if pvt_path is not None else default_pvt_path()
+    fn_temp = pvt_root / "temperature.txt"
+    fn_pres = pvt_root / "pressure.txt"
+    fn_rho_co2 = pvt_root / "rho_co2.txt"
+    fn_rho_h2o = pvt_root / "rho_h2o.txt"
 
     t = np.loadtxt(fn_temp)
     p = np.loadtxt(fn_pres)
@@ -72,7 +78,7 @@ def odesys(z: float, y: np.ndarray, well_header: dict, rho_getter: Callable) -> 
     return (dPdz,)
 
 
-def get_hydrostatic_P(well_header: dict, *, dz=1, pvt_path: str) -> pd.DataFrame:
+def get_hydrostatic_P(well_header: dict, *, dz=1, pvt_path: str | Path | None = None) -> pd.DataFrame:
     """Simple integration to get the hydrostatic pressure at a given depth
     Does also calculates the depth column, temperatur vs depth and water density (RHOH2O) vs depth (hydrostatic)
     """

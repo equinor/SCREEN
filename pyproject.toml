@@ -40,3 +40,6 @@ test = ["pytest==7.4.3", "pytest-cov==4.1.0", "ruff==0.5.3"]
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["src*"]
+
+[tool.setuptools.package-data]
+"src.WellClass" = ["data/pvt/co2/*.txt"]

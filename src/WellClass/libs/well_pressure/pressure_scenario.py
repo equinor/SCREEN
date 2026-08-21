@@ -6,7 +6,7 @@ from scipy import constants as const
 from scipy.integrate import solve_ivp
 from scipy.interpolate import RectBivariateSpline
 
-from ..pvt.pvt import get_pvt
+from ..pvt.pvt import default_pvt_path, get_pvt
 from ..utils.compute_intersection import compute_intersection
 from .pressure_table import PressureTable
 
@@ -284,10 +284,7 @@ class PressureScenario:
     def _fluid_density_interpolator(self) -> RectBivariateSpline:
         if self.fluid_type != "co2":
             raise ValueError(f"Only 'co2' is available in the in-situ PVT collection right now, got {self.fluid_type!r}")
-        if self.pvt_path is None:
-            raise ValueError("pvt_path is required to look up a named fluid's density table")
-
-        temperatures, pressures, rho_co2, _ = get_pvt(self.pvt_path)
+        temperatures, pressures, rho_co2, _ = get_pvt(self.pvt_path or default_pvt_path())
         return RectBivariateSpline(pressures, temperatures, rho_co2)
 
     def __repr__(self) -> str:

@@ -112,7 +112,7 @@ This is a naming convention to follow going forward, not a rename mandate — `w
 
 ## What Is Working Today
 
-- The current Python test suite passes: `44 passed`, with two expected warnings from sparse Shmin data extrapolation.
+- The current Python test suite passes: `67 passed`, with two expected warnings from sparse Shmin data extrapolation.
 - The WellClass-to-GaP adapter has a controlled vertical-well regression test.
 - A real Wildcat input can be converted into `hole_casings`, processed, adapted, and passed through `LGRBuilder` to produce a GRDECL artifact.
 - The three canonical notebooks now cover WellClass, GaP grid primitives, and the end-to-end path:
@@ -276,7 +276,15 @@ The repository needs a support classification before cleanup:
 
 WellClass should stay a single object a user can: (1) build well geometry from for both plotting and GaP input, (2) compute brine and CO2 pressure profiles under different scenario definitions, and (3) retrieve key pressure values at specific depths for reporting or later simulation input. Part 1 is done (`WellProcessed`).
 
-Parts 2/3 are now implemented as a collections-based (no pandas) engine: `Pressure` owns one shared `PressureTable` (well-level background curves: temperature, hydrostatic pressure, Shmin) and one or more named `PressureScenario` objects built on top of it. Each `PressureScenario` derives `brine_pressure` and `fluid_pressure` from a `z_fluid_datum`, either via a fixed pressure gradient or via full variable-density PVT integration for a named fluid (only `"co2"` today), and exposes its own metadata (`p_delta`, `p_resrv`, `z_resrv`, `p_MSAD`, `z_MSAD`). `Pressure.add_scenario(name, **kwargs)` supports as many named scenarios as needed, sharing the same background table.
+Parts 2/3 are now implemented as a collections-based (no pandas) engine. `Pressure` owns one or more named `PressureTable` objects (well-level background curves: temperature, hydrostatic pressure, Shmin) and one or more named `PressureScenario` objects. Scenarios use their selected table while retaining their own `brine_pressure`/`fluid_pressure` arrays and resolved metadata: `z_fluid_datum`/`p_fluid_datum`, `z_store`/`p_store`, `p_delta`, and `z_MSAD`/`p_MSAD`.
+
+The supported scenario anchors are:
+
+1. Fluid datum only, or fluid datum plus an explicit datum pressure or `p_delta`.
+2. A shallower store pressure pair, which anchors integration and derives the datum pressure at a supplied datum depth.
+3. `z_MSAD`, where `p_MSAD = Shmin(z_MSAD)` anchors integration; an optional `z_store` queries the resulting fluid pressure, and can become the datum when no datum is supplied.
+
+`PressureScenario.display_curves()` keeps complete calculated arrays available while returning full-depth brine plus the display-only fluid segment from MSAD to datum, with exact interpolated endpoints. `Pressure` may be constructed from a WellClass header or from explicit ground elevation, total depth, and RKB reference values.
 
 Remaining/deferred:
 
@@ -286,7 +294,11 @@ Remaining/deferred:
 
 **Exit criterion:** a WellClass user can define 2+ named pressure scenarios from a well and read back brine/CO2 pressure at a chosen depth, with test coverage, without pandas and without GaP involvement. Met except for the `get_values_at_depth` accessor.
 
-**Status:** substantially complete. `Pressure`/`PressureScenario`/`PressureTable` are implemented, tested (`tests/well_class/test_pressure.py`, `tests/well_class/test_pressure_table.py`), and demonstrated in `01_wellclass.ipynb`'s one-page pressure QC section.
+**Status:** substantially complete. `Pressure`/`PressureScenario`/`PressureTable` are implemented, tested (`tests/well_class/test_pressure.py`, `tests/well_class/test_pressure_table.py`), and demonstrated in `01_wellclass.ipynb` through datum, explicit-datum-pressure, store-anchored, and MSAD-anchored scenarios.
+
+### Checkpoint: 2026-08-21
+
+The WellClass pressure path now has a coherent object boundary: `Pressure` owns background tables; `PressureScenario` owns its resolved anchor metadata and calculated fluid/brine curves. This is the point to pause pressure API expansion. The next pressure increment should be the small read-only `get_values_at_depth` accessor, not another anchor type or PVT model. Bundled CO2 PVT constants now live in package-owned data and are the normal `Pressure` default; `pvt_path` remains an explicit override for alternative collections.
 
 ### Phase 5: Reduce historical noise
 

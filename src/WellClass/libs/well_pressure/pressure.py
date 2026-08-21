@@ -3,6 +3,7 @@ from typing import List, Optional
 
 import numpy as np
 
+from ..pvt.pvt import default_pvt_path
 from .pressure_scenario import PressureScenario
 from .pressure_table import PressureTable
 
@@ -66,8 +67,10 @@ class Pressure:
 
     def __post_init__(self):
         self._resolve_geometry()
-        if self.co2_datum is None or self.pvt_path is None:
-            raise ValueError("co2_datum and pvt_path are required")
+        if self.co2_datum is None:
+            raise ValueError("co2_datum is required")
+        if self.pvt_path is None:
+            self.pvt_path = str(default_pvt_path())
         if self.ground_temperature is None or self.geothermal_gradient is None:
             raise ValueError("ground_temperature and geothermal_gradient are required to build the well's PressureTable")
 
