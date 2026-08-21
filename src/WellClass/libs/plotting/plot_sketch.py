@@ -105,14 +105,14 @@ def casings_plotter(
             ax.plot([max_D / 2, min_D / 2], [max_Z] * 2, c=color_tone, zorder=10)
             ax.plot([-max_D / 2, -min_D / 2], [max_Z] * 2, c=color_tone, zorder=10)
 
-    # Draw annotations
-    if annot_bool:
+    # Draw annotations (only meaningful if the shoes they label are actually drawn)
+    if annot_bool and c_shoe_bool:
         for item in shoe_items:
             ycoord = item["tvd_msl_bottom"]
             d_in = item["diameter_in"]
             shoe_label = float_to_fraction_inches(d_in) + " shoe"
 
-            ax.annotate(shoe_label, xy=(x_txt_pos, ycoord), fontsize=txt_size, va="center", ha="right")
+            ax.annotate(shoe_label, xy=(x_txt_pos, ycoord), fontsize=txt_size, va="center", ha="right", clip_on=True)
 
 
 def cement_bond_plotter(ax: matplotlib.axes.Axes, data: List[Dict], cement_bond_bool: bool) -> None:
@@ -147,10 +147,11 @@ def cement_plug_plotter(
             height = row["bottom_tvd_msl"] - row["top_tvd_msl"]
             ax.add_patch(Rectangle(xy, width, height, facecolor="gray", zorder=1))
 
-    if annot_bool:
+    # Plug labels are only meaningful once the plugs themselves are drawn
+    if annot_bool and plug_bool:
         for row in plugs:
             ycoord = (row["tvd_msl_top"] + row["tvd_msl_bottom"]) / 2
-            ax.annotate(text=row["name"], xy=(0, ycoord), fontsize=txt_size, va="center", ha="center")
+            ax.annotate(text=row["name"], xy=(0, ycoord), fontsize=txt_size, va="center", ha="center", clip_on=True)
 
 
 def stratigraphy_plotter(
@@ -163,13 +164,14 @@ def stratigraphy_plotter(
         ax.axhspan(0, w_header["ground_elevation"], color="lightblue", alpha=0.5, zorder=-20)
         ax.axhspan(w_header["ground_elevation"], w_header["total_depth_rkb"], color="tan", alpha=0.5, zorder=-20)
 
-    if annot_bool:
+    # Geology labels are only meaningful once the geology bands are drawn
+    if annot_bool and geol_bool:
         for row in data:
             # if row["reservoir_flag"]:
             #     axis.axhspan(row["tvd_msl_top"], row["tvd_msl_bottom"], color="yellow", zorder=-10)
 
             ycoord = (row["tvd_msl_top"] + row["tvd_msl_bottom"]) / 2
-            ax.annotate(text=row["name"], xy=(x_txt_pos, ycoord), fontsize=txt_size, va="center")
+            ax.annotate(text=row["name"], xy=(x_txt_pos, ycoord), fontsize=txt_size, va="center", clip_on=True)
 
 
 def plot_sketch(
@@ -217,6 +219,10 @@ def plot_sketch(
     # Draw drilling (Bit size)
     hole_plotter(ax, hole_data, kwargs.get("draw_hole", True))
 
+    # draw_annotation is the shared default; draw_casing_annotation/draw_plug_annotation/
+    # draw_geology_annotation let callers override each label group independently.
+    draw_annotation = kwargs.get("draw_annotation", True)
+
     # Draw casings
     casings_plotter(
         ax=ax,
@@ -224,7 +230,7 @@ def plot_sketch(
         color_tone=STEELCOLOR,
         txt_size=TXT_FS_LEFT,
         x_txt_pos=XCOORD_LEFT,
-        annot_bool=kwargs.get("draw_annotation", True),
+        annot_bool=kwargs.get("draw_casing_annotation", draw_annotation),
         casings_bool=kwargs.get("draw_casings", True),
         c_shoe_bool=kwargs.get("draw_casing_shoes", True),
         c_weld_bool=kwargs.get("draw_welded", True),
@@ -234,7 +240,9 @@ def plot_sketch(
     cement_bond_plotter(ax, cement_bond, kwargs.get("draw_cement_bond", True))
 
     # draw barriers
-    cement_plug_plotter(ax, plugs_data, processed_plugs_data, kwargs.get("draw_barriers", True), kwargs.get("draw_annotation", True), TXT_FS_LEFT)
+    cement_plug_plotter(
+        ax, plugs_data, processed_plugs_data, kwargs.get("draw_barriers", True), kwargs.get("draw_plug_annotation", draw_annotation), TXT_FS_LEFT
+    )
 
     # Draw open hole (borehole/pipe) for testing only
     hole_plotter(ax, borehole_data, kwargs.get("draw_open_hole", False), fill_bool=False, z_order=100)
@@ -245,7 +253,7 @@ def plot_sketch(
         stratigraphy_data,
         mywell.header,
         kwargs.get("draw_geology", True),
-        kwargs.get("draw_annotation", True),
+        kwargs.get("draw_geology_annotation", draw_annotation),
         AX_WIDTH,
         XCOORD_RIGHT,
         TXT_FS_RIGHT,

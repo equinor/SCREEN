@@ -122,10 +122,12 @@ class StratigraphyModel(StratigraphyRaw):
     """The geological units encountered in the well
 
     Args:
-        reservoir_flag (bool): whether or not it is considered a reservoir
+        unit_type (str): interval categorization, used later by pressure computations.
+            Defaults to "undefined" when not specified in the input.
+        unit_perm (float): permeability for the unit
     """
 
-    unit_type: Optional[str] = None
+    unit_type: Literal["undefined", "reservoir", "flow_unit", "barrier"] = "undefined"
     unit_perm: Optional[Union[int, float]] = None
 
 

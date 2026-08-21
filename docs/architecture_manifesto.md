@@ -100,6 +100,16 @@ The central GaP path is [`LGRBuilder`](../src/WellClass/libs/grid_utils/LGR_buil
 
 This adapter is useful, but it should be a named transition. New WellClass code should not grow more legacy fields such as `drilling`, `casings`, or `barriers`.
 
+### Module naming conventions
+
+A module's name should say what kind of thing it holds, without needing to open it:
+
+- **Pydantic schemas** end in `_model.py` / `_models.py` (`well_model.py`, `scalar_unit_model.py`). These validate raw input; they are not the runtime object.
+- **Dataclasses / the object model** are named after the class they define, in snake_case, one class per module (`well_class.py` → `Well`, `well_processed.py` → `WellProcessed`, `well_raw.py` → `WellRaw`). No suffix needed — the directory (`well_class/`) already signals "this is the object model."
+- **Pure-function modules** are named after the computation, not a class, and every function inside starts with a verb: `compute_*`, `verify_*`, `build_*`, `get_*`, `split_*` (`well_computed/borehole.py` → `compute_borehole`, `well_validation.py` → `verify_hole_casings`, `well_computed/well_path.py` → `build_wellpath_object`, `pvt.py` → `get_pvt`).
+
+This is a naming convention to follow going forward, not a rename mandate — `well_model_utils.py` is the one existing inconsistency (it defines pydantic models but doesn't carry the `_model` suffix pattern clearly).
+
 ## What Is Working Today
 
 - The current Python test suite passes: `44 passed`, with two expected warnings from sparse Shmin data extrapolation.
@@ -262,6 +272,22 @@ The repository needs a support classification before cleanup:
 
 **Exit criterion:** a user can run a dry run anywhere and a full run only when the simulator prerequisites are installed.
 
+### Backlog: WellClass pressure scenario engine
+
+WellClass should stay a single object a user can: (1) build well geometry from for both plotting and GaP input, (2) compute brine and CO2 pressure profiles under different scenario definitions, and (3) retrieve key pressure values at specific depths for reporting or later simulation input. Part 1 is done (`WellProcessed`).
+
+Parts 2/3 are now implemented as a collections-based (no pandas) engine: `Pressure` owns one shared `PressureTable` (well-level background curves: temperature, hydrostatic pressure, Shmin) and one or more named `PressureScenario` objects built on top of it. Each `PressureScenario` derives `brine_pressure` and `fluid_pressure` from a `z_fluid_datum`, either via a fixed pressure gradient or via full variable-density PVT integration for a named fluid (only `"co2"` today), and exposes its own metadata (`p_delta`, `p_resrv`, `z_resrv`, `p_MSAD`, `z_MSAD`). `Pressure.add_scenario(name, **kwargs)` supports as many named scenarios as needed, sharing the same background table.
+
+Remaining/deferred:
+
+1. A `get_values_at_depth(depth)`-style accessor on `PressureScenario` (mirroring `PressureTable.get_values_at_depth`) so specific brine/CO2 pressure values can be pulled out without re-deriving the whole profile.
+2. Explicitly deferred: phase-envelope/fluid-composition-aware variable-density PVT (multiple mixtures, bubble/dew-point detection, brine salinity correction) — keep the current single-fluid (`"co2"`) variable-density integration until there is a concrete need.
+3. `barrier_pressure.py`'s `compute_barrier_leakage` was left disconnected — it referenced a legacy `Well` API (`well.barrier_perm`, `well.compute_barrier_props`) that no longer exists, and was removed from `Pressure`. Re-wiring barrier leakage estimation against the current `Well`/`WellProcessed` API is separate future work.
+
+**Exit criterion:** a WellClass user can define 2+ named pressure scenarios from a well and read back brine/CO2 pressure at a chosen depth, with test coverage, without pandas and without GaP involvement. Met except for the `get_values_at_depth` accessor.
+
+**Status:** substantially complete. `Pressure`/`PressureScenario`/`PressureTable` are implemented, tested (`tests/well_class/test_pressure.py`, `tests/well_class/test_pressure_table.py`), and demonstrated in `01_wellclass.ipynb`'s one-page pressure QC section.
+
 ### Phase 5: Reduce historical noise
 
 Only after the supported path is tested:
@@ -288,6 +314,7 @@ These are good discrete issues, ordered by leverage:
 10. **Update README/MkDocs around the three supported workflows.**
 11. **Publish and enforce the wellbore physical vocabulary.**
 12. **Rename the WellClass-to-GaP boundary from drilling/casings/barriers to holes/casings/barrier regions.**
+13. **Build a collections-based, multi-scenario WellClass pressure engine (brine + CO2, key-depth lookups) — see the pressure scenario engine backlog above.**
 
 ## Decision Rules
 

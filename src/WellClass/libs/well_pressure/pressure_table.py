@@ -62,11 +62,8 @@ class PressureTable:
 
     # Computed arrays
     temperature: np.ndarray = field(init=False)  # temperature array (°C)
-    hydrostatic_pressure: np.ndarray = field(init=False)  # hydrostatic pressure (MPa or bar)
-    min_horizontal_stress: np.ndarray = field(init=False)  # minimum horizontal stress (MPa or bar)
-    # fluid_pressure: np.ndarray  # fluid pressure (MPa or bar)
-    # brine_pressure: np.ndarray  # brine pressure (MPa or bar)
-    # min_horizontal_stress: np.ndarray  # minimum horizontal stress (MPa or bar)
+    hydrostatic_pressure: np.ndarray = field(init=False)  # hydrostatic pressure (bar)
+    min_horizontal_stress: np.ndarray = field(init=False)  # minimum horizontal stress (bar)
 
     def __post_init__(self):
         # Compute temperature array based on depth and geothermal gradient
@@ -102,8 +99,6 @@ class PressureTable:
 
     def compute_shmin(self) -> np.ndarray:
         """Compute minimum horizontal stress at a given depth."""
-        # Placeholder: linear increase with depth, can be replaced with a more complex model
-
         ground_pressure = np.interp(self.ground_elevation, self.depth, self.hydrostatic_pressure)
 
         if self.shmin_data:
@@ -115,8 +110,12 @@ class PressureTable:
                 surface_pressure_bar=const.atm / 1e5,
             )
 
-        else:
-            raise ValueError("Either shmin_gradient or shmin_data must be provided.")
+        if self.shmin_gradient is not None:
+            shmin = ground_pressure + self.shmin_gradient * (self.depth - self.ground_elevation)
+            shmin[self.depth < self.ground_elevation] = self.hydrostatic_pressure[self.depth < self.ground_elevation]
+            return shmin
+
+        raise ValueError("Either shmin_gradient or shmin_data must be provided.")
 
     def get_values_at_depth(self, depth_value: float) -> dict:
         """Interpolate all curves at a given depth."""
@@ -128,16 +127,5 @@ class PressureTable:
         return {
             "temperature": interp(self.temperature),
             "hydrostatic_pressure": interp(self.hydrostatic_pressure),
-            # "fluid_pressure": interp(self.fluid_pressure),
-            # "brine_pressure": interp(self.brine_pressure),
             "min_horizontal_stress": interp(self.min_horizontal_stress),
         }
-
-
-# @dataclass
-# class Pressure:
-#     ground_elevation: float
-#     total_depth_msl: float
-
-#     def __post_init__(self):
-#         self.pressure_tables: List[PressureTable] = []

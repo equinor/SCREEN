@@ -8,8 +8,6 @@ from scipy.integrate import solve_ivp
 from ..utils.compute_intersection import compute_intersection
 
 """Some global parameters"""
-G = const.g  # 9.81 m/s2 gravity acceleration
-BAR2PA = const.bar  # 10**5 Going from bars to Pascal: 1 bar = 10**5 Pascal
 SHMIN_FAC = 0.1695
 
 """Global names. Should be replaced by a global class containing these names? TODO"""
@@ -106,62 +104,7 @@ def _normalize_plug_positions(max_pressure_pos):
     return None
 
 
-def _integrate_pressure(
-    pt_df_in: pd.DataFrame, get_rho: callable, reference_depth: float, reference_pressure: float, direction: str, colname_p: str
-) -> pd.DataFrame:
-    """
-    Simple integration to find pressure
-    Starting point: reference_depth at reference pressure.  Reference temperature is found in pt_df
-                    Then iterate upwards (up) or downwards (down) to subtract or add pressure.
-                    Recalculates rho at each step.
-    """
-    pt_df = pt_df_in.copy()
-
-    ## Initialization
-    # Presure at MSL
-    p_msl = const.atm / BAR2PA  # 1.01325 bar Pressure at MSL
-
-    # New columns needed in DataFrame
-    if colname_p not in pt_df.columns:
-        pt_df[colname_p] = np.nan
-
-    colname_rho = colname_p + "_rho"
-    if colname_rho not in pt_df.columns:
-        pt_df[colname_rho] = np.nan
-
-    # Take out the part of the dataframe that is either below or above the reference depth.
-    if direction.lower() == "up":
-        query = pt_df.query("depth_msl<=@reference_depth")
-        sign = -1
-    elif direction.lower() == "down":
-        query = pt_df.query("depth_msl>=@reference_depth")
-        sign = 1
-    else:
-        print(f"ERROR: Not a valid direction. It should be 'up' or 'down'. You wrote {direction.lower()}")
-
-    ###Do the calculations
-    # Starting pressure and depth
-    p = reference_pressure
-    z0 = reference_depth
-
-    # Loop through the rows in the dataframe - upwards from the bottom of downwards from the top
-    for z_idx, row in query[::sign].iterrows():
-        t = row["temp"]
-        z = row["depth_msl"]
-
-        rho = get_rho(p, t)[0, 0]
-        dz = z - z0
-        p += (rho * G * dz) / BAR2PA  # /1e-5
-
-        # Ensure you do not get negative pressures
-        if p < p_msl:
-            p = p_msl
-
-        pt_df.loc[z_idx, colname_p] = p
-        pt_df.loc[z_idx, colname_rho] = rho
-        z0 = z
-
-    return pt_df
+##################################################################################
 
 
 ##################################################################################

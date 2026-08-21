@@ -1,178 +1,162 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Optional
 
 import numpy as np
-import pandas as pd
+from scipy import constants as const
+from scipy.integrate import solve_ivp
 from scipy.interpolate import RectBivariateSpline
 
+from ..pvt.pvt import get_pvt
 from ..utils.compute_intersection import compute_intersection
-from .co2_pressure import _get_rho_in_pressure_column, _integrate_pressure
+from .pressure_table import PressureTable
+
+
+def _integrate_variable_density(
+    depth: np.ndarray,
+    ground_elevation: float,
+    ground_temperature: float,
+    geothermal_gradient: float,
+    get_rho: callable,
+    reference_depth: float,
+    reference_pressure: float,
+    direction: str,
+) -> np.ndarray:
+    """Integrate a variable-density fluid column outward from a reference point.
+
+    Uses `solve_ivp` (adaptive Radau stepping) for the same robustness as
+    `pvt.get_hydrostatic_P`'s ODE integration, instead of a fixed-step Euler loop.
+    Temperature is evaluated analytically at each internal step (not interpolated
+    from the table's sampled array), since the solver picks its own z-values.
+    Depths on the other side of `reference_depth` are left as NaN.
+    """
+    pressure = np.full(depth.shape, np.nan)
+
+    if direction == "up":
+        indices = np.flatnonzero(depth <= reference_depth)
+        order = np.argsort(depth[indices])[::-1]  # from reference_depth upward (descending depth)
+    elif direction == "down":
+        indices = np.flatnonzero(depth >= reference_depth)
+        order = np.argsort(depth[indices])  # from reference_depth downward (ascending depth)
+    else:
+        raise ValueError(f"direction must be 'up' or 'down', got {direction!r}")
+
+    indices = indices[order]
+    if indices.size == 0:
+        return pressure
+
+    z_eval = depth[indices]
+    if z_eval[-1] == reference_depth:
+        # only the reference point itself is in range - nothing to integrate
+        pressure[indices] = reference_pressure
+        return pressure
+
+    def temperature_at(z: float) -> float:
+        return ground_temperature + max(0.0, z - ground_elevation) * (geothermal_gradient / 1000)
+
+    def odesys(z: float, y: np.ndarray) -> list:
+        rho = get_rho(y[0], temperature_at(z))[0, 0]
+        return [rho * const.g / const.bar]
+
+    solution = solve_ivp(
+        odesys,
+        [reference_depth, z_eval[-1]],
+        [reference_pressure],
+        t_eval=z_eval,
+        method="Radau",
+    )
+
+    pressure[indices] = np.maximum(solution.y[0], const.atm / const.bar)
+    return pressure
 
 
 @dataclass
-class FluidP_scenario:
-    header: dict
+class PressureScenario:
+    """
+    A named pressure scenario for a well.
 
-    ref_P: pd.DataFrame  # Init table with hydrostatic pressure, temperature and Shmin profile
-    rho_CO2: RectBivariateSpline
-    rho_H2O: RectBivariateSpline
+    Reuses the shared `PressureTable` background curves (temperature, hydrostatic
+    pressure, Shmin) and adds the scenario-specific curves: `brine_pressure` and
+    `fluid_pressure`, plus the scenario's own metadata (p_delta, p_resrv, z_resrv,
+    p_MSAD, z_MSAD).
 
-    p_name: str = None
+    The fluid curve is derived from `z_fluid_datum` in one of two ways:
+      - `fluid_gradient` given: a simple constant-gradient (bar/m) extrapolation.
+      - `fluid_type` given (default "co2"): a full variable-density integration
+        using the named fluid's density table from the in-situ PVT collection.
+    """
 
-    p_delta: float = np.nan
-    p_resrv: float = np.nan
-    z_resrv: float = np.nan
+    name: str
+    table: PressureTable
 
-    p_CO2_datum: float = np.nan
-    z_CO2_datum: float = np.nan
+    # Depth from which the fluid (e.g. CO2) column is derived
+    z_fluid_datum: float
 
-    p_MSAD: float = np.nan  # Pressure at Minimum Safety Abandonement depth
-    z_MSAD: float = np.nan  # Depth at Minimum Safety Abandonement depth
+    # Reservoir/reference point (optional overrides of the hydrostatic default)
+    p_delta: float = 0.0
+    p_resrv: Optional[float] = None
+    z_resrv: Optional[float] = None
 
-    P_table: pd.DataFrame = None
+    # Fluid derivation: a fixed gradient takes precedence over a named PVT fluid
+    fluid_type: Optional[str] = "co2"
+    fluid_gradient: Optional[float] = None
+    pvt_path: Optional[str] = None
+
+    # Computed curves
+    brine_pressure: np.ndarray = field(init=False)
+    fluid_pressure: np.ndarray = field(init=False)
+
+    # Computed scalars
+    p_MSAD: float = field(init=False, default=np.nan)  # Pressure at Minimum Safe Abandonment Depth
+    z_MSAD: float = field(init=False, default=np.nan)  # Depth at Minimum Safe Abandonment Depth
 
     def __post_init__(self):
-        """
-        Initialization. Depending on input defines which method to run.
-        """
-        if not np.isnan(self.z_MSAD):
-            # class will compute max pressure for given points. Integration of CO2 downwards
-            self.integrate_downwards()
+        self._resolve_reference_point()
+        self.brine_pressure = self.table.hydrostatic_pressure + self.p_delta
+        self.fluid_pressure = self._compute_fluid_pressure()
+        self.z_MSAD, self.p_MSAD = compute_intersection(self.table.depth, self.table.min_horizontal_stress, self.fluid_pressure)
 
-        elif (not np.isnan(self.p_delta)) and (not np.isnan(self.z_resrv)):
-            # reservoir pressure given as delta value- Integration of CO2 is upwards
-            raise NotImplementedError("method not implemented yet")
+    def _resolve_reference_point(self) -> None:
+        """Fill in whichever of p_delta/p_resrv/z_resrv the caller didn't provide."""
+        if self.z_resrv is None:
+            self.z_resrv = self.z_fluid_datum
 
-        elif (not np.isnan(self.p_resrv)) and (not np.isnan(self.z_resrv)) and (not np.isnan(self.z_CO2_datum)):
-            # reservoir pressure given as absolute value- Integration of CO2 is upwards
-            self.integrate_upwards()
+        hydrostatic_at_ref = float(np.interp(self.z_resrv, self.table.depth, self.table.hydrostatic_pressure))
 
-    def __repr__(self):
-        p_resrv_abs = f"reservoir pressure:\t{self.p_resrv:.2f} @ {self.z_resrv} mTVDMSL"
-        p_resrv_d = f"reservoir delta P:\t{self.p_delta} @ {self.z_resrv} mTVDMSL"
-        p_MSAD = f"max pressure:\t\t{self.p_MSAD:.2f} @ {self.z_MSAD:.2f} mTVDMSL"
-        z_datum = f"base of CO2:\t\t{self.z_CO2_datum} mTVDMSL"
+        if self.p_resrv is not None:
+            self.p_delta = self.p_resrv - hydrostatic_at_ref
+        else:
+            self.p_resrv = hydrostatic_at_ref + self.p_delta
 
-        return f"Pressure scenario:\t{self.p_name}\n{p_resrv_abs}\n{p_resrv_d}\n{p_MSAD}\n{z_datum}"
+    def _compute_fluid_pressure(self) -> np.ndarray:
+        p0 = float(np.interp(self.z_fluid_datum, self.table.depth, self.brine_pressure))
 
-    def integrate_upwards(self):
-        """
-        Method to compute pressure tables starting from reservoir pressure.
-        """
-        print(
-            f"Pressure scenario {self.p_name}: Compute pressures assuming reservoir pressure is {self.p_resrv:.2f} bar at {self.z_resrv:.2f} mTVDMSL"
+        if self.fluid_gradient is not None:
+            return p0 + self.fluid_gradient * (self.table.depth - self.z_fluid_datum)
+
+        get_rho = self._fluid_density_interpolator()
+        table = self.table
+        upper = _integrate_variable_density(
+            table.depth, table.ground_elevation, table.ground_temperature, table.geothermal_gradient, get_rho, self.z_fluid_datum, p0, "up"
         )
-
-        # Water
-        p0 = self.p_resrv
-        water_p_colname = "h2o"
-
-        self.P_table = _integrate_pressure(
-            well_header=self.header,
-            pt_df_in=self.ref_P,
-            get_rho=self.rho_H2O,
-            reference_depth=self.z_resrv,
-            reference_pressure=p0,
-            direction="up",
-            colname_p=water_p_colname,
+        lower = _integrate_variable_density(
+            table.depth, table.ground_elevation, table.ground_temperature, table.geothermal_gradient, get_rho, self.z_fluid_datum, p0, "down"
         )
+        return np.where(table.depth <= self.z_fluid_datum, upper, lower)
 
-        self.P_table = _integrate_pressure(
-            well_header=self.header,
-            pt_df_in=self.P_table,
-            get_rho=self.rho_H2O,
-            reference_depth=self.z_resrv,
-            reference_pressure=p0,
-            direction="down",
-            colname_p=water_p_colname,
+    def _fluid_density_interpolator(self) -> RectBivariateSpline:
+        if self.fluid_type != "co2":
+            raise ValueError(f"Only 'co2' is available in the in-situ PVT collection right now, got {self.fluid_type!r}")
+        if self.pvt_path is None:
+            raise ValueError("pvt_path is required to look up a named fluid's density table")
+
+        temperatures, pressures, rho_co2, _ = get_pvt(self.pvt_path)
+        return RectBivariateSpline(pressures, temperatures, rho_co2)
+
+    def __repr__(self) -> str:
+        return (
+            f"PressureScenario({self.name!r}): "
+            f"p_resrv={self.p_resrv:.2f} bar @ z_resrv={self.z_resrv:.1f} mTVDMSL, "
+            f"p_delta={self.p_delta:+.2f} bar, "
+            f"z_fluid_datum={self.z_fluid_datum:.1f} mTVDMSL, "
+            f"MSAD: p={self.p_MSAD:.2f} bar @ z={self.z_MSAD:.1f} mTVDMSL"
         )
-
-        # CO2
-        p0 = np.interp(self.z_CO2_datum, self.P_table["depth_msl"], self.P_table[water_p_colname])
-        self.p_CO2_datum = p0
-        co2_p_colname = "co2"
-
-        self.P_table = _integrate_pressure(
-            well_header=self.header,
-            pt_df_in=self.P_table,
-            get_rho=self.rho_CO2,
-            reference_depth=self.z_CO2_datum,
-            reference_pressure=p0,
-            direction="up",
-            colname_p=co2_p_colname,
-        )
-
-        # We need the density for water given the CO2-pressures, too
-        self.P_table = _get_rho_in_pressure_column(self.P_table, co2_p_colname, "h2o_rho_in_co2_column", self.rho_H2O)
-
-        # Compute MSAD
-        depth = self.P_table["depth_msl"].values
-        shmin = self.P_table["Shmin"].values
-        co2_p = self.P_table["co2"].values
-        self.z_MSAD, self.p_MSAD = compute_intersection(x=depth, y1=shmin, y2=co2_p)
-
-        # Compute delta P
-        hs_p = np.interp(float(self.z_resrv), self.ref_P["depth_msl"], self.ref_P["hs_p"])
-
-        self.p_delta = self.p_resrv - hs_p
-
-    def integrate_downwards(self):
-        """
-        Method to compute maximum pressure tables starting from Shmin at given depth.
-        """
-
-        print(f"Pressure scenario {self.p_name}: Compute maximum pressurization needed to reach Shmin at {self.z_MSAD} mTVDMSL")
-
-        # CO2
-        co2_p_colname = "co2"
-        self.p_MSAD = np.interp(float(self.z_MSAD), self.ref_P["depth_msl"], self.ref_P["Shmin"])
-
-        self.P_table = _integrate_pressure(
-            well_header=self.header,
-            pt_df_in=self.ref_P,
-            get_rho=self.rho_CO2,
-            reference_depth=float(self.z_MSAD),
-            reference_pressure=self.p_MSAD,
-            direction="down",
-            colname_p=co2_p_colname,
-        )
-
-        # Clean up pressure values below Gas_Water_contact
-        self.P_table.loc[self.P_table["depth_msl"] > self.z_CO2_datum, co2_p_colname] = np.nan
-
-        # Water
-        p0 = np.interp(float(self.z_CO2_datum), self.P_table["depth_msl"], self.P_table[co2_p_colname])
-        self.p_CO2_datum = p0
-        water_p_colname = "h2o"
-
-        self.P_table = _integrate_pressure(
-            well_header=self.header,
-            pt_df_in=self.P_table,
-            get_rho=self.rho_H2O,
-            reference_depth=self.z_CO2_datum,
-            reference_pressure=p0,
-            direction="up",
-            colname_p=water_p_colname,
-        )
-
-        self.P_table = _integrate_pressure(
-            well_header=self.header,
-            pt_df_in=self.P_table,
-            get_rho=self.rho_H2O,
-            reference_depth=self.z_CO2_datum,
-            reference_pressure=p0,
-            direction="down",
-            colname_p=water_p_colname,
-        )
-
-        # We need the density for water given the CO2-pressures, too
-        self.P_table = _get_rho_in_pressure_column(self.P_table, co2_p_colname, "h2o_rho_in_co2_column", self.rho_H2O)
-
-        # Compute reservoir pressure at CO2_datum
-        hs_p = self.P_table["h2o"].values
-
-        self.z_resrv = self.z_CO2_datum
-        self.p_resrv = self.p_CO2_datum
-
-        # Compute delta P
-        hs_p = np.interp(float(self.z_resrv), self.ref_P["depth_msl"], self.ref_P["hs_p"])
-        self.p_delta = self.p_resrv - hs_p
