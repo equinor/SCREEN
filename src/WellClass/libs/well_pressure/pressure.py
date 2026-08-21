@@ -23,8 +23,14 @@ class Pressure:
     "default" table is created automatically.
 
     Args:
-        header (dict): well header (WellProcessed.header), used for ground elevation
-            and total depth.
+        header (dict): optional WellClass header. When supplied, its geometry values
+            take precedence over the explicit geometry arguments below.
+        ground_elevation (float): ground elevation (mMSL), required when `header`
+            is not supplied.
+        total_depth_rkb (float): total measured depth (mRKB), required when
+            `header` is not supplied.
+        depth_reference_rkb (float): RKB reference elevation (mMSL), required
+            when `header` is not supplied.
         co2_datum (float): depth of the default CO2 scenario's fluid contact.
         pvt_path (str): directory where PVT files are located.
         fluid_type (str): named fluid to look up in the PVT collection for the
@@ -39,9 +45,13 @@ class Pressure:
         depth_step (float): depth sampling step (m) for every PressureTable.
     """
 
-    header: dict
-    co2_datum: float
-    pvt_path: str
+    header: Optional[dict] = None
+    co2_datum: Optional[float] = None
+    pvt_path: Optional[str] = None
+
+    ground_elevation: Optional[float] = None
+    total_depth_rkb: Optional[float] = None
+    depth_reference_rkb: Optional[float] = None
 
     fluid_type: str = "co2"
     ground_temperature: float = None
@@ -55,6 +65,9 @@ class Pressure:
     scenarios: dict = field(init=False, default_factory=dict)
 
     def __post_init__(self):
+        self._resolve_geometry()
+        if self.co2_datum is None or self.pvt_path is None:
+            raise ValueError("co2_datum and pvt_path are required")
         if self.ground_temperature is None or self.geothermal_gradient is None:
             raise ValueError("ground_temperature and geothermal_gradient are required to build the well's PressureTable")
 
@@ -65,6 +78,23 @@ class Pressure:
     def table(self) -> PressureTable:
         """The default PressureTable, kept for convenience when sensitivities aren't in play."""
         return self.tables[DEFAULT_TABLE_NAME]
+
+    def _resolve_geometry(self) -> None:
+        """Use a WellClass header when supplied, otherwise require explicit geometry."""
+        if self.header is not None:
+            self.ground_elevation = self.header["ground_elevation"]
+            self.total_depth_rkb = self.header["total_depth_rkb"]
+            self.depth_reference_rkb = self.header["depth_reference_rkb"]
+            return
+
+        required = {
+            "ground_elevation": self.ground_elevation,
+            "total_depth_rkb": self.total_depth_rkb,
+            "depth_reference_rkb": self.depth_reference_rkb,
+        }
+        missing = [name for name, value in required.items() if value is None]
+        if missing:
+            raise ValueError(f"Provide header or explicit geometry values: {', '.join(missing)}")
 
     def add_table(self, name: str, **overrides) -> PressureTable:
         """
@@ -77,15 +107,14 @@ class Pressure:
         if name in self.tables:
             raise ValueError(f"Table {name!r} already exists")
 
-        ground_elevation = self.header["ground_elevation"]
-        total_depth_msl = self.header["total_depth_rkb"] - self.header["depth_reference_rkb"]
+        total_depth_msl = self.total_depth_rkb - self.depth_reference_rkb
         z_final = max(total_depth_msl, self.co2_datum) + 500
         depth = np.arange(0.0, z_final, self.depth_step)
 
         table = PressureTable(
             name=name,
             depth=depth,
-            ground_elevation=ground_elevation,
+            ground_elevation=self.ground_elevation,
             ground_temperature=overrides.pop("ground_temperature", self.ground_temperature),
             geothermal_gradient=overrides.pop("geothermal_gradient", self.geothermal_gradient),
             rho_brine=overrides.pop("rho_brine", self.rho_brine),
