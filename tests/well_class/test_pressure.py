@@ -186,6 +186,98 @@ def test_pressure_scenario_rejects_datum_at_or_above_ground_elevation():
         PressureScenario(name="shallow_datum", table=table, z_fluid_datum=100.0, fluid_gradient=0.05)
 
 
+def test_msad_anchor_derives_hydrostatic_fluid_datum_when_none_is_supplied():
+    table = make_test_table()
+
+    scenario = PressureScenario(name="plug_msad", table=table, z_MSAD=500.0, fluid_gradient=0.20)
+
+    assert scenario.p_MSAD == pytest.approx(float(np.interp(500.0, table.depth, table.min_horizontal_stress)))
+    assert scenario.fluid_pressure[table.depth == 500.0][0] == pytest.approx(scenario.p_MSAD)
+    assert scenario.z_fluid_datum > table.ground_elevation
+    assert scenario.p_delta == 0.0
+    assert scenario.z_store == scenario.z_fluid_datum
+    assert scenario.p_store == scenario.p_fluid_datum
+
+
+def test_msad_anchor_derives_datum_pressure_and_delta_at_supplied_datum_depth():
+    table = make_test_table()
+
+    scenario = PressureScenario(name="plug_msad_with_datum", table=table, z_MSAD=500.0, z_fluid_datum=400.0, fluid_gradient=0.20)
+
+    hydrostatic_at_datum = float(np.interp(400.0, table.depth, table.hydrostatic_pressure))
+    assert scenario.p_fluid_datum == pytest.approx(scenario.fluid_pressure[table.depth == 400.0][0])
+    assert scenario.p_delta == pytest.approx(scenario.p_fluid_datum - hydrostatic_at_datum)
+    assert scenario.z_store == 400.0
+
+
+def test_msad_anchor_store_depth_becomes_datum_when_datum_is_not_supplied():
+    table = make_test_table()
+
+    scenario = PressureScenario(name="plug_msad_store_datum", table=table, z_MSAD=500.0, z_store=400.0, fluid_gradient=0.20)
+
+    hydrostatic_at_store = float(np.interp(400.0, table.depth, table.hydrostatic_pressure))
+    assert scenario.z_fluid_datum == 400.0
+    assert scenario.p_fluid_datum == pytest.approx(scenario.fluid_pressure[table.depth == 400.0][0])
+    assert scenario.p_store == pytest.approx(scenario.p_fluid_datum)
+    assert scenario.p_delta == pytest.approx(scenario.p_fluid_datum - hydrostatic_at_store)
+
+
+def test_msad_anchor_store_depth_queries_fluid_pressure_at_shallower_depth():
+    table = make_test_table()
+
+    scenario = PressureScenario(
+        name="plug_msad_store_query",
+        table=table,
+        z_MSAD=500.0,
+        z_fluid_datum=450.0,
+        z_store=400.0,
+        fluid_gradient=0.20,
+    )
+
+    assert scenario.p_store == pytest.approx(scenario.fluid_pressure[table.depth == 400.0][0])
+    assert scenario.z_store == 400.0
+
+
+def test_msad_anchor_rejects_store_deeper_than_supplied_datum():
+    table = make_test_table()
+
+    with pytest.raises(ValueError, match="cannot be deeper"):
+        PressureScenario(name="plug_msad_invalid_store", table=table, z_MSAD=500.0, z_fluid_datum=400.0, z_store=450.0, fluid_gradient=0.20)
+
+
+def test_msad_anchor_rejects_user_supplied_store_pressure():
+    table = make_test_table()
+
+    with pytest.raises(ValueError, match="p_store"):
+        PressureScenario(name="plug_msad_input_store_pressure", table=table, z_MSAD=500.0, z_store=400.0, p_store=180.0, fluid_gradient=0.20)
+
+
+def test_pressure_scenario_display_curves_clip_without_mutating_computed_arrays():
+    table = make_test_table()
+    scenario = PressureScenario(name="display", table=table, z_fluid_datum=505.0, p_delta=24.0, fluid_gradient=0.05)
+    full_fluid = scenario.fluid_pressure.copy()
+    full_brine = scenario.brine_pressure.copy()
+
+    display = scenario.display_curves()
+
+    assert display["fluid_depth"][0] == pytest.approx(scenario.z_MSAD)
+    assert display["fluid_depth"][-1] == pytest.approx(505.0)
+    assert display["fluid_pressure"][-1] == pytest.approx(scenario.p_fluid_datum)
+    assert np.array_equal(display["brine_depth"], table.depth)
+    assert np.array_equal(display["brine_pressure"], full_brine)
+    assert np.array_equal(scenario.fluid_pressure, full_fluid)
+    assert np.array_equal(scenario.brine_pressure, full_brine)
+
+
+def test_pressure_scenario_display_curves_rejects_msad_deeper_than_datum():
+    table = make_test_table()
+    scenario = PressureScenario(name="reversed", table=table, z_fluid_datum=300.0, p_delta=24.0, fluid_gradient=0.01)
+
+    scenario.z_MSAD = 400.0
+    with pytest.raises(ValueError, match="shallower"):
+        scenario.display_curves()
+
+
 def test_pressure_builds_default_scenario_from_co2_datum(tmp_path=None):
     header = {"ground_elevation": 100.0, "total_depth_rkb": 1000.0, "depth_reference_rkb": 25.0}
 

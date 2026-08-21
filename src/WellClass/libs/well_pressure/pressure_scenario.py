@@ -82,6 +82,8 @@ class PressureScenario:
     The fluid curve is normally derived from the fluid-datum pair. When a
     shallower `z_store`/`p_store` pair is supplied, that pair anchors the
     integration and the fluid-datum pressure is derived from the resulting curve.
+    Alternatively, `z_MSAD` anchors the fluid curve at Shmin; the datum is then
+    found from the resulting fluid curve or evaluated at a supplied datum depth.
     Curve derivation has two modes:
       - `fluid_gradient` given: a simple constant-gradient (bar/m) extrapolation.
       - `fluid_type` given (default "co2"): a full variable-density integration
@@ -95,13 +97,17 @@ class PressureScenario:
     z_fluid_datum: Optional[float] = None
     p_fluid_datum: Optional[float] = None
 
-    # Optional project/store reference. When supplied with a fluid datum, this
-    # pair anchors integration and the datum pressure is derived from the curve.
+    # Optional project/store reference. In datum/store scenarios the pair anchors
+    # integration; in MSAD scenarios z_store is a pressure-query depth and p_store
+    # is derived from the MSAD-anchored fluid curve.
     z_store: Optional[float] = None
     p_store: Optional[float] = None
 
     # Optional input/derived pressure offset: brine - hydrostatic at the datum.
     p_delta: Optional[float] = None
+
+    # Optional integration anchor: p_MSAD is always derived as Shmin(z_MSAD).
+    z_MSAD: Optional[float] = None
 
     # Fluid derivation: a fixed gradient takes precedence over a named PVT fluid
     fluid_type: Optional[str] = "co2"
@@ -112,23 +118,72 @@ class PressureScenario:
     brine_pressure: np.ndarray = field(init=False)
     fluid_pressure: np.ndarray = field(init=False)
 
-    # Computed scalars
+    # Computed scalar
     p_MSAD: float = field(init=False, default=np.nan)  # Pressure at Minimum Safe Abandonment Depth
-    z_MSAD: float = field(init=False, default=np.nan)  # Depth at Minimum Safe Abandonment Depth
     _integration_depth: float = field(init=False)
     _integration_pressure: float = field(init=False)
+    _msad_anchored: bool = field(init=False, default=False)
 
     def __post_init__(self):
-        self._resolve_datum_and_store()
+        if self.z_MSAD is None:
+            self._resolve_datum_and_store()
+        else:
+            self._resolve_from_msad()
         self.fluid_pressure = self._compute_fluid_pressure()
 
-        if self.p_fluid_datum is None:
+        if self._msad_anchored:
+            self._resolve_datum_from_msad_curve()
+        elif self.p_fluid_datum is None:
             self.p_fluid_datum = float(np.interp(self.z_fluid_datum, self.table.depth, self.fluid_pressure))
             hydrostatic_at_datum = float(np.interp(self.z_fluid_datum, self.table.depth, self.table.hydrostatic_pressure))
             self.p_delta = self.p_fluid_datum - hydrostatic_at_datum
 
         self.brine_pressure = self.table.hydrostatic_pressure + self.p_delta
-        self.z_MSAD, self.p_MSAD = compute_intersection(self.table.depth, self.table.min_horizontal_stress, self.fluid_pressure)
+        if not self._msad_anchored:
+            self.z_MSAD, self.p_MSAD = compute_intersection(self.table.depth, self.table.min_horizontal_stress, self.fluid_pressure)
+
+    def _resolve_from_msad(self) -> None:
+        """Use Shmin at z_MSAD as the fluid-curve integration anchor."""
+        if self.p_fluid_datum is not None or self.p_delta is not None or self.p_store is not None:
+            raise ValueError("z_MSAD cannot be combined with p_fluid_datum, p_delta, or p_store")
+
+        self._validate_depth("z_MSAD", self.z_MSAD)
+        if self.z_fluid_datum is not None:
+            self._validate_depth("z_fluid_datum", self.z_fluid_datum)
+        if self.z_store is not None:
+            self._validate_depth("z_store", self.z_store)
+            if self.z_fluid_datum is not None and self.z_store > self.z_fluid_datum:
+                raise ValueError("z_store cannot be deeper than z_fluid_datum")
+
+        self.p_MSAD = float(np.interp(self.z_MSAD, self.table.depth, self.table.min_horizontal_stress))
+        self._integration_depth = self.z_MSAD
+        self._integration_pressure = self.p_MSAD
+        self._msad_anchored = True
+
+    def _resolve_datum_from_msad_curve(self) -> None:
+        """Resolve the contact and brine offset after MSAD-anchored integration."""
+        if self.z_fluid_datum is None:
+            if self.z_store is not None:
+                self.z_fluid_datum = self.z_store
+                self.p_fluid_datum = float(np.interp(self.z_fluid_datum, self.table.depth, self.fluid_pressure))
+                hydrostatic_at_datum = float(np.interp(self.z_fluid_datum, self.table.depth, self.table.hydrostatic_pressure))
+                self.p_delta = self.p_fluid_datum - hydrostatic_at_datum
+            else:
+                z_datum, p_datum = compute_intersection(self.table.depth, self.fluid_pressure, self.table.hydrostatic_pressure)
+                if not np.isfinite(z_datum):
+                    raise ValueError("MSAD-anchored fluid curve does not cross hydrostatic pressure within the PressureTable range")
+                self._validate_depth("derived z_fluid_datum", z_datum)
+                self.z_fluid_datum = z_datum
+                self.p_fluid_datum = p_datum
+                self.p_delta = 0.0
+        else:
+            self.p_fluid_datum = float(np.interp(self.z_fluid_datum, self.table.depth, self.fluid_pressure))
+            hydrostatic_at_datum = float(np.interp(self.z_fluid_datum, self.table.depth, self.table.hydrostatic_pressure))
+            self.p_delta = self.p_fluid_datum - hydrostatic_at_datum
+
+        if self.z_store is None:
+            self.z_store = self.z_fluid_datum
+        self.p_store = float(np.interp(self.z_store, self.table.depth, self.fluid_pressure))
 
     def _resolve_datum_and_store(self) -> None:
         """Resolve the fluid datum and select the curve-integration anchor."""
@@ -183,6 +238,31 @@ class PressureScenario:
             raise ValueError(f"{name} must be deeper than ground_elevation")
         if depth < self.table.depth[0] or depth > self.table.depth[-1]:
             raise ValueError(f"{name} must be within the PressureTable depth range")
+
+    def display_curves(self) -> dict[str, np.ndarray]:
+        """Return full brine and the physical visual segment of the fluid curve.
+
+        Brine remains visible across the full PressureTable depth range. Fluid is
+        shown only from MSAD to the fluid datum. The full computed arrays remain
+        unchanged for calculations. Exact MSAD and datum rows are interpolated
+        into the fluid segment when the table grid does not contain those depths,
+        preventing gaps at the displayed endpoints.
+        """
+        if not np.isfinite(self.z_MSAD) or self.z_fluid_datum is None:
+            raise ValueError("MSAD and fluid datum must be resolved before display curves can be created")
+        if self.z_MSAD > self.z_fluid_datum:
+            raise ValueError("z_MSAD must be shallower than or equal to z_fluid_datum for display")
+
+        depth = self.table.depth
+        interior = (depth > self.z_MSAD) & (depth < self.z_fluid_datum)
+        fluid_depth = np.concatenate(([self.z_MSAD], depth[interior], [self.z_fluid_datum]))
+
+        return {
+            "brine_depth": depth.copy(),
+            "brine_pressure": self.brine_pressure.copy(),
+            "fluid_depth": fluid_depth,
+            "fluid_pressure": np.interp(fluid_depth, depth, self.fluid_pressure),
+        }
 
     def _compute_fluid_pressure(self) -> np.ndarray:
         p0 = self._integration_pressure
