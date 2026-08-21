@@ -4,6 +4,8 @@
 
 The current `LGRBuilder` assumes that a suitable coarse `.EGRID` and `.INIT` case already exists. It refines that grid around the well, assigns material and permeability regions, and writes a GRDECL artifact. This is the tested product path and should remain stable while coarse-grid accommodation is designed.
 
+The first pure-Python slice is now available as `CoarseGridSpec` and `build_vertical_grid_schedule` in `src/WellClass/libs/grid_utils/coarse_grid.py`. It creates a deterministic water/overburden/reservoir `DZ` schedule and validates that a supplied processed well fits within the configured top and bottom depths. It does not write `.EGRID`/`.INIT` files or invoke a simulator yet.
+
 ## Future Coarse-Grid Accommodation
 
 The desired capability is to make or adapt a coarse grid so the well can be represented before LGR refinement. A future implementation should separate this into an explicit stage:
