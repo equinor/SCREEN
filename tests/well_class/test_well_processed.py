@@ -5,6 +5,7 @@ import matplotlib
 matplotlib.use("Agg")
 
 from src.WellClass.libs.well_class import WellProcessed
+from src.WellClass.libs.plotting.plot_sketch import ZONATION_COLORS
 
 
 def make_well(**overrides):
@@ -102,3 +103,22 @@ def test_processed_well_sketch_draws_canonical_borehole_records():
 
     assert figure is axis.figure
     assert len(axis.patches) > 0
+
+
+def test_processed_well_preserves_frigg_stratigraphy_zonation():
+    well = WellProcessed.from_json("test_data/examples/frigg/frigg.json")
+    unit_types = {unit["name"]: unit["unit_type"] for unit in well.stratigraphy}
+
+    assert unit_types["UTSIRA SANDS"] == "flow_unit"
+    assert unit_types["FRIGG SANDS"] == "flow_unit"
+    assert unit_types["SELE FM"] == "reservoir"
+    assert unit_types["HORDALAND 1 GREEN CLAY"] == "barrier"
+    assert unit_types["BALDER FM"] == "undefined"
+
+
+def test_zonation_colors_cover_the_supported_display_flags():
+    assert ZONATION_COLORS == {
+        "reservoir": "#f6d55c",
+        "flow_unit": "#f4a261",
+        "barrier": "#1b5e20",
+    }

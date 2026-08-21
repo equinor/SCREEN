@@ -8,6 +8,12 @@ from matplotlib.patches import Rectangle
 from ..utils.fraction_float import float_to_fraction_inches
 from ..well_class.well_class import Well
 
+ZONATION_COLORS = {
+    "reservoir": "#f6d55c",
+    "flow_unit": "#f4a261",
+    "barrier": "#1b5e20",
+}
+
 
 def split_hole_casings(data: list[dict]) -> dict[str, list[dict]]:
     hole = [item for item in data if item["type"] == "hole"]
@@ -164,12 +170,14 @@ def stratigraphy_plotter(
         ax.axhspan(0, w_header["ground_elevation"], color="lightblue", alpha=0.5, zorder=-20)
         ax.axhspan(w_header["ground_elevation"], w_header["total_depth_rkb"], color="tan", alpha=0.5, zorder=-20)
 
+        for row in data:
+            color = ZONATION_COLORS.get(row.get("unit_type"))
+            if color:
+                ax.axhspan(row["tvd_msl_top"], row["tvd_msl_bottom"], color=color, alpha=0.35, zorder=-10)
+
     # Geology labels are only meaningful once the geology bands are drawn
     if annot_bool and geol_bool:
         for row in data:
-            # if row["reservoir_flag"]:
-            #     axis.axhspan(row["tvd_msl_top"], row["tvd_msl_bottom"], color="yellow", zorder=-10)
-
             ycoord = (row["tvd_msl_top"] + row["tvd_msl_bottom"]) / 2
             ax.annotate(text=row["name"], xy=(x_txt_pos, ycoord), fontsize=txt_size, va="center", clip_on=True)
 

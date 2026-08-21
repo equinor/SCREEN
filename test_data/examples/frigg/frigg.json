@@ -675,7 +675,8 @@
             {
                 "name": "UTSIRA SANDS",
                 "top_rkb": 238.0,
-                "bottom_rkb": 738.0
+                "bottom_rkb": 738.0,
+                "unit_type": "flow_unit"
             },
             {
                 "name": "HORDALAND 3 CLAY",
@@ -700,12 +701,14 @@
             {
                 "name": "HORDALAND 1 GREEN CLAY",
                 "top_rkb": 1350.0,
-                "bottom_rkb": 1926.0
+                "bottom_rkb": 1926.0,
+                "unit_type": "barrier"
             },
             {
                 "name": "FRIGG SANDS",
                 "top_rkb": 1926.0,
-                "bottom_rkb": 2171.0
+                "bottom_rkb": 2171.0,
+                "unit_type": "flow_unit"
             },
             {
                 "name": "BALDER FM",
@@ -715,7 +718,8 @@
             {
                 "name": "SELE FM",
                 "top_rkb": 2291.0,
-                "bottom_rkb": 2423.0
+                "bottom_rkb": 2423.0,
+                "unit_type": "reservoir"
             },
             {
                 "name": "LISTA FM",
