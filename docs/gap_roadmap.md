@@ -1,41 +1,58 @@
 # GaP Roadmap
 
-## Current Constraint
+This document tracks implementation work for the GaP path. The architectural contract is defined by the [SCREEN Architecture Manifesto](architecture_manifesto.md); this roadmap does not redefine it.
 
-The current `LGRBuilder` assumes that a suitable coarse `.EGRID` and `.INIT` case already exists. It refines that grid around the well, assigns material and permeability regions, and writes a GRDECL artifact. This is the tested product path and should remain stable while coarse-grid accommodation is designed.
+## Current State
 
-The first pure-Python slice is now available as `CoarseGridSpec`, `build_vertical_grid_schedule`, and `write_vertical_grid_recipe` in `src/WellClass/libs/grid_utils/coarse_grid.py`. It creates a deterministic water/overburden/reservoir `DZ` schedule, validates that a supplied processed well fits within the configured top and bottom depths, and can write a simulator-oriented `TOPS`/`DZ` text recipe. It does not write native `.EGRID`/`.INIT` files or invoke a simulator yet.
+The supported GaP path is:
 
-## Future Coarse-Grid Accommodation
-
-The desired capability is to make or adapt a coarse grid so the well can be represented before LGR refinement. A future implementation should separate this into an explicit stage:
-
-```mermaid
-flowchart LR
-    Well[Processed well JSON] --> Envelope[Well envelope and margins]
-    Envelope --> Extent[Required grid extents]
-    Base[Existing coarse grid or grid recipe] --> Inspect[Grid inspection]
-    Extent --> Inspect
-    Inspect --> Adapt[Adapt or generate coarse grid]
-    Adapt --> Validate[Validate coverage and cell quality]
-    Validate --> LGR[LGRBuilder]
-    LGR --> GRDECL[Reviewable GRDECL]
+```text
+canonical well JSON + existing .EGRID/.INIT
+    -> WellProcessed
+    -> WellDataFrame
+    -> LGRBuilder
+    -> CARFIN/LGR GRDECL
 ```
 
-Candidate responsibilities:
+The current `LGRBuilder` assumes that a suitable coarse grid already exists. This remains the regression path and must stay stable while coarse-grid preparation is developed upstream.
 
-1. **Well envelope:** derive lateral radius, top/bottom depth, and configurable safety margins from `WellProcessed` geometry.
-2. **Grid coverage:** verify that the coarse grid contains the envelope and report which bounds or layers are insufficient.
-3. **Grid adaptation:** split or extend coarse cells where needed, preserving coordinate systems, units, and existing properties.
-4. **Grid recipe:** support a pure-Python synthetic/coarse-grid recipe for tests and a separate simulator-backed writer for production cases.
-5. **Quality checks:** reject inverted cells, zero/negative dimensions, uncovered well intervals, and ambiguous depth references before LGR construction.
+Completed coarse-grid preparation slices:
 
-## Design Constraints
+- `CoarseGridSpec` makes vertical domain and layer-count assumptions explicit.
+- `build_vertical_grid_schedule` creates water, overburden, and reservoir `DZ` values.
+- Well top/bottom coverage and invalid depth ordering are validated.
+- `format_vertical_grid_recipe` and `write_vertical_grid_recipe` produce a simulator-oriented `TOPS`/`DZ` text recipe.
+- Notebook 2 demonstrates the recipe against the Wildcat JSON fixture.
 
-- Do not hide grid creation inside `LGRBuilder`; keep coarse-grid preparation as a named upstream boundary.
+These helpers do not create native `.EGRID`/`.INIT` files or run a simulator.
+
+## Next
+
+1. Add a typed coarse-grid envelope containing lateral and vertical margins derived from `WellProcessed` geometry.
+2. Add a pure-Python coverage report for an existing grid or grid specification:
+   - required well envelope;
+   - grid extents;
+   - missing margins;
+   - cell-size summary;
+   - warnings and failure reasons.
+3. Define a simulator backend interface that consumes the generated recipe and reports executable availability, command, logs, and output paths.
+4. Add one simulator-backed dry-run path without invoking PFLOTRAN/CIRRUS in unit tests.
+5. Connect a generated `.EGRID`/`.INIT` pair to notebook 3 as an optional generated-grid mode.
+
+## Later
+
+- Adapt or extend coarse cells when the well envelope is not covered.
+- Preserve existing properties when adapting a grid.
+- Support separate PFLOTRAN and CIRRUS input/output backends.
+- Add a small committed synthetic grid for pure-Python tests.
+- Replace hard-coded permeability and cell-size assumptions with modeled configuration.
+
+## Boundaries
+
+- Do not put coarse-grid creation inside `LGRBuilder`; it should receive a validated coarse grid.
 - Keep simulator execution optional and explicit.
-- Make margins, target cell sizes, coordinate system, and depth range configuration values rather than constants.
-- Add a small synthetic-grid test before integrating with PFLOTRAN/CIRRUS.
-- Preserve the current pre-existing-grid workflow as a regression path.
+- Keep `TOPS`/`DZ` text generation separate from native EGRID/INIT generation.
+- Keep units, depth coordinates, margins, and target cell sizes explicit.
+- Preserve the existing pre-existing-grid workflow as a regression path.
 
-The legacy recipes in `experiments/legacy/` are useful references for template copying, tops generation, pressure initialization, and simulator orchestration. They should inform this design but should not be imported as the new implementation.
+The scripts in `experiments/legacy/` contain historical examples of tops generation, template handling, pressure initialization, and simulator orchestration. They are references for future work, not new implementation boundaries.

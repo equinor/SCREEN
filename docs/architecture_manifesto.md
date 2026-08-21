@@ -8,6 +8,18 @@ SCREEN should make one workflow dependable:
 
 The immediate goal is not to modernize every module. It is to make that workflow explicit, testable, and honest about which external tools it needs.
 
+## Document Roles
+
+This manifesto is the architectural source of truth. It defines what SCREEN is supposed to do, which modules own each responsibility, which boundaries are stable, and which limitations are intentional.
+
+The focused roadmaps, such as [`gap_roadmap.md`](gap_roadmap.md), are execution trackers. They record implementation status and the next concrete tasks needed to move toward this architecture; they must not redefine the ownership boundaries or canonical workflow described here. When a roadmap item conflicts with this manifesto, the manifesto takes precedence and the roadmap should be revised.
+
+The three canonical notebooks are executable explanations of the architecture:
+
+- `01_wellclass.ipynb`: WellClass capabilities.
+- `02_gap_grid.ipynb`: GaP grid capabilities and coarse-grid recipe experiments.
+- `03_wellclass_to_gap.ipynb`: the JSON-to-LGR integration workflow.
+
 ## The Current Shape
 
 SCREEN is currently four overlapping products in one repository:
@@ -169,6 +181,12 @@ Architecture clarifications agreed in this pass:
 - **GaP is the core product path** in this repository for grid refinement and mesh artifact generation.
 - **WellClass is an upstream provider** of geometry constraints and permeability assumptions to GaP.
 - **Pressure/PVT are optional scenario inputs** and should not be treated as required for core GaP meshing workflows.
+
+### Checkpoint: 2026-08-21 (Canonical fixtures and coarse-grid recipe)
+
+The supported JSON-to-LGR contract is now exercised with Wildcat and Smeaheia coarse-grid cases. `WellProcessed` accepts the canonical JSON fixtures, notebook 3 is parameterized by well/grid case, and the integration test covers Wildcat `TEMP-0` plus Smeaheia `TEMP-0` and `GEN_NOLGR_PH2`.
+
+GaP still consumes existing `.EGRID` and `.INIT` files for LGR construction. The first upstream coarse-grid preparation slice is now explicit in `CoarseGridSpec`, `build_vertical_grid_schedule`, and `write_vertical_grid_recipe`: it validates the vertical domain and writes a `TOPS`/`DZ` text recipe, but does not yet generate native `.EGRID`/`.INIT` files or invoke a simulator. The implementation tracker for that work is [the GaP roadmap](gap_roadmap.md).
 
 Refinement mode policy:
 
