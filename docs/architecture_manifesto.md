@@ -149,6 +149,33 @@ Known residual risks:
 - Strict MkDocs still reports existing docstring/deprecation warnings even though the non-strict build succeeds.
 - Overall source coverage remains low outside the paths now tested; pressure and geometry coverage is better, but plotting and simulator orchestration are not comprehensively verified.
 
+### Checkpoint: 2026-08-21 (Pressure engine)
+
+This checkpoint confirms the GaP-first workflow intent and upgrades the canonical GaP notebook from a primitive-only demonstration to a full mesh-construction recipe.
+
+Completed during this pass:
+
+- Upgraded [`02_gap_grid.ipynb`](../notebooks/02_gap_grid.ipynb) to run an end-to-end GaP flow from coarse grid and synthetic geometry inputs through `LGRBuilder` and GRDECL generation.
+- Added explicit dual-mode refinement comparison in the canonical GaP notebook:
+  - `new_way` (log-transition lateral refinement), and
+  - `ali_way` (legacy fixed-transition refinement).
+- Added numeric lateral-refinement diagnostics (`nx`, min/max `DX`, grading ratio, representative outer/inner transition cells).
+- Added side-by-side visual QC of coarse versus refined meshes for both refinement modes.
+- Added a notebook flow diagram that documents input-to-LGR transformation stages and where material/permeability assignment occurs.
+- Set plotting in the canonical GaP notebook to blocky nearest-neighbor rendering for cell-level QC instead of visually smoothed heatmaps.
+
+Architecture clarifications agreed in this pass:
+
+- **GaP is the core product path** in this repository for grid refinement and mesh artifact generation.
+- **WellClass is an upstream provider** of geometry constraints and permeability assumptions to GaP.
+- **Pressure/PVT are optional scenario inputs** and should not be treated as required for core GaP meshing workflows.
+
+Refinement mode policy:
+
+- Default and recommended mode for new workflows: `new_way`.
+- `ali_way` remains supported for legacy comparability and result back-checking.
+- Canonical docs and examples should continue to show both modes where comparison value is high, while using `new_way` as the baseline path.
+
 ## The Main Risks
 
 ### 1. The tested surface is much smaller than the implementation
