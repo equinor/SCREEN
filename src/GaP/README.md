@@ -7,7 +7,9 @@ The resulting simulation model is a 3D representation of the wellbore, with the 
 *Figure 1: Comparison of the template grid with updated overburden thickness (left) and the resulting grid after LGR generation (right).*
 
 
-Users are encouraged to use the `wildcat-CIRRUS` dataset located in the `test_data/examples` folder, along with the `CIRRUS_gap` notebook or the `screen_well_to_gap.py` script. These resources guide users through library dependencies and path setups. The first step is to create copies of the template files and update them with well-specific information and problem setup details. This includes adjusting the thickness of overburden cells and updating equilibration information to initialize the simulation with expected reservoir pressure and temperature gradients.
+Users should start with the canonical GaP and WellClass notebooks, especially `notebooks/02_gap_grid.ipynb` and `notebooks/03_wellclass_to_gap.ipynb`. Simulator-dependent experiments require copies of the template files and explicit external-tool setup; see `experiments/README.md` for the optional command-line utilities.
+
+The current GaP path expects a suitable coarse grid before LGR refinement. Future coarse-grid accommodation ideas are recorded in [GaP Roadmap](gap_roadmap.md); the legacy workflow recipes are retained under `experiments/legacy/` as references only.
 
 The equilibration is divided into two zones: 'overburden_water' for the brine in the overburden and ocean water column, and 'CO2_column' for the reservoir, defined by a gas-water contact depth and pressure. The simulation is initially set to run for zero days (START_DATE = FINAL_DATE) to perform only an initialization run, which generates the EGRID file necessary for building the LGR.
 

@@ -1,0 +1,113 @@
+{
+    "apiVersion": "well/v0.1",
+    "kind": "Well",
+    "metadata": {
+        "namespace": "screen",
+        "name": "wildcat",
+        "author": "equinor"
+    },
+    "spec": {
+        "well_header": {
+            "unique_wellbore_identifier": "WellA",
+            "depth_reference_rkb": 25,
+            "depth_reference_rkb_unit": "m",
+            "ground_elevation": 300,
+            "ground_elevation_unit": "m",
+            "total_depth_rkb": 1500,
+            "total_depth_rkb_unit": "m"
+        },
+        "hole_casings": [
+            {
+                "name": "Hole 17 1/2 in",
+                "type": "hole",
+                "top_rkb": 325,
+                "bottom_rkb": 720,
+                "diameter_in": "17 1/2"
+            },
+            {
+                "name": "Hole 12 1/4 in",
+                "type": "hole",
+                "top_rkb": 720,
+                "bottom_rkb": 1185,
+                "diameter_in": "12 1/4"
+            },
+            {
+                "name": "Hole 8 1/2 in",
+                "type": "hole",
+                "top_rkb": 1185,
+                "bottom_rkb": 1500,
+                "diameter_in": "8 1/2"
+            },
+            {
+                "name": "Casing 13 3/8 in",
+                "type": "casing",
+                "top_rkb": 325,
+                "bottom_rkb": 709,
+                "diameter_in": "13 3/8",
+                "shoe": true
+            },
+            {
+                "name": "Cement 13 3/8 in",
+                "type": "casing cement",
+                "top_rkb": 325,
+                "bottom_rkb": 709,
+                "diameter_in": "13 3/8"
+            },
+            {
+                "name": "Casing 9 5/8 in",
+                "type": "casing",
+                "top_rkb": 622,
+                "bottom_rkb": 1137.5,
+                "diameter_in": "9 5/8",
+                "shoe": true
+            },
+            {
+                "name": "Cement 9 5/8 in",
+                "type": "casing cement",
+                "top_rkb": 706,
+                "bottom_rkb": 1137.5,
+                "diameter_in": "9 5/8"
+            }
+        ],
+        "plugs": [
+            {
+                "name": "cplug2",
+                "type": "cement",
+                "top_rkb": 400,
+                "bottom_rkb": 550
+            },
+            {
+                "name": "cplug1",
+                "type": "mechanical plug",
+                "top_rkb": 1000.0,
+                "bottom_rkb": 1100
+            }
+        ],
+        "stratigraphy": [
+            {
+                "name": "OVERBURDEN",
+                "top_rkb": 325,
+                "bottom_rkb": 1200,
+                "unit_type": "undefined"
+            },
+            {
+                "name": "CAP ROCK",
+                "top_rkb": 1200,
+                "bottom_rkb": 1250,
+                "unit_type": "undefined"
+            },
+            {
+                "name": "RESERVOIR",
+                "top_rkb": 1250,
+                "bottom_rkb": 1300,
+                "unit_type": "reservoir"
+            },
+            {
+                "name": "UNDERBURDEN",
+                "top_rkb": 1300,
+                "bottom_rkb": 1500.0,
+                "unit_type": "undefined"
+            }
+        ]
+    }
+}

@@ -1,0 +1,51 @@
+{
+    "apiVersion": "well/v0.1",
+    "kind": "Well",
+    "metadata": {"namespace": "screen", "name": "smeaheia", "author": "equinor"},
+    "spec": {
+        "well_header": {
+            "unique_wellbore_identifier": "NO 32/4-1",
+            "depth_reference_rkb": 23.5,
+            "depth_reference_rkb_unit": "m",
+            "ground_elevation": 312,
+            "ground_elevation_unit": "m",
+            "total_depth_rkb": 3186,
+            "total_depth_rkb_unit": "m"
+        },
+        "hole_casings": [
+            {"name": "Hole 36 in", "type": "hole", "top_rkb": 335.5, "bottom_rkb": 395, "diameter_in": 36},
+            {"name": "Hole 17 1/2 in", "type": "hole", "top_rkb": 395, "bottom_rkb": 720, "diameter_in": "17 1/2"},
+            {"name": "Hole 12 1/4 in", "type": "hole", "top_rkb": 720, "bottom_rkb": 1185, "diameter_in": "12 1/4"},
+            {"name": "Hole 8 1/2 in", "type": "hole", "top_rkb": 1185, "bottom_rkb": 3186, "diameter_in": "8 1/2"},
+            {"name": "Casing 30 in", "type": "casing", "top_rkb": 335.5, "bottom_rkb": 394, "diameter_in": 30, "shoe": true, "hc_perm": 5},
+            {"name": "Cement 30 in", "type": "casing cement", "top_rkb": 335.5, "bottom_rkb": 394, "diameter_in": 30, "hc_perm": 5},
+            {"name": "Casing 13 3/8 in", "type": "casing", "top_rkb": 335.5, "bottom_rkb": 709, "diameter_in": "13 3/8", "shoe": true, "hc_perm": 5},
+            {"name": "Cement 13 3/8 in", "type": "casing cement", "top_rkb": 335.5, "bottom_rkb": 709, "diameter_in": "13 3/8", "hc_perm": 5},
+            {"name": "Casing 9 5/8 in", "type": "casing", "top_rkb": 622, "bottom_rkb": 1137.5, "diameter_in": "9 5/8", "shoe": true, "hc_perm": 5},
+            {"name": "Cement 9 5/8 in", "type": "casing cement", "top_rkb": 706, "bottom_rkb": 1137.5, "diameter_in": "9 5/8", "hc_perm": 5}
+        ],
+        "plugs": [
+            {"name": "cplug9", "type": "cement", "top_rkb": 375, "bottom_rkb": 583, "cement_perm": 0.5},
+            {"name": "mplug2", "type": "mechanical plug", "top_rkb": 1049, "bottom_rkb": 1069, "cement_perm": 100}
+        ],
+        "stratigraphy": [
+            {"name": "NORDLAND GP", "top_rkb": 336, "bottom_rkb": 535, "unit_type": "undefined"},
+            {"name": "ROGALAND GP", "top_rkb": 535, "bottom_rkb": 846, "unit_type": "undefined"},
+            {"name": "SHETLAND GP", "top_rkb": 846, "bottom_rkb": 1081, "unit_type": "undefined"},
+            {"name": "CROMER KNOLL GP", "top_rkb": 1081, "bottom_rkb": 1109, "unit_type": "undefined"},
+            {"name": "DRAUPNE FM", "top_rkb": 1109, "bottom_rkb": 1216, "unit_type": "undefined"},
+            {"name": "HEATHER FM", "top_rkb": 1216, "bottom_rkb": 1238, "unit_type": "undefined"},
+            {"name": "SOGNEFJORD FM", "top_rkb": 1238, "bottom_rkb": 1306, "unit_type": "reservoir"},
+            {"name": "HEATHER FM", "top_rkb": 1306, "bottom_rkb": 1366, "unit_type": "undefined"},
+            {"name": "FENSFJORD FM", "top_rkb": 1366, "bottom_rkb": 1595, "unit_type": "reservoir"},
+            {"name": "HEATHER FM", "top_rkb": 1595, "bottom_rkb": 1598, "unit_type": "undefined"},
+            {"name": "KROSSFJORD FM", "top_rkb": 1598, "bottom_rkb": 1645, "unit_type": "reservoir"},
+            {"name": "HEATHER FM", "top_rkb": 1645, "bottom_rkb": 1650, "unit_type": "undefined"},
+            {"name": "BRENT GP", "top_rkb": 1650, "bottom_rkb": 1783, "unit_type": "undefined"},
+            {"name": "DUNLIN GP", "top_rkb": 1783, "bottom_rkb": 1816, "unit_type": "undefined"},
+            {"name": "STATFJORD GP", "top_rkb": 1816, "bottom_rkb": 1832, "unit_type": "undefined"},
+            {"name": "HEGRE GP", "top_rkb": 1832, "bottom_rkb": 3132, "unit_type": "undefined"},
+            {"name": "BASEMENT", "top_rkb": 3132, "bottom_rkb": 3186.0, "unit_type": "undefined"}
+        ]
+    }
+}

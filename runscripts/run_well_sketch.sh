@@ -9,7 +9,7 @@ PYTHON_HOME="/home/hzh/equinor/screen/SCREEN/venv_SCREEN/bin"
 #
 # Usage:
 #
-#   ./runscripts/run_well_sketch.sh --config_file ./test_data/examples/smeaheia_v1/smeaheia.yaml --out_name t.jpeg
+#   ./runscripts/run_well_sketch.sh --config_file ./test_data/examples/smeaheia/smeaheia.yaml --out_name t.jpeg
 
 # where to launch the current shell script
 LAUNCH_DIR=${PWD}

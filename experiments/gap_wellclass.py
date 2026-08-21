@@ -1,22 +1,22 @@
 """This module utilizes user-given .EGRID and .INIT files to generate .grdecl file for lgr grid.
 
-$ python -m experiments.gap_wellclass -p ./test_data/examples/smeaheia_v1 -w smeaheia.yaml -s GEN_NOLGR_PH2 --plot --ali-way
+$ python -m experiments.gap_wellclass -p ./test_data/examples/smeaheia -w smeaheia.json -s GEN_NOLGR_PH2 --plot --ali-way
 
 for comparing the output from smeaheia data with the output using Ali's grid logic.
 
 Otherwise, for other examples,
 
-# 1. smeaheia_v1
+# 1. Smeaheia, original grid case
 
-$ python -m experiments.gap_wellclass --sim-path ./test_data/examples/smeaheia_v1 --well smeaheia.yaml --sim-case GEN_NOLGR_PH2 --plot
+$ python -m experiments.gap_wellclass --sim-path ./test_data/examples/smeaheia --well smeaheia.json --sim-case GEN_NOLGR_PH2 --plot
 
-# 2. smeaheia_v2
+# 2. Smeaheia, TEMP-0 grid case
 
-$ python -m experiments.gap_wellclass --sim-path ./test_data/examples/smeaheia_v2 --well smeaheia.yaml --sim-case TEMP-0 --plot
+$ python -m experiments.gap_wellclass --sim-path ./test_data/examples/smeaheia --well smeaheia.json --sim-case TEMP-0 --plot
 
 # 3. wildcat
 
-$ python -m experiments.gap_wellclass --sim-path ./test_data/examples/wildcat --well wildcat.yaml --sim-case TEMP-0 --plot
+$ python -m experiments.gap_wellclass --sim-path ./test_data/examples/wildcat --well wildcat.json --sim-case TEMP-0 --plot
 
 """
 
@@ -39,7 +39,7 @@ from src.WellClass.libs.utils import (
 )
 
 # WellClass
-from src.WellClass.libs.well_class import Well
+from src.WellClass.libs.well_class import Well, WellProcessed
 
 
 def main(args):
@@ -49,7 +49,7 @@ def main(args):
     Ali_way = args.ali_way
 
     # where the location for the input parameters and eclipse .EGRID and .INIT files
-    # configuration path, for example './test_data/examples/smeaheia_v1'
+    # configuration path, for example './test_data/examples/smeaheia'
     sim_path = pathlib.Path(args.sim_path)
 
     # input configuration file name, for example, 'smeaheia.yaml'
@@ -73,29 +73,30 @@ def main(args):
     # where well configuration file is located
     well_name = sim_path / well_config
 
-    if use_yaml:
-        # # pydantic model
-        well_model = yaml_parser(well_name)
-        well_csv = json.loads(well_model.spec.model_dump_json())
+    if suffix == ".json":
+        my_well = WellProcessed.from_json(well_name)
+        well_df = WellDataFrame(my_well, oh_perm=10000.0, cb_perm=0.05, barrier_perm=0.05)
     else:
-        # load the well information
-        well_csv = csv_parser(well_name)
+        if use_yaml:
+            # # pydantic model
+            well_model = yaml_parser(well_name)
+            well_csv = json.loads(well_model.spec.model_dump_json())
+        else:
+            # load the well information
+            well_csv = csv_parser(well_name)
 
-    ########### 3. build Well class ######################
+        ########### 3. build legacy Well class ######################
+        my_well = Well(
+            header=well_csv["well_header"],
+            drilling=well_csv["drilling"],
+            casings=well_csv["casing_cement"],
+            geology=well_csv["geology"],
+            barriers=well_csv["barriers"],
+            barrier_perm=well_csv["barrier_permeability"],
+            co2_datum=well_csv["co2_datum"],
+        )
 
-    # 3.1 build well class
-    my_well = Well(
-        header=well_csv["well_header"],
-        drilling=well_csv["drilling"],
-        casings=well_csv["casing_cement"],
-        geology=well_csv["geology"],
-        barriers=well_csv["barriers"],
-        barrier_perm=well_csv["barrier_permeability"],
-        co2_datum=well_csv["co2_datum"],
-    )
-
-    # 3.2 to well dataframe
-    well_df = WellDataFrame(my_well)
+        well_df = WellDataFrame(my_well)
 
     # for convenience
 
