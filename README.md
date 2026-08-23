@@ -99,7 +99,7 @@ source .venv/bin/activate
 This generated shell will be used to run standalone python scripts.
 
 ## Experiments
-There are at least two ways to make experimenal runs of the codes. One is to run the experiments with Jupyter lab, and the other is commandline option. While Jupyter notebooks are mainly for QC tests and research purposes, the commandline option is aiming for production run.
+There are two supported ways to explore the code: the canonical Jupyter notebooks and the optional command-line experiments. The notebooks document and test the WellClass-to-GaP workflow; simulator-dependent command-line runs are intended for external-tool integration.
 
 ### 1. Jupyter notebooks
 Jupyter notebooks are located in directory `notebooks`. To test its functionaries, change current directory to `notebooks` and launch jupyter notebooks at the commandline:
@@ -108,16 +108,17 @@ jupyter-lab
 ```
 Or if you prefer, you can run these Jupyter notebooks from Microsoft's VS code.
 
-There exist several Jupyter notebooks in the directory:
+The maintained, canonical notebooks are:
 
-- Notebook **GaP-WellClass.ipynb** is a test example for the integration of `GaP` and `WellClass`. It hides many details. It require eclipse `.EGRID` and `.INIT` as input files. This notebook also serves the role of generating `pytest` data for unit testing.
-- Notebook **pflotran-gap.ipynb** integrates `GaP` and `WellClass` too. But instead of the user-provided `.EGRID` and `.INIT` files, both files are generates by calling pflotran scripts.
-- Notebook **Pressure-WellClass_test.ipynb** is Alejandro's tests on deviated wells.
-- Notebook **Pressure-WellClass.ipynb** is used to test pressure. 
-- Notebook **WellClass_csv_yaml.ipynb** is used to test pressure and loading `.csv` and `.yaml` input files.
+- **01_wellclass.ipynb** demonstrates WellClass input models, well processing, and pressure calculations.
+- **02_gap_grid.ipynb** demonstrates GaP grid preparation and coarse-grid recipe generation.
+- **03_wellclass_to_gap.ipynb** demonstrates the JSON-to-LGR integration workflow using an existing `.EGRID` and `.INIT` pair.
+- **04_init_case_preprocessing.ipynb** demonstrates dry-run preparation of an initialization case from explicit grid assumptions.
+
+The remaining notebooks are legacy or exploratory examples. They may require external simulators, historical input formats, or additional manual setup; they are not part of the supported regression workflow. In particular, `GaP-WellClass.ipynb`, `pflotran_gap.ipynb`, `Pressure-WellClass.ipynb`, `WellClass_Xsections.ipynb`, `WellClass_csv_yaml.ipynb`, `Post_processing.ipynb`, and `refactor.ipynb` are retained as references rather than canonical entry points.
 
 ### 2. Commandline option
-Two python scripts for commandline option are available in directory `experiments`. One script, **gap_plotran.py**, can be used not only for generating Eclipse `.EGRID` and `.INIT` on the fly but also can be used for quick `pflotran` test, while the other script, **gap_wellclass.py**, requires the user to provide these two grid files.  
+Two python scripts for commandline option are available in directory `experiments`. One script, **gap_pflotran.py**, can be used not only for generating Eclipse `.EGRID` and `.INIT` on the fly but also can be used for quick `pflotran` test, while the other script, **gap_wellclass.py**, requires the user to provide these two grid files.
 
 The followings are some of  the sample runs. In either way, you should run the python script inside the ```SCREEN``` directory. 
 
@@ -138,7 +139,7 @@ python -m experiments.gap_wellclass --sim-path ./test_data/examples/wildcat --we
 ```
 This will generate an output file `LEG_HIRES.grdecl` in `experiments` directory.
 
-2. To test **gap_plotran.py**, run the following commnad at the directory ``SCREEN``:
+2. To test **gap_pflotran.py**, run the following command from the ``SCREEN`` directory:
 ```python
 python -m experiments.gap_pflotran \
     --sim-path ./test_data/examples/wildcat-pflotran \
@@ -205,11 +206,15 @@ The following represents the current code structures:
 ├── INSTALLATION.md
 ├── mkdocs.yml
 ├── notebooks
+│   ├── 01_wellclass.ipynb
+│   ├── 02_gap_grid.ipynb
+│   ├── 03_wellclass_to_gap.ipynb
+│   ├── 04_init_case_preprocessing.ipynb
 │   ├── GaP-WellClass.ipynb
-│   ├── LEG_HIRES.grdecl.smeaheia
 │   ├── pflotran_gap.ipynb
 │   ├── Pressure-WellClass.ipynb
-│   ├── Pressure-WellClass_test.ipynb
+│   ├── Post_processing.ipynb
+│   ├── WellClass_Xsections.ipynb
 │   └── WellClass_csv_yaml.ipynb
 ├── README.md
 ├── requirements.txt

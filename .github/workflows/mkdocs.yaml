@@ -1,20 +1,12 @@
 name: SCREEN-docs
 on:
-
-  pull_request:
-    branches:
-    - main
-
   push:
-    branches: 
-    - main
-    - gpb/dev
-
-  workflow_dispatch:
     branches:
     - main
-    - gpb/dev
+  workflow_dispatch:
 
+permissions:
+  contents: write
 
 jobs:
   deploy:
@@ -22,13 +14,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Install uv (recommended by Astral + fastest method)
       - name: Install uv
-        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
 
       # Sync environment strictly from uv.lock (no resolver)
-      - name: Sync dependencies
-        run: uv sync --locked
+      - name: Sync documentation dependencies
+        run: uv sync --locked --all-groups
 
       - name: Build & deploy docs
         run: uv run mkdocs gh-deploy --force
