@@ -25,6 +25,7 @@ venv_*/
 test_data/**/model/*.in
 test_data/**/include/*.grdecl
 !test_data/**/model/TEMP-0.in
+!test_data/examples/smeaheia/model/GEN_NOLGR_PH2.in
 !test_data/**/include/TEMP_GRD.grdecl
 test_data/**/model/*.UNSMRY
 test_data/**/model/*.UNRST

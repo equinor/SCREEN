@@ -1,51 +1,61 @@
+from typing import Callable, Dict, List, Optional
 
-import pandas as pd
 
-def compute_cement_bond(casings: dict, drilling: dict) -> dict:
-    '''
-    Processes cement bond intervals. Reads both casing and borehole sizes to estimate cement bond width
+def compute_annulus(
+    holes: List[Dict], casings: List[Dict], md2tvd: Callable[[float], float], cement_bond: Optional[List[Dict]], solve_cement_bond: bool = False
+) -> List[Dict]:
+    holes_casings_merged = holes + casings
+    annulus_intervals = []
 
-        Args:
-            casings (dict): contains casing information
-            drilling (dict): contains drilling information
+    # Determine which intervals to process based on solve_cement_bond flag and availability of cement_bond data
+    intervals_to_process = cement_bond if solve_cement_bond and cement_bond is not None else casings
 
-        Returns:
-            cement bond (dict): contains cement bond information
-    '''
+    for cb in reversed(intervals_to_process):
+        cb_top = cb["top_rkb"]
+        cb_bottom = cb["bottom_rkb"]
+        cb_id = cb["diameter_m"]
+        cb_id_in = cb["diameter_in"]
 
-    casings_df = pd.DataFrame(casings)
-    drilling_df = pd.DataFrame(drilling)
+        holes_larger = [
+            item for item in holes_casings_merged if item["diameter_m"] > cb_id and item["bottom_rkb"] > cb_top and item["top_rkb"] < cb_bottom
+        ]
+        holes_larger_sorted = sorted(holes_larger, key=lambda x: x["diameter_m"])
 
-    cb_fields = []
+        cb_remaining_top = cb_top
+        cb_remaining_bottom = cb_bottom
 
-    for idx, row in casings_df[::-1].iterrows():
-        
-        d, top, bottom = row[['diameter_m', 'toc_msl', 'boc_msl']]
+        for hl in holes_larger_sorted:
+            cb_overlap_top = max(hl["top_rkb"], cb_remaining_top)
+            cb_overlap_bottom = min(hl["bottom_rkb"], cb_remaining_bottom)
+            cb_overlap_od = hl["diameter_m"]
+            cb_overlap_od_in = hl["diameter_in"]
 
-        hole = drilling_df[drilling_df['diameter_m'] > d].iloc[-1]
-        hole_top, hole_bottom, hole_d = hole[['top_msl', 'bottom_msl', 'diameter_m']]
+            if cb_overlap_bottom <= cb_overlap_top:
+                # no valid overlap,
+                continue
 
-        if top >= hole_top and bottom <= hole_bottom:
-            cb_fields.append((top, bottom, d, hole_d))
-        else:
-            bond_query = casings_df.query('diameter_m > @d & bottom_msl > @top')
-            bond_query = bond_query.sort_values(by='diameter_m')
-            temp_top_cb = bond_query['bottom_msl'].max()
-            cb_fields.append((temp_top_cb, bottom, d, hole_d))
+            # Shrink remaining interval by removing the overlap just processed
+            if cb_overlap_bottom < cb_remaining_bottom:
+                cb_remaining_top = cb_overlap_bottom
 
-            for idx, row in bond_query.iterrows():
-                if row['top_msl'] <= top:
-                    section_top = top
-                    section_bottom = temp_top_cb
-                    cb_fields.append((section_top, section_bottom, d, row['diameter_m']))
-                    break
-                else:
-                    section_top = row['top_msl']
-                    section_bottom = temp_top_cb
-                    cb_fields.append((section_top, section_bottom, d, row['diameter_m']))
-                    temp_top_cb = row['top_msl']
+            if cb_overlap_top > cb_remaining_top:
+                cb_remaining_bottom = cb_overlap_top
 
-    cement_bond_df = pd.DataFrame(data=cb_fields, columns=['top_msl', 'bottom_msl', 'id_m', 'od_m'])
+            # if cb_remaining_length > 0:
+            annulus_intervals.append(
+                {
+                    "top_rkb": cb_overlap_top,
+                    "bottom_rkb": cb_overlap_bottom,
+                    "top_tvd_msl": md2tvd(cb_overlap_top),
+                    "bottom_tvd_msl": md2tvd(cb_overlap_bottom),
+                    "id_m": cb_id,
+                    "od_m": cb_overlap_od,
+                    "id_in": cb_id_in,
+                    "od_in": cb_overlap_od_in,
+                }
+            )
 
-    return cement_bond_df.to_dict()
+    # Sort intervals by top_rkb ascending, then id_in descending
+    annulus_intervals = sorted(annulus_intervals, key=lambda x: (x["top_rkb"], -x["id_in"]))
 
+    return annulus_intervals

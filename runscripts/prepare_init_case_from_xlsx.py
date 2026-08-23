@@ -1,0 +1,159 @@
+#!/usr/bin/env python3
+"""Prepare an initialization case from a user-friendly Excel workbook.
+
+The workbook is expected to contain:
+- Header (key/value)
+- GridPolicy (key/value)
+- Optional well sheets (Survey, HoleCasings, Plugs, Stratigraphy, SubsurfaceAssumptions)
+
+The script computes layer counts from thickness/target-DZ settings and stages
+TEMP-0 files using the existing prepare_init_case workflow.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import math
+from pathlib import Path
+
+from prepare_init_case import run_initialization, stage_case
+
+from src.WellClass.libs.utils import xlsx_grid_policy, xlsx_to_well_model
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--xlsx", type=Path, required=True, help="Workbook path.")
+    parser.add_argument("--output-root", type=Path, required=True, help="Target case root.")
+    parser.add_argument(
+        "--template-root",
+        type=Path,
+        default=Path("test_data/examples/wildcat-pflotran"),
+        help="Template case root containing model/TEMP-0.in and include/TEMP_GRD.grdecl.",
+    )
+    parser.add_argument("--force", action="store_true", help="Overwrite staged files if they already exist.")
+    parser.add_argument(
+        "--sim-command",
+        type=str,
+        default="",
+        help="Optional external initialization command template. Use {deck} placeholder.",
+    )
+    parser.add_argument(
+        "--write-well-json",
+        action="store_true",
+        help="Write parsed WellModel JSON to <output-root>/well_input.json.",
+    )
+    return parser.parse_args()
+
+
+def _validated_positive(value: float, name: str) -> float:
+    if not math.isfinite(value) or value <= 0:
+        raise ValueError(f"{name} must be a positive finite number")
+    return value
+
+
+def _bounded_layer_count(thickness: float, target_dz: float, *, min_layers: int = 1, max_layers: int | None = None) -> int:
+    _validated_positive(thickness, "thickness")
+    _validated_positive(target_dz, "target_dz")
+    if min_layers <= 0:
+        raise ValueError("min_layers must be positive")
+    if max_layers is not None and max_layers < min_layers:
+        raise ValueError("max_layers must be >= min_layers")
+
+    layers = max(min_layers, math.ceil(thickness / target_dz))
+    if max_layers is not None:
+        layers = min(layers, max_layers)
+    return int(layers)
+
+
+def _as_optional_int(policy: dict, key: str) -> int | None:
+    if key not in policy:
+        return None
+    value = policy[key]
+    if value is None or value == "":
+        return None
+    return int(value)
+
+
+def derive_stage_args_from_policy(args: argparse.Namespace, policy: dict) -> argparse.Namespace:
+    top_depth = float(policy["top_depth"])
+    water_depth = float(policy["water_depth"])
+    reservoir_top = float(policy["reservoir_top"])
+    bottom_depth = float(policy["bottom_depth"])
+
+    if not top_depth < water_depth < reservoir_top < bottom_depth:
+        raise ValueError("GridPolicy depths must satisfy top_depth < water_depth < reservoir_top < bottom_depth")
+
+    water_layers = _bounded_layer_count(
+        water_depth - top_depth,
+        float(policy["target_dz_water"]),
+        min_layers=int(policy.get("min_water_layers", 1)),
+        max_layers=_as_optional_int(policy, "max_water_layers"),
+    )
+    overburden_layers = _bounded_layer_count(
+        reservoir_top - water_depth,
+        float(policy["target_dz_overburden"]),
+        min_layers=int(policy.get("min_overburden_layers", 1)),
+        max_layers=_as_optional_int(policy, "max_overburden_layers"),
+    )
+    reservoir_layers = _bounded_layer_count(
+        bottom_depth - reservoir_top,
+        float(policy["target_dz_reservoir"]),
+        min_layers=int(policy.get("min_reservoir_layers", 1)),
+        max_layers=_as_optional_int(policy, "max_reservoir_layers"),
+    )
+
+    return argparse.Namespace(
+        template_root=args.template_root,
+        output_root=args.output_root,
+        top_depth=top_depth,
+        water_depth=water_depth,
+        reservoir_top=reservoir_top,
+        bottom_depth=bottom_depth,
+        water_layers=water_layers,
+        overburden_layers=overburden_layers,
+        reservoir_layers=reservoir_layers,
+        cells_per_layer=int(policy.get("cells_per_layer", 400)),
+        force=args.force,
+    )
+
+
+def main() -> int:
+    args = parse_args()
+
+    policy = xlsx_grid_policy(args.xlsx)
+    stage_args = derive_stage_args_from_policy(args, policy)
+    output_deck, output_grdecl, output_tops = stage_case(stage_args)
+
+    print("Staged initialization case files from workbook:")
+    print(f"  deck:   {output_deck}")
+    print(f"  grid:   {output_grdecl}")
+    print(f"  topsdz: {output_tops}")
+    print("Derived layer counts:")
+    print(f"  water_layers:      {stage_args.water_layers}")
+    print(f"  overburden_layers: {stage_args.overburden_layers}")
+    print(f"  reservoir_layers:  {stage_args.reservoir_layers}")
+
+    if args.write_well_json:
+        well_model = xlsx_to_well_model(args.xlsx)
+        output_json = args.output_root / "well_input.json"
+        output_json.parent.mkdir(parents=True, exist_ok=True)
+        output_json.write_text(json.dumps(well_model.model_dump(mode="json"), indent=2), encoding="utf-8")
+        print(f"Wrote parsed well model JSON: {output_json}")
+
+    if not args.sim_command:
+        print("No --sim-command provided; skipping simulator execution.")
+        return 0
+
+    exit_code = run_initialization(args.sim_command, output_deck)
+    if exit_code != 0:
+        print(f"Initialization command failed with exit code {exit_code}.")
+        return exit_code
+
+    print("Initialization command completed successfully.")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

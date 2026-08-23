@@ -1,66 +1,44 @@
-
-import pandas as pd
-
-
-def compute_borehole(casings: dict, drilling: dict) -> dict:
-    '''
-    Update in Routine to compute the effective open borehole. 
-    The previous version remains stored as borehole_alt
-    Borehole relies mainly on the casings. It comes to drilling only for the places where casings are not available
-
-        Args:
-            casings (dict): contains casing information
-            drilling (dict): contains drilling information
-
-        Returns:
-            borehole (dict): contains borehole information
-    '''
-    casings_df  = pd.DataFrame(casings)
-    drilling_df = pd.DataFrame(drilling)    
-    
-    #Merge casings and drilling tables
-    well_concat = pd.concat([casings_df, drilling_df])
-
-    #Sort new table, firstly by top_rkb, and  secondly by diameter
-    well_concat = well_concat.sort_values(by=['top_msl', 'diameter_m'])
-    well_concat.reset_index(inplace=True)
-
-    #iterate over merged table
-    borehole_list = []
-
-    z_values = well_concat['top_msl'].drop_duplicates()
-
-    #very large value to initiate iteration
-    previous_diam = 999
-
-    #iterate over top_msl values
-    for z in z_values:
-            #query rows in merged table that have the z value as top_msl
-            query_df = well_concat.query('top_msl==@z')
-
-            #retrieve minimum diameter
-            min_diam_m = query_df['diameter_m'].min()
-
-            #check if diameter is smaller tahn previous_diam
-            if min_diam_m < previous_diam:
-                    #append top_msl and diameter
-                    borehole_list.append((z, min_diam_m))
-                    
-                    #update previous_diam for next iteration
-                    previous_diam = min_diam_m
+import itertools
+from typing import Callable, Dict, List, Tuple
 
 
-    #create dataframe
-    borehole_df = pd.DataFrame(data=borehole_list, columns=['top_msl', 'diameter_m'])
+def compute_borehole(holes: List[Dict], casings: List[Dict], md2tvd: Callable) -> List[Dict]:
+    # concatenate holes and casings
+    combined = holes + casings
 
-    #shit top_msl to create bottom_msl column
-    borehole_df['bottom_msl'] = borehole_df['top_msl'].shift(-1)
+    # Sort by top_rkb ascending, then diameter_m ascending
+    combined_sorted = sorted(combined, key=lambda x: (x["top_rkb"], x["diameter_m"]))
 
-    # Add TD in MSL to last record of bottom_msl
-    borehole_df.loc[borehole_df.index[-1], 'bottom_msl'] = well_concat['bottom_msl'].max()
+    # Group by top_rkb
+    borehole_list: List[Tuple[float, float]] = []
+    previous_diam = float("inf")
 
-    borehole_df.to_dict()
+    # Iterate over groups and find minimum diameter for each top_rkb
+    for top_rkb, group in itertools.groupby(combined_sorted, key=lambda x: x["top_rkb"]):
+        group_list = list(group)
+        min_diam = min(item["diameter_m"] for item in group_list)
 
+        if min_diam < previous_diam:
+            borehole_list.append((top_rkb, min_diam))
+            previous_diam = min_diam
 
-    return borehole_df.to_dict()
+    # Build borehole intervals with top_rkb, bottom_rkb, and diameter_m
+    borehole_intervals = []
+    for i, (top, diam) in enumerate(borehole_list):
+        if i + 1 < len(borehole_list):
+            bottom = borehole_list[i + 1][0]
+        else:
+            # Last bottom_rkb is max bottom_rkb from combined data
+            bottom = max(item["bottom_rkb"] for item in combined)
 
+        borehole_intervals.append(
+            {
+                "top_rkb": top,
+                "bottom_rkb": bottom,
+                "top_tvd_msl": md2tvd(top).item(),
+                "bottom_tvd_msl": md2tvd(bottom).item(),
+                "diameter_m": diam,
+            }
+        )
+
+    return borehole_intervals

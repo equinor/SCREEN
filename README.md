@@ -123,17 +123,17 @@ The followings are some of  the sample runs. In either way, you should run the p
 
 1. To test **gap_wellclass.py**, run either of the followings:
 ```
-# 1. for smeaheia_v1
+# 1. for the Smeaheia GEN_NOLGR_PH2 case
 
-python -m experiments.gap_wellclass --sim-path ./test_data/examples/smeaheia_v1 --well smeaheia.yaml --sim-case GEN_NOLGR_PH2 --plot 
+python -m experiments.gap_wellclass --sim-path ./test_data/examples/smeaheia --well smeaheia.json --sim-case GEN_NOLGR_PH2 --plot
 
-# 2. for smeaheia_v2
+# 2. for the Smeaheia TEMP-0 case
 
-python -m experiments.gap_wellclass --sim-path ./test_data/examples/smeaheia_v2 --well smeaheia.yaml --sim-case TEMP-0 --plot
+python -m experiments.gap_wellclass --sim-path ./test_data/examples/smeaheia --well smeaheia.json --sim-case TEMP-0 --plot
 
 # 3. for wildcat
 
-python -m experiments.gap_wellclass --sim-path ./test_data/examples/wildcat --well wildcat.yaml --sim-case TEMP-0 --plot
+python -m experiments.gap_wellclass --sim-path ./test_data/examples/wildcat --well wildcat.json --sim-case TEMP-0 --plot
 
 ```
 This will generate an output file `LEG_HIRES.grdecl` in `experiments` directory.
@@ -162,7 +162,7 @@ In order for a quick test of the codes, we include some test dataset in the fold
     ├── TEMP-0.in
     └── TEMP-0_NOSIM.in
 ```
-Sub-directories, such as `wildcat`, `smeaheia_v1` and `smeaheia_v2`, contain the necessary data, e.g., Eclipse  `.EGRID` and `.INIT` files, for testing **gap_wellclass.py**. 
+Sub-directories, such as `wildcat` and `smeaheia`, contain the necessary data, e.g., Eclipse `.EGRID` and `.INIT` files, for testing **gap_wellclass.py**. The Smeaheia folder contains both `GEN_NOLGR_PH2` and `TEMP-0` grid cases.
 
 One sub-directory, `wildcat-plotran`, contains configuration parameters for testing **gap_pflotran.py**, i.e., use pfloatran to generate `.EGRID` and `.INIT`. 
 
@@ -246,8 +246,7 @@ The following represents the current code structures:
     │   ├── wildcat-pflotran-2
     │   ├── frigg
     │   ├── simple_well
-    │   ├── smeaheia_v1
-    │   └── smeaheia_v2
+    │   └── smeaheia
     └── pvt_constants
         ├── pressure.txt
         ├── rho_co2.txt
@@ -258,4 +257,5 @@ It was generated with the linux command `tree`:
 ```shell
 tree -I 'docs|site|venv_screen|*pycache*|Equinor*|originals' -L 3
 ```
+
 

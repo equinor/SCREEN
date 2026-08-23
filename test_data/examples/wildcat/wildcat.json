@@ -1,0 +1,205 @@
+{
+    "apiVersion": "well/v0.1",
+    "kind": "Well",
+    "metadata": {
+        "namespace": "screen",
+        "name": "wildcat",
+        "author": "equinor"
+    },
+    "spec": {
+        "well_header": {
+            "unique_wellbore_identifier": "NO 17/4-1",
+            "depth_reference_rkb": 27,
+            "depth_reference_rkb_unit": "m",
+            "ground_elevation": 105,
+            "ground_elevation_unit": "m",
+            "total_depth_rkb": 3997,
+            "total_depth_rkb_unit": "m"
+        },
+        "hole_casings": [
+            {
+                "name": "Hole 36 in",
+                "type": "hole",
+                "top_rkb": 132,
+                "bottom_rkb": 190,
+                "diameter_in": 36
+            },
+            {
+                "name": "Hole 26 in",
+                "type": "hole",
+                "top_rkb": 190,
+                "bottom_rkb": 444,
+                "diameter_in": 26
+            },
+            {
+                "name": "Hole 17 1/2 in",
+                "type": "hole",
+                "top_rkb": 444,
+                "bottom_rkb": 1812,
+                "diameter_in": "17 1/2"
+            },
+            {
+                "name": "Hole 12 1/4 in",
+                "type": "hole",
+                "top_rkb": 1812,
+                "bottom_rkb": 3942,
+                "diameter_in": "12 1/4"
+            },
+            {
+                "name": "Hole 8 1/2 in",
+                "type": "hole",
+                "top_rkb": 3942,
+                "bottom_rkb": 3997,
+                "diameter_in": "8 1/2"
+            },
+            {
+                "name": "Casing 30 in",
+                "type": "casing",
+                "top_rkb": 132,
+                "bottom_rkb": 158,
+                "diameter_in": 30,
+                "shoe": true,
+                "hc_perm": 300
+            },
+            {
+                "name": "Cement 30 in",
+                "type": "casing cement",
+                "top_rkb": 132,
+                "bottom_rkb": 158,
+                "diameter_in": 30,
+                "hc_perm": 300
+            },
+            {
+                "name": "Casing 20 in",
+                "type": "casing",
+                "top_rkb": 132,
+                "bottom_rkb": 439,
+                "diameter_in": 20,
+                "shoe": true,
+                "hc_perm": 0.05
+            },
+            {
+                "name": "Cement 20 in",
+                "type": "casing cement",
+                "top_rkb": 132,
+                "bottom_rkb": 439,
+                "diameter_in": 20,
+                "hc_perm": 0.05
+            },
+            {
+                "name": "Casing 13 3/8 in",
+                "type": "casing",
+                "top_rkb": 182,
+                "bottom_rkb": 1803,
+                "diameter_in": "13 3/8",
+                "shoe": true,
+                "hc_perm": 500
+            },
+            {
+                "name": "Cement 13 3/8 in",
+                "type": "casing cement",
+                "top_rkb": 450,
+                "bottom_rkb": 1803,
+                "diameter_in": "13 3/8",
+                "hc_perm": 500
+            }
+        ],
+        "plugs": [
+            {
+                "name": "cplug3",
+                "type": "cement",
+                "top_rkb": 132,
+                "bottom_rkb": 150,
+                "cement_perm": 0.5
+            },
+            {
+                "name": "cplug2",
+                "type": "cement",
+                "top_rkb": 1690,
+                "bottom_rkb": 1850,
+                "cement_perm": 100
+            },
+            {
+                "name": "cplug1",
+                "type": "cement",
+                "top_rkb": 2050,
+                "bottom_rkb": 2300,
+                "cement_perm": 5
+            }
+        ],
+        "stratigraphy": [
+            {
+                "name": "NORDLAND GP",
+                "top_rkb": 132,
+                "bottom_rkb": 544,
+                "unit_type": "undefined"
+            },
+            {
+                "name": "HORDALAND GP",
+                "top_rkb": 544,
+                "bottom_rkb": 1041,
+                "unit_type": "undefined"
+            },
+            {
+                "name": "ROGALAND GP",
+                "top_rkb": 1041,
+                "bottom_rkb": 1163,
+                "unit_type": "undefined"
+            },
+            {
+                "name": "SHETLAND GP",
+                "top_rkb": 1163,
+                "bottom_rkb": 1444,
+                "unit_type": "undefined"
+            },
+            {
+                "name": "CROMER KNOLL GP",
+                "top_rkb": 1444,
+                "bottom_rkb": 2122,
+                "unit_type": "undefined"
+            },
+            {
+                "name": "VIKING GP",
+                "top_rkb": 2122,
+                "bottom_rkb": 2265,
+                "unit_type": "undefined"
+            },
+            {
+                "name": "JURASSIC SS",
+                "top_rkb": 2265,
+                "bottom_rkb": 2352,
+                "unit_type": "reservoir"
+            },
+            {
+                "name": "SKAGERRAK FM",
+                "top_rkb": 2352,
+                "bottom_rkb": 2532,
+                "unit_type": "reservoir"
+            },
+            {
+                "name": "SMITH BANK FM",
+                "top_rkb": 2532,
+                "bottom_rkb": 2665,
+                "unit_type": "reservoir"
+            },
+            {
+                "name": "ZECHSTEIN GP",
+                "top_rkb": 2665,
+                "bottom_rkb": 3829,
+                "unit_type": "undefined"
+            },
+            {
+                "name": "KUPFERSCHIEFER FM",
+                "top_rkb": 3829,
+                "bottom_rkb": 3834,
+                "unit_type": "undefined"
+            },
+            {
+                "name": "ROTLIEGEND GP",
+                "top_rkb": 3834,
+                "bottom_rkb": 3997.0,
+                "unit_type": "undefined"
+            }
+        ]
+    }
+}

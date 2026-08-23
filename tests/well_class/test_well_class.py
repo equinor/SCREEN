@@ -1,4 +1,10 @@
 
+from typing import List
+
+
+def filter_keys(data: List[dict], keys: List[str]) -> List[dict]:
+    return [{k: d[k] for k in keys if k in d} for d in data]
+
 
 def test_well_header(well_class_fixture,
                      well_class_dict_fixture) -> None:
@@ -9,55 +15,39 @@ def test_well_header(well_class_fixture,
     """
 
     info    = well_class_fixture.header
-    info_gt = well_class_dict_fixture['header']
+    info_gt = well_class_dict_fixture['spec']['well_header']
 
-    assert info['well_name'] == info_gt['well_name']
-    assert info['well_td_rkb'] == info_gt['well_td_rkb']
+    assert info['unique_wellbore_identifier'] == info_gt['unique_wellbore_identifier']
+    assert info['total_depth_rkb'] == info_gt['total_depth_rkb']
 
     # compare the whole dictionary
     assert info == info_gt
 
-def test_drilling(well_class_fixture,
+def test_hole_casings(well_class_fixture,
                   well_class_dict_fixture) -> None:
-    """ test drilling
+    """ test hole_casings
         Args:
             well_class_fixture: fixture for WellClass
             well_class_dict_fixture: fixture for WellClass example
     """
+    keys_to_compare = ['name', 'type', 'top_rkb', 'bottom_rkb', 'diameter_in']
 
-    info = well_class_fixture.drilling
-    info_gt = well_class_dict_fixture['drilling']
+    info = filter_keys(well_class_fixture.hole_casings, keys_to_compare)
+    info_gt = filter_keys(well_class_dict_fixture['spec']['hole_casings'], keys_to_compare)
+
+    # info = well_class_fixture.hole_casings
+    # info_gt = well_class_dict_fixture['spec']['hole_casings']
 
     # section index
-    sec_index = 1
+    sec_index = 5
 
-    assert info['diameter_in'][sec_index] == info_gt['diameter_in'][sec_index]
-    assert info['top_rkb'][sec_index] == info_gt['top_rkb'][sec_index]
-    assert info['bottom_rkb'][sec_index] == info_gt['bottom_rkb'][sec_index]
+    assert info[sec_index]['diameter_in'] == info_gt[sec_index]['diameter_in']
+    assert info[sec_index]['top_rkb'] == info_gt[sec_index]['top_rkb']
+    assert info[sec_index]['bottom_rkb'] == info_gt[sec_index]['bottom_rkb']
 
     # compare the whole dictionary
     assert info == info_gt
 
-def test_casings(well_class_fixture,
-                 well_class_dict_fixture) -> None:
-    """ test casings
-        Args:
-            well_class_fixture: fixture for WellClass
-            well_class_dict_fixture: fixture for WellClass example
-    """
-
-    info = well_class_fixture.casings
-    info_gt = well_class_dict_fixture['casings']
-
-    # section index
-    sec_index = 1
-
-    assert info['diameter_in'][sec_index] == info_gt['diameter_in'][sec_index]
-    assert info['top_rkb'][sec_index] == info_gt['top_rkb'][sec_index]
-    assert info['bottom_rkb'][sec_index] == info_gt['bottom_rkb'][sec_index]
-
-    # compare the whole dictionary
-    assert info == info_gt
 
 def test_barriers(well_class_fixture,
                   well_class_dict_fixture) -> None:
@@ -66,16 +56,17 @@ def test_barriers(well_class_fixture,
             well_class_fixture: fixture for WellClass
             well_class_dict_fixture: fixture for WellClass example
     """
+    keys_to_compare = ['name', 'type', 'top_rkb', 'bottom_rkb']
 
-    info = well_class_fixture.barriers
-    info_gt = well_class_dict_fixture['barriers']
+    info = filter_keys(well_class_fixture.plugs, keys_to_compare)
+    info_gt = filter_keys(well_class_dict_fixture['spec']['plugs'], keys_to_compare)
 
     # section index
     sec_index = 1
 
-    assert info['barrier_name'][sec_index] == info_gt['barrier_name'][sec_index]
-    assert info['top_rkb'][sec_index] == info_gt['top_rkb'][sec_index]
-    assert info['bottom_rkb'][sec_index] == info_gt['bottom_rkb'][sec_index]
+    assert info[sec_index]['name'] == info_gt[sec_index]['name']
+    assert info[sec_index]['top_rkb'] == info_gt[sec_index]['top_rkb']
+    assert info[sec_index]['bottom_rkb'] == info_gt[sec_index]['bottom_rkb']
 
     # compare the whole dictionary
     assert info == info_gt
