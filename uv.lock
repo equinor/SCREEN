@@ -1041,6 +1041,19 @@ wheels = [
 ]
 
 [[package]]
+name = "jupyter-builder"
+version = "1.2.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "jupyter-core" },
+    { name = "traitlets" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/6d/e1/e4ef07e2be228271b59e011a746d97feef69577af1f465b1cff0f1d7c760/jupyter_builder-1.2.2.tar.gz", hash = "sha256:b6cea88f58e44b2c5eba96f28d2e0d16fd453d3ca6dc9c4492ff8a1f2e97f601", size = 981074, upload-time = "2026-08-07T06:47:18.742Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c4/3b/920bc7f3c2ad25abc0071ae7ae55789f4b85ecf3e4467f0602a88dc668cb/jupyter_builder-1.2.2-py3-none-any.whl", hash = "sha256:6ebcd4c49daf5df6a18068a74a48010406700ed90a76c189fac43eaf85c60c63", size = 915266, upload-time = "2026-08-07T06:47:16.249Z" },
+]
+
+[[package]]
 name = "jupyter-client"
 version = "8.8.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1140,7 +1153,7 @@ wheels = [
 
 [[package]]
 name = "jupyter-server"
-version = "2.17.0"
+version = "2.20.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
@@ -1163,9 +1176,9 @@ dependencies = [
     { name = "traitlets" },
     { name = "websocket-client" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/5b/ac/e040ec363d7b6b1f11304cc9f209dac4517ece5d5e01821366b924a64a50/jupyter_server-2.17.0.tar.gz", hash = "sha256:c38ea898566964c888b4772ae1ed58eca84592e88251d2cfc4d171f81f7e99d5", size = 731949, upload-time = "2025-08-21T14:42:54.042Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/6b/dc/db3a582633170186f8c8b31298d7eb26ad0eb031a1f53476c258b64eed05/jupyter_server-2.20.0.tar.gz", hash = "sha256:b5778ba337d8015a3dc2b80803ecdd5ac18d3797fddf61a50ea5fb472b4ebe14", size = 756523, upload-time = "2026-06-17T12:09:09.435Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/92/80/a24767e6ca280f5a49525d987bf3e4d7552bf67c8be07e8ccf20271f8568/jupyter_server-2.17.0-py3-none-any.whl", hash = "sha256:e8cb9c7db4251f51ed307e329b81b72ccf2056ff82d50524debde1ee1870e13f", size = 388221, upload-time = "2025-08-21T14:42:52.034Z" },
+    { url = "https://files.pythonhosted.org/packages/f3/71/8c002223e873a870f5c41dc69b0a7c922301123e4a31d5d01ecb700aef77/jupyter_server-2.20.0-py3-none-any.whl", hash = "sha256:c3b67c93c471e947c18b5026f04f21614218adb706df8f48227d3ee8e0a7cdcc", size = 393143, upload-time = "2026-06-17T12:09:07.234Z" },
 ]
 
 [[package]]
@@ -1183,27 +1196,27 @@ wheels = [
 
 [[package]]
 name = "jupyterlab"
-version = "4.5.10"
+version = "4.6.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "async-lru" },
     { name = "httpx" },
     { name = "ipykernel" },
     { name = "jinja2" },
+    { name = "jupyter-builder" },
     { name = "jupyter-core" },
     { name = "jupyter-lsp" },
     { name = "jupyter-server" },
     { name = "jupyterlab-server" },
     { name = "notebook-shim" },
     { name = "packaging" },
-    { name = "setuptools" },
     { name = "tornado" },
     { name = "traitlets" },
     { name = "typing-extensions", marker = "python_full_version < '3.12'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/74/24/621aa20ec0d2fe72f52095bda0fc1be7738ac21aabe4129ff623140d5cdf/jupyterlab-4.5.10.tar.gz", hash = "sha256:77e8d80b78be59b2eaba2154562e21caa6e79c2f1281d6f486584f7144ee2f47", size = 23998879, upload-time = "2026-07-21T12:43:27.324Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/00/c0/45934229995d4c6e38192ca118d93185f60808f64157e3df3c5c28f8c5fd/jupyterlab-4.6.3.tar.gz", hash = "sha256:2e3db6e3a12495ebd188276e985bf5ac502fbde3d1e8628819920210008de498", size = 28319771, upload-time = "2026-08-10T18:50:57.947Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9f/c9/940f95f17ee4e413ad252bf8d4f2ee9a341f18cfeda87775fef3d7847321/jupyterlab-4.5.10-py3-none-any.whl", hash = "sha256:5967ca61e692e67a2f30b5a2b901c941dc6ce56c0b0e357bc6d34fed5ec095f6", size = 12452502, upload-time = "2026-07-21T12:43:23.542Z" },
+    { url = "https://files.pythonhosted.org/packages/e9/47/242f46de028074651c9bd6d8000fc340ed0d3cdd1a0eae4387826123413a/jupyterlab-4.6.3-py3-none-any.whl", hash = "sha256:0a1ebc6567186f1eabd99536e94df7ed9e96d1e7c5ddf3e4406ae16e88abacb7", size = 17168312, upload-time = "2026-08-10T18:50:53.044Z" },
 ]
 
 [[package]]
@@ -1719,18 +1732,19 @@ wheels = [
 
 [[package]]
 name = "notebook"
-version = "7.5.7"
+version = "7.6.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "jupyter-builder" },
     { name = "jupyter-server" },
     { name = "jupyterlab" },
     { name = "jupyterlab-server" },
     { name = "notebook-shim" },
     { name = "tornado" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3e/c4/f71f8716f2903e9e817a47f534b9fd84831e155e2acb32c26691c8e06243/notebook-7.5.7.tar.gz", hash = "sha256:d6d59288a25303b25e1dcb71e9b017ec3a785f7d92f38b9bc288ca1970d5b0a8", size = 14171612, upload-time = "2026-06-04T18:33:45.224Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/31/d9/5c76de84e96e1cf8aae3fce930875e0615e14f3557bbcdb634aab52da9d3/notebook-7.6.2.tar.gz", hash = "sha256:cc02b5f0bb972160cccfe44ad8a1a202036206ba3439469c514f03aefa9ae807", size = 5500147, upload-time = "2026-08-11T13:21:16.632Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e1/4d/b3347f7073a377273531efe4ffc738fc910e93718fd2838c7ebf6736c6af/notebook-7.5.7-py3-none-any.whl", hash = "sha256:1f95f79d117e47d20b5555b5c85a397d2cfecf136978aaab767cf0314b09165b", size = 14583767, upload-time = "2026-06-04T18:33:40.987Z" },
+    { url = "https://files.pythonhosted.org/packages/5c/fd/3e552ff5b24dd305c6e9a10e8645e29c03091c317429f326ae10dbae1ac6/notebook-7.6.2-py3-none-any.whl", hash = "sha256:5fe9e09c335cb4b7de21627b860f77210e70e54b1fb1276ad942a4a7e1d858d3", size = 5547102, upload-time = "2026-08-11T13:21:13.302Z" },
 ]
 
 [[package]]
@@ -2654,7 +2668,7 @@ wheels = [
 
 [[package]]
 name = "resdata"
-version = "6.2.9"
+version = "6.3.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cwrap" },
@@ -2662,20 +2676,21 @@ dependencies = [
     { name = "numpy" },
     { name = "pandas" },
     { name = "resfo-utilities" },
+    { name = "typing-extensions" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/fd/11/6681e304460bef9a627a940874620923e3aaf1f4535e19b62f837e502381/resdata-6.2.9-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:bd1492b0a456129b06a233e7fa8fe861487dca255bae7528399e5d0b9ad4c2cd", size = 1337111, upload-time = "2026-05-18T08:43:36.53Z" },
-    { url = "https://files.pythonhosted.org/packages/41/2a/1f29a01a9d9606e71ea7f999a89b5b380825f6829ce0c1024d290b993f21/resdata-6.2.9-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:c7dac96bc93e0141989b9b160feea565687a294e5b9248a76f1804520a370126", size = 4245556, upload-time = "2026-05-18T08:43:38.86Z" },
-    { url = "https://files.pythonhosted.org/packages/85/ad/4334a4754f545864ee5b079703debcebb4fd4cc0bf53b0b3345a222077b9/resdata-6.2.9-cp311-cp311-win_amd64.whl", hash = "sha256:9c6113c0ca33150b6d234a2ba403da16fb5359d3e37e8a566ffcdfd21468a130", size = 796603, upload-time = "2026-05-18T08:43:40.147Z" },
-    { url = "https://files.pythonhosted.org/packages/8a/e0/3baa35abb28efa98191c51cc66623c3655d49e7391de831d5407fd3668b3/resdata-6.2.9-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:ea614440dc0c626e97f8a3bc9e8ecda834ec7f9c0232c0ebc84c1e86485b4dbb", size = 1337103, upload-time = "2026-05-18T08:43:42.285Z" },
-    { url = "https://files.pythonhosted.org/packages/a4/10/e549702c6d2c25609bb7053851e722f102de497f7680537c3d3114368d4a/resdata-6.2.9-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:cfeb559622e54f594f14f10cec1ca97e72b17b1f03dcf7f1664b9b9d5f31521b", size = 4245562, upload-time = "2026-05-18T08:43:43.993Z" },
-    { url = "https://files.pythonhosted.org/packages/43/1b/8eb22910948fccc52aeba26079231900256fa094ea342c804cdf0dad1f22/resdata-6.2.9-cp312-cp312-win_amd64.whl", hash = "sha256:47613095cf2c22ef40bffb93700f8336ad9909436d49f0ebecd58911e7b6f050", size = 796602, upload-time = "2026-05-18T08:43:45.397Z" },
-    { url = "https://files.pythonhosted.org/packages/d2/5f/4329f6fa2b475d607a9f78a2e230376b981d2aa9493ace0697c4d6c0922f/resdata-6.2.9-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:0215d147bbbef29eee1d1d3f8bdbe61af3d4e08851470af64aac3c631e14c5e4", size = 1337112, upload-time = "2026-05-18T08:43:47.45Z" },
-    { url = "https://files.pythonhosted.org/packages/3e/db/1f46428dab612fde36296f2240c53cf4116a73ac2f47595a5c95d47bcf85/resdata-6.2.9-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:6df4e2bfa9dd92de255c4f6138558e57ebee3baba477b6ab114962493dc1dfde", size = 4245568, upload-time = "2026-05-18T08:43:48.962Z" },
-    { url = "https://files.pythonhosted.org/packages/ab/3b/fb1ed52d3438685094a800bfff188fcf404ad770a0e9d84b5079493c6d4b/resdata-6.2.9-cp313-cp313-win_amd64.whl", hash = "sha256:2339adea9af0835e53714d62d69b38b9d99320a9c34bc1319e48d3448115a069", size = 796605, upload-time = "2026-05-18T08:43:50.471Z" },
-    { url = "https://files.pythonhosted.org/packages/0d/94/a0fbb2b770d19623a3e02d8cffd8ddd0e41554ad5aa07b718e2aa7515059/resdata-6.2.9-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:62d61e7d8dc44b698c1b2a9f226c4556657c2cdf1c07c1b70c518d4ae6eee8ca", size = 1337111, upload-time = "2026-05-18T08:43:51.648Z" },
-    { url = "https://files.pythonhosted.org/packages/ab/d5/b46f8701decd45d3a1d77a5b6e6885086563a5d88827f7e5a135d68d99ca/resdata-6.2.9-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:bf970677ec39b1f58f9e27eea05ea342129f4004ebce40e3c49a0826ba466244", size = 4245565, upload-time = "2026-05-18T08:43:53.21Z" },
-    { url = "https://files.pythonhosted.org/packages/27/a6/3b68fe804af97a5dcc456ac1d786da764c3137a0d168d88f7363175e7d03/resdata-6.2.9-cp314-cp314-win_amd64.whl", hash = "sha256:d884425071bd23eb63c674bb7901d59f3ad37bc2a36dd313b771665794dbca83", size = 815481, upload-time = "2026-05-18T08:43:54.579Z" },
+    { url = "https://files.pythonhosted.org/packages/16/b2/ba23cc32066e89efa558d5c641529fba6c920a0ca9b51b88872faf7e1c77/resdata-6.3.3-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:a84e6a2b5e71562a550d4d56244282d3b4e93c52c86e3afa96758d9a8d01b8a3", size = 1714456, upload-time = "2026-08-13T06:48:15.272Z" },
+    { url = "https://files.pythonhosted.org/packages/f9/30/62b72b449f83608346ac7e29c01c1f7ca40b974a89457c188cbb21166ad2/resdata-6.3.3-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:8c1bc9b4c2a0f895552887c71a397dfa66472c2502258b043ad8386c81fa547a", size = 4854836, upload-time = "2026-08-13T06:48:16.799Z" },
+    { url = "https://files.pythonhosted.org/packages/0a/f0/8cf27966fa5dbe309602355f3535e6e0bb38cdb6aa2a8462350a0917a802/resdata-6.3.3-cp311-cp311-win_amd64.whl", hash = "sha256:b91c7ab75fc2b43586ac7d774167685d8f94c3b488056e9845f1734f409a24bc", size = 1303700, upload-time = "2026-08-13T06:48:18.058Z" },
+    { url = "https://files.pythonhosted.org/packages/14/c9/bbe439f17e2898dc9ee1ed0ed5f76990d2f2bc68ff700686d0b103624930/resdata-6.3.3-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:b871d0f56738ceb34ebd6f36c989a21a6bf7d40771d1fb1475823114f974a98a", size = 1715451, upload-time = "2026-08-13T06:48:19.211Z" },
+    { url = "https://files.pythonhosted.org/packages/e4/72/22605f16f8528c1d1088be2f4368eae47f9d38d3513cc40283fcb263057c/resdata-6.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:8cd1bf0b44e9aff219a5b849155e9896435905bcce73ba02a60e1d8e2d6eb677", size = 4858951, upload-time = "2026-08-13T06:48:20.506Z" },
+    { url = "https://files.pythonhosted.org/packages/c6/87/3f54ad496325859318c007b502e1c0f7bf3550d664adf4bccd300cebe01d/resdata-6.3.3-cp312-cp312-win_amd64.whl", hash = "sha256:51ece7cf7f82c2b1b88c6a8391f76859b859147e58f7972a9ef4cdb9e0ac59af", size = 1307145, upload-time = "2026-08-13T06:48:21.857Z" },
+    { url = "https://files.pythonhosted.org/packages/6a/eb/0a3a0045a1c9dcc259651b45efae81974a5392445df9f0e594dd18906630/resdata-6.3.3-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:e02371ff5d34c8ec899befd6f72f5758025a689f2279f8ed61503df372e66b98", size = 1715635, upload-time = "2026-08-13T06:48:22.86Z" },
+    { url = "https://files.pythonhosted.org/packages/c0/2f/b0bd53597adf7c607f785e8b87a8f6b811a391e4f3a31879868acc6953aa/resdata-6.3.3-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:aaba699ba445798e8ce21e13c94624f52f61cd26e6dc7771ace4cf3fd39bb781", size = 4858846, upload-time = "2026-08-13T06:48:24.16Z" },
+    { url = "https://files.pythonhosted.org/packages/08/df/a23d1785d37ae7eeb23500471951bd82752dd341f3b3c1f810d5c0a068a8/resdata-6.3.3-cp313-cp313-win_amd64.whl", hash = "sha256:1f9a4ee8ec740bfb5bcc2aa7a5ab61d6781c0b2c058dc2fe536d887f43afcef6", size = 1307231, upload-time = "2026-08-13T06:48:25.407Z" },
+    { url = "https://files.pythonhosted.org/packages/3c/b4/81737a7e8533d421204bc57bf8c664e21c0f00ef4374d7dd0d682787acf7/resdata-6.3.3-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:994c950bfd62094e508c511052f9e907fcfa6222fc5f6f24b37b4b3b9a5576b6", size = 1716550, upload-time = "2026-08-13T06:48:26.57Z" },
+    { url = "https://files.pythonhosted.org/packages/5c/b8/c911cffd865caaebf699bb001f9de6fb8398aebd035031a50f04fe7dfb6f/resdata-6.3.3-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:0215794eacd2a16011545814d804513787abfaa219bf96043ba75fc1ff233843", size = 4859329, upload-time = "2026-08-13T06:48:27.682Z" },
+    { url = "https://files.pythonhosted.org/packages/27/0b/98dc7f38f136de6d209ce7489cfb3fcb6f7cb9b7c6597322a5add9d1ef42/resdata-6.3.3-cp314-cp314-win_amd64.whl", hash = "sha256:f89850bfd2c12a67284763e90c93a8815f5555136cbd930968db2faf387f23d2", size = 1339045, upload-time = "2026-08-13T06:48:28.903Z" },
 ]
 
 [[package]]
@@ -3009,7 +3024,7 @@ requires-dist = [
     { name = "pandas", specifier = ">=3.0.0" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "pyyaml", specifier = ">=6.0.3" },
-    { name = "resdata", specifier = ">=6.2.9" },
+    { name = "resdata", specifier = ">=6.3.3" },
     { name = "scipy", specifier = ">=1.17.0" },
     { name = "wellpathpy", specifier = ">=0.5.2" },
 ]
@@ -3020,7 +3035,7 @@ dev = [
     { name = "ipympl", specifier = "==0.9.3" },
     { name = "jupyter", specifier = "==1.0.0" },
     { name = "jupyter-dash", specifier = "==0.4.2" },
-    { name = "jupyterlab", specifier = "==4.5.10" },
+    { name = "jupyterlab", specifier = "==4.6.3" },
 ]
 docs = [
     { name = "griffe", specifier = "==0.49.0" },
@@ -3047,11 +3062,11 @@ wheels = [
 
 [[package]]
 name = "setuptools"
-version = "83.0.0"
+version = "84.0.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/34/26/f5d29e25ffdb535afef2d35cdb55b325298f96debd670da4c325e08d70f4/setuptools-83.0.0.tar.gz", hash = "sha256:025bccbbf0fa05b6192bc64ae1e7b16e001fd6d6d4d5de03c97b1c1ade523bef", size = 1154254, upload-time = "2026-07-04T15:31:22.699Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/6d/44/f5da03a8ef95d369145c5bb53050e7877c9f3d312e128605fd9504829143/setuptools-84.0.0.tar.gz", hash = "sha256:f4695c21257f0d9b537ec2692c941d02ee143b7cc1276941349a546573b2ef73", size = 1168449, upload-time = "2026-08-08T18:27:58.365Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5d/40/e1e72872c6354b306daef1703549e8e83b4d43cfea356311bf722a043752/setuptools-83.0.0-py3-none-any.whl", hash = "sha256:29b23c360f22f414dc7336bb39178cc7bcbf6021ed2733cde173f09dba19abb3", size = 1008090, upload-time = "2026-07-04T15:31:20.885Z" },
+    { url = "https://files.pythonhosted.org/packages/95/9c/c510029fc6ef33a6275cd2c5d3cecd6613dfd6aa401d57c54f1c18852ccf/setuptools-84.0.0-py3-none-any.whl", hash = "sha256:51a52592b3b99e102b609654876bd65f19f999935166d1352678931132b0c670", size = 818216, upload-time = "2026-08-08T18:27:56.719Z" },
 ]
 
 [[package]]
