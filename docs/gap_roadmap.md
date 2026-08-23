@@ -24,13 +24,13 @@ Completed coarse-grid preparation slices:
 - `format_vertical_grid_recipe` and `write_vertical_grid_recipe` produce a simulator-oriented `TOPS`/`DZ` text recipe.
 - Notebook 2 demonstrates the recipe against the Wildcat JSON fixture.
 - A standalone preprocessing notebook demonstrates recipe generation and dry-run case staging:
-    - [`04_init_case_preprocessing.ipynb`](../notebooks/04_init_case_preprocessing.ipynb)
+    - `notebooks/04_init_case_preprocessing.ipynb`
 - A workbook-driven adapter path stages init cases from a multi-sheet user input deck:
-    - [`prepare_init_case_from_xlsx.py`](../runscripts/prepare_init_case_from_xlsx.py)
-    - [`xlsx_parser.py`](../src/WellClass/libs/utils/xlsx_parser.py)
-    - [`create_well_input_workbook.py`](../runscripts/create_well_input_workbook.py)
+    - `runscripts/prepare_init_case_from_xlsx.py`
+    - `src/WellClass/libs/utils/xlsx_parser.py`
+    - `runscripts/create_well_input_workbook.py`
 - Template assets now have explicit integrity checks in CI-focused tests:
-    - [`test_template_assets.py`](../tests/gap/test_template_assets.py)
+    - `tests/gap/test_template_assets.py`
 
 These helpers do not create native `.EGRID`/`.INIT` files or run a simulator.
 
@@ -65,3 +65,5 @@ These helpers do not create native `.EGRID`/`.INIT` files or run a simulator.
 - Preserve the existing pre-existing-grid workflow as a regression path.
 
 The scripts in `experiments/legacy/` contain historical examples of tops generation, template handling, pressure initialization, and simulator orchestration. They are references for future work, not new implementation boundaries.
+
+Legacy CSV-oriented recipes are kept for compatibility and migration only; new projects should prefer canonical JSON inputs or the workbook adapter path.
