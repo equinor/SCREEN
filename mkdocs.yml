@@ -61,6 +61,7 @@ nav:
   - Detailed Simulation workflow: gap.md
   - Developer Guides:
       - Architecture Manifesto: architecture_manifesto.md
+      - GaP Roadmap: gap_roadmap.md
       - MkDocs: mkdocs.md
       - Installation: INSTALLATION.md
       - Code References:

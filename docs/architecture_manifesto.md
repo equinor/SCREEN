@@ -68,7 +68,7 @@ This is a vocabulary contract, not a request for a repository-wide rename in one
 
 ```mermaid
 flowchart LR
-    Input[JSON / YAML / legacy CSV] --> Model[Pydantic WellModel]
+  Input[JSON / YAML / XLSX adapter / legacy CSV] --> Model[Pydantic WellModel]
     Model --> Raw[Well / WellRaw]
     Raw --> Processed[WellProcessed]
     Processed --> Derived[trajectory, TVD, borehole, annulus, plugs]
@@ -91,7 +91,7 @@ flowchart LR
 - Pressure and PVT calculations.
 - Well-focused plots.
 
-The canonical processed API is [`WellProcessed`](../src/WellClass/libs/well_class/well_processed.py). `Well` is the raw validated representation. `hole_casings` is the canonical input name; `holes`, `casings`, and `casing cement` are typed records inside that collection.
+The canonical processed API is `src/WellClass/libs/well_class/well_processed.py` (`WellProcessed`). `Well` is the raw validated representation. `hole_casings` is the canonical input name; `holes`, `casings`, and `casing cement` are typed records inside that collection.
 
 ### GaP owns
 
@@ -101,11 +101,11 @@ The canonical processed API is [`WellProcessed`](../src/WellClass/libs/well_clas
 - Assigning mesh material/permeability fields.
 - Writing CARFIN/GRDECL output.
 
-The central GaP path is [`LGRBuilder`](../src/WellClass/libs/grid_utils/LGR_builder.py), supported by `GridCoarse`, `GridRefine`, `LGR_grid_utils`, `LGR_bbox`, and the CARFIN writers in [`src/GaP/libs/carfin`](../src/GaP/libs/carfin).
+The central GaP path is `src/WellClass/libs/grid_utils/LGR_builder.py` (`LGRBuilder`), supported by `GridCoarse`, `GridRefine`, `LGR_grid_utils`, `LGR_bbox`, and the CARFIN writers under `src/GaP/libs/carfin`.
 
 ### The boundary owns
 
-[`WellDataFrame`](../src/WellClass/libs/grid_utils/well_df.py) is currently the compatibility boundary. It converts a processed WellClass object into the pandas fields the existing GaP mesh code expects:
+`src/WellClass/libs/grid_utils/well_df.py` (`WellDataFrame`) is currently the compatibility boundary. It converts a processed WellClass object into the pandas fields the existing GaP mesh code expects:
 
 - drilling: `top_msl`, `bottom_msl`, `diameter_m`, `oh_perm`
 - casing: `top_msl`, `bottom_msl`, `toc_msl`, `boc_msl`, `diameter_m`, `cb_perm`
@@ -130,14 +130,28 @@ This is a naming convention to follow going forward, not a rename mandate — `w
 - The WellClass-to-GaP adapter has a controlled vertical-well regression test.
 - A real Wildcat input can be converted into `hole_casings`, processed, adapted, and passed through `LGRBuilder` to produce a GRDECL artifact.
 - The three canonical notebooks now cover WellClass, GaP grid primitives, and the end-to-end path:
-  - [`01_wellclass.ipynb`](../notebooks/01_wellclass.ipynb)
-  - [`02_gap_grid.ipynb`](../notebooks/02_gap_grid.ipynb)
-  - [`03_wellclass_to_gap.ipynb`](../notebooks/03_wellclass_to_gap.ipynb)
+  - `notebooks/01_wellclass.ipynb`
+  - `notebooks/02_gap_grid.ipynb`
+  - `notebooks/03_wellclass_to_gap.ipynb`
 - The canonical WellClass notebook now shows a one-page sketch, hydrostatic water and CO2 pressure profiles, and a CO2 P-T density plot.
 - The notebook CI workflow executes all three canonical notebooks with the locked `uv` environment.
 - The WellClass-to-GaP vocabulary has been migrated incrementally: `holes_df`, `plugs_df`, `barrier_regions_df`, `casing_cement`, `cement_bond`, and canonical `plug_positions` are available while legacy aliases remain at compatibility boundaries.
 - PVT hydrostatic calculations accept canonical WellClass depth headers as well as legacy headers.
 - Pressure intersection, pressure integration, pressure scenarios, PressureTable, plug geometry, borehole plotting, GaP bounding boxes, CARFIN writers, and mesh material assignment have focused regression coverage.
+
+## Supported vs Deprecated Workflows
+
+Supported for ongoing use:
+
+- Canonical JSON workflow and adapters through WellClass -> GaP.
+- Workbook-driven preprocessing adapter (`runscripts/prepare_init_case_from_xlsx.py`) for organized user input.
+- Canonical notebooks: `notebooks/01_wellclass.ipynb`, `notebooks/02_gap_grid.ipynb`, `notebooks/03_wellclass_to_gap.ipynb`, `notebooks/04_init_case_preprocessing.ipynb`.
+
+Deprecated or historical (kept as references, not recommended as entry points):
+
+- Scripts under `experiments/legacy/`.
+- `_originals` assets and historical notebooks not listed above.
+- Legacy CSV-style input recipes for new projects; keep only for backward compatibility and migration.
 
 These are important smoke paths, not yet a complete production guarantee.
 
@@ -169,7 +183,7 @@ This checkpoint confirms the GaP-first workflow intent and upgrades the canonica
 
 Completed during this pass:
 
-- Upgraded [`02_gap_grid.ipynb`](../notebooks/02_gap_grid.ipynb) to run an end-to-end GaP flow from coarse grid and synthetic geometry inputs through `LGRBuilder` and GRDECL generation.
+- Upgraded `notebooks/02_gap_grid.ipynb` to run an end-to-end GaP flow from coarse grid and synthetic geometry inputs through `LGRBuilder` and GRDECL generation.
 - Added explicit dual-mode refinement comparison in the canonical GaP notebook:
   - `new_way` (log-transition lateral refinement), and
   - `ali_way` (legacy fixed-transition refinement).
@@ -203,16 +217,16 @@ This checkpoint keeps the GaP architecture unchanged while reducing manual setup
 Completed during this pass:
 
 - Added a standalone preprocessing notebook:
-  - [`04_init_case_preprocessing.ipynb`](../notebooks/04_init_case_preprocessing.ipynb)
+  - `notebooks/04_init_case_preprocessing.ipynb`
 - Added reusable init-case staging helpers:
-  - [`prepare_init_case.py`](../runscripts/prepare_init_case.py)
-  - [`prepare_init_case_from_xlsx.py`](../runscripts/prepare_init_case_from_xlsx.py)
-  - [`create_well_input_workbook.py`](../runscripts/create_well_input_workbook.py)
+  - `runscripts/prepare_init_case.py`
+  - `runscripts/prepare_init_case_from_xlsx.py`
+  - `runscripts/create_well_input_workbook.py`
 - Added workbook parser support for user-friendly multi-sheet input decks:
-  - [`xlsx_parser.py`](../src/WellClass/libs/utils/xlsx_parser.py)
+  - `src/WellClass/libs/utils/xlsx_parser.py`
 - Added template governance and workbook staging regression tests:
-  - [`test_template_assets.py`](../tests/gap/test_template_assets.py)
-  - [`test_prepare_init_case_from_xlsx.py`](../tests/gap/test_prepare_init_case_from_xlsx.py)
+  - `tests/gap/test_template_assets.py`
+  - `tests/gap/test_prepare_init_case_from_xlsx.py`
 
 Architecture clarifications agreed in this pass:
 
@@ -244,7 +258,7 @@ The remedy is not more compatibility aliases everywhere. Choose one canonical AP
 
 ### 3. External runtime dependencies are implicit
 
-Python dependencies are declared in [`pyproject.toml`](../pyproject.toml), but several workflows also require tools and artifacts that are not Python packages:
+Python dependencies are declared in `pyproject.toml`, but several workflows also require tools and artifacts that are not Python packages:
 
 - `runcirrus`
 - `runpflotran1.8`
