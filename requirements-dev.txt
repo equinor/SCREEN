@@ -1,5 +1,5 @@
 jupyter==1.0.0
-jupyterlab==4.4.8
+jupyterlab==4.5.10
 jupyter-dash==0.4.2
 ipympl==0.9.3
 ipykernel
