@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+"""Stage a reproducible initialization case from the canonical TEMP-0 template.
+
+This helper intentionally separates two concerns:
+
+1. Prepare case files (copy template deck/grid files and regenerate tops_dz.inc).
+2. Optionally run an external initialization command to produce EGRID/INIT.
+
+The script does not bundle simulator binaries; callers provide a command template
+through --sim-command when runtime execution is desired.
+"""
+
+from __future__ import annotations
+
+import argparse
+import shlex
+import subprocess
+from pathlib import Path
+
+from src.WellClass.libs.grid_utils import (
+    CoarseGridSpec,
+    build_vertical_grid_schedule,
+    write_vertical_grid_recipe,
+)
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--template-root",
+        type=Path,
+        default=Path("test_data/examples/wildcat-pflotran"),
+        help="Template case root containing model/TEMP-0.in and include/TEMP_GRD.grdecl.",
+    )
+    parser.add_argument(
+        "--output-root",
+        type=Path,
+        required=True,
+        help="Target case root to create/update.",
+    )
+    parser.add_argument("--top-depth", type=float, required=True, help="Top depth (MSL, positive downward).")
+    parser.add_argument("--water-depth", type=float, required=True, help="Water column base depth (MSL).")
+    parser.add_argument("--reservoir-top", type=float, required=True, help="Reservoir top depth (MSL).")
+    parser.add_argument("--bottom-depth", type=float, required=True, help="Bottom model depth (MSL).")
+    parser.add_argument("--water-layers", type=int, default=1, help="Number of water-column layers.")
+    parser.add_argument("--overburden-layers", type=int, default=9, help="Number of overburden layers.")
+    parser.add_argument("--reservoir-layers", type=int, default=50, help="Number of reservoir layers.")
+    parser.add_argument(
+        "--cells-per-layer",
+        type=int,
+        default=400,
+        help="Number of lateral cells represented by each vertical layer in DZ formatting.",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite existing staged files if they already exist.",
+    )
+    parser.add_argument(
+        "--sim-command",
+        type=str,
+        default="",
+        help="Optional external initialization command template. Use {deck} placeholder for TEMP-0.in.",
+    )
+    return parser.parse_args()
+
+
+def copy_required_file(source: Path, destination: Path, *, force: bool) -> None:
+    if not source.exists():
+        raise FileNotFoundError(f"Template file not found: {source}")
+    if destination.exists() and not force:
+        return
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
+
+
+def stage_case(args: argparse.Namespace) -> tuple[Path, Path, Path]:
+    template_root = args.template_root
+    output_root = args.output_root
+
+    source_deck = template_root / "model" / "TEMP-0.in"
+    source_grdecl = template_root / "include" / "TEMP_GRD.grdecl"
+
+    output_deck = output_root / "model" / "TEMP-0.in"
+    output_grdecl = output_root / "include" / "TEMP_GRD.grdecl"
+    output_tops = output_root / "include" / "tops_dz.inc"
+
+    copy_required_file(source_deck, output_deck, force=args.force)
+    copy_required_file(source_grdecl, output_grdecl, force=args.force)
+
+    spec = CoarseGridSpec(
+        top_depth=args.top_depth,
+        water_depth=args.water_depth,
+        reservoir_top=args.reservoir_top,
+        bottom_depth=args.bottom_depth,
+        water_layers=args.water_layers,
+        overburden_layers=args.overburden_layers,
+        reservoir_layers=args.reservoir_layers,
+    )
+    schedule = build_vertical_grid_schedule(spec)
+    write_vertical_grid_recipe(spec, schedule, output_tops, cells_per_layer=args.cells_per_layer)
+
+    return output_deck, output_grdecl, output_tops
+
+
+def run_initialization(sim_command: str, deck_path: Path) -> int:
+    command = sim_command.format(deck=shlex.quote(str(deck_path)))
+    return subprocess.run(command, shell=True, check=False).returncode
+
+
+def main() -> int:
+    args = parse_args()
+    output_deck, output_grdecl, output_tops = stage_case(args)
+
+    print("Staged initialization case files:")
+    print(f"  deck:   {output_deck}")
+    print(f"  grid:   {output_grdecl}")
+    print(f"  topsdz: {output_tops}")
+
+    if not args.sim_command:
+        print("No --sim-command provided; skipping simulator execution.")
+        return 0
+
+    exit_code = run_initialization(args.sim_command, output_deck)
+    if exit_code != 0:
+        print(f"Initialization command failed with exit code {exit_code}.")
+        return exit_code
+
+    print("Initialization command completed successfully.")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

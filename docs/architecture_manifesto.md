@@ -14,6 +14,8 @@ This manifesto is the architectural source of truth. It defines what SCREEN is s
 
 The focused roadmaps, such as [`gap_roadmap.md`](gap_roadmap.md), are execution trackers. They record implementation status and the next concrete tasks needed to move toward this architecture; they must not redefine the ownership boundaries or canonical workflow described here. When a roadmap item conflicts with this manifesto, the manifesto takes precedence and the roadmap should be revised.
 
+The simulator-facing file pipeline (`TEMP-0.in` -> `TEMP_GRD.grdecl` -> `tops_dz.inc` -> initialization run -> `.EGRID`/`.INIT` -> CARFIN include) is documented in [`gap.md`](gap.md). Treat that pipeline as operational guidance for reproducible runs and template governance.
+
 The three canonical notebooks are executable explanations of the architecture:
 
 - `01_wellclass.ipynb`: WellClass capabilities.
@@ -193,6 +195,31 @@ Refinement mode policy:
 - Default and recommended mode for new workflows: `new_way`.
 - `ali_way` remains supported for legacy comparability and result back-checking.
 - Canonical docs and examples should continue to show both modes where comparison value is high, while using `new_way` as the baseline path.
+
+### Checkpoint: 2026-08-23 (Workbook-driven preprocessing slice)
+
+This checkpoint keeps the GaP architecture unchanged while reducing manual setup overhead for initialization cases.
+
+Completed during this pass:
+
+- Added a standalone preprocessing notebook:
+  - [`04_init_case_preprocessing.ipynb`](../notebooks/04_init_case_preprocessing.ipynb)
+- Added reusable init-case staging helpers:
+  - [`prepare_init_case.py`](../runscripts/prepare_init_case.py)
+  - [`prepare_init_case_from_xlsx.py`](../runscripts/prepare_init_case_from_xlsx.py)
+  - [`create_well_input_workbook.py`](../runscripts/create_well_input_workbook.py)
+- Added workbook parser support for user-friendly multi-sheet input decks:
+  - [`xlsx_parser.py`](../src/WellClass/libs/utils/xlsx_parser.py)
+- Added template governance and workbook staging regression tests:
+  - [`test_template_assets.py`](../tests/gap/test_template_assets.py)
+  - [`test_prepare_init_case_from_xlsx.py`](../tests/gap/test_prepare_init_case_from_xlsx.py)
+
+Architecture clarifications agreed in this pass:
+
+- The workbook path is an **input adapter**, not a replacement for simulator-generated `.EGRID`/`.INIT`.
+- Geometry/topology authority remains in the initialization run path (`TEMP-0.in` + GRDECL + include files).
+- The current coarse-grid abstraction remains three-zone (`water`, `overburden`, `reservoir`) with user-configurable counts and an optional target-DZ-driven layer-count calculation.
+- Multi-reservoir interval modeling remains a planned extension and is not yet part of the supported contract.
 
 ## The Main Risks
 

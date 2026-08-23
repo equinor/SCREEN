@@ -9,6 +9,55 @@ The resulting simulation model is a 3D representation of the wellbore, with the 
 
 Users should start with the canonical GaP and WellClass notebooks, especially `notebooks/02_gap_grid.ipynb` and `notebooks/03_wellclass_to_gap.ipynb`. Simulator-dependent experiments require copies of the template files and explicit external-tool setup; see `experiments/README.md` for the optional command-line utilities.
 
+## Grid Build Pipeline (Canonical)
+
+The supported simulator-facing workflow is intentionally explicit:
+
+1. A template input deck (`TEMP-0.in`) references a template GRDECL (`TEMP_GRD.grdecl`).
+2. The GRDECL references a vertical geometry include (`tops_dz.inc`) that defines `TOPS` and `DZ`.
+3. An initialization-only simulator run (no production timestepping objective) produces `.EGRID` and `.INIT`.
+4. SCREEN reads `.EGRID` and `.INIT` to build LGR/CARFIN output.
+5. The generated LGR include is imported into a run deck for later simulation phases.
+
+This means geometry changes should be applied upstream (template + generated include), then regenerated via the initialization run. Avoid hand-editing generated `.EGRID`/`.INIT` structures.
+
+### Canonical Template Assets
+
+To keep the process reproducible, one canonical template case is retained in-repo:
+
+- `test_data/examples/wildcat-pflotran/model/TEMP-0.in`
+- `test_data/examples/wildcat-pflotran/include/TEMP_GRD.grdecl`
+- `test_data/examples/wildcat-pflotran/include/tops_dz.inc`
+
+These files are treated as golden assets and protected by regression tests. Use them as the source for new initialization cases instead of editing ad hoc copies.
+
+### Staging a New Initialization Case
+
+Use the helper script to copy the canonical template and regenerate `tops_dz.inc` from explicit depths and layer counts:
+
+```bash
+python runscripts/prepare_init_case.py \
+	--output-root test_data/examples/my_case \
+	--top-depth 4 \
+	--water-depth 104 \
+	--reservoir-top 1004 \
+	--bottom-depth 1504
+```
+
+This command prepares files only. You can optionally pass an external simulator command template to run the initialization step in the same workflow:
+
+```bash
+python runscripts/prepare_init_case.py \
+	--output-root test_data/examples/my_case \
+	--top-depth 4 \
+	--water-depth 104 \
+	--reservoir-top 1004 \
+	--bottom-depth 1504 \
+	--sim-command "runcirrus -i -nm 6 {deck}"
+```
+
+`{deck}` is replaced with the generated `TEMP-0.in` path.
+
 The current GaP path expects a suitable coarse grid before LGR refinement. Future coarse-grid accommodation ideas are recorded in [GaP Roadmap](gap_roadmap.md); the legacy workflow recipes are retained under `experiments/legacy/` as references only.
 
 The equilibration is divided into two zones: 'overburden_water' for the brine in the overburden and ocean water column, and 'CO2_column' for the reservoir, defined by a gas-water contact depth and pressure. The simulation is initially set to run for zero days (START_DATE = FINAL_DATE) to perform only an initialization run, which generates the EGRID file necessary for building the LGR.

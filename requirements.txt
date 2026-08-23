@@ -2,6 +2,7 @@ jsonpickle
 PyYAML
 pydantic
 numpy
+openpyxl
 pandas
 scipy
 resdata
