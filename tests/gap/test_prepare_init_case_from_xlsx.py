@@ -1,5 +1,6 @@
 from pathlib import Path
 import subprocess
+import sys
 
 import pandas as pd
 
@@ -52,7 +53,7 @@ def test_prepare_init_case_from_xlsx_stages_files(tmp_path):
     repo_root = Path(__file__).parents[2]
 
     command = [
-        "/workspaces/SCREEN/.venv/bin/python",
+        sys.executable,
         "runscripts/prepare_init_case_from_xlsx.py",
         "--xlsx",
         str(workbook),
