@@ -15,9 +15,10 @@ The supported simulator-facing workflow is intentionally explicit:
 
 1. A template input deck (`TEMP-0.in`) references a template GRDECL (`TEMP_GRD.grdecl`).
 2. The GRDECL references a vertical geometry include (`tops_dz.inc`) that defines `TOPS` and `DZ`.
-3. An initialization-only simulator run (no production timestepping objective) produces `.EGRID` and `.INIT`.
-4. SCREEN reads `.EGRID` and `.INIT` to build LGR/CARFIN output.
-5. The generated LGR include is imported into a run deck for later simulation phases.
+3. The staged initialization case also carries the referenced `co2_db_new.dat` database. The staging helper removes the later-stage `TEMP_LGR.grdecl` include from the initialization copy of `TEMP_GRD.grdecl`.
+4. An initialization-only simulator run (no production timestepping objective) produces `.EGRID` and `.INIT`.
+5. SCREEN reads `.EGRID` and `.INIT` to build LGR/CARFIN output.
+6. The generated LGR include is imported into a run deck for later simulation phases.
 
 This means geometry changes should be applied upstream (template + generated include), then regenerated via the initialization run. Avoid hand-editing generated `.EGRID`/`.INIT` structures.
 
@@ -27,6 +28,7 @@ To keep the process reproducible, one canonical template case is retained in-rep
 
 - `test_data/examples/wildcat-pflotran/model/TEMP-0.in`
 - `test_data/examples/wildcat-pflotran/include/TEMP_GRD.grdecl`
+- `test_data/examples/wildcat-pflotran/include/co2_db_new.dat`
 - `test_data/examples/wildcat-pflotran/include/tops_dz.inc`
 
 These files are treated as golden assets and protected by regression tests. Use them as the source for new initialization cases instead of editing ad hoc copies.
@@ -57,6 +59,8 @@ python runscripts/prepare_init_case.py \
 ```
 
 `{deck}` is replaced with the generated `TEMP-0.in` path.
+
+The first run should not include `TEMP_LGR.grdecl`; that file belongs to the later GaP CARFIN/LGR stage after `.EGRID` and `.INIT` have been produced. The staged initialization case is therefore self-contained with the coarse-grid GRDECL, `tops_dz.inc`, and `co2_db_new.dat`.
 
 The current GaP path expects a suitable coarse grid before LGR refinement. Future coarse-grid accommodation ideas are recorded in [GaP Roadmap](gap_roadmap.md); the legacy workflow recipes are retained under `experiments/legacy/` as references only.
 
