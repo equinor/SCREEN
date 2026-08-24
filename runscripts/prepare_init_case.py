@@ -80,13 +80,16 @@ def stage_case(args: argparse.Namespace) -> tuple[Path, Path, Path]:
 
     source_deck = template_root / "model" / "TEMP-0.in"
     source_grdecl = template_root / "include" / "TEMP_GRD.grdecl"
+    source_co2_database = template_root / "include" / "co2_db_new.dat"
 
     output_deck = output_root / "model" / "TEMP-0.in"
     output_grdecl = output_root / "include" / "TEMP_GRD.grdecl"
+    output_co2_database = output_root / "include" / "co2_db_new.dat"
     output_tops = output_root / "include" / "tops_dz.inc"
 
     copy_required_file(source_deck, output_deck, force=args.force)
     copy_required_file(source_grdecl, output_grdecl, force=args.force)
+    copy_required_file(source_co2_database, output_co2_database, force=args.force)
 
     spec = CoarseGridSpec(
         top_depth=args.top_depth,
