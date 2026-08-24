@@ -9,6 +9,38 @@ The resulting simulation model is a 3D representation of the wellbore, with the 
 
 Users should start with the canonical GaP and WellClass notebooks, especially `notebooks/02_gap_grid.ipynb` and `notebooks/03_wellclass_to_gap.ipynb`. Simulator-dependent experiments require copies of the template files and explicit external-tool setup; see `experiments/README.md` for the optional command-line utilities.
 
+For a repeatable command-line workflow, a multi-sheet workbook can be used as the input deck. The workbook is converted to canonical WellClass JSON, used to parameterize the CIRRUS deck, and then passed to GaP after initialization:
+
+```text
+XLSX -> well_input.json -> parameterized TEMP-0.in
+	 -> CIRRUS initialization -> .EGRID + .INIT
+	 -> WellProcessed -> WellDataFrame -> LGRBuilder
+	 -> TEMP_LGR.grdecl -> final CIRRUS simulation
+```
+
+Create a starter workbook and stage a case:
+
+```bash
+python runscripts/create_well_input_workbook.py --output well_input.xlsx
+python runscripts/prepare_init_case_from_xlsx.py \
+	--xlsx well_input.xlsx \
+	--output-root case \
+	--write-well-json \
+	--sim-command "runcirrus -i -nm 6 {deck}"
+```
+
+After `.EGRID` and `.INIT` have been produced, build the LGR/CARFIN include:
+
+```bash
+python runscripts/build_lgr_from_json.py \
+	--well-json case/well_input.json \
+	--sim-case case/model/TEMP-0 \
+	--output-folder case/include \
+	--lgr-name TEMP_LGR
+```
+
+The first command uses `FINAL_DATE = START_DATE` and disables `TEMP_LGR.grdecl` for initialization. The second command writes `TEMP_LGR.grdecl`; the same deck can then be configured for the final simulation by enabling that include and setting the requested final date. CIRRUS must be installed separately and available on `PATH`, or its absolute executable path can be supplied in `--sim-command`.
+
 ## Grid Build Pipeline (Canonical)
 
 The supported simulator-facing workflow is intentionally explicit:
