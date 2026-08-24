@@ -15,10 +15,12 @@ from __future__ import annotations
 import argparse
 import json
 import math
+from datetime import date
 from pathlib import Path
 
 from prepare_init_case import run_initialization, stage_case
 
+from src.GaP.libs.deck_config import CirrusDeckParameters, parameterize_cirrus_deck
 from src.WellClass.libs.utils import xlsx_grid_policy, xlsx_to_well_model
 
 
@@ -43,6 +45,18 @@ def parse_args() -> argparse.Namespace:
         "--write-well-json",
         action="store_true",
         help="Write parsed WellModel JSON to <output-root>/well_input.json.",
+    )
+    parser.add_argument("--start-date", default="2025-01-01", help="Simulation start date in ISO format.")
+    parser.add_argument(
+        "--simulation-years",
+        type=int,
+        default=100,
+        help="Final simulation duration in years; used with --final-run.",
+    )
+    parser.add_argument(
+        "--final-run",
+        action="store_true",
+        help="Configure the same deck for the final run and enable TEMP_LGR.grdecl.",
     )
     return parser.parse_args()
 
@@ -119,12 +133,48 @@ def derive_stage_args_from_policy(args: argparse.Namespace, policy: dict) -> arg
     )
 
 
+def _add_years(start_date: date, years: int) -> date:
+    if years < 0:
+        raise ValueError("simulation-years must be non-negative")
+    try:
+        return start_date.replace(year=start_date.year + years)
+    except ValueError:
+        return start_date.replace(month=2, day=28, year=start_date.year + years)
+
+
+def parameterize_staged_deck(args: argparse.Namespace, policy: dict, model) -> None:
+    start_date = date.fromisoformat(str(policy.get("start_date", args.start_date)))
+    final_date = _add_years(start_date, args.simulation_years) if args.final_run else start_date
+    scenarios = model.spec.subsurface_assumptions.scenarios if model.spec.subsurface_assumptions else []
+    assumptions = scenarios[0].model_dump(exclude_none=True) if scenarios else {}
+    parameters = CirrusDeckParameters(
+        start_date=start_date,
+        final_date=final_date,
+        top_depth=float(policy["top_depth"]),
+        seafloor_depth=float(policy["water_depth"]),
+        bottom_depth=float(policy["bottom_depth"]),
+        reservoir_depth=float(assumptions.get("z_resrv", 1500.0)),
+        reservoir_pressure_bar=float(assumptions.get("p_resrv", 144.5)),
+        wgc_depth=float(assumptions.get("wgc_d", float(policy["bottom_depth"]) + 1.0)),
+        ground_temperature_c=float(assumptions.get("ground_temperature", 4.0)),
+        geothermal_gradient_c_per_km=float(assumptions.get("temperature_gradient", 31.0)),
+        enable_lgr=args.final_run,
+    )
+    parameterize_cirrus_deck(
+        args.output_root / "model" / "TEMP-0.in",
+        parameters,
+        grdecl_path=args.output_root / "include" / "TEMP_GRD.grdecl",
+    )
+
+
 def main() -> int:
     args = parse_args()
 
     policy = xlsx_grid_policy(args.xlsx)
+    well_model = xlsx_to_well_model(args.xlsx)
     stage_args = derive_stage_args_from_policy(args, policy)
     output_deck, output_grdecl, output_tops = stage_case(stage_args)
+    parameterize_staged_deck(args, policy, well_model)
 
     print("Staged initialization case files from workbook:")
     print(f"  deck:   {output_deck}")
@@ -136,7 +186,6 @@ def main() -> int:
     print(f"  reservoir_layers:  {stage_args.reservoir_layers}")
 
     if args.write_well_json:
-        well_model = xlsx_to_well_model(args.xlsx)
         output_json = args.output_root / "well_input.json"
         output_json.parent.mkdir(parents=True, exist_ok=True)
         output_json.write_text(json.dumps(well_model.model_dump(mode="json"), indent=2), encoding="utf-8")
