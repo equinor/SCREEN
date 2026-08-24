@@ -35,6 +35,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def run_simulator(command_template: str, deck_path: Path) -> None:
+    deck_path = deck_path.resolve()
     command = command_template.format(deck=shlex.quote(str(deck_path)))
     result = subprocess.run(command, shell=True, cwd=deck_path.parent, check=False)
     if result.returncode != 0:
