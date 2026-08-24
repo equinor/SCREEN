@@ -13,6 +13,7 @@ through --sim-command when runtime execution is desired.
 from __future__ import annotations
 
 import argparse
+import re
 import shlex
 import subprocess
 from pathlib import Path
@@ -93,6 +94,30 @@ def copy_initialization_grid(source: Path, destination: Path, *, force: bool) ->
     destination.write_text(f"{content}\n", encoding="utf-8")
 
 
+def set_equilibration_regions(grdecl_path: Path, *, water_layers: int, overburden_layers: int) -> None:
+    """Assign water/overburden to region 1 and reservoir layers to region 2."""
+
+    content = grdecl_path.read_text(encoding="utf-8")
+    dimensions = re.search(r"(?ms)^\s*DIMENS\s+(\d+)\s+(\d+)\s+(\d+)\s*/", content)
+    if dimensions is None:
+        raise ValueError("grid template is missing DIMENS")
+    nx, ny, nz = (int(value) for value in dimensions.groups())
+    reservoir_start_k = water_layers + overburden_layers + 1
+    if not 2 <= reservoir_start_k <= nz:
+        raise ValueError("reservoir start layer must be within the template vertical dimensions")
+
+    replacements = iter(
+        [
+            f"EQLNUM 1 1 {nx} 1 {ny} 1 {reservoir_start_k - 1} /",
+            f"EQLNUM 2 1 {nx} 1 {ny} {reservoir_start_k} {nz} /",
+        ]
+    )
+    updated, count = re.subn(r"(?m)^\s*EQLNUM\s+[12]\s+.*$", lambda _: next(replacements), content, count=2)
+    if count != 2:
+        raise ValueError("grid template must define EQLNUM regions 1 and 2")
+    grdecl_path.write_text(updated, encoding="utf-8")
+
+
 def stage_case(args: argparse.Namespace) -> tuple[Path, Path, Path]:
     template_root = args.template_root
     output_root = args.output_root
@@ -121,6 +146,11 @@ def stage_case(args: argparse.Namespace) -> tuple[Path, Path, Path]:
     )
     schedule = build_vertical_grid_schedule(spec)
     write_vertical_grid_recipe(spec, schedule, output_tops, cells_per_layer=args.cells_per_layer)
+    set_equilibration_regions(
+        output_grdecl,
+        water_layers=args.water_layers,
+        overburden_layers=args.overburden_layers,
+    )
 
     return output_deck, output_grdecl, output_tops
 
