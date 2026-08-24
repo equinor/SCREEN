@@ -149,6 +149,7 @@ class SubsurfaceAssumptionsScenario(BaseModel):
     salinity: Optional[Union[int, float]] = None
     z_fluid_contact: Optional[Union[int, float]] = None
     p_fluid_contact: Optional[Union[int, float]] = None
+    overburden_datum_depth: Optional[Union[int, float]] = None
     z_resrv: Optional[Union[int, float]] = None
     p_resrv: Optional[Union[int, float]] = None
     z_msad: Optional[Union[int, float]] = None

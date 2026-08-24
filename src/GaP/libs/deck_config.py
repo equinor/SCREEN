@@ -15,6 +15,8 @@ class CirrusDeckParameters:
     top_depth: float
     seafloor_depth: float
     bottom_depth: float
+    overburden_datum_depth: float
+    overburden_pressure_bar: float
     fluid_contact_depth: float
     fluid_contact_pressure_bar: float
     ground_temperature_c: float = 4.0
@@ -100,6 +102,18 @@ def _replace_co2_equilibration(text: str, parameters: CirrusDeckParameters) -> s
     return text[: match.start(2)] + block + text[match.end(2) :]
 
 
+def _replace_overburden_equilibration(text: str, parameters: CirrusDeckParameters) -> str:
+    block_pattern = r"(?ms)(^EQUILIBRATION overburden_water\s*\n)(.*?)(^/\s*$)"
+    match = re.search(block_pattern, text)
+    if match is None:
+        raise ValueError("deck is missing EQUILIBRATION overburden_water")
+
+    block = match.group(2)
+    block = _replace_line(block, "DATUM_D", f"{parameters.overburden_datum_depth:g} m")
+    block = _replace_line(block, "PRESSURE", f"{parameters.overburden_pressure_bar:g} Bar")
+    return text[: match.start(2)] + block + text[match.end(2) :]
+
+
 def _replace_salt_tables(text: str, *, top_depth: float, bottom_depth: float) -> str:
     salt_table = format_saltvd(top_depth=top_depth, bottom_depth=bottom_depth)
     updated, count = re.subn(
@@ -137,6 +151,7 @@ def parameterize_cirrus_deck(deck_path: str | Path, parameters: CirrusDeckParame
     text = deck_path.read_text(encoding="utf-8")
     text = _replace_line(text, "START_DATE", _date_text(parameters.start_date))
     text = _replace_line(text, "FINAL_DATE", _date_text(parameters.final_date))
+    text = _replace_overburden_equilibration(text, parameters)
     text = _replace_co2_equilibration(text, parameters)
     text = _replace_salt_tables(
         text,
