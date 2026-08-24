@@ -79,6 +79,7 @@ def create_workbook(example: dict) -> Path:
         {
             "note": [
                 "Physical well sheets are copied from the canonical JSON fixture.",
+                "Survey is optional: leave it empty for vertical wells or add md_rkb, inclination_deg, and azimuth_deg rows for deviation.",
                 "GridPolicy and SubsurfaceAssumptions are editable example scenario values and must be reviewed for a real case.",
                 "z_fluid_contact and p_fluid_contact define the GAS_WATER datum and WGC depth in CIRRUS.",
             ]
@@ -88,6 +89,7 @@ def create_workbook(example: dict) -> Path:
         _key_values(payload.get("metadata", {})).to_excel(writer, sheet_name="Metadata", index=False)
         _key_values(spec["well_header"]).to_excel(writer, sheet_name="Header", index=False)
         _key_values(example["grid_policy"]).to_excel(writer, sheet_name="GridPolicy", index=False)
+        pd.DataFrame(columns=["md_rkb", "inclination_deg", "azimuth_deg"]).to_excel(writer, sheet_name="Survey", index=False)
         pd.DataFrame(spec.get("hole_casings", [])).to_excel(writer, sheet_name="HoleCasings", index=False)
         pd.DataFrame(spec.get("plugs", [])).to_excel(writer, sheet_name="Plugs", index=False)
         pd.DataFrame(spec.get("stratigraphy", [])).to_excel(writer, sheet_name="Stratigraphy", index=False)
