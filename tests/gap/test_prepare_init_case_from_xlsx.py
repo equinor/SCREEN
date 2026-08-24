@@ -126,6 +126,7 @@ def test_prepare_init_case_from_xlsx_configures_final_run(tmp_path):
     assert "     4    4" in deck
     assert "     104    4" in deck
     assert "     2400    75.176" in deck
+    assert deck.count("     2400    75.176") == 2
     assert deck.count("SALTVD\n     4 0.032\n     2400 0.032") == 2
     assert "WELL_DATA INJ_01" not in deck
     assert "external_file ../include/TEMP_LGR.grdecl /" in grdecl

@@ -83,23 +83,25 @@ def _replace_co2_equilibration(text: str, parameters: CirrusDeckParameters) -> s
     block = _replace_line(block, "DATUM_D", f"{parameters.fluid_contact_depth:g} m")
     block = _replace_line(block, "PRESSURE", f"{parameters.fluid_contact_pressure_bar:g} Bar")
     block = _replace_line(block, "WGC_D", f"{parameters.fluid_contact_depth:g} m")
-    temperature_bottom = max(parameters.bottom_depth, parameters.fluid_contact_depth)
+    return text[: match.start(2)] + block + text[match.end(2) :]
+
+
+def _replace_temperature_tables(text: str, parameters: CirrusDeckParameters) -> str:
     table = format_rtempvd(
         top_depth=parameters.top_depth,
         seafloor_depth=parameters.seafloor_depth,
-        bottom_depth=temperature_bottom,
+        bottom_depth=max(parameters.bottom_depth, parameters.fluid_contact_depth),
         ground_temperature_c=parameters.ground_temperature_c,
         geothermal_gradient_c_per_km=parameters.geothermal_gradient_c_per_km,
     )
-    block, count = re.subn(
+    updated, count = re.subn(
         r"(?ms)(^\s*RTEMPVD\s*\n).*?^(\s*/\s*$)",
         lambda match: f"{match.group(1)}{table}\n{match.group(2)}",
-        block,
-        count=1,
+        text,
     )
-    if count != 1:
-        raise ValueError("CO2 equilibration is missing RTEMPVD")
-    return text[: match.start(2)] + block + text[match.end(2) :]
+    if count != 2:
+        raise ValueError("deck must define RTEMPVD tables for both equilibration regions")
+    return updated
 
 
 def _replace_overburden_equilibration(text: str, parameters: CirrusDeckParameters) -> str:
@@ -153,6 +155,7 @@ def parameterize_cirrus_deck(deck_path: str | Path, parameters: CirrusDeckParame
     text = _replace_line(text, "FINAL_DATE", _date_text(parameters.final_date))
     text = _replace_overburden_equilibration(text, parameters)
     text = _replace_co2_equilibration(text, parameters)
+    text = _replace_temperature_tables(text, parameters)
     text = _replace_salt_tables(
         text,
         top_depth=parameters.top_depth,
