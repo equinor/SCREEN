@@ -52,6 +52,17 @@ python runscripts/build_lgr_from_json.py \
 
 The first command uses `FINAL_DATE = START_DATE` and disables `TEMP_LGR.grdecl` for initialization. The second command writes `TEMP_LGR.grdecl`; the same deck can then be configured for the final simulation by enabling that include and setting the requested final date. CIRRUS must be installed separately and available on `PATH`, or its absolute executable path can be supplied in `--sim-command`.
 
+The wrapper performs the complete handoff in one command:
+
+```bash
+python runscripts/run_workbook_to_cirrus_lgr.py \
+	--xlsx well_input.xlsx \
+	--output-root case \
+	--sim-command "runcirrus -i -nm 6 {deck}"
+```
+
+It stages the workbook, runs CIRRUS initialization, verifies `.EGRID` and `.INIT`, writes `TEMP_LGR.grdecl`, and configures the same deck for its final run. Add `--run-final` only when the final CIRRUS simulation should be launched immediately.
+
 ## Grid Build Pipeline (Canonical)
 
 The supported simulator-facing workflow is intentionally explicit:
@@ -108,6 +119,8 @@ The first run should not include `TEMP_LGR.grdecl`; that file belongs to the lat
 The current GaP path expects a suitable coarse grid before LGR refinement. Future coarse-grid accommodation ideas are recorded in [GaP Roadmap](gap_roadmap.md); the legacy workflow recipes are retained under `experiments/legacy/` as references only.
 
 The equilibration is divided into two zones: 'overburden_water' for the brine in the overburden and ocean water column, and 'CO2_column' for the reservoir, defined by a gas-water contact depth and pressure. The simulation is initially set to run for zero days (START_DATE = FINAL_DATE) to perform only an initialization run, which generates the EGRID file necessary for building the LGR.
+
+The staged GRDECL assigns `EQLNUM 1` to the water and overburden layers and `EQLNUM 2` to reservoir layers, based on the workbook-derived layer counts. `overburden_water` uses a WellClass-interpolated hydrostatic pressure at an explicit or midpoint overburden datum. In `GAS_WATER` mode, `CO2_column` uses `DATUM_D = WGC_D = z_fluid_contact` and `PRESSURE = p_fluid_contact`. Both regions share generated temperature and salt tables that cover the required depth range.
 
 After the EGRID file is produced, the LGRBuilder functionality is used to set up the LGR, update transport properties, zonation, and equilibration zones. The user must define the upper limit of the 'CO2_column' equilibration zone, which may extend into the wellbore to represent a continuous column of CO2 connecting the wellbore to the reservoir. This upper boundary is typically defined by the base of the first cement plug above the reservoir, but the user must specify this.
 

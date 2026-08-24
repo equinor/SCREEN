@@ -30,6 +30,10 @@ Data can originate from databases such as SMDA and Wellcom, but it is the users'
 
 For clarification, SCREEN workflows do not interact with databases directly but rely on user-provided data, manually entered or sourced from other systems.
 
+### Current Workbook Entry Point
+
+For a repeatable simulation setup, users can enter a well description, grid policy, and subsurface assumptions in an Excel workbook. SCREEN converts the workbook to canonical WellClass JSON, stages a parameterized CIRRUS case, runs initialization when CIRRUS is available, and generates the GaP LGR include from the resulting `.EGRID` and `.INIT` files. Ready-to-edit Wildcat and Smeaheia examples are available under `test_data/examples`; the detailed commands are documented in [Detailed Simulation workflow](gap.md).
+
 ![Figure 1.2 - Schematic flow chart of the data types needed for a legacy well evaluation](imgs/SCREEN_DataFlow.png)
 
 ## References
