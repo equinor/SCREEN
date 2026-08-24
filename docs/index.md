@@ -1,12 +1,24 @@
 The **Script-based Risk Estimation of well leakage in Early phase evaluatioN (SCREEN)** project targets legacy well assessment for Carbon Capture and Storage (CCS) projects. Given that abandoned or inactive wells can serve as pathways for CO2 leakage, rigorous risk assessments and integrity evaluations are crucial [1; 2].
 
-Within the SCREEN project, the process of evaluating legacy wells involves multiple steps made by different disciplines using various tools. From the identification of legacy wells to the quantification of leakage, several tasks are carried out that involve data gathering, data processing, and both qualitative and quantitative analysis (Figure 1.1). The contents of this repository, and the main delivery of the SCREEN project, consist of two components that aim to streamline analysis in legacy well evaluations, improving data processing and analysis for well integrity engineers and subsurface teams.
+Within the SCREEN project, the process of evaluating legacy wells involves multiple steps made by different disciplines using various tools. From the identification of legacy wells to the quantification of leakage, several tasks are carried out that involve data gathering, data processing, and both qualitative and quantitative analysis. The contents of this repository, and the main delivery of the SCREEN project, consist of two components that aim to streamline analysis in legacy well evaluations, improving data processing and analysis for well integrity engineers and subsurface teams.
 
 In this repository, SCREEN has delivered scripts to facilitate mainly two steps of the generalized workflow displayed in Figure 1.1. Within the pre-processing and preliminary assessment module, we have built a script for processing data so it is ready to be used in the detailed simulation workflow using the CIRRUS (formerly known as PFLOTRAN-OGS) tool. The preliminary assessments apply to all legacy wells, contingent on data availability; this component has migrated and is now part of the functionalities offered by the WINC tool. The output of that step shall serve as a basis for any risk assessment, barrier evaluation, and other analyses done on WINC. In case the well is identified as one that presents a risk of leakage, the same output serves as a basis to use the scripts of this repository to build a simulation model that facilitates the quantification of leakage rates.
 
-While the simulation workflow includes modeling of key well integrity risks, it is not comprehensive for scenarios like material degradation or overburden fracturing. Specialists must assess these risks using different tools. For overburden leakage risks, a REVEAL-based workflow, stemming from SCREEN, is recommended (Figure 1.1).
+While the simulation workflow includes modeling of key well integrity risks, it is not comprehensive for scenarios like material degradation or overburden fracturing. Specialists must assess these risks using different tools. For overburden leakage risks, a REVEAL-based workflow, stemming from SCREEN, is recommended.
 
-![Figure 1.1 - Schematic workflow for assessment of legacy wells, highlighting where the SCREEN deliverables (marked in red) fit and when should be used.](imgs/screen_workflow.png)
+```mermaid
+flowchart TD
+  A["Legacy Well Data<br/>Wells, reports, databases,<br/>P&A records, logs"]
+  A --> B["Preliminary Assessment<br/>- Well architecture<br/>- Barrier assessment<br/>- Geological context<br/>- Pressure exposure"]
+  B --> C["Leakage Mechanism Identification<br/>- Crossflow<br/>- Cement degradation<br/>- Casing degradation<br/>- Plug failure<br/>- Channel formation<br/>- Fracturing potential"]
+  C --> D{Governing Leakage<br/>Mechanism?}
+  D -->|Darcy-type flow through<br/>porous barriers/media| E[SCREEN Workflow]
+  E --> F["Quantitative Leakage Assessment<br/>Leakage rate<br/>Volume<br/>Timing<br/>Uncertainty"]
+  F --> G["Risk-Based Decision<br/>Monitor<br/>Reassess<br/>Remediate"]
+  D -->|Non-Darcy or coupled<br/>multiphysics processes| H[Advanced Assessment Workflow]
+  H --> I["Examples:<br/>- Blowouts<br/>- Large cement channels<br/>- Major barrier defects<br/>- Fracture-dominated flow<br/>- Overburden pressurisation<br/>- Coupled geomechanics"]
+  E -.->|Workflow logic may<br/>inform advanced studies| H
+```
 
 ## Data Preparation
 
@@ -29,6 +41,10 @@ Data preparation is a prerequisite for employing SCREEN workflows. Before the us
 Data can originate from databases such as SMDA and Wellcom, but it is the users' responsibility to input this data into SCREEN workflows manually or via other applications. Notably, the implementation within the WINC platform automates data retrieval from databases prior to running the SCREEN modules (Figure 1.2).
 
 For clarification, SCREEN workflows do not interact with databases directly but rely on user-provided data, manually entered or sourced from other systems.
+
+### Current Workbook Entry Point
+
+For a repeatable simulation setup, users can enter a well description, grid policy, and subsurface assumptions in an Excel workbook. SCREEN converts the workbook to canonical WellClass JSON, stages a parameterized CIRRUS case, runs initialization when CIRRUS is available, and generates the GaP LGR include from the resulting `.EGRID` and `.INIT` files. Ready-to-edit Wildcat and Smeaheia examples are available under `test_data/examples`; the detailed commands are documented in [Detailed Simulation workflow](gap.md).
 
 ![Figure 1.2 - Schematic flow chart of the data types needed for a legacy well evaluation](imgs/SCREEN_DataFlow.png)
 

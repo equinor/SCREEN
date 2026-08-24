@@ -35,13 +35,20 @@ Completed coarse-grid preparation slices:
 - A CLI bridge now converts WellClass JSON plus an existing `.EGRID`/`.INIT` case into LGR/CARFIN output:
     - `runscripts/build_lgr_from_json.py`
     - `tests/gap/test_build_lgr_from_json.py`
+- The wrapper now orchestrates workbook staging, CIRRUS initialization, `.EGRID`/`.INIT` validation, LGR generation, and final-deck configuration:
+    - `runscripts/run_workbook_to_cirrus_lgr.py`
+- Staged grids derive two equilibration regions from layer counts: `EQLNUM 1` for water/overburden and `EQLNUM 2` for reservoir layers.
+- The two CIRRUS equilibration blocks share generated temperature and salt tables. The overburden datum uses WellClass hydrostatic pressure; the `CO2_column` datum and gas-water contact use the workbook fluid-contact pair.
+- Ready-to-edit workbook examples are included for Wildcat and Smeaheia, including optional survey sheets:
+    - `test_data/examples/wildcat/wildcat_workbook.xlsx`
+    - `test_data/examples/smeaheia/smeaheia_workbook.xlsx`
 
 These helpers do not create native `.EGRID`/`.INIT` files unless an external simulator command is explicitly supplied.
 
 ## Next
 
-1. Add a Smeaheia workbook-to-CIRRUS-to-LGR example using the command-line bridge.
-2. Extend workbook policy support from three-zone defaults to interval-aware policies (multi-reservoir capable) while keeping backward compatibility.
+1. Run and document a simulator-backed Smeaheia workbook-to-CIRRUS-to-LGR example on a CIRRUS-enabled Linux host.
+2. Extend workbook policy support with scenario-specific permeability and salinity inputs, then interval-aware multi-reservoir policies while keeping backward compatibility.
 3. Add a pure-Python coverage report for an existing grid or grid specification:
    - required well envelope;
    - grid extents;
