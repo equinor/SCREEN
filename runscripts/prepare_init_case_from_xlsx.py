@@ -18,10 +18,12 @@ import math
 from datetime import date
 from pathlib import Path
 
+import numpy as np
 from prepare_init_case import run_initialization, stage_case
 
 from src.GaP.libs.deck_config import CirrusDeckParameters, parameterize_cirrus_deck
 from src.WellClass.libs.utils import xlsx_grid_policy, xlsx_to_well_model
+from src.WellClass.libs.well_pressure.pressure_table import PressureTable
 
 
 def parse_args() -> argparse.Namespace:
@@ -147,12 +149,26 @@ def parameterize_staged_deck(args: argparse.Namespace, policy: dict, model) -> N
     final_date = _add_years(start_date, args.simulation_years) if args.final_run else start_date
     scenarios = model.spec.subsurface_assumptions.scenarios if model.spec.subsurface_assumptions else []
     assumptions = scenarios[0].model_dump(exclude_none=True) if scenarios else {}
+    seafloor_depth = float(policy["water_depth"])
+    reservoir_top = float(policy["reservoir_top"])
+    overburden_datum_depth = float(assumptions.get("overburden_datum_depth", (seafloor_depth + reservoir_top) / 2))
+    if not seafloor_depth < overburden_datum_depth < reservoir_top:
+        raise ValueError("overburden_datum_depth must be between water_depth and reservoir_top")
+    pressure_table = PressureTable(
+        name="cirrus_overburden",
+        depth=np.arange(0.0, overburden_datum_depth + 10.0, 10.0),
+        ground_elevation=float(model.spec.well_header.ground_elevation),
+        ground_temperature=float(assumptions.get("ground_temperature", 4.0)),
+        geothermal_gradient=float(assumptions.get("temperature_gradient", 31.0)),
+    )
     parameters = CirrusDeckParameters(
         start_date=start_date,
         final_date=final_date,
         top_depth=float(policy["top_depth"]),
-        seafloor_depth=float(policy["water_depth"]),
+        seafloor_depth=seafloor_depth,
         bottom_depth=float(policy["bottom_depth"]),
+        overburden_datum_depth=overburden_datum_depth,
+        overburden_pressure_bar=pressure_table.get_values_at_depth(overburden_datum_depth)["hydrostatic_pressure"],
         fluid_contact_depth=float(assumptions.get("z_fluid_contact", assumptions.get("z_resrv", 1500.0))),
         fluid_contact_pressure_bar=float(assumptions.get("p_fluid_contact", assumptions.get("p_resrv", 144.5))),
         ground_temperature_c=float(assumptions.get("ground_temperature", 4.0)),
