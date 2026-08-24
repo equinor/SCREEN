@@ -73,10 +73,11 @@ def _replace_co2_equilibration(text: str, parameters: CirrusDeckParameters) -> s
     block = _replace_line(block, "DATUM_D", f"{parameters.fluid_contact_depth:g} m")
     block = _replace_line(block, "PRESSURE", f"{parameters.fluid_contact_pressure_bar:g} Bar")
     block = _replace_line(block, "WGC_D", f"{parameters.fluid_contact_depth:g} m")
+    temperature_bottom = max(parameters.bottom_depth, parameters.fluid_contact_depth)
     table = format_rtempvd(
         top_depth=parameters.top_depth,
         seafloor_depth=parameters.seafloor_depth,
-        bottom_depth=parameters.bottom_depth,
+        bottom_depth=temperature_bottom,
         ground_temperature_c=parameters.ground_temperature_c,
         geothermal_gradient_c_per_km=parameters.geothermal_gradient_c_per_km,
     )
