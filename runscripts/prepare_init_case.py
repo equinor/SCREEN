@@ -74,6 +74,21 @@ def copy_required_file(source: Path, destination: Path, *, force: bool) -> None:
     destination.write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
 
 
+def copy_initialization_grid(source: Path, destination: Path, *, force: bool) -> None:
+    """Copy a coarse grid template without the post-initialization LGR include."""
+
+    if not source.exists():
+        raise FileNotFoundError(f"Template file not found: {source}")
+    if destination.exists() and not force:
+        return
+    content = source.read_text(encoding="utf-8")
+    content = "\n".join(
+        line for line in content.splitlines() if "external_file ../include/TEMP_LGR.grdecl" not in line
+    )
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(f"{content}\n", encoding="utf-8")
+
+
 def stage_case(args: argparse.Namespace) -> tuple[Path, Path, Path]:
     template_root = args.template_root
     output_root = args.output_root
@@ -88,7 +103,7 @@ def stage_case(args: argparse.Namespace) -> tuple[Path, Path, Path]:
     output_tops = output_root / "include" / "tops_dz.inc"
 
     copy_required_file(source_deck, output_deck, force=args.force)
-    copy_required_file(source_grdecl, output_grdecl, force=args.force)
+    copy_initialization_grid(source_grdecl, output_grdecl, force=args.force)
     copy_required_file(source_co2_database, output_co2_database, force=args.force)
 
     spec = CoarseGridSpec(
