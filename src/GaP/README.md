@@ -29,6 +29,17 @@ python runscripts/prepare_init_case_from_xlsx.py \
 	--sim-command "runcirrus -i -nm 6 {deck}"
 ```
 
+Ready-to-edit examples are provided beside the canonical fixtures:
+
+- `test_data/examples/wildcat/wildcat_workbook.xlsx`
+- `test_data/examples/smeaheia/smeaheia_workbook.xlsx`
+
+Their well-construction sheets are copied from the corresponding canonical JSON files. `GridPolicy` and `SubsurfaceAssumptions` contain illustrative scenario values that must be reviewed before running CIRRUS. Regenerate both examples after changing their source fixtures with:
+
+```bash
+python runscripts/create_example_well_workbooks.py
+```
+
 After `.EGRID` and `.INIT` have been produced, build the LGR/CARFIN include:
 
 ```bash
