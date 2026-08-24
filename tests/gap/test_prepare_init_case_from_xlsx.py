@@ -47,6 +47,8 @@ def _write_minimal_workbook(path: Path) -> None:
             {
                 "temperature_gradient": [31.0],
                 "ground_temperature": [4.0],
+                "z_fluid_contact": [1200.0],
+                "p_fluid_contact": [210.0],
                 "z_resrv": [1400.0],
                 "p_resrv": [250.0],
             }
@@ -112,8 +114,9 @@ def test_prepare_init_case_from_xlsx_configures_final_run(tmp_path):
     deck = (output_root / "model" / "TEMP-0.in").read_text(encoding="utf-8")
     grdecl = (output_root / "include" / "TEMP_GRD.grdecl").read_text(encoding="utf-8")
     assert "FINAL_DATE  1 JAN 2125" in deck
-    assert "DATUM_D  1400 m" in deck
-    assert "PRESSURE  250 Bar" in deck
+    assert "DATUM_D  1200 m" in deck
+    assert "PRESSURE  210 Bar" in deck
+    assert "WGC_D  1200 m" in deck
     assert "     4    4" in deck
     assert "     104    4" in deck
     assert "     1504    47.4" in deck

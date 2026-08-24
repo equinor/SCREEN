@@ -15,9 +15,8 @@ class CirrusDeckParameters:
     top_depth: float
     seafloor_depth: float
     bottom_depth: float
-    reservoir_depth: float
-    reservoir_pressure_bar: float
-    wgc_depth: float
+    fluid_contact_depth: float
+    fluid_contact_pressure_bar: float
     ground_temperature_c: float = 4.0
     geothermal_gradient_c_per_km: float = 31.0
     enable_lgr: bool = False
@@ -71,9 +70,9 @@ def _replace_co2_equilibration(text: str, parameters: CirrusDeckParameters) -> s
         raise ValueError("deck is missing EQUILIBRATION CO2_column")
 
     block = match.group(2)
-    block = _replace_line(block, "DATUM_D", f"{parameters.reservoir_depth:g} m")
-    block = _replace_line(block, "PRESSURE", f"{parameters.reservoir_pressure_bar:g} Bar")
-    block = _replace_line(block, "WGC_D", f"{parameters.wgc_depth:g} m")
+    block = _replace_line(block, "DATUM_D", f"{parameters.fluid_contact_depth:g} m")
+    block = _replace_line(block, "PRESSURE", f"{parameters.fluid_contact_pressure_bar:g} Bar")
+    block = _replace_line(block, "WGC_D", f"{parameters.fluid_contact_depth:g} m")
     table = format_rtempvd(
         top_depth=parameters.top_depth,
         seafloor_depth=parameters.seafloor_depth,
