@@ -65,11 +65,13 @@ def test_prepare_init_case_from_xlsx_stages_files(tmp_path):
 
     deck = output_root / "model" / "TEMP-0.in"
     grdecl = output_root / "include" / "TEMP_GRD.grdecl"
+    co2_database = output_root / "include" / "co2_db_new.dat"
     tops = output_root / "include" / "tops_dz.inc"
     well_json = output_root / "well_input.json"
 
     assert deck.exists()
     assert grdecl.exists()
+    assert co2_database.exists()
     assert tops.exists()
     assert well_json.exists()
 
@@ -78,6 +80,7 @@ def test_prepare_init_case_from_xlsx_stages_files(tmp_path):
     assert "800*50" in recipe
     assert "6000*60" in recipe
     assert "20000*10" in recipe
+    assert "DATABASE ../include/co2_db_new.dat" in deck.read_text(encoding="utf-8")
 
 
 def test_xlsx_grid_policy_requires_keys(tmp_path):
