@@ -43,6 +43,14 @@ def _write_minimal_workbook(path: Path) -> None:
         metadata.to_excel(writer, sheet_name="Metadata", index=False)
         header.to_excel(writer, sheet_name="Header", index=False)
         grid_policy.to_excel(writer, sheet_name="GridPolicy", index=False)
+        pd.DataFrame(
+            {
+                "temperature_gradient": [31.0],
+                "ground_temperature": [4.0],
+                "z_resrv": [1400.0],
+                "p_resrv": [250.0],
+            }
+        ).to_excel(writer, sheet_name="SubsurfaceAssumptions", index=False)
 
 
 def test_prepare_init_case_from_xlsx_stages_files(tmp_path):
@@ -82,6 +90,35 @@ def test_prepare_init_case_from_xlsx_stages_files(tmp_path):
     assert "20000*10" in recipe
     assert "DATABASE ../include/co2_db_new.dat" in deck.read_text(encoding="utf-8")
     assert "TEMP_LGR.grdecl" not in grdecl.read_text(encoding="utf-8")
+
+
+def test_prepare_init_case_from_xlsx_configures_final_run(tmp_path):
+    workbook = tmp_path / "well_input.xlsx"
+    _write_minimal_workbook(workbook)
+    output_root = tmp_path / "staged_case"
+    repo_root = Path(__file__).parents[2]
+
+    command = [
+        sys.executable,
+        "runscripts/prepare_init_case_from_xlsx.py",
+        "--xlsx",
+        str(workbook),
+        "--output-root",
+        str(output_root),
+        "--final-run",
+    ]
+    subprocess.run(command, check=True, cwd=repo_root, capture_output=True, text=True)
+
+    deck = (output_root / "model" / "TEMP-0.in").read_text(encoding="utf-8")
+    grdecl = (output_root / "include" / "TEMP_GRD.grdecl").read_text(encoding="utf-8")
+    assert "FINAL_DATE  1 JAN 2125" in deck
+    assert "DATUM_D  1400 m" in deck
+    assert "PRESSURE  250 Bar" in deck
+    assert "     4    4" in deck
+    assert "     104    4" in deck
+    assert "     1504    47.4" in deck
+    assert "WELL_DATA INJ_01" not in deck
+    assert "external_file ../include/TEMP_LGR.grdecl /" in grdecl
 
 
 def test_xlsx_grid_policy_requires_keys(tmp_path):
