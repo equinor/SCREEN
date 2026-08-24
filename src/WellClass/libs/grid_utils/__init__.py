@@ -5,6 +5,7 @@ from .grid_refine import GridRefine
 from .grid_lgr import GridLGR
 from .LGR_builder import LGRBuilder
 from .coarse_grid import (
+	CoarseGridEnvelope,
 	CoarseGridSpec,
 	VerticalGridSchedule,
 	build_vertical_grid_schedule,
