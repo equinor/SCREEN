@@ -33,6 +33,81 @@ class CoarseGridSpec:
 
 
 @dataclass(frozen=True)
+class CoarseGridEnvelope:
+    """Bounds required to contain vertically projected processed wells."""
+
+    x_min: float
+    x_max: float
+    y_min: float
+    y_max: float
+    z_min: float
+    z_max: float
+
+    def __post_init__(self):
+        bounds = (self.x_min, self.x_max, self.y_min, self.y_max, self.z_min, self.z_max)
+        if not all(math.isfinite(float(bound)) for bound in bounds):
+            raise ValueError("coarse-grid envelope bounds must be finite")
+        if not self.x_min <= self.x_max or not self.y_min <= self.y_max or not self.z_min <= self.z_max:
+            raise ValueError("coarse-grid envelope bounds must be ordered")
+
+    @classmethod
+    def from_wells(
+        cls,
+        wells,
+        *,
+        lateral_margin: float = 0.0,
+        vertical_margin: float = 0.0,
+    ):
+        """Build an envelope from one or more processed wells.
+
+        GaP treats wells as vertical for coarse-grid sizing, so only each
+        well-path reference coordinate is used laterally. Deviation remains
+        available on ``WellProcessed`` for accurate TVDMSL conversion and
+        WellClass geometry. Depths use the positive-downward MSL convention
+        used by ``CoarseGridSpec``.
+        """
+
+        wells = list(wells)
+        if not wells:
+            raise ValueError("at least one well is required")
+        if not math.isfinite(lateral_margin) or lateral_margin < 0:
+            raise ValueError("lateral_margin must be a finite non-negative number")
+        if not math.isfinite(vertical_margin) or vertical_margin < 0:
+            raise ValueError("vertical_margin must be a finite non-negative number")
+
+        x_values = []
+        y_values = []
+        z_values = []
+        for well in wells:
+            path = getattr(well, "wellpath", None)
+            if path is None:
+                raise ValueError("each well must have a processed wellpath")
+            if not hasattr(path, "x") or not hasattr(path, "y"):
+                raise ValueError("each wellpath must provide x and y coordinates")
+            if len(path.x) == 0 or len(path.y) == 0:
+                raise ValueError("each wellpath must provide reference coordinates")
+            x_values.append(path.x[0])
+            y_values.append(path.y[0])
+            borehole = getattr(well, "borehole", None) or []
+            for interval in borehole:
+                z_values.extend((float(interval["top_tvd_msl"]), float(interval["bottom_tvd_msl"])))
+
+        if not x_values or not y_values or not z_values:
+            raise ValueError("wells must provide path coordinates and borehole depths")
+        if not all(math.isfinite(float(value)) for value in (*x_values, *y_values, *z_values)):
+            raise ValueError("well envelope coordinates must be finite")
+
+        return cls(
+            x_min=min(x_values) - lateral_margin,
+            x_max=max(x_values) + lateral_margin,
+            y_min=min(y_values) - lateral_margin,
+            y_max=max(y_values) + lateral_margin,
+            z_min=min(z_values) - vertical_margin,
+            z_max=max(z_values) + vertical_margin,
+        )
+
+
+@dataclass(frozen=True)
 class VerticalGridSchedule:
     """Vertical cell thicknesses and their physical section labels."""
 

@@ -2,11 +2,45 @@ import numpy as np
 import pytest
 
 from src.WellClass.libs.grid_utils import (
+    CoarseGridEnvelope,
     CoarseGridSpec,
     build_vertical_grid_schedule,
     format_vertical_grid_recipe,
     write_vertical_grid_recipe,
 )
+
+
+def test_coarse_grid_envelope_projects_deviated_wells_vertically():
+    wells = [
+        type("WellStub", (), {"wellpath": type("PathStub", (), {"x": [10.0, 20.0], "y": [0.0, 5.0]})(), "borehole": [{"top_tvd_msl": 100.0, "bottom_tvd_msl": 500.0}]})(),
+        type("WellStub", (), {"wellpath": type("PathStub", (), {"x": [-5.0, 15.0], "y": [-10.0, 2.0]})(), "borehole": [{"top_tvd_msl": 50.0, "bottom_tvd_msl": 300.0}]})(),
+    ]
+
+    envelope = CoarseGridEnvelope.from_wells(wells, lateral_margin=2.0, vertical_margin=10.0)
+
+    assert envelope == CoarseGridEnvelope(-7.0, 12.0, -12.0, 2.0, 40.0, 510.0)
+
+
+def test_coarse_grid_envelope_rejects_missing_well_geometry():
+    with pytest.raises(ValueError, match="at least one well"):
+        CoarseGridEnvelope.from_wells([])
+
+    well = type("WellStub", (), {"wellpath": None, "borehole": []})()
+    with pytest.raises(ValueError, match="processed wellpath"):
+        CoarseGridEnvelope.from_wells([well])
+
+
+@pytest.mark.parametrize("field", ["lateral_margin", "vertical_margin"])
+def test_coarse_grid_envelope_rejects_negative_margins(field):
+    well = type("WellStub", (), {"wellpath": type("PathStub", (), {"x": [0.0], "y": [0.0]})(), "borehole": [{"top_tvd_msl": 0.0, "bottom_tvd_msl": 1.0}]})()
+
+    with pytest.raises(ValueError, match=field):
+        CoarseGridEnvelope.from_wells([well], **{field: -1.0})
+
+
+def test_coarse_grid_envelope_rejects_unordered_bounds():
+    with pytest.raises(ValueError, match="bounds must be ordered"):
+        CoarseGridEnvelope(1.0, 0.0, 0.0, 1.0, 0.0, 1.0)
 
 
 def test_vertical_schedule_covers_explicit_domain():
