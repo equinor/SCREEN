@@ -81,6 +81,7 @@ def test_prepare_init_case_from_xlsx_stages_files(tmp_path):
     assert "6000*60" in recipe
     assert "20000*10" in recipe
     assert "DATABASE ../include/co2_db_new.dat" in deck.read_text(encoding="utf-8")
+    assert "TEMP_LGR.grdecl" not in grdecl.read_text(encoding="utf-8")
 
 
 def test_xlsx_grid_policy_requires_keys(tmp_path):
