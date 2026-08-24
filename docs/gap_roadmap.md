@@ -19,6 +19,7 @@ The current `LGRBuilder` assumes that a suitable coarse grid already exists. Thi
 Completed coarse-grid preparation slices:
 
 - `CoarseGridSpec` makes vertical domain and layer-count assumptions explicit.
+- `CoarseGridEnvelope` derives vertical coverage and reference-point lateral bounds from processed wells. GaP treats wells as vertical for coarse-grid sizing; WellClass retains deviation for TVDMSL conversion.
 - `build_vertical_grid_schedule` creates water, overburden, and reservoir `DZ` values.
 - Well top/bottom coverage and invalid depth ordering are validated.
 - `format_vertical_grid_recipe` and `write_vertical_grid_recipe` produce a simulator-oriented `TOPS`/`DZ` text recipe.
@@ -32,21 +33,20 @@ Completed coarse-grid preparation slices:
 - Template assets now have explicit integrity checks in CI-focused tests:
     - `tests/gap/test_template_assets.py`
 
-These helpers do not create native `.EGRID`/`.INIT` files or run a simulator.
+These helpers do not create native `.EGRID`/`.INIT` files unless an external simulator command is explicitly supplied.
 
 ## Next
 
-1. Add a typed coarse-grid envelope containing lateral and vertical margins derived from `WellProcessed` geometry.
-2. Extend workbook policy support from three-zone defaults to interval-aware policies (multi-reservoir capable) while keeping backward compatibility.
-3. Add a pure-Python coverage report for an existing grid or grid specification:
+1. Extend workbook policy support from three-zone defaults to interval-aware policies (multi-reservoir capable) while keeping backward compatibility.
+2. Add a pure-Python coverage report for an existing grid or grid specification:
    - required well envelope;
    - grid extents;
    - missing margins;
    - cell-size summary;
    - warnings and failure reasons.
-4. Define a simulator backend interface that consumes the generated recipe and reports executable availability, command, logs, and output paths.
-5. Add one simulator-backed dry-run path without invoking PFLOTRAN/CIRRUS in unit tests.
-6. Connect a generated `.EGRID`/`.INIT` pair to notebook 3 as an optional generated-grid mode.
+3. Define a simulator backend interface that consumes the generated recipe and reports executable availability, command, logs, and output paths.
+4. Add one simulator-backed dry-run path without invoking PFLOTRAN/CIRRUS in unit tests.
+5. Connect a generated `.EGRID`/`.INIT` pair to notebook 3 as an optional generated-grid mode.
 
 ## Later
 

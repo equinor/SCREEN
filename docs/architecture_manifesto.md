@@ -235,6 +235,12 @@ Architecture clarifications agreed in this pass:
 - The current coarse-grid abstraction remains three-zone (`water`, `overburden`, `reservoir`) with user-configurable counts and an optional target-DZ-driven layer-count calculation.
 - Multi-reservoir interval modeling remains a planned extension and is not yet part of the supported contract.
 
+### Checkpoint: 2026-08-24 (Coarse-grid envelope and initialization staging)
+
+The coarse-grid preparation path now includes a typed `CoarseGridEnvelope` derived from processed wells. GaP uses each well's reference X/Y position and treats wells as vertical when sizing the coarse grid; WellClass retains deviation to calculate accurate TVDMSL depths and derived well geometry.
+
+Initialization staging preserves the CIRRUS `co2_db_new.dat` database and removes the post-initialization `TEMP_LGR.grdecl` include from the staged coarse-grid GRDECL. The first simulator run produces only the coarse `.EGRID` and `.INIT`; GaP consumes those files afterward to generate LGR/CARFIN output.
+
 ## The Main Risks
 
 ### 1. The tested surface is much smaller than the implementation
