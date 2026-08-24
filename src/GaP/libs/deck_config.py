@@ -63,6 +63,14 @@ def format_rtempvd(
     return "\n".join(f"     {depth:g}    {value:g}" for depth, value in points)
 
 
+def format_saltvd(*, top_depth: float, bottom_depth: float, concentration_mole: float = 0.032) -> str:
+    """Create a constant-salinity table spanning the required equilibration depth."""
+
+    if not top_depth < bottom_depth:
+        raise ValueError("salt-table depths must satisfy top < bottom")
+    return f"     {top_depth:g} {concentration_mole:g}\n     {bottom_depth:g} {concentration_mole:g}"
+
+
 def _replace_co2_equilibration(text: str, parameters: CirrusDeckParameters) -> str:
     block_pattern = r"(?ms)(^EQUILIBRATION CO2_column\s*\n)(.*?)(^/\s*$)"
     match = re.search(block_pattern, text)
@@ -92,6 +100,18 @@ def _replace_co2_equilibration(text: str, parameters: CirrusDeckParameters) -> s
     return text[: match.start(2)] + block + text[match.end(2) :]
 
 
+def _replace_salt_tables(text: str, *, top_depth: float, bottom_depth: float) -> str:
+    salt_table = format_saltvd(top_depth=top_depth, bottom_depth=bottom_depth)
+    updated, count = re.subn(
+        r"(?ms)(^\s*SALTVD\s*\n).*?^(\s*/\s*$)",
+        lambda match: f"{match.group(1)}{salt_table}\n{match.group(2)}",
+        text,
+    )
+    if count == 0:
+        raise ValueError("deck is missing SALTVD")
+    return updated
+
+
 def _remove_unused_wells_section(text: str) -> str:
     pattern = r"(?ms)^#=+ Wells =+\n.*?(?=^#=+\n)"
     return re.sub(pattern, "", text, count=1)
@@ -118,6 +138,11 @@ def parameterize_cirrus_deck(deck_path: str | Path, parameters: CirrusDeckParame
     text = _replace_line(text, "START_DATE", _date_text(parameters.start_date))
     text = _replace_line(text, "FINAL_DATE", _date_text(parameters.final_date))
     text = _replace_co2_equilibration(text, parameters)
+    text = _replace_salt_tables(
+        text,
+        top_depth=parameters.top_depth,
+        bottom_depth=max(parameters.bottom_depth, parameters.fluid_contact_depth),
+    )
     text = _remove_unused_wells_section(text)
     deck_path.write_text(text, encoding="utf-8")
 
