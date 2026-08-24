@@ -67,7 +67,7 @@ The terminology must distinguish geometry from material:
 This is a vocabulary contract, not a request for a repository-wide rename in one change. First document and test the mapping, then rename one ownership boundary at a time. The `WellDataFrame` adapter is the current compatibility seam where legacy names can be translated without leaking them back into WellClass.
 
 ```mermaid
-flowchart LR
+flowchart TB
   Input[JSON / YAML / XLSX adapter / legacy CSV] --> Model[Pydantic WellModel]
     Model --> Raw[Well / WellRaw]
     Raw --> Processed[WellProcessed]
