@@ -101,6 +101,7 @@ def test_prepare_init_case_from_xlsx_stages_files(tmp_path):
     assert "PORO 1 1 20 1 20 1 2 /" in grdecl_text
     assert "FIPLEG 3 1 20 1 20 18 64 /" in grdecl_text
     assert "FIPLEG 5 1 20 1 20 65 67 /" in grdecl_text
+    assert "PERMX 0.01 1 20 1 20 65 67 /" in grdecl_text
     assert "TRANZ 0 1 20 1 20 18 18 /" in grdecl_text
     assert "PERMZ 0.1 1 20 1 20 3 67 /" in grdecl_text
 
