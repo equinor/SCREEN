@@ -43,21 +43,21 @@ Completed coarse-grid preparation slices:
     - `test_data/examples/wildcat/wildcat_workbook.xlsx`
     - `test_data/examples/smeaheia/smeaheia_workbook.xlsx`
 - The single-reservoir workbook-to-CIRRUS-to-LGR path is complete for the current supported contract. It parameterizes the coarse GRDECL, preserves required CIRRUS assets, creates `.EGRID`/`.INIT`, generates `TEMP_LGR.grdecl`, and prepares the same deck for the final run.
+- Smeaheia validation completed on a CIRRUS-enabled Linux host: the 10-year run used `FINAL_DATE 1 JAN 2035` and produced `.EGRID`, `.INIT`, and `TEMP_LGR.grdecl`. The generated deck used `DATUM_D = WGC_D = 1282.5 m` and `PRESSURE = 129.99 Bar`.
 
 These helpers do not create native `.EGRID`/`.INIT` files unless an external simulator command is explicitly supplied.
 
 ## Next
 
-1. Run and document a simulator-backed Smeaheia workbook-to-CIRRUS-to-LGR example on a CIRRUS-enabled Linux host.
-2. Add a pure-Python coverage report for an existing grid or grid specification:
+1. Add a pure-Python coverage report for an existing grid or grid specification:
    - required well envelope;
    - grid extents;
    - missing margins;
    - cell-size summary;
    - warnings and failure reasons.
-3. Define a simulator backend interface that consumes the generated recipe and reports executable availability, command, logs, and output paths.
-4. Add one simulator-backed dry-run path without invoking PFLOTRAN/CIRRUS in unit tests.
-5. Connect a generated `.EGRID`/`.INIT` pair to notebook 3 as an optional generated-grid mode.
+2. Define a simulator backend interface that consumes the generated recipe and reports executable availability, command, logs, and output paths.
+3. Add one simulator-backed dry-run path without invoking PFLOTRAN/CIRRUS in unit tests.
+4. Connect a generated `.EGRID`/`.INIT` pair to notebook 3 as an optional generated-grid mode.
 
 ## Later
 
