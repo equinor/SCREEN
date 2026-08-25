@@ -235,6 +235,12 @@ Architecture clarifications agreed in this pass:
 - The current coarse-grid abstraction remains three-zone (`water`, `overburden`, `reservoir`) with user-configurable counts and an optional target-DZ-driven layer-count calculation.
 - Multi-reservoir interval modeling remains a planned extension and is not yet part of the supported contract.
 
+### Milestone: 2026-08-25 (Single-reservoir workbook-to-LGR workflow)
+
+The supported single-reservoir workflow now runs from a multi-sheet workbook through WellClass, CIRRUS initialization, and GaP LGR generation. The workbook supplies the physical well description and scenario/grid assumptions; the workflow writes a canonical `well_input.json`, parameterizes the coarse GRDECL and shared equilibration tables, runs CIRRUS to produce `.EGRID` and `.INIT`, and uses those files to generate `TEMP_LGR.grdecl` for the final simulation deck.
+
+The current contract intentionally treats wells as vertical for GaP coarse-grid sizing, while WellClass retains deviation for TVDMSL conversion and well geometry. It supports two equilibration regions, `overburden_water` and `CO2_column`, with `EQLNUM 1` assigned to water/overburden and `EQLNUM 2` to reservoir layers. Scenario-specific permeability and salinity remain configurable follow-up work. Interval-aware and multi-reservoir modeling is deferred because it requires a separate policy and equilibration design.
+
 ### Checkpoint: 2026-08-24 (Coarse-grid envelope and initialization staging)
 
 The coarse-grid preparation path now includes a typed `CoarseGridEnvelope` derived from processed wells. GaP uses each well's reference X/Y position and treats wells as vertical when sizing the coarse grid; WellClass retains deviation to calculate accurate TVDMSL depths and derived well geometry.

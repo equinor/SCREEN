@@ -42,22 +42,22 @@ Completed coarse-grid preparation slices:
 - Ready-to-edit workbook examples are included for Wildcat and Smeaheia, including optional survey sheets:
     - `test_data/examples/wildcat/wildcat_workbook.xlsx`
     - `test_data/examples/smeaheia/smeaheia_workbook.xlsx`
+- The single-reservoir workbook-to-CIRRUS-to-LGR path is complete for the current supported contract. It parameterizes the coarse GRDECL, preserves required CIRRUS assets, creates `.EGRID`/`.INIT`, generates `TEMP_LGR.grdecl`, and prepares the same deck for the final run.
 
 These helpers do not create native `.EGRID`/`.INIT` files unless an external simulator command is explicitly supplied.
 
 ## Next
 
 1. Run and document a simulator-backed Smeaheia workbook-to-CIRRUS-to-LGR example on a CIRRUS-enabled Linux host.
-2. Extend workbook policy support with scenario-specific permeability and salinity inputs, then interval-aware multi-reservoir policies while keeping backward compatibility.
-3. Add a pure-Python coverage report for an existing grid or grid specification:
+2. Add a pure-Python coverage report for an existing grid or grid specification:
    - required well envelope;
    - grid extents;
    - missing margins;
    - cell-size summary;
    - warnings and failure reasons.
-4. Define a simulator backend interface that consumes the generated recipe and reports executable availability, command, logs, and output paths.
-5. Add one simulator-backed dry-run path without invoking PFLOTRAN/CIRRUS in unit tests.
-6. Connect a generated `.EGRID`/`.INIT` pair to notebook 3 as an optional generated-grid mode.
+3. Define a simulator backend interface that consumes the generated recipe and reports executable availability, command, logs, and output paths.
+4. Add one simulator-backed dry-run path without invoking PFLOTRAN/CIRRUS in unit tests.
+5. Connect a generated `.EGRID`/`.INIT` pair to notebook 3 as an optional generated-grid mode.
 
 ## Later
 
@@ -66,6 +66,8 @@ These helpers do not create native `.EGRID`/`.INIT` files unless an external sim
 - Support separate PFLOTRAN and CIRRUS input/output backends.
 - Add a small committed synthetic grid for pure-Python tests.
 - Replace hard-coded permeability and cell-size assumptions with modeled configuration.
+- Design scenario-specific permeability and salinity overrides as a separate layer from the physical well description.
+- Design interval-aware and multi-reservoir policies only after the single-reservoir contract is stable; they are explicitly out of scope for the current milestone.
 
 ## Boundaries
 

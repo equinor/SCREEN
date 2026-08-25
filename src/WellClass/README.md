@@ -21,7 +21,7 @@ Users provide input data in CSV or YAML format, which includes the following req
 - `reservoir_pressure`: (to be deprecated) Reference for pressure deviations at the reservoir level.
 - `co2_datum`: Depth of the expected base of the gas column, indicating aquifer pressure conditions.
 
-Examples in the `test_data` folder can be used as templates for structuring the data. The `pflotran_gap` notebook serves as a reference guide to execute the workflow. The initial step involves using the `Well` data class to construct the well object:
+Examples in the `test_data` folder can be used as templates for structuring the data. The maintained workbook and notebook workflow is documented in the GaP guide. The older `pflotran_gap` notebook is retained under `notebooks/legacy_notebooks/` as a reference. The initial step involves using the `Well` data class to construct the well object:
 
 ```python
 my_well = Well(header       = well_csv['well_header'], 

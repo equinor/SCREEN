@@ -115,7 +115,7 @@ The maintained, canonical notebooks are:
 - **03_wellclass_to_gap.ipynb** demonstrates the JSON-to-LGR integration workflow using an existing `.EGRID` and `.INIT` pair.
 - **04_init_case_preprocessing.ipynb** demonstrates dry-run preparation of an initialization case from explicit grid assumptions.
 
-The remaining notebooks are legacy or exploratory examples. They may require external simulators, historical input formats, or additional manual setup; they are not part of the supported regression workflow. In particular, `GaP-WellClass.ipynb`, `pflotran_gap.ipynb`, `Pressure-WellClass.ipynb`, `WellClass_Xsections.ipynb`, `WellClass_csv_yaml.ipynb`, `Post_processing.ipynb`, and `refactor.ipynb` are retained as references rather than canonical entry points.
+The notebooks in `notebooks/legacy_notebooks/` are legacy or exploratory examples. They may require external simulators, historical input formats, or additional manual setup; they are not part of the supported regression workflow. They are retained as references and sources of ideas rather than canonical entry points.
 
 ### 2. Commandline option
 Two python scripts for commandline option are available in directory `experiments`. One script, **gap_pflotran.py**, can be used not only for generating Eclipse `.EGRID` and `.INIT` on the fly but also can be used for quick `pflotran` test, while the other script, **gap_wellclass.py**, requires the user to provide these two grid files.
@@ -210,12 +210,8 @@ The following represents the current code structures:
 │   ├── 02_gap_grid.ipynb
 │   ├── 03_wellclass_to_gap.ipynb
 │   ├── 04_init_case_preprocessing.ipynb
-│   ├── GaP-WellClass.ipynb
-│   ├── pflotran_gap.ipynb
-│   ├── Pressure-WellClass.ipynb
-│   ├── Post_processing.ipynb
-│   ├── WellClass_Xsections.ipynb
-│   └── WellClass_csv_yaml.ipynb
+│   ├── 05_workbook_to_cirrus_lgr.ipynb
+│   └── legacy_notebooks
 ├── README.md
 ├── requirements.txt
 ├── src
