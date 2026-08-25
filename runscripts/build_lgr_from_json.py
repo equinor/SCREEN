@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from src.GaP.libs.grid_utils.lgr_equilibration import restrict_co2_equilibration
 from src.WellClass.libs.grid_utils import LGRBuilder, WellDataFrame
 from src.WellClass.libs.well_class import WellProcessed
 
@@ -44,7 +45,16 @@ def build_lgr(args: argparse.Namespace) -> Path:
         well_frames.casings_df,
         well_frames.barrier_regions_df,
     )
-    return args.output_folder / f"{args.lgr_name}.grdecl"
+    lgr_path = args.output_folder / f"{args.lgr_name}.grdecl"
+    reservoir_tops = [record["tvd_msl_top"] for record in processed_well.stratigraphy or [] if record.get("unit_type") == "reservoir"]
+    qualifying_plugs = [
+        record for record in processed_well.processed_plugs or [] if reservoir_tops and record["bottom_tvd_msl"] < min(reservoir_tops)
+    ]
+    if qualifying_plugs:
+        deepest_plug = max(qualifying_plugs, key=lambda record: record["bottom_tvd_msl"])
+        plug_row = well_frames.barrier_regions_df[well_frames.barrier_regions_df["barrier_name"] == deepest_plug["name"]].iloc[0]
+        restrict_co2_equilibration(lgr_path, first_co2_layer=int(plug_row["k_max"]) + 2)
+    return lgr_path
 
 
 def main() -> int:
