@@ -136,6 +136,7 @@ def derive_stage_args_from_policy(args: argparse.Namespace, policy: dict) -> arg
         dx=float(policy.get("dx", 200.0)),
         dy=float(policy.get("dy", 200.0)),
         reservoir_permx=float(policy.get("reservoir_permx", 0.01)),
+        aquifer_permx=float(policy["aquifer_permx"]) if policy.get("aquifer_permx") not in (None, "") else None,
         aquifer_layers=int(policy.get("aquifer_layers", 3)),
         porv_multiplier=float(policy.get("porv_multiplier", 2000.0)),
         permz_multiplier=float(policy.get("permz_multiplier", 0.1)),

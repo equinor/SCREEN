@@ -105,6 +105,7 @@ def parameterize_grdecl(
     dx: float = 200.0,
     dy: float = 200.0,
     reservoir_permx: float = 0.01,
+    aquifer_permx: float | None = None,
     aquifer_layers: int = 3,
     porv_multiplier: float = 2000.0,
     permz_multiplier: float = 0.1,
@@ -119,6 +120,8 @@ def parameterize_grdecl(
         raise ValueError("grid lateral dimensions must be positive integers")
     if not 0 <= aquifer_layers < reservoir_layers:
         raise ValueError("aquifer_layers must be non-negative and smaller than reservoir_layers")
+    if aquifer_permx is None:
+        aquifer_permx = reservoir_permx
     nz = sum(counts)
     water_start = 1
     water_end = water_layers
@@ -157,8 +160,10 @@ def parameterize_grdecl(
         lines.extend([region("PERMX", reservoir_permx, reservoir_start, reservoir_end), region("FIPLEG", 3, reservoir_start, reservoir_end)])
     else:
         if aquifer_start > reservoir_start:
-            lines.extend([region("PERMX", reservoir_permx, reservoir_start, aquifer_start - 1), region("FIPLEG", 3, reservoir_start, aquifer_start - 1)])
-        lines.append(region("FIPLEG", 5, aquifer_start, reservoir_end))
+            lines.extend(
+                [region("PERMX", reservoir_permx, reservoir_start, aquifer_start - 1), region("FIPLEG", 3, reservoir_start, aquifer_start - 1)]
+            )
+        lines.extend([region("PERMX", aquifer_permx, aquifer_start, reservoir_end), region("FIPLEG", 5, aquifer_start, reservoir_end)])
     lines.extend(
         [
             "",
@@ -239,6 +244,7 @@ def stage_case(args: argparse.Namespace) -> tuple[Path, Path, Path]:
         dx=getattr(args, "dx", 200.0),
         dy=getattr(args, "dy", 200.0),
         reservoir_permx=getattr(args, "reservoir_permx", 0.01),
+        aquifer_permx=getattr(args, "aquifer_permx", None),
         aquifer_layers=getattr(args, "aquifer_layers", 3),
         porv_multiplier=getattr(args, "porv_multiplier", 2000.0),
         permz_multiplier=getattr(args, "permz_multiplier", 0.1),
