@@ -95,7 +95,14 @@ def test_prepare_init_case_from_xlsx_stages_files(tmp_path):
     assert "TEMP_LGR.grdecl" not in grdecl.read_text(encoding="utf-8")
     grdecl_text = grdecl.read_text(encoding="utf-8")
     assert "EQLNUM 1 1 20 1 20 1 17 /" in grdecl_text
-    assert "EQLNUM 2 1 20 1 20 18 80 /" in grdecl_text
+    assert "EQLNUM 2 1 20 1 20 18 67 /" in grdecl_text
+    assert "PERMX 10000 1 20 1 20 1 2 /" in grdecl_text
+    assert "PERMX 0.001 1 20 1 20 3 17 /" in grdecl_text
+    assert "PORO 1 1 20 1 20 1 2 /" in grdecl_text
+    assert "FIPLEG 3 1 20 1 20 18 64 /" in grdecl_text
+    assert "FIPLEG 5 1 20 1 20 65 67 /" in grdecl_text
+    assert "TRANZ 0 1 20 1 20 18 18 /" in grdecl_text
+    assert "PERMZ 0.1 1 20 1 20 3 67 /" in grdecl_text
 
 
 def test_prepare_init_case_from_xlsx_configures_final_run(tmp_path):
