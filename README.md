@@ -114,6 +114,7 @@ The maintained, canonical notebooks are:
 - **02_gap_grid.ipynb** demonstrates GaP grid preparation and coarse-grid recipe generation.
 - **03_wellclass_to_gap.ipynb** demonstrates the JSON-to-LGR integration workflow using an existing `.EGRID` and `.INIT` pair.
 - **04_init_case_preprocessing.ipynb** demonstrates dry-run preparation of an initialization case from explicit grid assumptions.
+- **05_workbook_to_cirrus_lgr.ipynb** demonstrates the selectable workbook-to-CIRRUS-to-LGR workflow for Wildcat and Smeaheia.
 
 The notebooks in `notebooks/legacy_notebooks/` are legacy or exploratory examples. They may require external simulators, historical input formats, or additional manual setup; they are not part of the supported regression workflow. They are retained as references and sources of ideas rather than canonical entry points.
 

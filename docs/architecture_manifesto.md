@@ -16,11 +16,13 @@ The focused roadmaps, such as [`gap_roadmap.md`](gap_roadmap.md), are execution 
 
 The simulator-facing file pipeline (`TEMP-0.in` -> `TEMP_GRD.grdecl` -> `tops_dz.inc` -> initialization run -> `.EGRID`/`.INIT` -> CARFIN include) is documented in [`gap.md`](gap.md). Treat that pipeline as operational guidance for reproducible runs and template governance.
 
-The three canonical notebooks are executable explanations of the architecture:
+The five canonical notebooks are executable explanations of the architecture:
 
 - `01_wellclass.ipynb`: WellClass capabilities.
 - `02_gap_grid.ipynb`: GaP grid capabilities and coarse-grid recipe experiments.
 - `03_wellclass_to_gap.ipynb`: the JSON-to-LGR integration workflow.
+- `04_init_case_preprocessing.ipynb`: initialization-case preprocessing.
+- `05_workbook_to_cirrus_lgr.ipynb`: the selectable workbook-to-CIRRUS-to-LGR workflow.
 
 ## The Current Shape
 
@@ -129,12 +131,14 @@ This is a naming convention to follow going forward, not a rename mandate — `w
 - The current Python test suite passes: `67 passed`, with two expected warnings from sparse Shmin data extrapolation.
 - The WellClass-to-GaP adapter has a controlled vertical-well regression test.
 - A real Wildcat input can be converted into `hole_casings`, processed, adapted, and passed through `LGRBuilder` to produce a GRDECL artifact.
-- The three canonical notebooks now cover WellClass, GaP grid primitives, and the end-to-end path:
+- The five canonical notebooks now cover WellClass, GaP grid primitives, preprocessing, and the end-to-end path:
   - `notebooks/01_wellclass.ipynb`
   - `notebooks/02_gap_grid.ipynb`
   - `notebooks/03_wellclass_to_gap.ipynb`
+  - `notebooks/04_init_case_preprocessing.ipynb`
+  - `notebooks/05_workbook_to_cirrus_lgr.ipynb`
 - The canonical WellClass notebook now shows a one-page sketch, hydrostatic water and CO2 pressure profiles, and a CO2 P-T density plot.
-- The notebook CI workflow executes all three canonical notebooks with the locked `uv` environment.
+- The notebook CI workflow executes the canonical notebooks with the locked `uv` environment.
 - The WellClass-to-GaP vocabulary has been migrated incrementally: `holes_df`, `plugs_df`, `barrier_regions_df`, `casing_cement`, `cement_bond`, and canonical `plug_positions` are available while legacy aliases remain at compatibility boundaries.
 - PVT hydrostatic calculations accept canonical WellClass depth headers as well as legacy headers.
 - Pressure intersection, pressure integration, pressure scenarios, PressureTable, plug geometry, borehole plotting, GaP bounding boxes, CARFIN writers, and mesh material assignment have focused regression coverage.
@@ -145,7 +149,7 @@ Supported for ongoing use:
 
 - Canonical JSON workflow and adapters through WellClass -> GaP.
 - Workbook-driven preprocessing adapter (`runscripts/prepare_init_case_from_xlsx.py`) for organized user input.
-- Canonical notebooks: `notebooks/01_wellclass.ipynb`, `notebooks/02_gap_grid.ipynb`, `notebooks/03_wellclass_to_gap.ipynb`, `notebooks/04_init_case_preprocessing.ipynb`.
+- Canonical notebooks: `notebooks/01_wellclass.ipynb`, `notebooks/02_gap_grid.ipynb`, `notebooks/03_wellclass_to_gap.ipynb`, `notebooks/04_init_case_preprocessing.ipynb`, `notebooks/05_workbook_to_cirrus_lgr.ipynb`.
 
 Deprecated or historical (kept as references, not recommended as entry points):
 
@@ -300,7 +304,7 @@ The physical vocabulary above is part of the input contract. Every interval shou
 
 The repository needs a support classification before cleanup:
 
-- **Supported**: WellClass models/processing, the GaP mesh path, the three canonical notebooks, and selected CLI workflows.
+- **Supported**: WellClass models/processing, the GaP mesh path, the five canonical notebooks, and selected CLI workflows.
 - **Experimental**: pressure development, plotting prototypes, simulator orchestration.
 - **Historical**: `_originals`, old `ecl` scripts, removed standalone applications, superseded notebooks.
 
@@ -308,7 +312,7 @@ The repository needs a support classification before cleanup:
 
 ### Phase 0: Establish the truth (small, high value)
 
-1. Keep the three canonical notebooks as the only workflow recipes.
+1. Keep the five canonical notebooks as the only workflow recipes.
 2. Add a short support/dependency matrix to the documentation.
 3. Add a CI smoke job that runs:
    - all Python tests;
@@ -405,14 +409,14 @@ Only after the supported path is tested:
 1. Archive superseded notebooks and scripts outside the primary navigation.
 2. Remove dead modules only when imports and documentation no longer reference them.
 3. Delete stale comments that describe the old Well API.
-4. Update README and MkDocs navigation to the three canonical recipes.
+4. Update README and MkDocs navigation to the canonical recipes.
 5. Keep original data/code in a clearly labeled archive or separate history if it is still useful for provenance.
 
 ## Issue Candidates
 
 These are good discrete issues, ordered by leverage:
 
-1. **Add CI notebook smoke tests for the three canonical recipes.**
+1. **Add CI notebook smoke tests for the canonical recipes.**
 2. **Document the WellClass-to-GaP dataframe contract and units.**
 3. **Add vertical and deviated WellProcessed geometry fixtures.**
 4. **Cover LGR bounding-box boundary cases.**
