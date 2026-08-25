@@ -122,6 +122,8 @@ The equilibration is divided into two zones: 'overburden_water' for the brine in
 
 The staged GRDECL assigns `EQLNUM 1` to the water and overburden layers and `EQLNUM 2` to reservoir layers, based on the workbook-derived layer counts. `overburden_water` uses a WellClass-interpolated hydrostatic pressure at an explicit or midpoint overburden datum. In `GAS_WATER` mode, `CO2_column` uses `DATUM_D = WGC_D = z_fluid_contact` and `PRESSURE = p_fluid_contact`. Both regions share generated temperature and salt tables that cover the required depth range.
 
+In the refined LGR, `EQLNUM 2` is restricted to layers below the base of the deepest processed plug whose base lies above the reservoir. This preserves the plug as part of the shallow equilibration region and prevents the CO2 equilibration region from being assigned above that barrier.
+
 After the EGRID file is produced, the LGRBuilder functionality is used to set up the LGR, update transport properties, zonation, and equilibration zones. The user must define the upper limit of the 'CO2_column' equilibration zone, which may extend into the wellbore to represent a continuous column of CO2 connecting the wellbore to the reservoir. This upper boundary is typically defined by the base of the first cement plug above the reservoir, but the user must specify this.
 
 ![Input Wellbore and Resulting Grid Representation](imgs/screen_grid_setup_GaP.png)
