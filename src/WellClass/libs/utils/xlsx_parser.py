@@ -129,6 +129,12 @@ def xlsx_grid_policy(xlsx_file: str | Path) -> dict[str, Any]:
     - max_water_layers
     - max_overburden_layers
     - max_reservoir_layers
+    - nx, ny (default 20)
+    - dx, dy (default 200 m)
+    - reservoir_permx (default 0.01)
+    - aquifer_layers (default 3)
+    - porv_multiplier (default 2000)
+    - permz_multiplier (default 0.1)
     """
 
     workbook = Path(xlsx_file)

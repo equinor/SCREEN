@@ -94,27 +94,110 @@ def copy_initialization_grid(source: Path, destination: Path, *, force: bool) ->
     destination.write_text(f"{content}\n", encoding="utf-8")
 
 
-def set_equilibration_regions(grdecl_path: Path, *, water_layers: int, overburden_layers: int) -> None:
-    """Assign water/overburden to region 1 and reservoir layers to region 2."""
+def parameterize_grdecl(
+    grdecl_path: Path,
+    *,
+    water_layers: int,
+    overburden_layers: int,
+    reservoir_layers: int,
+    nx: int = 20,
+    ny: int = 20,
+    dx: float = 200.0,
+    dy: float = 200.0,
+    reservoir_permx: float = 0.01,
+    aquifer_layers: int = 3,
+    porv_multiplier: float = 2000.0,
+    permz_multiplier: float = 0.1,
+) -> None:
+    """Parameterize the coarse-grid GRDECL ranges from the grid policy."""
 
     content = grdecl_path.read_text(encoding="utf-8")
-    dimensions = re.search(r"(?ms)^\s*DIMENS\s+(\d+)\s+(\d+)\s+(\d+)\s*/", content)
-    if dimensions is None:
-        raise ValueError("grid template is missing DIMENS")
-    nx, ny, nz = (int(value) for value in dimensions.groups())
-    reservoir_start_k = water_layers + overburden_layers + 1
-    if not 2 <= reservoir_start_k <= nz:
-        raise ValueError("reservoir start layer must be within the template vertical dimensions")
+    counts = (water_layers, overburden_layers, reservoir_layers)
+    if not all(isinstance(count, int) and count > 0 for count in counts):
+        raise ValueError("grid layer counts must be positive integers")
+    if not all(isinstance(count, int) and count > 0 for count in (nx, ny)):
+        raise ValueError("grid lateral dimensions must be positive integers")
+    if not 0 <= aquifer_layers < reservoir_layers:
+        raise ValueError("aquifer_layers must be non-negative and smaller than reservoir_layers")
+    nz = sum(counts)
+    water_start = 1
+    water_end = water_layers
+    overburden_start = water_end + 1
+    overburden_end = overburden_start + overburden_layers - 1
+    reservoir_start = overburden_end + 1
+    reservoir_end = reservoir_start + reservoir_layers - 1
+    aquifer_start = reservoir_end - aquifer_layers + 1 if aquifer_layers else None
 
-    replacements = iter(
+    def region(keyword: str, value: object, start: int, end: int) -> str:
+        formatted_value = f"{value:g}" if isinstance(value, (int, float)) else str(value)
+        return f"{keyword} {formatted_value} 1 {nx} 1 {ny} {start} {end} /"
+
+    lines = [
+        "EQUALS",
+        "FIPLEG 4  /",
+        f"DX    {dx:g}   /",
+        f"DY    {dy:g}   /",
+        "PORO   0.2   /",
+        "PERMX  1000  /",
+        "",
+        "-- Equilibration regions: water/overburden then reservoir",
+        region("EQLNUM", 1, water_start, overburden_end),
+        region("EQLNUM", 2, reservoir_start, reservoir_end),
+        "",
+        "-- Overburden and water properties",
+        region("PERMX", 0.001, overburden_start, overburden_end),
+        region("FIPLEG", 2, overburden_start, overburden_end),
+        region("PERMX", 10000.0, water_start, water_end),
+        region("PORO", 1.0, water_start, water_end),
+        region("FIPLEG", 1, water_start, water_end),
+        "",
+        "-- Reservoir and aquifer properties",
+    ]
+    if aquifer_start is None:
+        lines.extend([region("PERMX", reservoir_permx, reservoir_start, reservoir_end), region("FIPLEG", 3, reservoir_start, reservoir_end)])
+    else:
+        if aquifer_start > reservoir_start:
+            lines.extend([region("PERMX", reservoir_permx, reservoir_start, aquifer_start - 1), region("FIPLEG", 3, reservoir_start, aquifer_start - 1)])
+        lines.append(region("FIPLEG", 5, aquifer_start, reservoir_end))
+    lines.extend(
         [
-            f"EQLNUM 1 1 {nx} 1 {ny} 1 {reservoir_start_k - 1} /",
-            f"EQLNUM 2 1 {nx} 1 {ny} {reservoir_start_k} {nz} /",
+            "",
+            "-- Isolate the top reservoir layer",
+            region("TRANZ", 0, reservoir_start, reservoir_start),
+            region("TRANX", 0, reservoir_start, reservoir_start),
+            region("TRANY", 0, reservoir_start, reservoir_start),
+            "/",
+            "",
+            "COPY",
+            "PERMX PERMY /",
+            "PERMX PERMZ /",
+            "/",
+            "",
+            "MULTIPLY",
+            "-- Multiply pore volume on the four outer coarse-grid sides",
+            f"PORV {porv_multiplier:g} 1 1 1 {ny} 1 {nz} /",
+            f"PORV {porv_multiplier:g} {nx} {nx} 1 {ny} 1 {nz} /",
+            f"PORV {porv_multiplier:g} 2 {nx - 1} 1 1 1 {nz} /",
+            f"PORV {porv_multiplier:g} 2 {nx - 1} {ny} {ny} 1 {nz} /",
+            "",
+            "-- Do not reduce permeability in the water layer",
+            f"PERMZ {permz_multiplier:g} 1 {nx} 1 {ny} {water_end + 1} {nz} /",
+            "/",
+            "",
+            "MINPV",
+            " 0 /",
+            "",
+            "--dpcf",
+            "--0.2 1 /",
         ]
     )
-    updated, count = re.subn(r"(?m)^\s*EQLNUM\s+[12]\s+.*$", lambda _: next(replacements), content, count=2)
-    if count != 2:
-        raise ValueError("grid template must define EQLNUM regions 1 and 2")
+
+    updated, count = re.subn(r"(?ms)^EQUALS\s*\n.*?(?=^COPY\s*$)", "\n".join(lines[: lines.index("COPY")]) + "\n", content, count=1)
+    if count != 1:
+        raise ValueError("grid template is missing its EQUALS section")
+    copy_start = updated.index("COPY")
+    updated = updated[:copy_start] + "\n".join(lines[lines.index("COPY") :]) + "\n"
+    updated = re.sub(r"(?ms)^\s*DIMENS\s+\d+\s+\d+\s+\d+\s*/", f"DIMENS\n{nx} {ny} {nz} /", updated, count=1)
     grdecl_path.write_text(updated, encoding="utf-8")
 
 
@@ -146,10 +229,19 @@ def stage_case(args: argparse.Namespace) -> tuple[Path, Path, Path]:
     )
     schedule = build_vertical_grid_schedule(spec)
     write_vertical_grid_recipe(spec, schedule, output_tops, cells_per_layer=args.cells_per_layer)
-    set_equilibration_regions(
+    parameterize_grdecl(
         output_grdecl,
         water_layers=args.water_layers,
         overburden_layers=args.overburden_layers,
+        reservoir_layers=args.reservoir_layers,
+        nx=getattr(args, "nx", 20),
+        ny=getattr(args, "ny", 20),
+        dx=getattr(args, "dx", 200.0),
+        dy=getattr(args, "dy", 200.0),
+        reservoir_permx=getattr(args, "reservoir_permx", 0.01),
+        aquifer_layers=getattr(args, "aquifer_layers", 3),
+        porv_multiplier=getattr(args, "porv_multiplier", 2000.0),
+        permz_multiplier=getattr(args, "permz_multiplier", 0.1),
     )
 
     return output_deck, output_grdecl, output_tops

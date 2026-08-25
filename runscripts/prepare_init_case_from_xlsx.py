@@ -131,6 +131,14 @@ def derive_stage_args_from_policy(args: argparse.Namespace, policy: dict) -> arg
         overburden_layers=overburden_layers,
         reservoir_layers=reservoir_layers,
         cells_per_layer=int(policy.get("cells_per_layer", 400)),
+        nx=int(policy.get("nx", 20)),
+        ny=int(policy.get("ny", 20)),
+        dx=float(policy.get("dx", 200.0)),
+        dy=float(policy.get("dy", 200.0)),
+        reservoir_permx=float(policy.get("reservoir_permx", 0.01)),
+        aquifer_layers=int(policy.get("aquifer_layers", 3)),
+        porv_multiplier=float(policy.get("porv_multiplier", 2000.0)),
+        permz_multiplier=float(policy.get("permz_multiplier", 0.1)),
         force=args.force,
     )
 
