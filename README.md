@@ -199,12 +199,17 @@ It may take some minutes until the documentation goes live. And the generated do
 The following represents the current code structures:
 
 ```
+├── docs
+│   ├── INSTALLATION.md
+│   ├── architecture_manifesto.md
+│   ├── gap.md
+│   └── gap_roadmap.md
 ├── experiments
 │   ├── gap_pflotran.py
 │   ├── gap_wellclass.py
-│   ├── __init__.py
-│   └── LEG_HIRES.grdecl
-├── INSTALLATION.md
+│   ├── legacy
+│   ├── well_sketch.py
+│   └── well_sketch_pressure.py
 ├── mkdocs.yml
 ├── notebooks
 │   ├── 01_wellclass.ipynb
@@ -215,6 +220,13 @@ The following represents the current code structures:
 │   └── legacy_notebooks
 ├── README.md
 ├── requirements.txt
+├── runscripts
+│   ├── build_lgr_from_json.py
+│   ├── create_example_well_workbooks.py
+│   ├── create_well_input_workbook.py
+│   ├── prepare_init_case.py
+│   ├── prepare_init_case_from_xlsx.py
+│   └── run_workbook_to_cirrus_lgr.py
 ├── src
 │   ├── GaP
 │   │   ├── data
@@ -224,40 +236,23 @@ The following represents the current code structures:
 │   │   ├── notebooks
 │   │   └── README.md
 │   ├── __init__.py
-│   ├── PressCalc
-│   │   ├── 1D_PresCalc.ipynb
-│   │   ├── __init__.py
-│   │   ├── phase_envelope.png
-│   │   ├── Pressure_plot.png
-│   │   ├── PT_01012996
-│   │   ├── PT_010153
-│   │   └── Readme.md
-│   ├── WellClass
-│   │   ├── __init__.py
-│   │   ├── libs
-│   │   ├── notebooks
-│   │   └── README.md
-│   └── WellViz
+│   └── WellClass
 │       ├── __init__.py
-│       ├── Readme.md
-│       └── WellViz_Jan23_Dash_v4.py
+│       ├── data
+│       ├── libs
+│       ├── notebooks
+│       └── README.md
 └── test_data
     ├── examples
-    │   ├── wildcat
-    │   ├── wildcat-pflotran
-    │   ├── wildcat-pflotran-2
     │   ├── frigg
     │   ├── simple_well
-    │   └── smeaheia
-    └── pvt_constants
-        ├── pressure.txt
-        ├── rho_co2.txt
-        ├── rho_h2o.txt
-        └── temperature.txt
+    │   ├── smeaheia
+    │   ├── wildcat
+    │   └── wildcat-pflotran
 ```
 It was generated with the linux command `tree`:
 ```shell
-tree -I 'docs|site|venv_screen|*pycache*|Equinor*|originals' -L 3
+tree -I 'site|.venv|*pycache*|originals' -L 3
 ```
 
 
