@@ -1364,18 +1364,6 @@ wheels = [
 ]
 
 [[package]]
-name = "markdown-callouts"
-version = "0.3.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "markdown" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/49/7f/0baf428f7f0cc646289fd04a9be12f9992fe01eb69a9e48a8891dcb4d162/markdown-callouts-0.3.0.tar.gz", hash = "sha256:21e99d72a879663343e232158413e12eeaa9fb78b90e669f41cdbf0962a364fb", size = 5287, upload-time = "2022-09-18T20:44:32.705Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/71/d8/a65d01fe6b838fbc2ac3aaaeb12b7eafdb04ef980392c8a2357e2ceeec4c/markdown_callouts-0.3.0-py3-none-any.whl", hash = "sha256:6d58e8bd244366d2a5ca549b1971f4caac3036469c243856eb886364f71c013b", size = 5266, upload-time = "2022-09-18T20:44:27.861Z" },
-]
-
-[[package]]
 name = "markupsafe"
 version = "3.0.3"
 source = { registry = "https://pypi.org/simple" }
@@ -3004,7 +2992,6 @@ dev = [
 ]
 docs = [
     { name = "griffe" },
-    { name = "markdown-callouts" },
     { name = "mkdocs" },
     { name = "mkdocs-autorefs" },
     { name = "mkdocs-material" },
@@ -3039,7 +3026,6 @@ dev = [
 ]
 docs = [
     { name = "griffe", specifier = "==0.49.0" },
-    { name = "markdown-callouts", specifier = "==0.3.0" },
     { name = "mkdocs", specifier = "==1.5.3" },
     { name = "mkdocs-autorefs", specifier = "==0.5.0" },
     { name = "mkdocs-material", specifier = "==9.4.14" },
