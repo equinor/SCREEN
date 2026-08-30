@@ -4,7 +4,6 @@ metadata:
   name: SCREEN
   annotations:
     github.com/project-slug: equinor/SCREEN
-    backstage.io/techdocs-ref: value
 spec:
   type: other
   lifecycle: unknown
