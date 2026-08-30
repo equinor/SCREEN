@@ -7,16 +7,7 @@ from ..utils.fraction_float import fraction_float
 
 
 class WellHeaderModel(BaseModel):
-    """General information about the well.
-
-    Args:
-        well_name (str): well name
-        well_rkb (float): RKB elevation
-        sf_depth_msl (float): depth of the sea floor
-        well_td_rkb (float): total depth of RKB
-        sf_temp (float): sea floor temperature
-        geo_tgrad  (float): geothermal gradient
-    """
+    """General information about the well."""
 
     unique_wellbore_identifier: str
     depth_reference_rkb: Union[int, float]
@@ -28,13 +19,7 @@ class WellHeaderModel(BaseModel):
 
 
 class WellSurveyModel(BaseModel):
-    """Information about the well survey
-
-    Args:
-        md_rkb (float): measured depth in RKB
-        inclination_deg (float): inclination in degree
-        azimuth_deg (float): azimuth in degree
-    """
+    """Information about the well survey."""
 
     md_rkb: List[Union[int, float]]
     inclination_deg: List[Union[int, float]]
@@ -42,13 +27,7 @@ class WellSurveyModel(BaseModel):
 
 
 class HoleCasingModelRaw(BaseModel):
-    """Information about the drilling intervals of the well
-
-    Args:
-        top_rkb (float): the top depth in RKB
-        bottom_rkb (float): the bottom depth in RKB
-        diameter_in (float, str): the diameter of the borehole in inches
-    """
+    """Information about the drilling intervals of the well."""
 
     name: str
     type: Literal["hole", "casing", "casing cement"]
@@ -68,25 +47,13 @@ class HoleCasingModelRaw(BaseModel):
 
 
 class HoleCasingModel(HoleCasingModelRaw):
-    """Information about the drilling intervals of the well
-
-    Args:
-        hc_perm (float): faked permeability for hole casing element
-    """
+    """Information about the drilling intervals of the well."""
 
     hc_perm: Optional[Union[int, float]] = None
 
 
 class PlugsRaw(BaseModel):
-    """Information about the barrier in the well
-
-    Args:
-        barrier_name (str): the barrier name
-        barrier_type (str): the barrier type
-        top_rkb (float): the top depth in RKB
-        bottom_rkb (float): the bottom depth in RKB
-        barrier_perm (float): permeability for the barrier
-    """
+    """Information about the barrier in the well."""
 
     name: str
     type: Literal["cement", "mechanical plug"]
@@ -95,23 +62,13 @@ class PlugsRaw(BaseModel):
 
 
 class PlugsModel(PlugsRaw):
-    """Information about the barrier in the well
-
-    Args:
-        barrier_perm (float): permeability for the barrier
-    """
+    """Information about the barrier in the well."""
 
     cement_perm: Optional[Union[int, float]] = None
 
 
 class StratigraphyRaw(BaseModel):
-    """The geological units encountered in the well
-
-    Args:
-        top_rkb (float): top depth in RKB
-        geol_unit (str): name
-        reservoir_flag (bool): whether or not it is considered a reservoir
-    """
+    """The geological units encountered in the well."""
 
     name: str
     top_rkb: Union[int, float]
@@ -119,13 +76,7 @@ class StratigraphyRaw(BaseModel):
 
 
 class StratigraphyModel(StratigraphyRaw):
-    """The geological units encountered in the well
-
-    Args:
-        unit_type (str): interval categorization, used later by pressure computations.
-            Defaults to "undefined" when not specified in the input.
-        unit_perm (float): permeability for the unit
-    """
+    """The geological units encountered in the well."""
 
     unit_type: Literal["undefined", "reservoir", "flow_unit", "barrier"] = "undefined"
     unit_perm: Optional[Union[int, float]] = None
