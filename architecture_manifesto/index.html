@@ -1,0 +1,2064 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../gap/">
+      
+      
+        <link rel="next" href="../gap_roadmap/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.14">
+    
+    
+      
+        <title>Architecture Manifesto - SCREEN</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.fad675c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.356b1318.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="amber">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#screen-architecture-manifesto" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="SCREEN" class="md-header__button md-logo" aria-label="SCREEN" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SCREEN
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Architecture Manifesto
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9v1Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7M9 21v-1h6v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1m3-17a5 5 0 0 0-5 5c0 2.05 1.23 3.81 3 4.58V16h4v-2.42c1.77-.77 3-2.53 3-4.58a5 5 0 0 0-5-5Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/equinor/SCREEN" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="SCREEN" class="md-nav__button md-logo" aria-label="SCREEN" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    SCREEN
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/equinor/SCREEN" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Introduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../well_class/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Pre‐processing and Preliminary Assessment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gap/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Detailed Simulation workflow
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Developer Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Developer Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Architecture Manifesto
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Architecture Manifesto
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      Purpose
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#document-roles" class="md-nav__link">
+    <span class="md-ellipsis">
+      Document Roles
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-current-shape" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Current Shape
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#physical-vocabulary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Physical Vocabulary
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Physical Vocabulary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#naming-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      Naming map
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ownership-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ownership Boundaries
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ownership Boundaries">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#wellclass-owns" class="md-nav__link">
+    <span class="md-ellipsis">
+      WellClass owns
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gap-owns" class="md-nav__link">
+    <span class="md-ellipsis">
+      GaP owns
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-boundary-owns" class="md-nav__link">
+    <span class="md-ellipsis">
+      The boundary owns
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#module-naming-conventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Module naming conventions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-working-today" class="md-nav__link">
+    <span class="md-ellipsis">
+      What Is Working Today
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supported-vs-deprecated-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported vs Deprecated Workflows
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Supported vs Deprecated Workflows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#checkpoint-2026-08-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      Checkpoint: 2026-08-20
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#checkpoint-2026-08-21-pressure-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      Checkpoint: 2026-08-21 (Pressure engine)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#checkpoint-2026-08-21-canonical-fixtures-and-coarse-grid-recipe" class="md-nav__link">
+    <span class="md-ellipsis">
+      Checkpoint: 2026-08-21 (Canonical fixtures and coarse-grid recipe)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#checkpoint-2026-08-23-workbook-driven-preprocessing-slice" class="md-nav__link">
+    <span class="md-ellipsis">
+      Checkpoint: 2026-08-23 (Workbook-driven preprocessing slice)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#milestone-2026-08-25-single-reservoir-workbook-to-lgr-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Milestone: 2026-08-25 (Single-reservoir workbook-to-LGR workflow)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#checkpoint-2026-08-24-coarse-grid-envelope-and-initialization-staging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Checkpoint: 2026-08-24 (Coarse-grid envelope and initialization staging)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-main-risks" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Main Risks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Main Risks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-the-tested-surface-is-much-smaller-than-the-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. The tested surface is much smaller than the implementation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-the-public-api-is-split-between-two-generations" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. The public API is split between two generations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-external-runtime-dependencies-are-implicit" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. External runtime dependencies are implicit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-input-semantics-are-not-yet-fully-explicit" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Input semantics are not yet fully explicit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-file-and-package-structure-obscures-the-supported-product" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. File and package structure obscures the supported product
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommended-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recommended Plan
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recommended Plan">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-0-establish-the-truth-small-high-value" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 0: Establish the truth (small, high value)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-lock-down-the-wellclass-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 1: Lock down the WellClass contract
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-test-gap-as-a-pure-transformation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 2: Test GaP as a pure transformation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-make-the-boundary-intentional" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 3: Make the boundary intentional
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-clarify-operational-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 4: Clarify operational workflows
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backlog-wellclass-pressure-scenario-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      Backlog: WellClass pressure scenario engine
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#checkpoint-2026-08-21" class="md-nav__link">
+    <span class="md-ellipsis">
+      Checkpoint: 2026-08-21
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-5-reduce-historical-noise" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 5: Reduce historical noise
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#issue-candidates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Issue Candidates
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      Decision Rules
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#first-three-work-items" class="md-nav__link">
+    <span class="md-ellipsis">
+      First Three Work Items
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gap_roadmap/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GaP Roadmap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mkdocs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    MkDocs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../INSTALLATION/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_5" id="__nav_4_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Code References
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5">
+            <span class="md-nav__icon md-icon"></span>
+            Code References
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_5_1" id="__nav_4_5_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    GaP
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_5_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5_1">
+            <span class="md-nav__icon md-icon"></span>
+            GaP
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_references/gap/gap_carfin/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CARFIN
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_references/gap/gap_geometry/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bounding boxes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_5_2" id="__nav_4_5_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    WellClass
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            WellClass
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_references/well_class/well_class/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Well class
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_references/well_class/well_pressure/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Well pressure
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_references/well_class/models/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_5_2_4" id="__nav_4_5_2_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Grids
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_4_5_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            Grids
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_references/well_class/grids/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Various grids
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_references/well_class/lgr_builder/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    LGR builder
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      Purpose
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#document-roles" class="md-nav__link">
+    <span class="md-ellipsis">
+      Document Roles
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-current-shape" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Current Shape
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#physical-vocabulary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Physical Vocabulary
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Physical Vocabulary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#naming-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      Naming map
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ownership-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ownership Boundaries
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ownership Boundaries">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#wellclass-owns" class="md-nav__link">
+    <span class="md-ellipsis">
+      WellClass owns
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gap-owns" class="md-nav__link">
+    <span class="md-ellipsis">
+      GaP owns
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-boundary-owns" class="md-nav__link">
+    <span class="md-ellipsis">
+      The boundary owns
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#module-naming-conventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Module naming conventions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-working-today" class="md-nav__link">
+    <span class="md-ellipsis">
+      What Is Working Today
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supported-vs-deprecated-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported vs Deprecated Workflows
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Supported vs Deprecated Workflows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#checkpoint-2026-08-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      Checkpoint: 2026-08-20
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#checkpoint-2026-08-21-pressure-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      Checkpoint: 2026-08-21 (Pressure engine)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#checkpoint-2026-08-21-canonical-fixtures-and-coarse-grid-recipe" class="md-nav__link">
+    <span class="md-ellipsis">
+      Checkpoint: 2026-08-21 (Canonical fixtures and coarse-grid recipe)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#checkpoint-2026-08-23-workbook-driven-preprocessing-slice" class="md-nav__link">
+    <span class="md-ellipsis">
+      Checkpoint: 2026-08-23 (Workbook-driven preprocessing slice)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#milestone-2026-08-25-single-reservoir-workbook-to-lgr-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Milestone: 2026-08-25 (Single-reservoir workbook-to-LGR workflow)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#checkpoint-2026-08-24-coarse-grid-envelope-and-initialization-staging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Checkpoint: 2026-08-24 (Coarse-grid envelope and initialization staging)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-main-risks" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Main Risks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Main Risks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-the-tested-surface-is-much-smaller-than-the-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. The tested surface is much smaller than the implementation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-the-public-api-is-split-between-two-generations" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. The public API is split between two generations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-external-runtime-dependencies-are-implicit" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. External runtime dependencies are implicit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-input-semantics-are-not-yet-fully-explicit" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Input semantics are not yet fully explicit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-file-and-package-structure-obscures-the-supported-product" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. File and package structure obscures the supported product
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommended-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recommended Plan
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recommended Plan">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-0-establish-the-truth-small-high-value" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 0: Establish the truth (small, high value)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-lock-down-the-wellclass-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 1: Lock down the WellClass contract
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-test-gap-as-a-pure-transformation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 2: Test GaP as a pure transformation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-make-the-boundary-intentional" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 3: Make the boundary intentional
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-clarify-operational-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 4: Clarify operational workflows
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backlog-wellclass-pressure-scenario-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      Backlog: WellClass pressure scenario engine
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#checkpoint-2026-08-21" class="md-nav__link">
+    <span class="md-ellipsis">
+      Checkpoint: 2026-08-21
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-5-reduce-historical-noise" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 5: Reduce historical noise
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#issue-candidates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Issue Candidates
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      Decision Rules
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#first-three-work-items" class="md-nav__link">
+    <span class="md-ellipsis">
+      First Three Work Items
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="screen-architecture-manifesto">SCREEN Architecture Manifesto</h1>
+<h2 id="purpose">Purpose</h2>
+<p>SCREEN should make one workflow dependable:</p>
+<blockquote>
+<p>validate a well description, derive its geometry and pressure inputs, translate that information into GaP mesh primitives, and produce a reviewable grid artifact.</p>
+</blockquote>
+<p>The immediate goal is not to modernize every module. It is to make that workflow explicit, testable, and honest about which external tools it needs.</p>
+<h2 id="document-roles">Document Roles</h2>
+<p>This manifesto is the architectural source of truth. It defines what SCREEN is supposed to do, which modules own each responsibility, which boundaries are stable, and which limitations are intentional.</p>
+<p>The focused roadmaps, such as <a href="../gap_roadmap/"><code>gap_roadmap.md</code></a>, are execution trackers. They record implementation status and the next concrete tasks needed to move toward this architecture; they must not redefine the ownership boundaries or canonical workflow described here. When a roadmap item conflicts with this manifesto, the manifesto takes precedence and the roadmap should be revised.</p>
+<p>The simulator-facing file pipeline (<code>TEMP-0.in</code> -&gt; <code>TEMP_GRD.grdecl</code> -&gt; <code>tops_dz.inc</code> -&gt; initialization run -&gt; <code>.EGRID</code>/<code>.INIT</code> -&gt; CARFIN include) is documented in <a href="../gap/"><code>gap.md</code></a>. Treat that pipeline as operational guidance for reproducible runs and template governance.</p>
+<p>The five canonical notebooks are executable explanations of the architecture:</p>
+<ul>
+<li><code>01_wellclass.ipynb</code>: WellClass capabilities.</li>
+<li><code>02_gap_grid.ipynb</code>: GaP grid capabilities and coarse-grid recipe experiments.</li>
+<li><code>03_wellclass_to_gap.ipynb</code>: the JSON-to-LGR integration workflow.</li>
+<li><code>04_init_case_preprocessing.ipynb</code>: initialization-case preprocessing.</li>
+<li><code>05_workbook_to_cirrus_lgr.ipynb</code>: the selectable workbook-to-CIRRUS-to-LGR workflow.</li>
+</ul>
+<h2 id="the-current-shape">The Current Shape</h2>
+<p>SCREEN is currently four overlapping products in one repository:</p>
+<ol>
+<li><strong>WellClass</strong>: input models, well trajectory, geometry derivation, pressure/PVT calculations, and plotting.</li>
+<li><strong>GaP</strong>: grid geometry, bounding boxes, CARFIN/GRDECL writers, and plotting helpers.</li>
+<li><strong>Workflow scripts and notebooks</strong>: experiments that combine the two systems, invoke external simulators, and generate files.</li>
+<li><strong>Historical code and assets</strong>: <code>src/_originals</code>, <code>src/PressCalc</code>, <code>src/WellViz</code>, old GaP scripts, duplicated notebooks, and legacy dataframe APIs.</li>
+</ol>
+<p>The code is not yet organized around those boundaries. The branch refactor improved the WellClass data model, but the GaP side still consumes legacy pandas-shaped tables.</p>
+<h2 id="physical-vocabulary">Physical Vocabulary</h2>
+<p>The well model should use the physical construction sequence as its source of truth:</p>
+<ol>
+<li><strong>Borehole / drilled hole</strong>: the void created by drilling. It has a boundary and a diameter, but no material assigned inside it.</li>
+<li><strong>Casing</strong>: a pipe installed inside the drilled hole.</li>
+<li><strong>Annulus</strong>: the remaining space between the casing outside diameter and the borehole boundary.</li>
+<li><strong>Cement bond</strong>: the portion of the annulus occupied by injected cement over a depth interval.</li>
+<li><strong>Plug</strong>: a cement or mechanical plug occupying a section of the remaining wellbore.</li>
+<li><strong>Material region</strong>: the mesh-level classification assigned by GaP, such as <code>openhole</code>, <code>annulus</code>, <code>cement_bond_N</code>, or <code>barrier_N</code>.</li>
+</ol>
+<p>The terminology must distinguish geometry from material:</p>
+<ul>
+<li>A <strong>hole</strong> is a geometric interval.</li>
+<li>An <strong>annulus</strong> is a geometric region created by casing placement.</li>
+<li>A <strong>cement bond</strong> is a material-filled subregion of an annulus.</li>
+<li>A <strong>plug</strong> is a material-filled interval in the remaining wellbore.</li>
+<li>A <strong>barrier</strong> is a functional or mesh classification; it is not automatically synonymous with a plug.</li>
+</ul>
+<h3 id="naming-map">Naming map</h3>
+<table>
+<thead>
+<tr>
+<th>Current name</th>
+<th>Problem</th>
+<th>Canonical direction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>drilling</code>, <code>drilling_df</code></td>
+<td>Describes the activity, not the resulting hole geometry</td>
+<td><code>holes</code>, <code>holes_df</code></td>
+</tr>
+<tr>
+<td><code>hole_casings</code></td>
+<td>Current combined input collection</td>
+<td>Keep as the input container; split into <code>holes</code>, <code>casings</code>, and <code>casing_cement</code> records internally</td>
+</tr>
+<tr>
+<td><code>borehole</code></td>
+<td>Used for a derived effective opening and sometimes for the original drilled hole</td>
+<td>Reserve <code>borehole</code> for the derived effective open-wellbore geometry; use <code>holes</code> for drilled input intervals</td>
+</tr>
+<tr>
+<td><code>casings</code>, <code>casings_df</code></td>
+<td>Usually clear, but often carries cement fields too</td>
+<td><code>casings</code> for pipe geometry; <code>casing_cement</code> for cement input/intervals</td>
+</tr>
+<tr>
+<td><code>cement_bond</code></td>
+<td>Used for both input cement intervals and derived annulus output</td>
+<td>Use <code>casing_cement</code> for input; <code>cement_bond</code> for derived material intervals</td>
+</tr>
+<tr>
+<td><code>barriers</code>, <code>barriers_mod_df</code></td>
+<td>Can mean plugs, functional barriers, or mesh regions</td>
+<td>Use <code>plugs</code> for physical plugs; use <code>barrier_regions</code> for mesh/functional barriers</td>
+</tr>
+<tr>
+<td><code>material == "openhole"</code></td>
+<td>Mesh material name can be confused with the original hole</td>
+<td>Keep as a GaP material label, but document it as a mesh classification</td>
+</tr>
+</tbody>
+</table>
+<p>This is a vocabulary contract, not a request for a repository-wide rename in one change. First document and test the mapping, then rename one ownership boundary at a time. The <code>WellDataFrame</code> adapter is the current compatibility seam where legacy names can be translated without leaking them back into WellClass.</p>
+<pre class="mermaid"><code>flowchart TB
+  Input[JSON / YAML / XLSX adapter / legacy CSV] --&gt; Model[Pydantic WellModel]
+    Model --&gt; Raw[Well / WellRaw]
+    Raw --&gt; Processed[WellProcessed]
+    Processed --&gt; Derived[trajectory, TVD, borehole, annulus, plugs]
+    Derived --&gt; Adapter[WellDataFrame compatibility adapter]
+    Adapter --&gt; GaP[GridCoarse / LGRBuilder]
+    GaP --&gt; Carfin[CARFIN / GRDECL]
+    Grid[.EGRID + .INIT] --&gt; GaP
+    Simulator[PFLOTRAN / Cirrus / Eclipse tools] -. external runtime .-&gt; Grid</code></pre>
+<h2 id="ownership-boundaries">Ownership Boundaries</h2>
+<h3 id="wellclass-owns">WellClass owns</h3>
+<ul>
+<li>Input schema and validation.</li>
+<li>Unit normalization.</li>
+<li>Measured-depth to true-vertical-depth conversion.</li>
+<li>Hole, casing, cement, plug, and stratigraphy records.</li>
+<li>Well-derived geometry: borehole, annulus, cement bond, plug segments.</li>
+<li>Pressure and PVT calculations.</li>
+<li>Well-focused plots.</li>
+</ul>
+<p>The canonical processed API is <code>src/WellClass/libs/well_class/well_processed.py</code> (<code>WellProcessed</code>). <code>Well</code> is the raw validated representation. <code>hole_casings</code> is the canonical input name; <code>holes</code>, <code>casings</code>, and <code>casing cement</code> are typed records inside that collection.</p>
+<h3 id="gap-owns">GaP owns</h3>
+<ul>
+<li>Reading coarse grid data from <code>.EGRID</code> and <code>.INIT</code> through <code>resdata</code>.</li>
+<li>Computing LGR dimensions and cell coordinates.</li>
+<li>Mapping well geometry to grid indices and bounding boxes.</li>
+<li>Assigning mesh material/permeability fields.</li>
+<li>Writing CARFIN/GRDECL output.</li>
+</ul>
+<p>The central GaP path is <code>src/WellClass/libs/grid_utils/LGR_builder.py</code> (<code>LGRBuilder</code>), supported by <code>GridCoarse</code>, <code>GridRefine</code>, <code>LGR_grid_utils</code>, <code>LGR_bbox</code>, and the CARFIN writers under <code>src/GaP/libs/carfin</code>.</p>
+<h3 id="the-boundary-owns">The boundary owns</h3>
+<p><code>src/WellClass/libs/grid_utils/well_df.py</code> (<code>WellDataFrame</code>) is currently the compatibility boundary. It converts a processed WellClass object into the pandas fields the existing GaP mesh code expects:</p>
+<ul>
+<li>drilling: <code>top_msl</code>, <code>bottom_msl</code>, <code>diameter_m</code>, <code>oh_perm</code></li>
+<li>casing: <code>top_msl</code>, <code>bottom_msl</code>, <code>toc_msl</code>, <code>boc_msl</code>, <code>diameter_m</code>, <code>cb_perm</code></li>
+<li>annulus: <code>top_msl</code>, <code>bottom_msl</code>, <code>thick_m</code></li>
+<li>barriers: GaP-compatible diameter, depth, and permeability fields</li>
+</ul>
+<p>This adapter is useful, but it should be a named transition. New WellClass code should not grow more legacy fields such as <code>drilling</code>, <code>casings</code>, or <code>barriers</code>.</p>
+<h3 id="module-naming-conventions">Module naming conventions</h3>
+<p>A module's name should say what kind of thing it holds, without needing to open it:</p>
+<ul>
+<li><strong>Pydantic schemas</strong> end in <code>_model.py</code> / <code>_models.py</code> (<code>well_model.py</code>, <code>scalar_unit_model.py</code>). These validate raw input; they are not the runtime object.</li>
+<li><strong>Dataclasses / the object model</strong> are named after the class they define, in snake_case, one class per module (<code>well_class.py</code> → <code>Well</code>, <code>well_processed.py</code> → <code>WellProcessed</code>, <code>well_raw.py</code> → <code>WellRaw</code>). No suffix needed — the directory (<code>well_class/</code>) already signals "this is the object model."</li>
+<li><strong>Pure-function modules</strong> are named after the computation, not a class, and every function inside starts with a verb: <code>compute_*</code>, <code>verify_*</code>, <code>build_*</code>, <code>get_*</code>, <code>split_*</code> (<code>well_computed/borehole.py</code> → <code>compute_borehole</code>, <code>well_validation.py</code> → <code>verify_hole_casings</code>, <code>well_computed/well_path.py</code> → <code>build_wellpath_object</code>, <code>pvt.py</code> → <code>get_pvt</code>).</li>
+</ul>
+<p>This is a naming convention to follow going forward, not a rename mandate — <code>well_model_utils.py</code> is the one existing inconsistency (it defines pydantic models but doesn't carry the <code>_model</code> suffix pattern clearly).</p>
+<h2 id="what-is-working-today">What Is Working Today</h2>
+<ul>
+<li>The current Python test suite passes: <code>67 passed</code>, with two expected warnings from sparse Shmin data extrapolation.</li>
+<li>The WellClass-to-GaP adapter has a controlled vertical-well regression test.</li>
+<li>A real Wildcat input can be converted into <code>hole_casings</code>, processed, adapted, and passed through <code>LGRBuilder</code> to produce a GRDECL artifact.</li>
+<li>The five canonical notebooks now cover WellClass, GaP grid primitives, preprocessing, and the end-to-end path:</li>
+<li><code>notebooks/01_wellclass.ipynb</code></li>
+<li><code>notebooks/02_gap_grid.ipynb</code></li>
+<li><code>notebooks/03_wellclass_to_gap.ipynb</code></li>
+<li><code>notebooks/04_init_case_preprocessing.ipynb</code></li>
+<li><code>notebooks/05_workbook_to_cirrus_lgr.ipynb</code></li>
+<li>The canonical WellClass notebook now shows a one-page sketch, hydrostatic water and CO2 pressure profiles, and a CO2 P-T density plot.</li>
+<li>The notebook CI workflow executes the canonical notebooks with the locked <code>uv</code> environment.</li>
+<li>The WellClass-to-GaP vocabulary has been migrated incrementally: <code>holes_df</code>, <code>plugs_df</code>, <code>barrier_regions_df</code>, <code>casing_cement</code>, <code>cement_bond</code>, and canonical <code>plug_positions</code> are available while legacy aliases remain at compatibility boundaries.</li>
+<li>PVT hydrostatic calculations accept canonical WellClass depth headers as well as legacy headers.</li>
+<li>Pressure intersection, pressure integration, pressure scenarios, PressureTable, plug geometry, borehole plotting, GaP bounding boxes, CARFIN writers, and mesh material assignment have focused regression coverage.</li>
+</ul>
+<h2 id="supported-vs-deprecated-workflows">Supported vs Deprecated Workflows</h2>
+<p>Supported for ongoing use:</p>
+<ul>
+<li>Canonical JSON workflow and adapters through WellClass -&gt; GaP.</li>
+<li>Workbook-driven preprocessing adapter (<code>runscripts/prepare_init_case_from_xlsx.py</code>) for organized user input.</li>
+<li>Canonical notebooks: <code>notebooks/01_wellclass.ipynb</code>, <code>notebooks/02_gap_grid.ipynb</code>, <code>notebooks/03_wellclass_to_gap.ipynb</code>, <code>notebooks/04_init_case_preprocessing.ipynb</code>, <code>notebooks/05_workbook_to_cirrus_lgr.ipynb</code>.</li>
+</ul>
+<p>Deprecated or historical (kept as references, not recommended as entry points):</p>
+<ul>
+<li>Scripts under <code>experiments/legacy/</code>.</li>
+<li><code>_originals</code> assets and historical notebooks not listed above.</li>
+<li>Legacy CSV-style input recipes for new projects; keep only for backward compatibility and migration.</li>
+</ul>
+<p>These are important smoke paths, not yet a complete production guarantee.</p>
+<h3 id="checkpoint-2026-08-20">Checkpoint: 2026-08-20</h3>
+<p>The repository is in a better-observed state, but not a finished or fully standardized state. The main workflow can now be followed and tested from WellClass input through GaP GRDECL generation. The remaining work should be planned from the contracts and vocabulary above, not from another broad refactor.</p>
+<p>Completed during this pass:</p>
+<ul>
+<li>Established three canonical workflow notebooks with visual QC.</li>
+<li>Added CI execution for the canonical notebooks.</li>
+<li>Added explicit WellClass-to-GaP permeability inputs.</li>
+<li>Fixed feet-to-metre normalization before TVD derivation.</li>
+<li>Fixed discontinuous-hole validation and cement-material preservation.</li>
+<li>Added pressure, PVT, plug, intersection, CARFIN, mesh-material, and grid-boundary tests.</li>
+<li>Removed broken legacy documentation links and pinned the compatible MkDocs documentation stack.</li>
+</ul>
+<p>Known residual risks:</p>
+<ul>
+<li>Legacy aliases and terminology still exist in the adapter, CSV parser, comments, historical scripts, and old notebooks.</li>
+<li>The pressure/PVT examples use explicit illustrative assumptions where the Frigg fixture has no reservoir scenario or temperature-gradient fields.</li>
+<li>The simulator workflows still require external <code>runpflotran1.8</code>/<code>runcirrus</code> tools and are not part of the pure-Python test suite.</li>
+<li>Strict MkDocs still reports existing docstring/deprecation warnings even though the non-strict build succeeds.</li>
+<li>Overall source coverage remains low outside the paths now tested; pressure and geometry coverage is better, but plotting and simulator orchestration are not comprehensively verified.</li>
+</ul>
+<h3 id="checkpoint-2026-08-21-pressure-engine">Checkpoint: 2026-08-21 (Pressure engine)</h3>
+<p>This checkpoint confirms the GaP-first workflow intent and upgrades the canonical GaP notebook from a primitive-only demonstration to a full mesh-construction recipe.</p>
+<p>Completed during this pass:</p>
+<ul>
+<li>Upgraded <code>notebooks/02_gap_grid.ipynb</code> to run an end-to-end GaP flow from coarse grid and synthetic geometry inputs through <code>LGRBuilder</code> and GRDECL generation.</li>
+<li>Added explicit dual-mode refinement comparison in the canonical GaP notebook:</li>
+<li><code>new_way</code> (log-transition lateral refinement), and</li>
+<li><code>ali_way</code> (legacy fixed-transition refinement).</li>
+<li>Added numeric lateral-refinement diagnostics (<code>nx</code>, min/max <code>DX</code>, grading ratio, representative outer/inner transition cells).</li>
+<li>Added side-by-side visual QC of coarse versus refined meshes for both refinement modes.</li>
+<li>Added a notebook flow diagram that documents input-to-LGR transformation stages and where material/permeability assignment occurs.</li>
+<li>Set plotting in the canonical GaP notebook to blocky nearest-neighbor rendering for cell-level QC instead of visually smoothed heatmaps.</li>
+</ul>
+<p>Architecture clarifications agreed in this pass:</p>
+<ul>
+<li><strong>GaP is the core product path</strong> in this repository for grid refinement and mesh artifact generation.</li>
+<li><strong>WellClass is an upstream provider</strong> of geometry constraints and permeability assumptions to GaP.</li>
+<li><strong>Pressure/PVT are optional scenario inputs</strong> and should not be treated as required for core GaP meshing workflows.</li>
+</ul>
+<h3 id="checkpoint-2026-08-21-canonical-fixtures-and-coarse-grid-recipe">Checkpoint: 2026-08-21 (Canonical fixtures and coarse-grid recipe)</h3>
+<p>The supported JSON-to-LGR contract is now exercised with Wildcat and Smeaheia coarse-grid cases. <code>WellProcessed</code> accepts the canonical JSON fixtures, notebook 3 is parameterized by well/grid case, and the integration test covers Wildcat <code>TEMP-0</code> plus Smeaheia <code>TEMP-0</code> and <code>GEN_NOLGR_PH2</code>.</p>
+<p>GaP still consumes existing <code>.EGRID</code> and <code>.INIT</code> files for LGR construction. The first upstream coarse-grid preparation slice is now explicit in <code>CoarseGridSpec</code>, <code>build_vertical_grid_schedule</code>, and <code>write_vertical_grid_recipe</code>: it validates the vertical domain and writes a <code>TOPS</code>/<code>DZ</code> text recipe, but does not yet generate native <code>.EGRID</code>/<code>.INIT</code> files or invoke a simulator. The implementation tracker for that work is <a href="../gap_roadmap/">the GaP roadmap</a>.</p>
+<p>Refinement mode policy:</p>
+<ul>
+<li>Default and recommended mode for new workflows: <code>new_way</code>.</li>
+<li><code>ali_way</code> remains supported for legacy comparability and result back-checking.</li>
+<li>Canonical docs and examples should continue to show both modes where comparison value is high, while using <code>new_way</code> as the baseline path.</li>
+</ul>
+<h3 id="checkpoint-2026-08-23-workbook-driven-preprocessing-slice">Checkpoint: 2026-08-23 (Workbook-driven preprocessing slice)</h3>
+<p>This checkpoint keeps the GaP architecture unchanged while reducing manual setup overhead for initialization cases.</p>
+<p>Completed during this pass:</p>
+<ul>
+<li>Added a standalone preprocessing notebook:</li>
+<li><code>notebooks/04_init_case_preprocessing.ipynb</code></li>
+<li>Added reusable init-case staging helpers:</li>
+<li><code>runscripts/prepare_init_case.py</code></li>
+<li><code>runscripts/prepare_init_case_from_xlsx.py</code></li>
+<li><code>runscripts/create_well_input_workbook.py</code></li>
+<li>Added workbook parser support for user-friendly multi-sheet input decks:</li>
+<li><code>src/WellClass/libs/utils/xlsx_parser.py</code></li>
+<li>Added template governance and workbook staging regression tests:</li>
+<li><code>tests/gap/test_template_assets.py</code></li>
+<li><code>tests/gap/test_prepare_init_case_from_xlsx.py</code></li>
+</ul>
+<p>Architecture clarifications agreed in this pass:</p>
+<ul>
+<li>The workbook path is an <strong>input adapter</strong>, not a replacement for simulator-generated <code>.EGRID</code>/<code>.INIT</code>.</li>
+<li>Geometry/topology authority remains in the initialization run path (<code>TEMP-0.in</code> + GRDECL + include files).</li>
+<li>The current coarse-grid abstraction remains three-zone (<code>water</code>, <code>overburden</code>, <code>reservoir</code>) with user-configurable counts and an optional target-DZ-driven layer-count calculation.</li>
+<li>Multi-reservoir interval modeling remains a planned extension and is not yet part of the supported contract.</li>
+</ul>
+<h3 id="milestone-2026-08-25-single-reservoir-workbook-to-lgr-workflow">Milestone: 2026-08-25 (Single-reservoir workbook-to-LGR workflow)</h3>
+<p>The supported single-reservoir workflow now runs from a multi-sheet workbook through WellClass, CIRRUS initialization, and GaP LGR generation. The workbook supplies the physical well description and scenario/grid assumptions; the workflow writes a canonical <code>well_input.json</code>, parameterizes the coarse GRDECL and shared equilibration tables, runs CIRRUS to produce <code>.EGRID</code> and <code>.INIT</code>, and uses those files to generate <code>TEMP_LGR.grdecl</code> for the final simulation deck.</p>
+<p>The current contract intentionally treats wells as vertical for GaP coarse-grid sizing, while WellClass retains deviation for TVDMSL conversion and well geometry. It supports two equilibration regions, <code>overburden_water</code> and <code>CO2_column</code>, with <code>EQLNUM 1</code> assigned to water/overburden and <code>EQLNUM 2</code> to reservoir layers. Scenario-specific permeability and salinity remain configurable follow-up work. Interval-aware and multi-reservoir modeling is deferred because it requires a separate policy and equilibration design.</p>
+<h3 id="checkpoint-2026-08-24-coarse-grid-envelope-and-initialization-staging">Checkpoint: 2026-08-24 (Coarse-grid envelope and initialization staging)</h3>
+<p>The coarse-grid preparation path now includes a typed <code>CoarseGridEnvelope</code> derived from processed wells. GaP uses each well's reference X/Y position and treats wells as vertical when sizing the coarse grid; WellClass retains deviation to calculate accurate TVDMSL depths and derived well geometry.</p>
+<p>Initialization staging preserves the CIRRUS <code>co2_db_new.dat</code> database and removes the post-initialization <code>TEMP_LGR.grdecl</code> include from the staged coarse-grid GRDECL. The first simulator run produces only the coarse <code>.EGRID</code> and <code>.INIT</code>; GaP consumes those files afterward to generate LGR/CARFIN output.</p>
+<h2 id="the-main-risks">The Main Risks</h2>
+<h3 id="1-the-tested-surface-is-much-smaller-than-the-implementation">1. The tested surface is much smaller than the implementation</h3>
+<p>The current source coverage is approximately 24%: 2,702 statements, 2,064 missed. Most of the following have no meaningful tests:</p>
+<ul>
+<li>WellClass pressure modules: <code>pressure.py</code>, <code>co2_pressure.py</code>, <code>pressure_scenario.py</code>, <code>barrier_pressure.py</code>, <code>pressure_table.py</code>.</li>
+<li>WellClass plotting modules.</li>
+<li>Most LGR mesh construction: <code>grid_refine_base.py</code>, <code>LGR_bbox.py</code>, <code>LGR_grid_info.py</code>, <code>LGR2GaP.py</code>.</li>
+<li>Most CARFIN writers.</li>
+<li>CSV parsing and parts of YAML/model validation.</li>
+<li>Plug and barrier derivation.</li>
+</ul>
+<p>Passing tests currently prove input loading, a few bounding-box helpers, and the new adapter contract. They do not prove the complete simulation workflow.</p>
+<h3 id="2-the-public-api-is-split-between-two-generations">2. The public API is split between two generations</h3>
+<p>The branch has a typed, list-based <code>WellProcessed</code> model, while older notebooks and scripts still use the pandas-era constructor and names. This creates failures such as old parser imports resolving to modules and <code>Well(...)</code> receiving removed arguments.</p>
+<p>The remedy is not more compatibility aliases everywhere. Choose one canonical API, document the adapter, migrate the three canonical workflows, and then quarantine or remove old recipes deliberately.</p>
+<h3 id="3-external-runtime-dependencies-are-implicit">3. External runtime dependencies are implicit</h3>
+<p>Python dependencies are declared in <code>pyproject.toml</code>, but several workflows also require tools and artifacts that are not Python packages:</p>
+<ul>
+<li><code>runcirrus</code></li>
+<li><code>runpflotran1.8</code></li>
+<li>simulator-generated <code>.EGRID</code>, <code>.INIT</code>, and restart files</li>
+<li>Eclipse/ECL tooling used by historical scripts</li>
+<li><code>ecl</code> imports in legacy GaP notebooks/scripts</li>
+</ul>
+<p><code>resdata</code> is the current Python reader for grid files. The old <code>ecl</code>-based scripts should not be treated as supported entry points until they are isolated, documented, or removed.</p>
+<h3 id="4-input-semantics-are-not-yet-fully-explicit">4. Input semantics are not yet fully explicit</h3>
+<p>Permeability values are required at the WellClass-to-GaP boundary, but the new schema and fixtures do not consistently carry them. The adapter currently accepts explicit <code>oh_perm</code>, <code>cb_perm</code>, and <code>barrier_perm</code> values and fails when they are absent. That is better than silently inventing physics, but the long-term owner of these assumptions should be a modeled configuration object.</p>
+<p>Other semantic questions need a written contract:</p>
+<ul>
+<li>Which depth coordinate does each GaP function consume: RKB, MSL, or TVD MSL?</li>
+<li>Are intervals closed, half-open, or allowed to touch at boundaries?</li>
+<li>What should happen when a well extends beyond the grid?</li>
+<li>What is the unit of permeability and pressure at each boundary?</li>
+<li>Are casing cement intervals matched by diameter, name, or explicit identifier?</li>
+</ul>
+<p>The physical vocabulary above is part of the input contract. Every interval should also make its coordinate system, units, and role explicit. A name such as <code>top_tvd_msl</code> should not be silently interchanged with <code>top_rkb</code>, and a mesh material label should not be used as if it were a physical input type.</p>
+<h3 id="5-file-and-package-structure-obscures-the-supported-product">5. File and package structure obscures the supported product</h3>
+<p><code>src/PressCalc</code>, <code>src/WellViz</code>, <code>src/_originals</code>, historical GaP scripts, root experiments, and many notebooks coexist with the current code. This makes it hard to know what should be imported, tested, or supported.</p>
+<p>The repository needs a support classification before cleanup:</p>
+<ul>
+<li><strong>Supported</strong>: WellClass models/processing, the GaP mesh path, the five canonical notebooks, and selected CLI workflows.</li>
+<li><strong>Experimental</strong>: pressure development, plotting prototypes, simulator orchestration.</li>
+<li><strong>Historical</strong>: <code>_originals</code>, old <code>ecl</code> scripts, removed standalone applications, superseded notebooks.</li>
+</ul>
+<h2 id="recommended-plan">Recommended Plan</h2>
+<h3 id="phase-0-establish-the-truth-small-high-value">Phase 0: Establish the truth (small, high value)</h3>
+<ol>
+<li>Keep the five canonical notebooks as the only workflow recipes.</li>
+<li>Add a short support/dependency matrix to the documentation.</li>
+<li>Add a CI smoke job that runs:</li>
+<li>all Python tests;</li>
+<li>the WellClass notebook;</li>
+<li>the GaP notebook against committed grid fixtures;</li>
+<li>the end-to-end notebook and checks that a GRDECL file is written.</li>
+<li>Make test output distinguish pure-Python tests from simulator-required tests.</li>
+<li>Record the exact Python version and <code>uv.lock</code> environment in CI.</li>
+</ol>
+<p><strong>Exit criterion:</strong> a fresh environment can say, automatically, which part of the workflow works and which external tool is missing.</p>
+<p><strong>Status:</strong> substantially complete. The canonical notebook CI smoke workflow exists and runs with <code>uv.lock</code>; simulator dependency reporting and dry-run behavior remain.</p>
+<h3 id="phase-1-lock-down-the-wellclass-contract">Phase 1: Lock down the WellClass contract</h3>
+<ol>
+<li>Add parameterized vertical wells: no casing, one casing, multiple casing overlaps, cement gaps, plugs, and no survey.</li>
+<li>Add one deviated-well fixture with expected MD-to-TVD values.</li>
+<li>Test unit conversion from feet to meters.</li>
+<li>Test invalid intervals and invalid Pydantic values.</li>
+<li>Test <code>WellProcessed</code> output schemas and numeric tolerances.</li>
+<li>Move permeability and other modeling assumptions into an explicit configuration model.</li>
+</ol>
+<p><strong>Exit criterion:</strong> WellClass can be trusted independently of GaP and produces documented, stable records.</p>
+<p><strong>Status:</strong> core geometry, unit, validation, plug, pressure, and PVT contracts are covered. Remaining work is broader deviated-well and pressure/PVT scenario coverage plus explicit modeling assumptions.</p>
+<h3 id="phase-2-test-gap-as-a-pure-transformation">Phase 2: Test GaP as a pure transformation</h3>
+<ol>
+<li>Unit-test bounding boxes and interval-to-grid-index conversion at top, bottom, and boundary depths.</li>
+<li>Test LGR size calculations with small synthetic grids.</li>
+<li>Test material assignment for open hole, annulus, cement, and barrier cells.</li>
+<li>Test CARFIN writers as text transformations: key sections, indices, dimensions, and output closure.</li>
+<li>Use a tiny committed <code>.EGRID</code>/<code>.INIT</code> fixture for one integration test.</li>
+<li>Remove or fix the current mutable-dataframe behavior in mesh builders after tests characterize it.</li>
+</ol>
+<p><strong>Exit criterion:</strong> GaP can prove that a known dataframe and grid produce a known mesh artifact without running PFLOTRAN/Cirrus.</p>
+<p><strong>Status:</strong> substantially complete for current bounding-box, material, CARFIN, and end-to-end smoke paths. A smaller committed grid fixture and broader material edge cases remain.</p>
+<h3 id="phase-3-make-the-boundary-intentional">Phase 3: Make the boundary intentional</h3>
+<ol>
+<li>Rename <code>WellDataFrame</code> to a clearly transitional adapter or move it into a GaP input module.</li>
+<li>Define a typed GaP input record instead of passing loosely specified DataFrames everywhere.</li>
+<li>Migrate GaP functions from legacy <code>drilling_df</code> terminology to <code>holes_df</code> or typed hole records.</li>
+<li>Keep conversion to pandas at the last possible boundary, if pandas remains useful.</li>
+<li>Add one end-to-end test comparing the current and refactored vertical-well geometry.</li>
+</ol>
+<p><strong>Exit criterion:</strong> WellClass does not know GaP’s historical dataframe vocabulary, and GaP has one documented input contract.</p>
+<p><strong>Status:</strong> in progress. Canonical aliases and internal <code>holes_df</code>/<code>barrier_regions_df</code> names exist, but legacy aliases and dataframe contracts are still present.</p>
+<h3 id="phase-4-clarify-operational-workflows">Phase 4: Clarify operational workflows</h3>
+<ol>
+<li>Separate pure file generation from simulator execution.</li>
+<li>Replace <code>os.system</code> with a small subprocess runner that checks executable availability, return codes, and captured logs.</li>
+<li>Put simulator-dependent commands behind explicit CLI options or markers.</li>
+<li>Make output directories temporary by default and avoid mutating input fixtures.</li>
+<li>Add a dry-run mode that validates paths and writes planned commands without executing them.</li>
+</ol>
+<p><strong>Exit criterion:</strong> a user can run a dry run anywhere and a full run only when the simulator prerequisites are installed.</p>
+<h3 id="backlog-wellclass-pressure-scenario-engine">Backlog: WellClass pressure scenario engine</h3>
+<p>WellClass should stay a single object a user can: (1) build well geometry from for both plotting and GaP input, (2) compute brine and CO2 pressure profiles under different scenario definitions, and (3) retrieve key pressure values at specific depths for reporting or later simulation input. Part 1 is done (<code>WellProcessed</code>).</p>
+<p>Parts 2/3 are now implemented as a collections-based (no pandas) engine. <code>Pressure</code> owns one or more named <code>PressureTable</code> objects (well-level background curves: temperature, hydrostatic pressure, Shmin) and one or more named <code>PressureScenario</code> objects. Scenarios use their selected table while retaining their own <code>brine_pressure</code>/<code>fluid_pressure</code> arrays and resolved metadata: <code>z_fluid_datum</code>/<code>p_fluid_datum</code>, <code>z_store</code>/<code>p_store</code>, <code>p_delta</code>, and <code>z_MSAD</code>/<code>p_MSAD</code>.</p>
+<p>The supported scenario anchors are:</p>
+<ol>
+<li>Fluid datum only, or fluid datum plus an explicit datum pressure or <code>p_delta</code>.</li>
+<li>A shallower store pressure pair, which anchors integration and derives the datum pressure at a supplied datum depth.</li>
+<li><code>z_MSAD</code>, where <code>p_MSAD = Shmin(z_MSAD)</code> anchors integration; an optional <code>z_store</code> queries the resulting fluid pressure, and can become the datum when no datum is supplied.</li>
+</ol>
+<p><code>PressureScenario.display_curves()</code> keeps complete calculated arrays available while returning full-depth brine plus the display-only fluid segment from MSAD to datum, with exact interpolated endpoints. <code>Pressure</code> may be constructed from a WellClass header or from explicit ground elevation, total depth, and RKB reference values.</p>
+<p>Remaining/deferred:</p>
+<ol>
+<li>A <code>get_values_at_depth(depth)</code>-style accessor on <code>PressureScenario</code> (mirroring <code>PressureTable.get_values_at_depth</code>) so specific brine/CO2 pressure values can be pulled out without re-deriving the whole profile.</li>
+<li>Explicitly deferred: phase-envelope/fluid-composition-aware variable-density PVT (multiple mixtures, bubble/dew-point detection, brine salinity correction) — keep the current single-fluid (<code>"co2"</code>) variable-density integration until there is a concrete need.</li>
+<li><code>barrier_pressure.py</code>'s <code>compute_barrier_leakage</code> was left disconnected — it referenced a legacy <code>Well</code> API (<code>well.barrier_perm</code>, <code>well.compute_barrier_props</code>) that no longer exists, and was removed from <code>Pressure</code>. Re-wiring barrier leakage estimation against the current <code>Well</code>/<code>WellProcessed</code> API is separate future work.</li>
+</ol>
+<p><strong>Exit criterion:</strong> a WellClass user can define 2+ named pressure scenarios from a well and read back brine/CO2 pressure at a chosen depth, with test coverage, without pandas and without GaP involvement. Met except for the <code>get_values_at_depth</code> accessor.</p>
+<p><strong>Status:</strong> substantially complete. <code>Pressure</code>/<code>PressureScenario</code>/<code>PressureTable</code> are implemented, tested (<code>tests/well_class/test_pressure.py</code>, <code>tests/well_class/test_pressure_table.py</code>), and demonstrated in <code>01_wellclass.ipynb</code> through datum, explicit-datum-pressure, store-anchored, and MSAD-anchored scenarios.</p>
+<h3 id="checkpoint-2026-08-21">Checkpoint: 2026-08-21</h3>
+<p>The WellClass pressure path now has a coherent object boundary: <code>Pressure</code> owns background tables; <code>PressureScenario</code> owns its resolved anchor metadata and calculated fluid/brine curves. This is the point to pause pressure API expansion. The next pressure increment should be the small read-only <code>get_values_at_depth</code> accessor, not another anchor type or PVT model. Bundled CO2 PVT constants now live in package-owned data and are the normal <code>Pressure</code> default; <code>pvt_path</code> remains an explicit override for alternative collections.</p>
+<h3 id="phase-5-reduce-historical-noise">Phase 5: Reduce historical noise</h3>
+<p>Only after the supported path is tested:</p>
+<ol>
+<li>Archive superseded notebooks and scripts outside the primary navigation.</li>
+<li>Remove dead modules only when imports and documentation no longer reference them.</li>
+<li>Delete stale comments that describe the old Well API.</li>
+<li>Update README and MkDocs navigation to the canonical recipes.</li>
+<li>Keep original data/code in a clearly labeled archive or separate history if it is still useful for provenance.</li>
+</ol>
+<h2 id="issue-candidates">Issue Candidates</h2>
+<p>These are good discrete issues, ordered by leverage:</p>
+<ol>
+<li><strong>Add CI notebook smoke tests for the canonical recipes.</strong></li>
+<li><strong>Document the WellClass-to-GaP dataframe contract and units.</strong></li>
+<li><strong>Add vertical and deviated WellProcessed geometry fixtures.</strong></li>
+<li><strong>Cover LGR bounding-box boundary cases.</strong></li>
+<li><strong>Cover CARFIN output writers with golden text fixtures.</strong></li>
+<li><strong>Model permeability assumptions explicitly.</strong></li>
+<li><strong>Add a simulator dependency check and dry-run mode.</strong></li>
+<li><strong>Migrate GaP mesh functions away from legacy <code>drilling_df</code> naming.</strong></li>
+<li><strong>Classify and archive historical modules and notebooks.</strong></li>
+<li><strong>Update README/MkDocs around the three supported workflows.</strong></li>
+<li><strong>Publish and enforce the wellbore physical vocabulary.</strong></li>
+<li><strong>Rename the WellClass-to-GaP boundary from drilling/casings/barriers to holes/casings/barrier regions.</strong></li>
+<li><strong>Build a collections-based, multi-scenario WellClass pressure engine (brine + CO2, key-depth lookups) — see the pressure scenario engine backlog above.</strong></li>
+</ol>
+<h2 id="decision-rules">Decision Rules</h2>
+<p>To avoid bloat:</p>
+<ul>
+<li>Do not add an abstraction unless a test demonstrates a repeated boundary or a real ownership problem.</li>
+<li>Prefer fixtures and contract tests over large snapshot files.</li>
+<li>Prefer pure functions for geometry and text generation.</li>
+<li>Keep simulator execution outside unit tests.</li>
+<li>Make units and coordinate systems visible in names or types.</li>
+<li>Fail at the boundary when required physics inputs are missing.</li>
+<li>Do not preserve an old API indefinitely without a migration owner and removal date.</li>
+<li>Every new workflow recipe must either become one of the canonical three or be clearly labeled experimental.</li>
+</ul>
+<h2 id="first-three-work-items">First Three Work Items</h2>
+<p>If only three items can be done next, do these:</p>
+<ol>
+<li><strong>CI smoke test the canonical notebooks and the end-to-end GRDECL artifact.</strong></li>
+<li><strong>Add WellClass geometry contract tests for vertical, deviated, unit-converted, and invalid wells.</strong></li>
+<li><strong>Add GaP transformation tests for bounding boxes, material assignment, and CARFIN text.</strong></li>
+</ol>
+<p>The next naming task after these tests is to create a small typed boundary model or named adapter result using the vocabulary above. Do not start with a global search-and-replace; use the adapter and its tests to make each rename observable.</p>
+<p>Those three create the feedback loop needed to improve the rest of the repository without guessing whether behavior changed.</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["search.suggest", "search.highlight", "content.tabs.link", "navigation.indexes", "content.tooltips", "navigation.path", "content.code.annotate", "content.code.copy", "content.code.select"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.cd18aaf1.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10.9.0/dist/mermaid.min.js"></script>
+      
+    
+  </body>
+</html>
