@@ -12,7 +12,7 @@ from prepare_init_case import stage_case
 from prepare_init_case_from_xlsx import derive_stage_args_from_policy, parameterize_staged_deck
 
 from src.GaP.libs.cirrus_backend import CirrusBackend
-from src.WellClass.libs.utils import xlsx_grid_policy, xlsx_to_well_model
+from src.WellClass.libs.utils import xlsx_grid_policy, xlsx_to_simulation_design, xlsx_to_well_model
 
 
 def parse_args() -> argparse.Namespace:
@@ -48,11 +48,12 @@ def run_workflow(args: argparse.Namespace) -> Path:
     backend = CirrusBackend(args.sim_command)
     policy = xlsx_grid_policy(args.xlsx)
     model = xlsx_to_well_model(args.xlsx)
+    scenario = xlsx_to_simulation_design(args.xlsx).select()
     stage_args = derive_stage_args_from_policy(args, policy)
     deck_path, grdecl_path, _ = stage_case(stage_args)
 
     args.final_run = False
-    parameterize_staged_deck(args, policy, model)
+    parameterize_staged_deck(args, policy, model.spec.well_header, scenario)
     output_json = args.output_root / "well_input.json"
     output_json.parent.mkdir(parents=True, exist_ok=True)
     output_json.write_text(json.dumps(model.model_dump(mode="json"), indent=2), encoding="utf-8")
@@ -75,7 +76,7 @@ def run_workflow(args: argparse.Namespace) -> Path:
     lgr_path = build_lgr(lgr_args)
 
     args.final_run = True
-    parameterize_staged_deck(args, policy, model)
+    parameterize_staged_deck(args, policy, model.spec.well_header, scenario)
     print(f"Generated LGR: {lgr_path}")
     if args.run_final:
         print(f"Running final CIRRUS simulation: {deck_path}")

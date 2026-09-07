@@ -22,7 +22,7 @@ import numpy as np
 from prepare_init_case import run_initialization, stage_case
 
 from src.GaP.libs.deck_config import CirrusDeckParameters, parameterize_cirrus_deck
-from src.WellClass.libs.utils import xlsx_grid_policy, xlsx_to_well_model
+from src.WellClass.libs.utils import xlsx_grid_policy, xlsx_to_simulation_design, xlsx_to_well_model
 from src.WellClass.libs.well_pressure.pressure_table import PressureTable
 
 
@@ -153,11 +153,10 @@ def _add_years(start_date: date, years: int) -> date:
         return start_date.replace(month=2, day=28, year=start_date.year + years)
 
 
-def parameterize_staged_deck(args: argparse.Namespace, policy: dict, model) -> None:
+def parameterize_staged_deck(args: argparse.Namespace, policy: dict, well_header, scenario) -> None:
     start_date = date.fromisoformat(str(policy.get("start_date", args.start_date)))
     final_date = _add_years(start_date, args.simulation_years) if args.final_run else start_date
-    scenarios = model.spec.subsurface_assumptions.scenarios if model.spec.subsurface_assumptions else []
-    assumptions = scenarios[0].model_dump(exclude_none=True) if scenarios else {}
+    assumptions = scenario.model_dump(exclude_none=True)
     seafloor_depth = float(policy["water_depth"])
     reservoir_top = float(policy["reservoir_top"])
     overburden_datum_depth = float(assumptions.get("overburden_datum_depth", (seafloor_depth + reservoir_top) / 2))
@@ -166,7 +165,7 @@ def parameterize_staged_deck(args: argparse.Namespace, policy: dict, model) -> N
     pressure_table = PressureTable(
         name="cirrus_overburden",
         depth=np.arange(0.0, overburden_datum_depth + 10.0, 10.0),
-        ground_elevation=float(model.spec.well_header.ground_elevation),
+        ground_elevation=float(well_header.ground_elevation),
         ground_temperature=float(assumptions.get("ground_temperature", 4.0)),
         geothermal_gradient=float(assumptions.get("temperature_gradient", 31.0)),
     )
@@ -196,9 +195,10 @@ def main() -> int:
 
     policy = xlsx_grid_policy(args.xlsx)
     well_model = xlsx_to_well_model(args.xlsx)
+    scenario = xlsx_to_simulation_design(args.xlsx).select()
     stage_args = derive_stage_args_from_policy(args, policy)
     output_deck, output_grdecl, output_tops = stage_case(stage_args)
-    parameterize_staged_deck(args, policy, well_model)
+    parameterize_staged_deck(args, policy, well_model.spec.well_header, scenario)
 
     print("Staged initialization case files from workbook:")
     print(f"  deck:   {output_deck}")

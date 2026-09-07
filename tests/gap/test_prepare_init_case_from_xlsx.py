@@ -4,7 +4,7 @@ import sys
 
 import pandas as pd
 
-from src.WellClass.libs.utils.xlsx_parser import xlsx_grid_policy
+from src.WellClass.libs.utils.xlsx_parser import xlsx_grid_policy, xlsx_to_simulation_design, xlsx_to_well_model
 
 
 def _write_minimal_workbook(path: Path) -> None:
@@ -104,6 +104,18 @@ def test_prepare_init_case_from_xlsx_stages_files(tmp_path):
     assert "PERMX 0.01 1 20 1 20 65 67 /" in grdecl_text
     assert "TRANZ 0 1 20 1 20 18 18 /" in grdecl_text
     assert "PERMZ 0.1 1 20 1 20 3 67 /" in grdecl_text
+
+
+def test_workbook_keeps_simulation_assumptions_outside_well_model(tmp_path):
+    workbook = tmp_path / "well_input.xlsx"
+    _write_minimal_workbook(workbook)
+
+    well_model = xlsx_to_well_model(workbook)
+    scenario = xlsx_to_simulation_design(workbook).select()
+
+    assert well_model.spec.subsurface_assumptions is None
+    assert scenario.z_fluid_contact == 2400.0
+    assert scenario.p_fluid_contact == 210.0
 
 
 def test_prepare_init_case_from_xlsx_configures_final_run(tmp_path):
