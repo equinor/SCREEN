@@ -63,6 +63,8 @@ python runscripts/run_workbook_to_cirrus_lgr.py \
 
 It stages the workbook, runs CIRRUS initialization, verifies `.EGRID` and `.INIT`, writes `TEMP_LGR.grdecl`, and configures the same deck for its final run. Add `--run-final` only when the final CIRRUS simulation should be launched immediately.
 
+The wrapper validates that the configured CIRRUS executable is available before running. It writes captured output for each phase to `case/logs/initialization.log` and, when `--run-final` is used, `case/logs/final.log`. Errors report the log path, exit code, and whether the required `.EGRID`/`.INIT` files were found.
+
 ## Grid Build Pipeline (Canonical)
 
 The supported simulator-facing workflow is intentionally explicit:

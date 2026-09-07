@@ -5,14 +5,13 @@ from __future__ import annotations
 
 import argparse
 import json
-import shlex
-import subprocess
 from pathlib import Path
 
 from build_lgr_from_json import build_lgr
 from prepare_init_case import stage_case
 from prepare_init_case_from_xlsx import derive_stage_args_from_policy, parameterize_staged_deck
 
+from src.GaP.libs.cirrus_backend import CirrusBackend
 from src.WellClass.libs.utils import xlsx_grid_policy, xlsx_to_well_model
 
 
@@ -34,14 +33,6 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def run_simulator(command_template: str, deck_path: Path) -> None:
-    deck_path = deck_path.resolve()
-    command = command_template.format(deck=shlex.quote(str(deck_path)))
-    result = subprocess.run(command, shell=True, cwd=deck_path.parent, check=False)
-    if result.returncode != 0:
-        raise RuntimeError(f"CIRRUS command failed with exit code {result.returncode}")
-
-
 def find_simulator_case(output_root: Path, deck_path: Path) -> Path:
     prefix = deck_path.with_suffix("")
     candidates = (prefix, output_root / "model" / "TEMP-0", output_root / "TEMP-0")
@@ -54,6 +45,7 @@ def find_simulator_case(output_root: Path, deck_path: Path) -> Path:
 
 
 def run_workflow(args: argparse.Namespace) -> Path:
+    backend = CirrusBackend(args.sim_command)
     policy = xlsx_grid_policy(args.xlsx)
     model = xlsx_to_well_model(args.xlsx)
     stage_args = derive_stage_args_from_policy(args, policy)
@@ -66,7 +58,8 @@ def run_workflow(args: argparse.Namespace) -> Path:
     output_json.write_text(json.dumps(model.model_dump(mode="json"), indent=2), encoding="utf-8")
 
     print(f"Running CIRRUS initialization: {deck_path}")
-    run_simulator(args.sim_command, deck_path)
+    initialization = backend.run(deck_path, phase="initialization", require_grid_outputs=True)
+    print(f"CIRRUS initialization log: {initialization.log_path}")
     sim_case = find_simulator_case(args.output_root, deck_path)
 
     lgr_args = argparse.Namespace(
@@ -86,7 +79,8 @@ def run_workflow(args: argparse.Namespace) -> Path:
     print(f"Generated LGR: {lgr_path}")
     if args.run_final:
         print(f"Running final CIRRUS simulation: {deck_path}")
-        run_simulator(args.sim_command, deck_path)
+        final_run = backend.run(deck_path, phase="final")
+        print(f"CIRRUS final-run log: {final_run.log_path}")
     else:
         print("Final CIRRUS run not requested; deck is configured and ready.")
     return lgr_path
