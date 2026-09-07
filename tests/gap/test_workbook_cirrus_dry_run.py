@@ -35,6 +35,8 @@ def test_workbook_wrapper_runs_full_dry_run_without_cirrus(tmp_path):
             "--run-final",
             "--simulation-years",
             "0",
+            "--case-name",
+            "baseline",
         ],
         cwd=root,
         check=True,
