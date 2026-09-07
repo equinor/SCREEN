@@ -66,8 +66,17 @@ The single-reservoir workflow is complete for the current contract. The next cha
 - Support separate PFLOTRAN and CIRRUS input/output backends.
 - Add a small committed synthetic grid for pure-Python tests.
 - Replace hard-coded permeability and cell-size assumptions with modeled configuration.
-- Design scenario-specific permeability and salinity overrides as a separate layer from the physical well description.
+- Design a first-class **design matrix** for one physical wellbore. A `DesignMatrix` workbook sheet should use one named case per row and common columns for potentially variable parameters. For example, a 20-column table can hold `case_name` plus 19 parameters such as initial/contact pressure, casing-hole geometry, cement permeability, grid policy, or salinity. Ten rows must produce ten separate reproducible simulation cases, each with its own parameterized deck/GRDECL, LGR output, logs, and results. Define precedence as: item-specific well override -> selected design-matrix value -> documented default.
+    - WellClass pressure scenarios currently support multiple calculation/plotting cases, but the workbook staging path selects only the first `SubsurfaceAssumptions` row. A selected scenario must instead propagate its pressure/contact values into CIRRUS `EQUILIBRATION` cards and its physical-property assumptions into CARFIN/GRDECL generation.
+    - Keep the physical well description shared and immutable across scenarios. Scenario selections must not rewrite the canonical well JSON; they should produce isolated output directories such as `<output-root>/<scenario-name>/`.
+    - Start with single-reservoir scenario variants. Interval-aware/multi-reservoir selection remains a separate later design.
 - Design interval-aware and multi-reservoir policies only after the single-reservoir contract is stable; they are explicitly out of scope for the current milestone.
+- Migrate GaP-owned grid and LGR modules from `src/WellClass/libs/grid_utils/` into `src/GaP/libs/`, keeping `WellDataFrame` as an explicit compatibility adapter until callers have migrated. Preserve temporary re-exports so the tested workflow remains stable during the move.
+- Model explicit wellbore-defect scenarios as simulation inputs separate from the physical well description. The workbook should describe casing holes (default or explicit diameter) and cement defects: channel/hole diameter, fracture opening, or microannulus geometry. WellClass should display these scenarios in sketches without changing the base well geometry. GaP/CARFIN should own their grid-property representation:
+    - casing holes: a localized transmissibility variation replacing the default zero casing transmissibility, with a geometric area-based multiplier considered as a candidate model;
+    - cement channels/holes, microannuli, and fractures: use literature-backed relationships to derive an effective permeability from the channel diameter, microannulus size, or fracture opening. This approach may combine low-permeability cement with a high-permeability defect contribution and assign the resulting effective value to the full cement-plug region;
+    - cement channels/holes: alternatively represent the defect explicitly as a high-permeability column of grid cells within the cement-plug region while retaining the cement permeability elsewhere. When the channel cross-sectional area is smaller than the cell `DX * DY` area, derive the cell porosity, vertical transmissibility, and permeability consistently from the sub-cell geometry.
+    Validate each defect representation against CIRRUS transmissibility conventions and literature before treating the proposed relationships as supported physics.
 
 ## Boundaries
 
