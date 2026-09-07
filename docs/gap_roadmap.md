@@ -46,18 +46,18 @@ Completed coarse-grid preparation slices:
 - Smeaheia validation completed on a CIRRUS-enabled Linux host: the 10-year run used `FINAL_DATE 1 JAN 2035` and produced `.EGRID`, `.INIT`, and `TEMP_LGR.grdecl`. The generated deck used `DATUM_D = WGC_D = 1282.5 m` and `PRESSURE = 129.99 Bar`.
 - Notebook 3 supports an optional generated-grid mode: it can consume a completed workbook-wrapper output directory while fixture mode remains deterministic for CI.
 - The complete workbook wrapper has simulator-free dry-run coverage: a fake CIRRUS executable supplies a valid coarse `.EGRID`/`.INIT` pair, then the test verifies LGR creation, final-deck configuration, and both captured logs.
+- A pure-Python coverage report compares a required `CoarseGridEnvelope` with explicit grid bounds, reports directional missing margins, and summarizes optional cell sizes:
+    - `src/WellClass/libs/grid_utils/coverage.py`
+    - `tests/gap/test_grid_coverage.py`
+- `CirrusBackend` makes executable availability, resolved commands, phase logs, exit codes, and initialization outputs explicit for the workbook wrapper:
+    - `src/GaP/libs/cirrus_backend.py`
+    - `tests/gap/test_cirrus_backend.py`
 
 These helpers do not create native `.EGRID`/`.INIT` files unless an external simulator command is explicitly supplied.
 
 ## Next
 
-1. Add a pure-Python coverage report for an existing grid or grid specification:
-   - required well envelope;
-   - grid extents;
-   - missing margins;
-   - cell-size summary;
-   - warnings and failure reasons.
-2. Define a simulator backend interface that consumes the generated recipe and reports executable availability, command, logs, and output paths.
+The single-reservoir workflow is complete for the current contract. The next changes require separate scenario-policy design rather than incremental plumbing.
 
 ## Later
 
