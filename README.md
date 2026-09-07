@@ -172,6 +172,71 @@ Another sub-directory `frigg` contains information for testing deviated wells.
 
 In addition, the **PVT** values are included in the directory `pvt_contants` for self-consistent testing of pressure-related computes.
 
+## Multi-scenario workbook workflow
+
+Workbook inputs can contain multiple simulation scenarios in the
+`SubsurfaceAssumptions` sheet. Each row must have a unique `case_name`.
+The remaining workbook sheets describe the physical well and grid policy and
+are shared by all scenarios.
+
+Create a starter workbook with one or more named scenarios:
+
+```bash
+uv run python runscripts/create_well_input_workbook.py \
+    --output work/design_matrix.xlsx \
+    --scenarios baseline hot_case conservative
+```
+
+The command creates progressively varied example assumptions. For production
+work, open the workbook and replace those values with the scenarios to study.
+Example Wildcat and Smeaheia workbooks with multiple scenarios can be
+regenerated with:
+
+```bash
+uv run python runscripts/create_example_well_workbooks.py
+```
+
+Run one scenario through the workbook -> CIRRUS -> GaP LGR workflow by naming
+the case explicitly:
+
+```bash
+uv run python runscripts/run_workbook_to_cirrus_lgr.py \
+    --xlsx work/design_matrix.xlsx \
+    --output-root work/results/baseline \
+    --template-root test_data/examples/wildcat-pflotran \
+    --sim-command 'cirrus {deck}' \
+    --case-name baseline \
+    --run-final
+```
+
+To execute every scenario, use the batch wrapper. It creates one output
+directory per `case_name`:
+
+```bash
+uv run python runscripts/run_workbook_scenarios_batch.py \
+    --xlsx work/design_matrix.xlsx \
+    --output-root work/results \
+    --template-root test_data/examples/wildcat-pflotran \
+    --sim-command 'cirrus {deck}' \
+    --run-final
+```
+
+The resulting layout is:
+
+```text
+work/results/
+├── baseline/
+│   ├── include/
+│   ├── model/
+│   └── well_input.json
+├── hot_case/
+└── conservative/
+```
+
+The simulator command must accept the staged deck path in place of `{deck}`.
+Use `--case-name` with the single-scenario script when the workbook does not
+contain a scenario named `default`.
+
 ## Unit testing and code coverage
 We are using `pytest` for unit testing and code coverage. The unit testing utilizes `wildcat` as the testing example. So please make sure the saved .pkl files in ```test_data/examples/wildcat/pytest``` exists and is updated. Here is a commandline example:
 ```pyton
