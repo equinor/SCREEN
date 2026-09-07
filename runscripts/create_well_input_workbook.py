@@ -12,7 +12,46 @@ import pandas as pd
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True, help="Path to output .xlsx file.")
+    parser.add_argument(
+        "--scenarios",
+        type=str,
+        nargs="+",
+        default=["default"],
+        help="Scenario case names (generates progressively hotter scenarios; default: [default]).",
+    )
     return parser.parse_args()
+
+
+def _generate_scenario_variations(
+    scenario_names: list[str],
+    base_gradient: float = 31.0,
+    base_ground_temp: float = 4.0,
+    base_fluid_contact: float = 2400.0,
+    base_fluid_pressure: float = 245.0,
+) -> pd.DataFrame:
+    """Generate scenario variations with progressively higher geothermal gradients."""
+    scenarios = []
+    for i, name in enumerate(scenario_names):
+        # Progressively increase gradient and temperature
+        temp_gradient = base_gradient + i * 5.0
+        ground_temp = base_ground_temp + i * 1.0
+        # Slightly vary fluid contact for diversity
+        z_fluid = base_fluid_contact - i * 25.0
+        p_fluid = base_fluid_pressure + i * 5.0
+
+        scenarios.append(
+            {
+                "case_name": name,
+                "temperature_gradient": temp_gradient,
+                "ground_temperature": ground_temp,
+                "fluid_type": "co2",
+                "z_fluid_contact": z_fluid,
+                "p_fluid_contact": p_fluid,
+                "z_resrv": z_fluid + 50.0,
+                "p_resrv": p_fluid + 5.0,
+            }
+        )
+    return pd.DataFrame(scenarios)
 
 
 def main() -> int:
@@ -84,17 +123,7 @@ def main() -> int:
             "unit_perm": [None, None],
         }
     )
-    assumptions = pd.DataFrame(
-        {
-            "temperature_gradient": [31.0],
-            "ground_temperature": [4.0],
-            "fluid_type": ["co2"],
-            "z_fluid_contact": [2400.0],
-            "p_fluid_contact": [245.0],
-            "z_resrv": [2450.0],
-            "p_resrv": [250.0],
-        }
-    )
+    assumptions = _generate_scenario_variations(args.scenarios)
 
     with pd.ExcelWriter(args.output, engine="openpyxl") as writer:
         metadata.to_excel(writer, sheet_name="Metadata", index=False)
@@ -105,7 +134,9 @@ def main() -> int:
         stratigraphy.to_excel(writer, sheet_name="Stratigraphy", index=False)
         assumptions.to_excel(writer, sheet_name="SubsurfaceAssumptions", index=False)
 
-    print(f"Created workbook template: {args.output}")
+    scenario_str = ", ".join(args.scenarios)
+    print(f"Created workbook template with {len(args.scenarios)} scenario(s): {scenario_str}")
+    print(f"  Output: {args.output}")
     return 0
 
 
