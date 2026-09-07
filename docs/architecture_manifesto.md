@@ -206,6 +206,8 @@ Architecture clarifications agreed in this pass:
 
 The supported JSON-to-LGR contract is now exercised with Wildcat and Smeaheia coarse-grid cases. `WellProcessed` accepts the canonical JSON fixtures, notebook 3 is parameterized by well/grid case, and the integration test covers Wildcat `TEMP-0` plus Smeaheia `TEMP-0` and `GEN_NOLGR_PH2`.
 
+Canonical well fixtures live under `test_data/examples/`: Wildcat, Smeaheia, Frigg, and Simple Well JSON files must process through `WellProcessed`. The Smeaheia simulator fixtures in that directory are the supported test and workflow assets. The divergent `src/GaP/data/smeaheia*` cases remain historical package experiments and are not canonical inputs for new workflows.
+
 GaP still consumes existing `.EGRID` and `.INIT` files for LGR construction. The first upstream coarse-grid preparation slice is now explicit in `CoarseGridSpec`, `build_vertical_grid_schedule`, and `write_vertical_grid_recipe`: it validates the vertical domain and writes a `TOPS`/`DZ` text recipe, but does not yet generate native `.EGRID`/`.INIT` files or invoke a simulator. The implementation tracker for that work is [the GaP roadmap](gap_roadmap.md).
 
 Refinement mode policy:
