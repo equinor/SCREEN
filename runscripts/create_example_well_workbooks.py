@@ -25,15 +25,28 @@ EXAMPLES = {
             "min_overburden_layers": 1,
             "min_reservoir_layers": 1,
         },
-        "assumptions": {
-            "temperature_gradient": 31.0,
-            "ground_temperature": 4.0,
-            "fluid_type": "co2",
-            "z_fluid_contact": 2400.0,
-            "p_fluid_contact": 245.0,
-            "z_resrv": 2450.0,
-            "p_resrv": 250.0,
-        },
+        "scenarios": [
+            {
+                "case_name": "baseline",
+                "temperature_gradient": 31.0,
+                "ground_temperature": 4.0,
+                "fluid_type": "co2",
+                "z_fluid_contact": 2400.0,
+                "p_fluid_contact": 245.0,
+                "z_resrv": 2450.0,
+                "p_resrv": 250.0,
+            },
+            {
+                "case_name": "hot_case",
+                "temperature_gradient": 36.0,
+                "ground_temperature": 5.0,
+                "fluid_type": "co2",
+                "z_fluid_contact": 2375.0,
+                "p_fluid_contact": 250.0,
+                "z_resrv": 2425.0,
+                "p_resrv": 255.0,
+            },
+        ],
     },
     "smeaheia": {
         "json": Path("test_data/examples/smeaheia/smeaheia.json"),
@@ -51,15 +64,28 @@ EXAMPLES = {
             "min_overburden_layers": 1,
             "min_reservoir_layers": 1,
         },
-        "assumptions": {
-            "temperature_gradient": 31.0,
-            "ground_temperature": 4.0,
-            "fluid_type": "co2",
-            "z_fluid_contact": 1282.5,
-            "p_fluid_contact": 129.99,
-            "z_resrv": 1282.5,
-            "p_resrv": 129.99,
-        },
+        "scenarios": [
+            {
+                "case_name": "baseline",
+                "temperature_gradient": 31.0,
+                "ground_temperature": 4.0,
+                "fluid_type": "co2",
+                "z_fluid_contact": 1282.5,
+                "p_fluid_contact": 129.99,
+                "z_resrv": 1282.5,
+                "p_resrv": 129.99,
+            },
+            {
+                "case_name": "conservative",
+                "temperature_gradient": 26.0,
+                "ground_temperature": 3.0,
+                "fluid_type": "co2",
+                "z_fluid_contact": 1300.0,
+                "p_fluid_contact": 131.0,
+                "z_resrv": 1300.0,
+                "p_resrv": 131.0,
+            },
+        ],
     },
 }
 
@@ -82,6 +108,7 @@ def create_workbook(example: dict) -> Path:
                 "Survey is optional: leave it empty for vertical wells or add md_rkb, inclination_deg, and azimuth_deg rows for deviation.",
                 "GridPolicy and SubsurfaceAssumptions are editable example scenario values and must be reviewed for a real case.",
                 "z_fluid_contact and p_fluid_contact define the GAS_WATER datum and WGC depth in CIRRUS.",
+                "Multiple rows in SubsurfaceAssumptions define a design matrix of scenarios that can be run with --case-name selection.",
             ]
         }
     )
@@ -93,7 +120,7 @@ def create_workbook(example: dict) -> Path:
         pd.DataFrame(spec.get("hole_casings", [])).to_excel(writer, sheet_name="HoleCasings", index=False)
         pd.DataFrame(spec.get("plugs", [])).to_excel(writer, sheet_name="Plugs", index=False)
         pd.DataFrame(spec.get("stratigraphy", [])).to_excel(writer, sheet_name="Stratigraphy", index=False)
-        pd.DataFrame([example["assumptions"]]).to_excel(writer, sheet_name="SubsurfaceAssumptions", index=False)
+        pd.DataFrame(example["scenarios"]).to_excel(writer, sheet_name="SubsurfaceAssumptions", index=False)
         notes.to_excel(writer, sheet_name="Notes", index=False)
     return output
 
