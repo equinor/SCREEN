@@ -65,6 +65,8 @@ It stages the workbook, runs CIRRUS initialization, verifies `.EGRID` and `.INIT
 
 The wrapper validates that the configured CIRRUS executable is available before running. It writes captured output for each phase to `case/logs/initialization.log` and, when `--run-final` is used, `case/logs/final.log`. Errors report the log path, exit code, and whether the required `.EGRID`/`.INIT` files were found.
 
+Notebook 3 also supports an optional generated-grid mode for visual QC after a wrapper run. Set `input_mode = 'generated'` in `notebooks/03_wellclass_to_gap.ipynb` and point `generated_case_root` at a completed case directory containing `well_input.json`, `model/TEMP-0.EGRID`, and `model/TEMP-0.INIT`.
+
 ## Grid Build Pipeline (Canonical)
 
 The supported simulator-facing workflow is intentionally explicit:
