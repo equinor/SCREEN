@@ -68,6 +68,7 @@ The single-reservoir workflow is complete for the current contract. The next cha
 - Replace hard-coded permeability and cell-size assumptions with modeled configuration.
 - Design scenario-specific permeability and salinity overrides as a separate layer from the physical well description.
 - Design interval-aware and multi-reservoir policies only after the single-reservoir contract is stable; they are explicitly out of scope for the current milestone.
+- Migrate GaP-owned grid and LGR modules from `src/WellClass/libs/grid_utils/` into `src/GaP/libs/`, keeping `WellDataFrame` as an explicit compatibility adapter until callers have migrated. Preserve temporary re-exports so the tested workflow remains stable during the move.
 
 ## Boundaries
 
