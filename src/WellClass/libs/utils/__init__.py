@@ -18,4 +18,12 @@ def xlsx_grid_policy(*args, **kwargs):
 	return _xlsx_grid_policy(*args, **kwargs)
 
 
-__all__ = ["xlsx_to_well_model", "xlsx_grid_policy"]
+def xlsx_to_simulation_design(*args, **kwargs):
+	"""Lazy wrapper for GaP-owned workbook simulation scenario parsing."""
+
+	from .xlsx_parser import xlsx_to_simulation_design as _xlsx_to_simulation_design
+
+	return _xlsx_to_simulation_design(*args, **kwargs)
+
+
+__all__ = ["xlsx_to_well_model", "xlsx_grid_policy", "xlsx_to_simulation_design"]

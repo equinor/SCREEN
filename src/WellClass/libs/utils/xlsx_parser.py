@@ -5,6 +5,8 @@ from typing import Any
 
 import pandas as pd
 
+from src.GaP.libs.models.simulation_scenario import SimulationDesign
+
 from ..models.well_model import WellModel
 
 
@@ -63,7 +65,6 @@ def xlsx_to_well_model(xlsx_file: str | Path) -> WellModel:
     hole_casings_sheet = _read_sheet(workbook, "HoleCasings")
     plugs_sheet = _read_sheet(workbook, "Plugs")
     stratigraphy_sheet = _read_sheet(workbook, "Stratigraphy")
-    assumptions_sheet = _read_sheet(workbook, "SubsurfaceAssumptions")
 
     metadata = _key_value_sheet(metadata_sheet, sheet_name="Metadata") if metadata_sheet is not None else {}
     header = _key_value_sheet(header_sheet, sheet_name="Header")
@@ -93,10 +94,6 @@ def xlsx_to_well_model(xlsx_file: str | Path) -> WellModel:
     if stratigraphy:
         spec["stratigraphy"] = stratigraphy
 
-    assumptions = _records_sheet(assumptions_sheet)
-    if assumptions:
-        spec["subsurface_assumptions"] = {"scenarios": assumptions}
-
     payload: dict[str, Any] = {
         "apiVersion": "well/v0.1",
         "kind": "Well",
@@ -107,6 +104,16 @@ def xlsx_to_well_model(xlsx_file: str | Path) -> WellModel:
         payload["metadata"] = metadata
 
     return WellModel(**payload)
+
+
+def xlsx_to_simulation_design(xlsx_file: str | Path) -> SimulationDesign:
+    """Parse workbook scenario assumptions without modifying the physical WellModel."""
+
+    workbook = Path(xlsx_file)
+    if not workbook.exists():
+        raise FileNotFoundError(f"workbook not found: {workbook}")
+    scenarios = _records_sheet(_read_sheet(workbook, "SubsurfaceAssumptions"))
+    return SimulationDesign(scenarios=scenarios or [{}])
 
 
 def xlsx_grid_policy(xlsx_file: str | Path) -> dict[str, Any]:

@@ -9,7 +9,7 @@ The resulting simulation model is a 3D representation of the wellbore, with the 
 
 Users should start with the canonical GaP and WellClass notebooks, especially `notebooks/02_gap_grid.ipynb` and `notebooks/03_wellclass_to_gap.ipynb`. Simulator-dependent experiments require copies of the template files and explicit external-tool setup; see `experiments/README.md` for the optional command-line utilities.
 
-For a repeatable command-line workflow, a multi-sheet workbook can be used as the input deck. The workbook is converted to canonical WellClass JSON, used to parameterize the CIRRUS deck, and then passed to GaP after initialization:
+For a repeatable command-line workflow, a multi-sheet workbook can be used as the input deck. Its physical well sheets are converted to canonical WellClass JSON, while `GridPolicy` and `SubsurfaceAssumptions` are parsed as separate GaP/CIRRUS simulation inputs used to parameterize the deck:
 
 ```text
 XLSX -> well_input.json -> parameterized TEMP-0.in
