@@ -69,6 +69,11 @@ The single-reservoir workflow is complete for the current contract. The next cha
 - Design scenario-specific permeability and salinity overrides as a separate layer from the physical well description.
 - Design interval-aware and multi-reservoir policies only after the single-reservoir contract is stable; they are explicitly out of scope for the current milestone.
 - Migrate GaP-owned grid and LGR modules from `src/WellClass/libs/grid_utils/` into `src/GaP/libs/`, keeping `WellDataFrame` as an explicit compatibility adapter until callers have migrated. Preserve temporary re-exports so the tested workflow remains stable during the move.
+- Model explicit wellbore-defect scenarios as simulation inputs separate from the physical well description. The workbook should describe casing holes (default or explicit diameter) and cement defects: channel/hole diameter, fracture opening, or microannulus geometry. WellClass should display these scenarios in sketches without changing the base well geometry. GaP/CARFIN should own their grid-property representation:
+    - casing holes: a localized transmissibility variation replacing the default zero casing transmissibility, with a geometric area-based multiplier considered as a candidate model;
+    - cement channels/holes and fractures: an explicit local region or a literature-backed effective-permeability model, with optional porosity and vertical-transmissibility changes;
+    - microannulus: geometry-derived annular flow properties from the difference between cement and hole/casing diameters.
+    Validate each defect representation against CIRRUS transmissibility conventions and literature before treating the proposed relationships as supported physics.
 
 ## Boundaries
 
