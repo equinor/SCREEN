@@ -60,6 +60,12 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Configure the same deck for the final run and enable TEMP_LGR.grdecl.",
     )
+    parser.add_argument(
+        "--case-name",
+        type=str,
+        default="default",
+        help="Name of the simulation scenario from workbook SubsurfaceAssumptions sheet.",
+    )
     return parser.parse_args()
 
 
@@ -195,7 +201,12 @@ def main() -> int:
 
     policy = xlsx_grid_policy(args.xlsx)
     well_model = xlsx_to_well_model(args.xlsx)
-    scenario = xlsx_to_simulation_design(args.xlsx).select()
+    design = xlsx_to_simulation_design(args.xlsx)
+    try:
+        scenario = design.select(args.case_name)
+    except ValueError as exc:
+        print(f"Error: {exc}")
+        return 1
     stage_args = derive_stage_args_from_policy(args, policy)
     output_deck, output_grdecl, output_tops = stage_case(stage_args)
     parameterize_staged_deck(args, policy, well_model.spec.well_header, scenario)

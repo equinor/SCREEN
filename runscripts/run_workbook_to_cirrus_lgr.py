@@ -30,6 +30,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--barrier-perm", type=float, default=0.05)
     parser.add_argument("--ali-way", action="store_true")
     parser.add_argument("--force", action="store_true")
+    parser.add_argument(
+        "--case-name",
+        type=str,
+        default="default",
+        help="Name of the simulation scenario from workbook SubsurfaceAssumptions sheet.",
+    )
     return parser.parse_args()
 
 
@@ -48,7 +54,11 @@ def run_workflow(args: argparse.Namespace) -> Path:
     backend = CirrusBackend(args.sim_command)
     policy = xlsx_grid_policy(args.xlsx)
     model = xlsx_to_well_model(args.xlsx)
-    scenario = xlsx_to_simulation_design(args.xlsx).select()
+    design = xlsx_to_simulation_design(args.xlsx)
+    try:
+        scenario = design.select(args.case_name)
+    except ValueError as exc:
+        raise ValueError(f"Invalid case-name '{args.case_name}': {exc}") from None
     stage_args = derive_stage_args_from_policy(args, policy)
     deck_path, grdecl_path, _ = stage_case(stage_args)
 

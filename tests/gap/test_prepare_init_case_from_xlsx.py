@@ -166,3 +166,98 @@ def test_xlsx_grid_policy_requires_keys(tmp_path):
         assert "missing required keys" in str(exc)
     else:
         raise AssertionError("Expected ValueError for missing GridPolicy keys")
+
+
+def test_case_name_defaults_to_default_when_omitted(tmp_path):
+    """Verify that --case-name defaults to 'default' when omitted."""
+    workbook = tmp_path / "well_input.xlsx"
+    _write_minimal_workbook(workbook)
+
+    output_root = tmp_path / "staged_case"
+    repo_root = Path(__file__).parents[2]
+
+    command = [
+        sys.executable,
+        "runscripts/prepare_init_case_from_xlsx.py",
+        "--xlsx",
+        str(workbook),
+        "--output-root",
+        str(output_root),
+    ]
+    subprocess.run(command, check=True, cwd=repo_root, capture_output=True, text=True)
+
+    # Should succeed without specifying --case-name
+    assert (output_root / "model" / "TEMP-0.in").exists()
+
+
+def test_case_name_selection_with_multi_scenario(tmp_path):
+    """Verify that --case-name selects the correct scenario from multi-scenario workbook."""
+    workbook = tmp_path / "multi_scenario.xlsx"
+    metadata = pd.DataFrame({"key": ["namespace", "name", "author"], "value": ["screen", "xlsx-test", "pytest"]})
+    header = pd.DataFrame(
+        {
+            "key": [
+                "unique_wellbore_identifier",
+                "depth_reference_rkb",
+                "depth_reference_rkb_unit",
+                "ground_elevation",
+                "ground_elevation_unit",
+                "total_depth_rkb",
+                "total_depth_rkb_unit",
+            ],
+            "value": ["NO 00/0-0", 27, "m", 105, "m", 3997, "m"],
+        }
+    )
+    grid_policy = pd.DataFrame(
+        {
+            "key": [
+                "top_depth",
+                "water_depth",
+                "reservoir_top",
+                "bottom_depth",
+                "target_dz_water",
+                "target_dz_overburden",
+                "target_dz_reservoir",
+                "cells_per_layer",
+            ],
+            "value": [4.0, 104.0, 1004.0, 1504.0, 50.0, 60.0, 10.0, 400],
+        }
+    )
+
+    with pd.ExcelWriter(workbook, engine="openpyxl") as writer:
+        metadata.to_excel(writer, sheet_name="Metadata", index=False)
+        header.to_excel(writer, sheet_name="Header", index=False)
+        grid_policy.to_excel(writer, sheet_name="GridPolicy", index=False)
+        pd.DataFrame(
+            {
+                "case_name": ["default", "hot_case"],
+                "temperature_gradient": [31.0, 40.0],
+                "ground_temperature": [4.0, 5.0],
+                "z_fluid_contact": [2400.0, 2350.0],
+                "p_fluid_contact": [210.0, 220.0],
+                "overburden_datum_depth": [500.0, 500.0],
+                "z_resrv": [1400.0, 1400.0],
+                "p_resrv": [250.0, 260.0],
+            }
+        ).to_excel(writer, sheet_name="SubsurfaceAssumptions", index=False)
+
+    design = xlsx_to_simulation_design(workbook)
+    default_scenario = design.select("default")
+    hot_scenario = design.select("hot_case")
+
+    assert default_scenario.temperature_gradient == 31.0
+    assert hot_scenario.temperature_gradient == 40.0
+
+
+def test_case_name_raises_error_for_unknown_case(tmp_path):
+    """Verify that selecting an unknown case name raises an error."""
+    workbook = tmp_path / "well_input.xlsx"
+    _write_minimal_workbook(workbook)
+
+    design = xlsx_to_simulation_design(workbook)
+    try:
+        design.select("nonexistent_case")
+    except ValueError as exc:
+        assert "unknown simulation case" in str(exc)
+    else:
+        raise AssertionError("Expected ValueError for unknown case name")
