@@ -64,8 +64,10 @@ def run_workflow(args: argparse.Namespace) -> Path:
 
     args.final_run = False
     parameterize_staged_deck(args, policy, model.spec.well_header, scenario)
+    scenario_json = args.output_root / "scenario.json"
     output_json = args.output_root / "well_input.json"
     output_json.parent.mkdir(parents=True, exist_ok=True)
+    scenario_json.write_text(json.dumps(scenario.model_dump(mode="json"), indent=2) + "\n", encoding="utf-8")
     output_json.write_text(json.dumps(model.model_dump(mode="json"), indent=2), encoding="utf-8")
 
     print(f"Running CIRRUS initialization: {deck_path}")

@@ -228,6 +228,7 @@ work/results/
 ├── baseline/
 │   ├── include/
 │   ├── model/
+│   ├── scenario.json
 │   └── well_input.json
 ├── hot_case/
 └── conservative/
@@ -254,6 +255,10 @@ The command checks `TEMP_GRD.grdecl`, `TEMP_LGR.grdecl`, `TEMP-0.EGRID`, and
 `TEMP-0.INIT` for every case. It returns a non-zero exit code if a required
 file is missing or empty, a log contains an error, or no scenario directories
 are found. The optional JSON report includes file sizes and SHA-256 checksums.
+
+Each case directory also contains `scenario.json`, which records the exact
+scenario assumptions selected from the workbook for that run. The separate
+`well_input.json` continues to store the shared physical well model.
 
 ## Unit testing and code coverage
 
