@@ -38,6 +38,7 @@ def test_workbook_wrapper_runs_full_dry_run_without_cirrus(tmp_path):
             "0",
             "--case-name",
             "baseline",
+            "--plot",
         ],
         cwd=root,
         check=True,
@@ -49,6 +50,7 @@ def test_workbook_wrapper_runs_full_dry_run_without_cirrus(tmp_path):
     scenario = json.loads((output_root / "scenario.json").read_text(encoding="utf-8"))
     assert scenario["case_name"] == "baseline"
     assert scenario["temperature_gradient"] == 31.0
+    assert (output_root / "qc_plot.png").stat().st_size > 0
     assert (output_root / "model/TEMP-0.EGRID").exists()
     assert (output_root / "model/TEMP-0.INIT").exists()
     assert (output_root / "include/TEMP_LGR.grdecl").exists()

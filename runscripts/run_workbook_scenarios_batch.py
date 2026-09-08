@@ -42,6 +42,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--barrier-perm", type=float, default=0.05)
     parser.add_argument("--ali-way", action="store_true")
     parser.add_argument("--force", action="store_true")
+    parser.add_argument("--plot", action="store_true", help="Save a sketch and pressure QC plot for each scenario.")
     parser.add_argument(
         "--jobs",
         type=int,
@@ -94,6 +95,8 @@ def run_scenario_case(
         command.append("--ali-way")
     if args.force:
         command.append("--force")
+    if args.plot:
+        command.append("--plot")
 
     print(f"\n{'='*70}")
     print(f"Running scenario: {case_name}")

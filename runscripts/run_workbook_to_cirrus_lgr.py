@@ -13,6 +13,8 @@ from prepare_init_case_from_xlsx import derive_stage_args_from_policy, parameter
 
 from src.GaP.libs.cirrus_backend import CirrusBackend
 from src.WellClass.libs.utils import xlsx_grid_policy, xlsx_to_simulation_design, xlsx_to_well_model
+from src.WellClass.libs.well_class.well_processed import WellProcessed
+from src.WellClass.libs.well_pressure import Pressure
 
 
 def parse_args() -> argparse.Namespace:
@@ -30,6 +32,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--barrier-perm", type=float, default=0.05)
     parser.add_argument("--ali-way", action="store_true")
     parser.add_argument("--force", action="store_true")
+    parser.add_argument("--plot", action="store_true", help="Save a sketch and pressure QC plot as qc_plot.png.")
     parser.add_argument(
         "--case-name",
         type=str,
@@ -48,6 +51,56 @@ def find_simulator_case(output_root: Path, deck_path: Path) -> Path:
     raise FileNotFoundError(
         f"CIRRUS did not produce both .EGRID and .INIT for {deck_path}; searched: " + ", ".join(str(candidate) for candidate in candidates)
     )
+
+
+def save_qc_plot(model, scenario, output_path: Path) -> None:
+    """Save the notebook-style WellClass sketch and pressure QC plot."""
+    try:
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+    except ImportError as exc:
+        raise RuntimeError("--plot requires matplotlib; install the development dependencies with `uv sync --all-groups`") from exc
+
+    from src.WellClass.libs.plotting.plot_sketch import plot_sketch
+
+    z_fluid_contact = scenario.z_fluid_contact or scenario.z_resrv
+    if z_fluid_contact is None:
+        raise ValueError("--plot requires z_fluid_contact or z_resrv in the selected scenario")
+
+    processed_well = WellProcessed.from_pydantic(model)
+    pressure = Pressure(
+        header=processed_well.header,
+        co2_datum=z_fluid_contact,
+        ground_temperature=scenario.ground_temperature,
+        geothermal_gradient=scenario.temperature_gradient,
+        fluid_type=scenario.fluid_type,
+    )
+    pressure_scenario = pressure.scenarios["default"]
+    curves = pressure_scenario.display_curves()
+    fig, (ax_well, ax_pressure) = plt.subplots(1, 2, figsize=(12, 8), sharey=True)
+    plot_sketch(processed_well, ax=ax_well)
+    ax_well.set_title("WellClass sketch")
+    table = pressure.table
+    ax_pressure.plot(table.hydrostatic_pressure, table.depth, color="steelblue", linestyle=":", label="hydrostatic water")
+    ax_pressure.plot(table.min_horizontal_stress, table.depth, color="gray", linestyle="--", label="Shmin")
+    ax_pressure.plot(curves["brine_pressure"], curves["brine_depth"], color="steelblue", label="brine")
+    ax_pressure.plot(curves["fluid_pressure"], curves["fluid_depth"], color="firebrick", label=scenario.fluid_type)
+    ax_pressure.set_title("Pressure profiles")
+    ax_pressure.set_xlabel("pressure [bar]")
+    ax_pressure.set_ylim(0, float(table.depth.max()))
+    ax_pressure.invert_yaxis()
+    ax_pressure.grid(alpha=0.25)
+    ax_pressure.legend()
+    ax_pressure.set_ylabel("")
+    ax_pressure.tick_params(labelleft=False)
+    fig.suptitle(f"{scenario.case_name} WellClass QC")
+    fig.tight_layout()
+    fig.subplots_adjust(wspace=0)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(output_path, dpi=200)
+    plt.close(fig)
 
 
 def run_workflow(args: argparse.Namespace) -> Path:
@@ -69,6 +122,8 @@ def run_workflow(args: argparse.Namespace) -> Path:
     output_json.parent.mkdir(parents=True, exist_ok=True)
     scenario_json.write_text(json.dumps(scenario.model_dump(mode="json"), indent=2) + "\n", encoding="utf-8")
     output_json.write_text(json.dumps(model.model_dump(mode="json"), indent=2), encoding="utf-8")
+    if args.plot:
+        save_qc_plot(model, scenario, args.output_root / "qc_plot.png")
 
     print(f"Running CIRRUS initialization: {deck_path}")
     initialization = backend.run(deck_path, phase="initialization", require_grid_outputs=True)

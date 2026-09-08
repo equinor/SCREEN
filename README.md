@@ -206,6 +206,7 @@ uv run python runscripts/run_workbook_to_cirrus_lgr.py \
     --template-root test_data/examples/wildcat-pflotran \
     --sim-command "cirrus {deck}" \
     --case-name baseline \
+    --plot \
     --run-final
 ```
 
@@ -218,6 +219,7 @@ uv run python runscripts/run_workbook_scenarios_batch.py \
     --output-root work/results \
     --template-root test_data/examples/wildcat-pflotran \
     --sim-command "cirrus {deck}" \
+    --plot \
     --run-final
 ```
 
@@ -228,6 +230,7 @@ work/results/
 ├── baseline/
 │   ├── include/
 │   ├── model/
+│   ├── qc_plot.png
 │   ├── scenario.json
 │   └── well_input.json
 ├── hot_case/
@@ -259,6 +262,11 @@ are found. The optional JSON report includes file sizes and SHA-256 checksums.
 Each case directory also contains `scenario.json`, which records the exact
 scenario assumptions selected from the workbook for that run. The separate
 `well_input.json` continues to store the shared physical well model.
+
+The optional `--plot` flag saves `qc_plot.png`, containing the WellClass well
+sketch and pressure profiles used for quick quality control. Plotting uses
+matplotlib and is intended for installations with the development dependencies
+available; it is not required for simulator execution.
 
 ## Unit testing and code coverage
 
