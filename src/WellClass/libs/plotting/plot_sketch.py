@@ -209,8 +209,9 @@ def plot_sketch(
     casing_data = hole_casings["casing"]
     cement_bond = mywell.cement_bond
     borehole_data = mywell.borehole
-    plugs_data = mywell.plugs
+    plugs_data = mywell.plugs or []
     processed_plugs_data = mywell.processed_plugs
+    processed_plugs_data = processed_plugs_data or []
     stratigraphy_data = mywell.stratigraphy
 
     # define plot spatial references
