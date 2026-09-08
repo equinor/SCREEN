@@ -241,6 +241,20 @@ available on `PATH` (or be replaced with its absolute path). Use `--case-name`
 with the single-scenario script when the workbook does not contain a scenario
 named `default`.
 
+After a batch run, validate that every scenario produced the expected files
+and that its logs contain no `error`, `fatal`, or `failed` messages:
+
+```bash
+uv run python runscripts/validate_scenario_outputs.py \
+    --output-root work/results \
+    --report work/results/validation.json
+```
+
+The command checks `TEMP_GRD.grdecl`, `TEMP_LGR.grdecl`, `TEMP-0.EGRID`, and
+`TEMP-0.INIT` for every case. It returns a non-zero exit code if a required
+file is missing or empty, a log contains an error, or no scenario directories
+are found. The optional JSON report includes file sizes and SHA-256 checksums.
+
 ## Unit testing and code coverage
 
 The project uses `pytest` for unit testing. After installing the dependencies
