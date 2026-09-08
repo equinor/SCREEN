@@ -204,7 +204,7 @@ uv run python runscripts/run_workbook_to_cirrus_lgr.py \
     --xlsx work/design_matrix.xlsx \
     --output-root work/results/baseline \
     --template-root test_data/examples/wildcat-pflotran \
-    --sim-command 'cirrus {deck}' \
+    --sim-command "cirrus {deck}" \
     --case-name baseline \
     --run-final
 ```
@@ -217,7 +217,7 @@ uv run python runscripts/run_workbook_scenarios_batch.py \
     --xlsx work/design_matrix.xlsx \
     --output-root work/results \
     --template-root test_data/examples/wildcat-pflotran \
-    --sim-command 'cirrus {deck}' \
+    --sim-command "cirrus {deck}" \
     --run-final
 ```
 
@@ -234,8 +234,12 @@ work/results/
 ```
 
 The simulator command must accept the staged deck path in place of `{deck}`.
-Use `--case-name` with the single-scenario script when the workbook does not
-contain a scenario named `default`.
+The examples use a generic `cirrus {deck}` command; replace it with the
+command provided by your installation. On Equinor clusters, an optional
+example is `runcirrus -i -nm 6 {deck}`. In that case, `runcirrus` must be
+available on `PATH` (or be replaced with its absolute path). Use `--case-name`
+with the single-scenario script when the workbook does not contain a scenario
+named `default`.
 
 ## Unit testing and code coverage
 We are using `pytest` for unit testing and code coverage. The unit testing utilizes `wildcat` as the testing example. So please make sure the saved .pkl files in ```test_data/examples/wildcat/pytest``` exists and is updated. Here is a commandline example:
