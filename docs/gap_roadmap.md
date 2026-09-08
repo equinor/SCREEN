@@ -52,12 +52,22 @@ Completed coarse-grid preparation slices:
 - `CirrusBackend` makes executable availability, resolved commands, phase logs, exit codes, and initialization outputs explicit for the workbook wrapper:
     - `src/GaP/libs/cirrus_backend.py`
     - `tests/gap/test_cirrus_backend.py`
+- The single-reservoir design-matrix workflow is now implemented:
+    - `--case-name` selects one named workbook scenario for a run.
+    - `runscripts/run_workbook_scenarios_batch.py` executes all named scenarios in isolated output directories.
+    - Workbook generators create named multi-scenario inputs and updated Wildcat/Smeaheia examples.
+    - Each result records the selected assumptions in `scenario.json` beside the shared `well_input.json`.
+    - `--plot` optionally saves a WellClass sketch and pressure QC image as `qc_plot.png`.
+    - `runscripts/validate_scenario_outputs.py` checks required outputs, logs, file sizes, and checksums.
 
 These helpers do not create native `.EGRID`/`.INIT` files unless an external simulator command is explicitly supplied.
 
 ## Next
 
-The single-reservoir workflow is complete for the current contract. The next changes require separate scenario-policy design rather than incremental plumbing.
+The single-reservoir design-matrix workflow is complete for the current
+contract. The next step is to validate scenario influence using the generated
+QC plots and CIRRUS visualization tools, then identify which result quantities
+are worth comparing automatically.
 
 ## Later
 
@@ -66,10 +76,10 @@ The single-reservoir workflow is complete for the current contract. The next cha
 - Support separate PFLOTRAN and CIRRUS input/output backends.
 - Add a small committed synthetic grid for pure-Python tests.
 - Replace hard-coded permeability and cell-size assumptions with modeled configuration.
-- Design a first-class **design matrix** for one physical wellbore. A `DesignMatrix` workbook sheet should use one named case per row and common columns for potentially variable parameters. For example, a 20-column table can hold `case_name` plus 19 parameters such as initial/contact pressure, casing-hole geometry, cement permeability, grid policy, or salinity. Ten rows must produce ten separate reproducible simulation cases, each with its own parameterized deck/GRDECL, LGR output, logs, and results. Define precedence as: item-specific well override -> selected design-matrix value -> documented default.
-    - WellClass pressure scenarios currently support multiple calculation/plotting cases, but the workbook staging path selects only the first `SubsurfaceAssumptions` row. A selected scenario must instead propagate its pressure/contact values into CIRRUS `EQUILIBRATION` cards and its physical-property assumptions into CARFIN/GRDECL generation.
-    - Keep the physical well description shared and immutable across scenarios. Scenario selections must not rewrite the canonical well JSON; they should produce isolated output directories such as `<output-root>/<scenario-name>/`.
-    - Start with single-reservoir scenario variants. Interval-aware/multi-reservoir selection remains a separate later design.
+- Extend the single-reservoir design matrix beyond the current workbook assumptions. A future `DesignMatrix` sheet could hold additional variable parameters such as casing-hole geometry, cement permeability, grid policy, or salinity. Define precedence as: item-specific well override -> selected design-matrix value -> documented default.
+    - The current workbook staging path supports named `SubsurfaceAssumptions` rows and propagates selected pressure/contact values into CIRRUS initialization.
+    - Keep the physical well description shared and immutable across scenarios; scenario results remain isolated under `<output-root>/<scenario-name>/`.
+    - Interval-aware/multi-reservoir selection remains a separate later design.
 - Design interval-aware and multi-reservoir policies only after the single-reservoir contract is stable; they are explicitly out of scope for the current milestone.
 - Migrate GaP-owned grid and LGR modules from `src/WellClass/libs/grid_utils/` into `src/GaP/libs/`, keeping `WellDataFrame` as an explicit compatibility adapter until callers have migrated. Preserve temporary re-exports so the tested workflow remains stable during the move.
 - Model explicit wellbore-defect scenarios as simulation inputs separate from the physical well description. The workbook should describe casing holes (default or explicit diameter) and cement defects: channel/hole diameter, fracture opening, or microannulus geometry. WellClass should display these scenarios in sketches without changing the base well geometry. GaP/CARFIN should own their grid-property representation:
