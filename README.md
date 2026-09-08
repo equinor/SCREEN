@@ -242,18 +242,35 @@ with the single-scenario script when the workbook does not contain a scenario
 named `default`.
 
 ## Unit testing and code coverage
-We are using `pytest` for unit testing and code coverage. The unit testing utilizes `wildcat` as the testing example. So please make sure the saved .pkl files in ```test_data/examples/wildcat/pytest``` exists and is updated. Here is a commandline example:
-```pyton
-python -m pytest tests
+
+The project uses `pytest` for unit testing. After installing the dependencies
+with `uv sync --all-groups`, run the complete test suite with:
+
+```bash
+uv run python -m pytest -q
 ```
-This will report the unit testing results. And the following will report not only unit testing but also code coverage:
-```python
-python -m pytest --cov tests
+
+The suite covers the WellClass and GaP components, workbook parsing and
+generation, scenario selection, batch execution, and simulator-free workflow
+tests. The current suite contains 116 tests.
+
+To run the tests with branch coverage and a missing-lines report, use:
+
+```bash
+uv run python -m pytest \
+    --cov=src \
+    --cov-branch \
+    --cov-report=term-missing \
+    tests
 ```
-or a litle bit more complex command:
-```python
-python -m pytest --cov --cov-branch --cov-report term-missing tests
+
+For a coverage HTML report, run:
+
+```bash
+uv run python -m pytest --cov=src --cov-report=html tests
 ```
+
+The report is written to `htmlcov/index.html`.
 
 ## Documentation
 
