@@ -1,6 +1,7 @@
 import importlib.util
 import shutil
 from pathlib import Path
+import pytest
 
 from src.GaP.libs.visualization import hexahedron_polygons
 
@@ -47,3 +48,19 @@ def test_viewer_callback_constructs_component_for_installed_webviz(tmp_path):
     assert response.content_type == "application/json"
     points = response.get_json()
     assert len(points) == 0
+
+
+def test_viewer_callback_ignores_stale_property_and_j_values(tmp_path):
+    source = Path("test_data/examples/wildcat/model")
+    model = tmp_path / "baseline" / "model"
+    model.mkdir(parents=True)
+    for suffix in ("EGRID", "INIT"):
+        shutil.copy(source / f"TEMP-0.{suffix}", model / f"TEMP-0.{suffix}")
+
+    app = _load_viewer().create_app(tmp_path)
+    callback = next(value for key, value in app.callback_map.items() if key.startswith("viewer.children"))["callback"]
+
+    with pytest.raises(Exception) as error:
+        callback.__wrapped__("baseline", "INIT", "NOT_A_KEYWORD", 7, 0.001)
+
+    assert error.value.__class__.__name__ == "PreventUpdate"

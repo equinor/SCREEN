@@ -50,6 +50,7 @@ def create_app(results_root: Path):
         import dash
         import webviz_subsurface_components as wsc
         from dash import Input, Output, dcc, html
+        from dash.exceptions import PreventUpdate
     except ImportError as exc:
         raise RuntimeError(
             "The Webviz viewer requires optional dependencies. Install with " "`uv pip install webviz-subsurface-components`."
@@ -117,6 +118,11 @@ def create_app(results_root: Path):
         Input("z-scale", "value"),
     )
     def update_viewer(case_name: str, source: str, keyword: str, j_column: int | None, z_scale: float | None):
+        available_keywords = loaded_cases[case_name].keywords if source == "INIT" else loaded_cases[case_name].restart_keywords
+        lgr = loaded_cases[case_name].embedded_lgr()
+        available_j = range(lgr.get_dims()[1]) if lgr is not None else []
+        if keyword not in available_keywords or (j_column is not None and j_column not in available_j):
+            raise PreventUpdate
         vertical_scale = float(z_scale or 0.001)
         if vertical_scale <= 0:
             return html.Div("Z scale must be positive")
