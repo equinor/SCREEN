@@ -92,9 +92,9 @@ def create_app(results_root: Path):
                 {
                     "@@type": "Grid3DLayer",
                     "id": "screen-lgr-middle-j",
-                    "pointsData": f"{layer_url}/points",
-                    "polysData": f"{layer_url}/polys",
-                    "propertiesData": f"{layer_url}/properties",
+                    "pointsData": f"{layer_url}/points.json",
+                    "polysData": f"{layer_url}/polys.json",
+                    "propertiesData": f"{layer_url}/properties.json",
                     "colorMapName": "Rainbow",
                     "coloringMode": "Property",
                     "gridLines": True,
@@ -111,7 +111,7 @@ def create_app(results_root: Path):
             coordinateUnit="m",
         )
 
-    @app.server.route("/screen-data/<case_name>/<source>/<keyword>/<kind>")
+    @app.server.route("/screen-data/<case_name>/<source>/<keyword>/<kind>.json")
     def screen_data(case_name: str, source: str, keyword: str, kind: str):
         from flask import jsonify
 

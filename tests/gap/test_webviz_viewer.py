@@ -37,3 +37,10 @@ def test_viewer_callback_constructs_component_for_installed_webviz(tmp_path):
     assert component.id == "screen-viewer"
     assert component.verticalScale == 0.005
     assert "style" not in component.to_plotly_json()["props"]
+
+    client = app.server.test_client()
+    response = client.get("/screen-data/baseline/INIT/PORV/points.json")
+
+    assert response.status_code == 200
+    assert response.content_type == "application/json"
+    assert response.get_json() == []
