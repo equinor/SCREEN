@@ -153,7 +153,7 @@ def create_app(results_root: Path):
             views={
                 "layout": [1, 1],
                 "showLabel": True,
-                "viewports": [{"id": "screen-xz", "show3D": False, "name": "South XZ", "layerIds": ["screen-lgr-middle-j"]}],
+                "viewports": [{"id": "screen-xz", "viewType": "OrthographicView", "name": "South XZ", "layerIds": ["screen-lgr-middle-j"]}],
             },
             cameraPosition=camera,
             coordinateUnit="m",
