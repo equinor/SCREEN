@@ -35,6 +35,7 @@ class ResdataCase:
         self._parent_centers = None
         self._parent_values_cache: dict[tuple[str, str, int], np.ndarray] = {}
         self._slice_cache: dict[int, dict[str, np.ndarray]] = {}
+        self._restart_lgr_cache: dict[tuple[str, int], np.ndarray] = {}
 
     @property
     def dimensions(self) -> tuple[int, int, int, int]:
@@ -88,8 +89,13 @@ class ResdataCase:
         """Return an UNRST property vector for one logical LGR timestep."""
         if self.restart is None:
             raise FileNotFoundError(f"restart file not found for {self.prefix}")
+        cache_key = (keyword, timestep)
+        if cache_key in self._restart_lgr_cache:
+            return self._restart_lgr_cache[cache_key]
         restart_record = self.restart_timesteps[timestep]["restart_record"]
-        return np.asarray(self.restart[keyword][int(restart_record)].numpy_view())
+        vector = np.asarray(self.restart[keyword][int(restart_record)].numpy_view())
+        self._restart_lgr_cache[cache_key] = vector
+        return vector
 
     def cell_centers(self, active_indices: np.ndarray | None = None) -> np.ndarray:
         """Return cell centers as an ``(N, 3)`` XYZ array."""
