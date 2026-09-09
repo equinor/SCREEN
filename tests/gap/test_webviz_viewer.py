@@ -32,7 +32,7 @@ def test_viewer_callback_constructs_component_for_installed_webviz(tmp_path):
 
     app = _load_viewer().create_app(tmp_path)
     callback = next(value for key, value in app.callback_map.items() if key.startswith("viewer.children"))["callback"]
-    component = callback.__wrapped__("baseline", "INIT", "PORV", None)
+    component = callback.__wrapped__("baseline", "INIT", "PORV", None, 0.001)
     props = component.to_plotly_json()["props"]
 
     assert component.id == "screen-viewer"
@@ -41,7 +41,7 @@ def test_viewer_callback_constructs_component_for_installed_webviz(tmp_path):
     assert "style" not in props
 
     client = app.server.test_client()
-    response = client.get("/screen-data/baseline/INIT/PORV/7/points.json")
+    response = client.get("/screen-data/baseline/INIT/PORV/7/0.001/points.json")
 
     assert response.status_code == 200
     assert response.content_type == "application/json"

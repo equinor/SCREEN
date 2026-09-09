@@ -147,16 +147,16 @@ class ResdataCase:
         minimum = corners.reshape(-1, 3).min(axis=0)
         maximum = corners.reshape(-1, 3).max(axis=0)
         center = (minimum + maximum) / 2.0
-        height = max(maximum[2] - minimum[2], 1e-6)
+        height = max((maximum[2] - minimum[2]) * vertical_scale, 1e-6)
         half_width = height * 0.002
         return {
-            "target": [float(center[0]), float(center[2])],
+            "target": [float(center[0]), float(center[2] * vertical_scale)],
             "zoom": [
                 float(center[0] - half_width),
-                float(minimum[2]),
+                float(minimum[2] * vertical_scale),
                 0.0,
                 float(center[0] + half_width),
-                float(maximum[2]),
+                float(maximum[2] * vertical_scale),
                 0.0,
             ],
         }

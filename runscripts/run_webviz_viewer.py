@@ -29,13 +29,13 @@ def _case_names(results_root: Path) -> list[str]:
     return sorted(path.name for path in results_root.iterdir() if path.is_dir() and (path / "model" / "TEMP-0.EGRID").exists())
 
 
-def _payload(case: ResdataCase, source: str, keyword: str, j: int | None = None) -> dict[str, list[float] | list[int]]:
+def _payload(case: ResdataCase, source: str, keyword: str, j: int | None = None, vertical_scale: float = 0.001) -> dict[str, list[float] | list[int]]:
     data = case.lgr_property_slice(source, keyword, j=j)
     corners = data["corners"].copy()
     if not len(corners):
         return {"points": [], "polys": [], "properties": []}
     original_y = corners[:, :, 1].copy()
-    corners[:, :, 1] = corners[:, :, 2]
+    corners[:, :, 1] = corners[:, :, 2] * vertical_scale
     corners[:, :, 2] = original_y - original_y.mean()
     properties = np.repeat(data["properties"], 6)
     return {
@@ -70,42 +70,61 @@ def create_app(results_root: Path):
                     dcc.Dropdown(["INIT", "UNRST"], "INIT", id="source", clearable=False),
                     dcc.Dropdown(id="keyword", clearable=False),
                     dcc.Dropdown(id="j-column", clearable=False),
+                    dcc.Input(id="z-scale", type="number", value=0.001, min=0.00001, step=0.0001),
                 ],
-                style={"display": "grid", "gridTemplateColumns": "1fr 1fr 2fr 1fr", "gap": "8px"},
+                style={"display": "grid", "gridTemplateColumns": "1fr 1fr 2fr 1fr 1fr", "gap": "8px"},
             ),
             html.Div(id="viewer", style={"height": "80vh", "width": "100%"}),
         ],
         style={"fontFamily": "sans-serif", "padding": "16px"},
     )
 
-    @app.callback(Output("keyword", "options"), Output("keyword", "value"), Input("case", "value"), Input("source", "value"))
-    def update_keywords(case_name: str, source: str):
+    @app.callback(
+        Output("keyword", "options"),
+        Output("keyword", "value"),
+        Output("j-column", "options"),
+        Output("j-column", "value"),
+        Input("case", "value"),
+        Input("source", "value"),
+    )
+    def update_controls(case_name: str, source: str):
         keywords = loaded_cases[case_name].keywords if source == "INIT" else loaded_cases[case_name].restart_keywords
         numeric = [
             keyword
             for keyword in keywords
             if keyword not in {"SEQNUM", "INTEHEAD", "LOGIHEAD", "DOUBHEAD", "LGR", "LGRNAMES", "LGRHEADI", "LGRHEADQ", "LGRHEADD", "LGRSGONE"}
         ]
-        return [{"label": keyword, "value": keyword} for keyword in numeric], numeric[0] if numeric else None
-
-    @app.callback(Output("j-column", "options"), Output("j-column", "value"), Input("case", "value"))
-    def update_j_columns(case_name: str):
         lgr = loaded_cases[case_name].embedded_lgr()
         if lgr is None:
-            return [], None
-        columns = list(range(lgr.get_dims()[1]))
-        middle = lgr.get_dims()[1] // 2
-        return [{"label": f"J {column}", "value": column} for column in columns], middle
+            columns = []
+            middle = None
+        else:
+            columns = list(range(lgr.get_dims()[1]))
+            middle = lgr.get_dims()[1] // 2
+        return (
+            [{"label": keyword, "value": keyword} for keyword in numeric],
+            numeric[0] if numeric else None,
+            [{"label": f"J {column}", "value": column} for column in columns],
+            middle,
+        )
 
     @app.callback(
-        Output("viewer", "children"), Input("case", "value"), Input("source", "value"), Input("keyword", "value"), Input("j-column", "value")
+        Output("viewer", "children"),
+        Input("case", "value"),
+        Input("source", "value"),
+        Input("keyword", "value"),
+        Input("j-column", "value"),
+        Input("z-scale", "value"),
     )
-    def update_viewer(case_name: str, source: str, keyword: str, j_column: int | None):
+    def update_viewer(case_name: str, source: str, keyword: str, j_column: int | None, z_scale: float | None):
+        vertical_scale = float(z_scale or 0.001)
+        if vertical_scale <= 0:
+            return html.Div("Z scale must be positive")
         if not keyword:
             return html.Div("No numeric properties available")
-        layer_url = f"/screen-data/{case_name}/{source}/{keyword}/{j_column}"
+        layer_url = f"/screen-data/{case_name}/{source}/{keyword}/{j_column}/{vertical_scale}"
         camera = (
-            loaded_cases[case_name].south_xz_camera()
+            loaded_cases[case_name].south_xz_camera(vertical_scale)
             if len(loaded_cases[case_name].lgr_parent_indices())
             else {"target": [0, 0, 0], "zoom": 0, "rotationX": 0, "rotationOrbit": 180}
         )
@@ -134,11 +153,11 @@ def create_app(results_root: Path):
             coordinateUnit="m",
         )
 
-    @app.server.route("/screen-data/<case_name>/<source>/<keyword>/<j>/<kind>.json")
-    def screen_data(case_name: str, source: str, keyword: str, j: str, kind: str):
+    @app.server.route("/screen-data/<case_name>/<source>/<keyword>/<j>/<vertical_scale>/<kind>.json")
+    def screen_data(case_name: str, source: str, keyword: str, j: str, vertical_scale: str, kind: str):
         from flask import jsonify
 
-        payload = _payload(loaded_cases[case_name], source, keyword, None if j == "None" else int(j))
+        payload = _payload(loaded_cases[case_name], source, keyword, None if j == "None" else int(j), float(vertical_scale))
         return jsonify(payload[kind])
 
     return app
