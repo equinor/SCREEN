@@ -342,6 +342,23 @@ for all LGR J columns, so it is larger than a single-property export. Use
 use this WellViz-style exporter when browser-side property and J-column
 selection is more important than file size.
 
+For the same controls without embedding the data in one large HTML file,
+export an indexed package and serve it locally:
+
+```bash
+uv run python runscripts/export_wellviz_indexed.py \
+    --results-root work/results \
+    --case baseline \
+    --output-dir work/results/baseline_wellviz_indexed
+
+cd work/results/baseline_wellviz_indexed
+python -m http.server 8000
+```
+
+Open `http://localhost:8000`. The page loads only the selected
+`source/property/J-column` JSON file. This keeps the initial HTML small while
+retaining the old WellViz-style browser controls.
+
 ## Webviz simulation viewer
 
 The optional Webviz viewer provides a predefined SCREEN view for completed
