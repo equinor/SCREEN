@@ -39,11 +39,17 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def write_package(case: ResdataCase, case_name: str, output_dir: Path, timing: dict[str, float] | None = None) -> None:
+def write_package(
+    case: ResdataCase,
+    case_name: str,
+    output_dir: Path,
+    timing: dict[str, float] | None = None,
+    sources: dict[str, list[str]] | None = None,
+) -> None:
     lgr = case.embedded_lgr()
     if lgr is None:
         raise ValueError("The selected case has no embedded LGR")
-    sources = {source: _numeric_keywords(case, source) for source in ("INIT", "UNRST")}
+    sources = sources or {source: _numeric_keywords(case, source) for source in ("INIT", "UNRST")}
     j_columns = list(range(lgr.get_dims()[1]))
     rows = []
     extraction_started = time.perf_counter()
