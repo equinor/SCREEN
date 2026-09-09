@@ -351,13 +351,17 @@ uv run python runscripts/export_wellviz_indexed.py \
     --case baseline \
     --output-dir work/results/baseline_wellviz_indexed
 
-cd work/results/baseline_wellviz_indexed
-python -m http.server 8000
+uv run python runscripts/serve_wellviz_parquet.py \
+    --package-dir work/results/baseline_wellviz_indexed \
+    --port 8000
 ```
 
 Open `http://localhost:8000`. The page loads only the selected
-`source/property/J-column` JSON file. This keeps the initial HTML small while
+`source/property/J-column` slice from Parquet. This keeps the initial HTML small while
 retaining the old WellViz-style browser controls.
+
+The package stores the indexed values in one `data.parquet` file. The server
+filters that file and returns only the selected heatmap payload.
 
 ## Webviz simulation viewer
 

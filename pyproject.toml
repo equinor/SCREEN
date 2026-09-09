@@ -21,7 +21,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-visualization = ["plotly>=6.0.0", "webviz-subsurface-components>=1.0.6"]
+visualization = [
+    "plotly>=6.0.0",
+    "pyarrow>=18.0.0",
+    "webviz-subsurface-components>=1.0.6",
+]
 
 [dependency-groups]
 dev = [
