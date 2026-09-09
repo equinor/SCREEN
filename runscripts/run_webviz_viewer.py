@@ -31,10 +31,13 @@ def _case_names(results_root: Path) -> list[str]:
 
 def _payload(case: ResdataCase, source: str, keyword: str) -> dict[str, list[float] | list[int]]:
     data = case.lgr_property_slice(source, keyword)
+    corners = data["corners"].copy()
+    corners[:, :, 1] = corners[:, :, 2]
+    corners[:, :, 2] = 0.0
     properties = np.repeat(data["properties"], 6)
     return {
-        "points": data["corners"].reshape(-1, 3).astype(np.float32).ravel().tolist(),
-        "polys": hexahedron_polygons(len(data["corners"])),
+        "points": corners.reshape(-1, 3).astype(np.float32).ravel().tolist(),
+        "polys": hexahedron_polygons(len(corners)),
         "properties": properties.astype(np.float32).tolist(),
     }
 
@@ -105,9 +108,8 @@ def create_app(results_root: Path):
             views={
                 "layout": [1, 1],
                 "showLabel": True,
-                "viewports": [{"id": "screen-xz", "show3D": True, "name": "South XZ", "layerIds": ["screen-lgr-middle-j"]}],
+                "viewports": [{"id": "screen-xz", "show3D": False, "name": "South XZ", "layerIds": ["screen-lgr-middle-j"]}],
             },
-            verticalScale=0.005,
             coordinateUnit="m",
         )
 
