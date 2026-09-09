@@ -92,10 +92,10 @@ def write_package(
     middle_slice = case.lgr_xz_slice(manifest["middle_j"])
     x_center = float(middle_slice["centers"][:, 0].mean())
     manifest["bounds"] = {
-        "x_min": x_center - 10.0,
-        "x_max": x_center + 10.0,
-        "y_min": middle_slice["depth_min"],
-        "y_max": middle_slice["depth_max"],
+        "x_min": x_center - 7.5,
+        "x_max": x_center + 7.5,
+        "y_min": middle_slice["depth_max"],
+        "y_max": middle_slice["depth_min"],
     }
     output_dir.mkdir(parents=True, exist_ok=True)
     parquet_started = time.perf_counter()
