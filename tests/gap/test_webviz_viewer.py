@@ -36,8 +36,10 @@ def test_viewer_callback_constructs_component_for_installed_webviz(tmp_path):
     props = component.to_plotly_json()["props"]
 
     assert component.id == "screen-viewer"
-    assert "verticalScale" not in props
-    assert props["views"]["viewports"][0]["show3D"] is False
+    assert props["verticalScale"] == 0.001
+    assert props["views"]["viewports"][0]["show3D"] is True
+    assert props["cameraPosition"]["rotationX"] == 0
+    assert props["cameraPosition"]["rotationOrbit"] == 180
     assert "style" not in props
 
     client = app.server.test_client()
