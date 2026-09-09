@@ -81,3 +81,35 @@ class ResdataCase:
         if len(parent_indices) == 0:
             return None
         return self.grid.get_cell_lgr(active_index=int(parent_indices[0]))
+
+    def lgr_slice_indices(self, j: int | None = None) -> np.ndarray:
+        """Return embedded-LGR cell indices for one J column."""
+        lgr = self.embedded_lgr()
+        if lgr is None:
+            return np.asarray([], dtype=int)
+        lgr_index = lgr.export_index()
+        selected_j = lgr.get_dims()[1] // 2 if j is None else j
+        if not 0 <= selected_j < lgr.get_dims()[1]:
+            raise ValueError(f"J column {selected_j} is outside 0..{lgr.get_dims()[1] - 1}")
+        return lgr_index.loc[lgr_index["j"] == selected_j, "active"].to_numpy(dtype=int)
+
+    def lgr_xz_slice(self, j: int | None = None) -> dict[str, np.ndarray]:
+        """Return geometry for a south-facing XZ slice through the embedded LGR."""
+        lgr = self.embedded_lgr()
+        if lgr is None:
+            return {"indices": np.asarray([], dtype=int), "centers": np.empty((0, 3)), "corners": np.empty((0, 8, 3))}
+        indices = self.lgr_slice_indices(j)
+        centers = np.asarray([lgr.get_xyz(active_index=int(index)) for index in indices], dtype=float)
+        corners = np.asarray(lgr.export_corners(lgr.export_index().loc[lgr.export_index()["active"].isin(indices)]), dtype=float)
+        return {"indices": indices, "centers": centers, "corners": corners.reshape((-1, 8, 3))}
+
+    @staticmethod
+    def south_xz_view(vertical_scale: float = 0.005) -> dict[str, object]:
+        """Return the predefined orthographic south-facing XZ view settings."""
+        return {
+            "projection": "orthographic",
+            "view_direction": "south",
+            "plane": "xz",
+            "show_coarse_grid": False,
+            "vertical_scale": vertical_scale,
+        }
