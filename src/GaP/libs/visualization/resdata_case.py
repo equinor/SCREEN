@@ -9,6 +9,16 @@ from resdata.grid import Grid
 from resdata.resfile import ResdataInitFile, ResdataRestartFile
 
 
+def hexahedron_polygons(cell_count: int) -> list[int]:
+    """Encode six quad faces per hexahedral cell for Webviz Grid3DLayer."""
+    faces = ((0, 1, 2, 3), (4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7))
+    polygons: list[int] = []
+    for cell_index in range(cell_count):
+        for face in faces:
+            polygons.extend([4, *(cell_index * 8 + corner for corner in face)])
+    return polygons
+
+
 class ResdataCase:
     """Expose grid geometry and static properties from one simulator case."""
 
@@ -102,6 +112,20 @@ class ResdataCase:
         centers = np.asarray([lgr.get_xyz(active_index=int(index)) for index in indices], dtype=float)
         corners = np.asarray(lgr.export_corners(lgr.export_index().loc[lgr.export_index()["active"].isin(indices)]), dtype=float)
         return {"indices": indices, "centers": centers, "corners": corners.reshape((-1, 8, 3))}
+
+    def lgr_property_slice(self, source: str, keyword: str, record: int = 0, j: int | None = None) -> dict[str, np.ndarray]:
+        """Return LGR slice geometry and parent-cell property values."""
+        slice_data = self.lgr_xz_slice(j)
+        if not len(slice_data["indices"]):
+            return {**slice_data, "properties": np.asarray([], dtype=float)}
+
+        values = self.init_array(keyword, record) if source == "INIT" else self.restart_array(keyword, record)
+        parent_centers = self.cell_centers(self.lgr_parent_indices())
+        parent_values = values.reshape(-1, order="F")[self.lgr_parent_indices()]
+        lgr_z = slice_data["centers"][:, 2]
+        parent_z = parent_centers[:, 2]
+        nearest_parent = np.abs(lgr_z[:, None] - parent_z[None, :]).argmin(axis=1)
+        return {**slice_data, "properties": parent_values[nearest_parent].astype(float)}
 
     @staticmethod
     def south_xz_view(vertical_scale: float = 0.005) -> dict[str, object]:

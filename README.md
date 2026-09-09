@@ -299,6 +299,31 @@ uv run python -m pytest --cov=src --cov-report=html tests
 
 The report is written to `htmlcov/index.html`.
 
+## Webviz simulation viewer
+
+The optional Webviz viewer provides a predefined SCREEN view for completed
+scenario results. Install its dependency with:
+
+```bash
+uv pip install -e '.[visualization]'
+```
+
+Start it against the batch results:
+
+```bash
+uv run python runscripts/run_webviz_viewer.py \
+    --results-root work/results \
+    --case baseline
+```
+
+Open `http://127.0.0.1:8050`. The viewer starts with an orthographic 3D view
+of the middle J column of the embedded LGR, hides the coarse grid, applies a
+vertical scale of `0.005`, and lets you select a scenario, `INIT` or `UNRST`,
+and a numeric property. The initial adapter maps coarse-cell properties onto
+the refined LGR cells by depth because the current simulator vectors are
+coarse-grid sized; this is kept explicit so it can be replaced when refined
+LGR property vectors are available.
+
 ## Documentation
 
 The document can be automatically generated and deployed to github pages. To do that, type the following at the command line:

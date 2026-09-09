@@ -20,6 +20,9 @@ dependencies = [
     "wellpathpy>=0.5.2",
 ]
 
+[project.optional-dependencies]
+visualization = ["webviz-subsurface-components>=1.0.6"]
+
 [dependency-groups]
 dev = [
     "ipykernel>=7.1.0",

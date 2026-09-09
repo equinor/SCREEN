@@ -2920,6 +2920,11 @@ dependencies = [
     { name = "wellpathpy" },
 ]
 
+[package.optional-dependencies]
+visualization = [
+    { name = "webviz-subsurface-components" },
+]
+
 [package.dev-dependencies]
 dev = [
     { name = "ipykernel" },
@@ -2948,8 +2953,10 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "resdata", specifier = ">=6.3.3" },
     { name = "scipy", specifier = ">=1.17.0" },
+    { name = "webviz-subsurface-components", marker = "extra == 'visualization'", specifier = ">=1.0.6" },
     { name = "wellpathpy", specifier = ">=0.5.2" },
 ]
+provides-extras = ["visualization"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -3236,6 +3243,20 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/2c/41/aa4bf9664e4cda14c3b39865b12251e8e7d239f4cd0e3cc1b6c2ccde25c1/websocket_client-1.9.0.tar.gz", hash = "sha256:9e813624b6eb619999a97dc7958469217c3176312b3a16a4bd1bc7e08a46ec98", size = 70576, upload-time = "2025-10-07T21:16:36.495Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/34/db/b10e48aa8fff7407e67470363eac595018441cf32d5e1001567a7aeba5d2/websocket_client-1.9.0-py3-none-any.whl", hash = "sha256:af248a825037ef591efbf6ed20cc5faa03d3b47b9e5a2230a529eeee1c1fc3ef", size = 82616, upload-time = "2025-10-07T21:16:34.951Z" },
+]
+
+[[package]]
+name = "webviz-subsurface-components"
+version = "1.0.6"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "dash" },
+    { name = "numpy" },
+    { name = "pandas" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/81/7b/c23cc206527371da6c9d7fb5087fd91b1178bf3ace22fcb1db0f52fc6f88/webviz_subsurface_components-1.0.6.tar.gz", hash = "sha256:9633d300ade50a0d278bec231fe6244478beaf3ce121029e99d6208843f03adb", size = 8755184, upload-time = "2026-03-25T17:40:33.414Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b4/24/eeeaef43d66b6f12aa5bc0782a9f6a599c5b456759288915353233a7bd9a/webviz_subsurface_components-1.0.6-py3-none-any.whl", hash = "sha256:e1c6fa8281967aa2edc80905985d8675db141efc299f5091f603bbfcdd3a4637", size = 8852597, upload-time = "2026-03-25T17:40:31.049Z" },
 ]
 
 [[package]]
