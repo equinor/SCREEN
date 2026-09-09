@@ -37,23 +37,15 @@ def _matrix(case: ResdataCase, source: str, keyword: str, j_column: int | None, 
     data = case.lgr_property_slice(source, keyword, record=record, j=j_column)
     if not len(data["centers"]):
         raise ValueError("The selected case has no embedded LGR cells")
-    centers = data["centers"]
-    x_values = np.unique(np.round(centers[:, 0], 8))
-    z_values = np.unique(np.round(centers[:, 2], 8))
-    x_index = {value: index for index, value in enumerate(x_values)}
-    z_index = {value: index for index, value in enumerate(z_values)}
+    x_values = data["x_values"]
+    z_values = data["z_values"]
     matrix = np.full((len(z_values), len(x_values)), np.nan)
     hover = np.full((len(z_values), len(x_values), 4), np.nan)
-    lgr_index = case.embedded_lgr().export_index()
-    lgr_i = lgr_index["i"].to_numpy()
-    lgr_j = lgr_index["j"].to_numpy()
-    lgr_k = lgr_index["k"].to_numpy()
-    for center, value, cell_index in zip(centers, data["properties"], data["indices"]):
-        ix = x_index[round(center[0], 8)]
-        iz = z_index[round(center[2], 8)]
-        matrix[iz, ix] = value
-        index = int(cell_index)
-        hover[iz, ix] = [value, lgr_i[index], lgr_j[index], lgr_k[index]]
+    rows = data["row_index"]
+    columns = data["column_index"]
+    matrix[rows, columns] = data["properties"]
+    hover[rows, columns, 0] = data["properties"]
+    hover[rows, columns, 1:] = data["ijk"]
     return x_values, z_values, matrix, hover
 
 

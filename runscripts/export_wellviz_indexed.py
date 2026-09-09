@@ -8,6 +8,7 @@ import json
 import time
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 from export_wellviz_xz import _matrix, _numeric_keywords
 
@@ -54,31 +55,30 @@ def write_package(
     sources = sources or {source: _numeric_keywords(case, source) for source in ("INIT", "UNRST")}
     records = records or {"INIT": [0], "UNRST": [0]}
     j_columns = list(range(lgr.get_dims()[1]))
-    rows = []
+    row_frames = []
     extraction_started = time.perf_counter()
     for source, keywords in sources.items():
         for keyword in keywords:
             for record in records[source]:
                 for j_column in j_columns:
                     x_values, z_values, matrix, hover = _matrix(case, source, keyword, j_column, record, 1.0)
-                    for row_index, z_value in enumerate(z_values):
-                        for column_index, x_value in enumerate(x_values):
-                            value = matrix[row_index, column_index]
-                            if not pd.isna(value):
-                                rows.append(
-                                    {
-                                        "source": source,
-                                        "property": keyword,
-                                        "record": record,
-                                        "j_column": j_column,
-                                        "x": x_value,
-                                        "z": z_value,
-                                        "value": value,
-                                        "i": hover[row_index, column_index, 1],
-                                        "j": hover[row_index, column_index, 2],
-                                        "k": hover[row_index, column_index, 3],
-                                    }
-                                )
+                    row_index, column_index = np.nonzero(np.isfinite(matrix))
+                    row_frames.append(
+                        pd.DataFrame(
+                            {
+                                "source": source,
+                                "property": keyword,
+                                "record": record,
+                                "j_column": j_column,
+                                "x": x_values[column_index],
+                                "z": z_values[row_index],
+                                "value": matrix[row_index, column_index],
+                                "i": hover[row_index, column_index, 1],
+                                "j": hover[row_index, column_index, 2],
+                                "k": hover[row_index, column_index, 3],
+                            }
+                        )
+                    )
     if timing is not None:
         timing["slice_extraction_and_rows"] = time.perf_counter() - extraction_started
     manifest = {
@@ -91,7 +91,7 @@ def write_package(
     }
     output_dir.mkdir(parents=True, exist_ok=True)
     parquet_started = time.perf_counter()
-    pd.DataFrame(rows).to_parquet(output_dir / "data.parquet", index=False)
+    pd.concat(row_frames, ignore_index=True).to_parquet(output_dir / "data.parquet", index=False)
     if timing is not None:
         timing["parquet_write"] = time.perf_counter() - parquet_started
     manifest_started = time.perf_counter()

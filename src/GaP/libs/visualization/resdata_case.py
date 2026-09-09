@@ -156,11 +156,22 @@ class ResdataCase:
         if self._parent_centers is None:
             self._parent_centers = self.cell_centers(self.lgr_parent_indices())
         nearest_parent = np.abs(centers[:, 2, None] - self._parent_centers[None, :, 2]).argmin(axis=1)
+        x_values = np.unique(np.round(centers[:, 0], 8))
+        z_values = np.unique(np.round(centers[:, 2], 8))
+        row_index = np.searchsorted(z_values, np.round(centers[:, 2], 8))
+        column_index = np.searchsorted(x_values, np.round(centers[:, 0], 8))
+        lgr_index = lgr.export_index()
+        indices = indices.astype(int)
         result = {
             "indices": indices,
             "centers": centers,
             "corners": corners.reshape((-1, 8, 3)),
             "parent_lookup": nearest_parent,
+            "x_values": x_values,
+            "z_values": z_values,
+            "row_index": row_index,
+            "column_index": column_index,
+            "ijk": np.column_stack((lgr_index["i"].to_numpy()[indices], lgr_index["j"].to_numpy()[indices], lgr_index["k"].to_numpy()[indices])),
         }
         self._slice_cache[selected_j] = result
         return result
