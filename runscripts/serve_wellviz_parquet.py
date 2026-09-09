@@ -18,7 +18,13 @@ def create_app(package_dir: Path) -> Flask:
     @app.get("/api/data")
     def data_endpoint():
         j_column = int(request.args["j"])
-        selected = data[(data["source"] == request.args["source"]) & (data["property"] == request.args["property"]) & (data["j_column"] == j_column)]
+        record = int(request.args.get("record", 0))
+        selected = data[
+            (data["source"] == request.args["source"])
+            & (data["property"] == request.args["property"])
+            & (data["record"] == record)
+            & (data["j_column"] == j_column)
+        ]
         if selected.empty:
             return jsonify({"x": [], "z": [], "values": [], "hover": []}), 404
         x_values = sorted(selected["x"].unique())

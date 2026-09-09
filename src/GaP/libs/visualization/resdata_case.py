@@ -62,12 +62,34 @@ class ResdataCase:
         """Return available dynamic keywords, or an empty list without UNRST."""
         return list(self.restart.keys()) if self.restart is not None else []
 
+    @property
+    def restart_timesteps(self) -> list[dict[str, float | int]]:
+        """Return logical restart timesteps and their UNRST record indices."""
+        if self.restart is None:
+            return []
+        timestep_count = len(self.restart["SEQNUM"])
+        return [
+            {
+                "record": timestep,
+                "restart_record": 2 * timestep + 1,
+                "days": float(self.restart["DOUBHEAD"][2 * timestep + 1].numpy_view()[0]),
+            }
+            for timestep in range(timestep_count)
+        ]
+
     def restart_array(self, keyword: str, record: int = 0) -> np.ndarray:
         """Return one UNRST keyword reshaped to simulator IJK order."""
         if self.restart is None:
             raise FileNotFoundError(f"restart file not found for {self.prefix}")
         vector = np.asarray(self.restart[keyword][record].numpy_view())
         return vector.reshape(self.dimensions[:3], order="F")
+
+    def restart_lgr_vector(self, keyword: str, timestep: int = 0) -> np.ndarray:
+        """Return an UNRST property vector for one logical LGR timestep."""
+        if self.restart is None:
+            raise FileNotFoundError(f"restart file not found for {self.prefix}")
+        restart_record = self.restart_timesteps[timestep]["restart_record"]
+        return np.asarray(self.restart[keyword][int(restart_record)].numpy_view())
 
     def cell_centers(self, active_indices: np.ndarray | None = None) -> np.ndarray:
         """Return cell centers as an ``(N, 3)`` XYZ array."""
@@ -143,9 +165,12 @@ class ResdataCase:
         if not len(slice_data["indices"]):
             return {**slice_data, "properties": np.asarray([], dtype=float)}
 
+        if source == "UNRST":
+            values = self.restart_lgr_vector(keyword, record)
+            return {**slice_data, "properties": values[slice_data["indices"]].astype(float)}
         cache_key = (source, keyword, record)
         if cache_key not in self._parent_values_cache:
-            values = self.init_array(keyword, record) if source == "INIT" else self.restart_array(keyword, record)
+            values = self.init_array(keyword, record)
             self._parent_values_cache[cache_key] = values.reshape(-1, order="F")[self.lgr_parent_indices()]
         parent_values = self._parent_values_cache[cache_key]
         return {**slice_data, "properties": parent_values[slice_data["parent_lookup"]].astype(float)}

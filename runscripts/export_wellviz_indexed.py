@@ -18,15 +18,15 @@ INDEX_HTML = """<!doctype html>
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 <style>body{font-family:sans-serif;margin:1rem}#controls{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}label{display:flex;flex-direction:column}#plot{width:100%}</style></head>
 <body><h1>SCREEN WellViz XZ</h1><div id="controls">
-<label>Source<select id="source"></select></label><label>Property<select id="property"></select></label>
+<label>Source<select id="source"></select></label><label>Property<select id="property"></select></label><label>Timestep<select id="record"></select></label>
 <label>J column<select id="j-column"></select></label><label>Z scale<input id="z-scale" type="number" min="0.00001" step="0.0001" value="0.001"></label></div>
 <div id="status">Loading manifest...</div><div id="plot"></div><script>
-const source=document.getElementById('source'), property=document.getElementById('property'), jColumn=document.getElementById('j-column'), zScale=document.getElementById('z-scale'), status=document.getElementById('status');
+const source=document.getElementById('source'), property=document.getElementById('property'), record=document.getElementById('record'), jColumn=document.getElementById('j-column'), zScale=document.getElementById('z-scale'), status=document.getElementById('status');
 let manifest;
-async function loadManifest(){ manifest=await fetch('manifest.json').then(r=>r.json()); for(const name of manifest.sources) source.add(new Option(name,name)); for(const j of manifest.j_columns) jColumn.add(new Option(`J ${j}`,j)); source.value=manifest.sources[0]; jColumn.value=manifest.middle_j; updateProperties(); }
+async function loadManifest(){ manifest=await fetch('manifest.json').then(r=>r.json()); for(const name of manifest.sources) source.add(new Option(name,name)); for(const step of manifest.timesteps) record.add(new Option(`step ${step.record} (${step.days} days)`,step.record)); for(const j of manifest.j_columns) jColumn.add(new Option(`J ${j}`,j)); source.value=manifest.sources[0]; record.value=0; jColumn.value=manifest.middle_j; updateProperties(); }
 function updateProperties(){ property.replaceChildren(...manifest.properties[source.value].map(name=>new Option(name,name))); property.value=manifest.properties[source.value][0]; render(); }
-async function render(){ if(!manifest||!property.value)return; const key=`/api/data?source=${source.value}&property=${property.value}&j=${jColumn.value}`; status.textContent=`Loading ${key}...`; const item=await fetch(key).then(r=>r.json()); const scale=Number(zScale.value)||0.001; Plotly.react('plot',[{x:item.x,y:item.z.map(v=>v*scale),z:item.values,customdata:item.hover,type:'heatmap',colorscale:'Viridis',colorbar:{title:property.value},connectgaps:false,zsmooth:false,hovertemplate:`${property.value}: %{customdata[0]:.6g}<br>ijk: %{customdata[1]:.0f} %{customdata[2]:.0f} %{customdata[3]:.0f}<extra></extra>`}],{title:`${source.value} | ${property.value} | J=${jColumn.value}`,xaxis:{title:'X [m]'},yaxis:{title:`Z scaled by ${scale} [m]`,autorange:'reversed'},height:900,template:'plotly_white'}); status.textContent='Ready'; }
-source.addEventListener('change',()=>{updateProperties()}); property.addEventListener('change',render); jColumn.addEventListener('change',render); zScale.addEventListener('input',render); loadManifest().catch(error=>{status.textContent=error});
+async function render(){ if(!manifest||!property.value)return; const key=`/api/data?source=${source.value}&property=${property.value}&record=${record.value}&j=${jColumn.value}`; status.textContent=`Loading ${key}...`; const item=await fetch(key).then(r=>r.json()); const scale=Number(zScale.value)||0.001; Plotly.react('plot',[{x:item.x,y:item.z.map(v=>v*scale),z:item.values,customdata:item.hover,type:'heatmap',colorscale:'Viridis',colorbar:{title:property.value},connectgaps:false,zsmooth:false,hovertemplate:`${property.value}: %{customdata[0]:.6g}<br>ijk: %{customdata[1]:.0f} %{customdata[2]:.0f} %{customdata[3]:.0f}<extra></extra>`}],{title:`${source.value} | ${property.value} | step=${record.value} | J=${jColumn.value}`,xaxis:{title:'X [m]'},yaxis:{title:`Z scaled by ${scale} [m]`,autorange:'reversed'},height:900,template:'plotly_white'}); status.textContent='Ready'; }
+source.addEventListener('change',()=>{updateProperties()}); property.addEventListener('change',render); record.addEventListener('change',render); jColumn.addEventListener('change',render); zScale.addEventListener('input',render); loadManifest().catch(error=>{status.textContent=error});
 </script></body></html>"""
 
 
@@ -36,6 +36,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--case", required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--timing", action="store_true", help="Print phase timing information.")
+    parser.add_argument("--all-records", action="store_true", help="Include every logical UNRST timestep instead of timestep 0 only.")
     return parser.parse_args()
 
 
@@ -45,35 +46,39 @@ def write_package(
     output_dir: Path,
     timing: dict[str, float] | None = None,
     sources: dict[str, list[str]] | None = None,
+    records: dict[str, list[int]] | None = None,
 ) -> None:
     lgr = case.embedded_lgr()
     if lgr is None:
         raise ValueError("The selected case has no embedded LGR")
     sources = sources or {source: _numeric_keywords(case, source) for source in ("INIT", "UNRST")}
+    records = records or {"INIT": [0], "UNRST": [0]}
     j_columns = list(range(lgr.get_dims()[1]))
     rows = []
     extraction_started = time.perf_counter()
     for source, keywords in sources.items():
         for keyword in keywords:
-            for j_column in j_columns:
-                x_values, z_values, matrix, hover = _matrix(case, source, keyword, j_column, 0, 1.0)
-                for row_index, z_value in enumerate(z_values):
-                    for column_index, x_value in enumerate(x_values):
-                        value = matrix[row_index, column_index]
-                        if not pd.isna(value):
-                            rows.append(
-                                {
-                                    "source": source,
-                                    "property": keyword,
-                                    "j_column": j_column,
-                                    "x": x_value,
-                                    "z": z_value,
-                                    "value": value,
-                                    "i": hover[row_index, column_index, 1],
-                                    "j": hover[row_index, column_index, 2],
-                                    "k": hover[row_index, column_index, 3],
-                                }
-                            )
+            for record in records[source]:
+                for j_column in j_columns:
+                    x_values, z_values, matrix, hover = _matrix(case, source, keyword, j_column, record, 1.0)
+                    for row_index, z_value in enumerate(z_values):
+                        for column_index, x_value in enumerate(x_values):
+                            value = matrix[row_index, column_index]
+                            if not pd.isna(value):
+                                rows.append(
+                                    {
+                                        "source": source,
+                                        "property": keyword,
+                                        "record": record,
+                                        "j_column": j_column,
+                                        "x": x_value,
+                                        "z": z_value,
+                                        "value": value,
+                                        "i": hover[row_index, column_index, 1],
+                                        "j": hover[row_index, column_index, 2],
+                                        "k": hover[row_index, column_index, 3],
+                                    }
+                                )
     if timing is not None:
         timing["slice_extraction_and_rows"] = time.perf_counter() - extraction_started
     manifest = {
@@ -82,6 +87,7 @@ def write_package(
         "properties": sources,
         "j_columns": j_columns,
         "middle_j": lgr.get_dims()[1] // 2,
+        "timesteps": [step for step in case.restart_timesteps if step["record"] in records["UNRST"]],
     }
     output_dir.mkdir(parents=True, exist_ok=True)
     parquet_started = time.perf_counter()
@@ -104,7 +110,8 @@ def main() -> int:
     keyword_started = time.perf_counter()
     sources = {source: _numeric_keywords(case, source) for source in ("INIT", "UNRST")}
     timing["keyword_scan"] = time.perf_counter() - keyword_started
-    write_package(case, args.case, args.output_dir, timing, sources)
+    records = {"INIT": [0], "UNRST": list(range(len(case.restart_timesteps))) if args.all_records else [0]}
+    write_package(case, args.case, args.output_dir, timing, sources, records)
     timing["total"] = time.perf_counter() - started
     print(f"Wrote indexed WellViz package: {args.output_dir}")
     if args.timing:

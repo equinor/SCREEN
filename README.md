@@ -349,7 +349,8 @@ export an indexed package and serve it locally:
 uv run python runscripts/export_wellviz_indexed.py \
     --results-root work/results \
     --case baseline \
-    --output-dir work/results/baseline_wellviz_indexed
+    --output-dir work/results/baseline_wellviz_indexed \
+    --all-records
 
 uv run python runscripts/serve_wellviz_parquet.py \
     --package-dir work/results/baseline_wellviz_indexed \
@@ -362,6 +363,8 @@ retaining the old WellViz-style browser controls.
 
 The package stores the indexed values in one `data.parquet` file. The server
 filters that file and returns only the selected heatmap payload.
+By default only timestep 0 is exported; add `--all-records` to include the
+full UNRST time series and enable timestep selection in the browser.
 
 ## Documentation
 
