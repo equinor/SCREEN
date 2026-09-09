@@ -41,6 +41,8 @@ test_data/**/model/*.EGRID
 test_data/**/model/*.INIT
 test_data/**/include/*LGR.grdecl
 
+work/
+
 # wildcat-pflotran
 test_data/examples/wildcat-pflotran*/model/*.EGRID
 test_data/examples/wildcat-pflotran*/model/*.INIT

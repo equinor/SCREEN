@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
 from pathlib import Path
 
 import pandas as pd
@@ -34,16 +35,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--results-root", type=Path, required=True)
     parser.add_argument("--case", required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--timing", action="store_true", help="Print phase timing information.")
     return parser.parse_args()
 
 
-def write_package(case: ResdataCase, case_name: str, output_dir: Path) -> None:
+def write_package(case: ResdataCase, case_name: str, output_dir: Path, timing: dict[str, float] | None = None) -> None:
     lgr = case.embedded_lgr()
     if lgr is None:
         raise ValueError("The selected case has no embedded LGR")
     sources = {source: _numeric_keywords(case, source) for source in ("INIT", "UNRST")}
     j_columns = list(range(lgr.get_dims()[1]))
     rows = []
+    extraction_started = time.perf_counter()
     for source, keywords in sources.items():
         for keyword in keywords:
             for j_column in j_columns:
@@ -65,6 +68,8 @@ def write_package(case: ResdataCase, case_name: str, output_dir: Path) -> None:
                                     "k": hover[row_index, column_index, 3],
                                 }
                             )
+    if timing is not None:
+        timing["slice_extraction_and_rows"] = time.perf_counter() - extraction_started
     manifest = {
         "case": case_name,
         "sources": list(sources),
@@ -73,16 +78,33 @@ def write_package(case: ResdataCase, case_name: str, output_dir: Path) -> None:
         "middle_j": lgr.get_dims()[1] // 2,
     }
     output_dir.mkdir(parents=True, exist_ok=True)
+    parquet_started = time.perf_counter()
     pd.DataFrame(rows).to_parquet(output_dir / "data.parquet", index=False)
+    if timing is not None:
+        timing["parquet_write"] = time.perf_counter() - parquet_started
+    manifest_started = time.perf_counter()
     (output_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     (output_dir / "index.html").write_text(INDEX_HTML, encoding="utf-8")
+    if timing is not None:
+        timing["manifest_and_html_write"] = time.perf_counter() - manifest_started
 
 
 def main() -> int:
     args = parse_args()
+    timing: dict[str, float] = {}
+    started = time.perf_counter()
     case = ResdataCase(args.results_root / args.case / "model" / "TEMP-0")
-    write_package(case, args.case, args.output_dir)
+    timing["case_load"] = time.perf_counter() - started
+    keyword_started = time.perf_counter()
+    sources = {source: _numeric_keywords(case, source) for source in ("INIT", "UNRST")}
+    timing["keyword_scan"] = time.perf_counter() - keyword_started
+    write_package(case, args.case, args.output_dir, timing, sources)
+    timing["total"] = time.perf_counter() - started
     print(f"Wrote indexed WellViz package: {args.output_dir}")
+    if args.timing:
+        print("Timing:")
+        for name, elapsed in timing.items():
+            print(f"  {name}: {elapsed:.3f}s")
     return 0
 
 

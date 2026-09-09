@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
 import webbrowser
 from pathlib import Path
 
@@ -24,6 +25,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--z-scale", type=float, default=0.001)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--open", action="store_true", help="Open the generated HTML in the default browser.")
+    parser.add_argument("--timing", action="store_true", help="Print phase timing information.")
     return parser.parse_args()
 
 
@@ -43,12 +45,15 @@ def _matrix(case: ResdataCase, source: str, keyword: str, j_column: int | None, 
     matrix = np.full((len(z_values), len(x_values)), np.nan)
     hover = np.full((len(z_values), len(x_values), 4), np.nan)
     lgr_index = case.embedded_lgr().export_index()
+    lgr_i = lgr_index["i"].to_numpy()
+    lgr_j = lgr_index["j"].to_numpy()
+    lgr_k = lgr_index["k"].to_numpy()
     for center, value, cell_index in zip(centers, data["properties"], data["indices"]):
         ix = x_index[round(center[0], 8)]
         iz = z_index[round(center[2], 8)]
         matrix[iz, ix] = value
-        row = lgr_index.iloc[int(cell_index)]
-        hover[iz, ix] = [value, row["i"], row["j"], row["k"]]
+        index = int(cell_index)
+        hover[iz, ix] = [value, lgr_i[index], lgr_j[index], lgr_k[index]]
     return x_values, z_values * z_scale, matrix, hover
 
 
@@ -89,8 +94,10 @@ def _interactive_html(
     initial_source: str,
     initial_keyword: str,
     initial_j: int,
+    timing: dict[str, float] | None = None,
 ) -> str:
     data = {}
+    matrix_started = time.perf_counter()
     for source, keywords in sources.items():
         for keyword in keywords:
             for j_column in j_columns:
@@ -101,6 +108,8 @@ def _interactive_html(
                     "values": _json_matrix(matrix),
                     "hover": _json_cube(hover),
                 }
+    if timing is not None:
+        timing["matrix_and_serialization"] = time.perf_counter() - matrix_started
     figure = build_figure(case, initial_source, initial_keyword, initial_j, record, z_scale)
     plot_html = figure.to_html(full_html=False, include_plotlyjs=True, div_id="wellviz-xz-plot")
     metadata = json.dumps(
@@ -162,7 +171,10 @@ def main() -> int:
     args = parse_args()
     if args.z_scale <= 0:
         raise ValueError("--z-scale must be positive")
+    timing: dict[str, float] = {}
+    started = time.perf_counter()
     case = ResdataCase(_case_prefix(args.results_root, args.case))
+    timing["case_load"] = time.perf_counter() - started
     sources = {source: _numeric_keywords(case, source) for source in ("INIT", "UNRST")}
     for source in sources:
         if not sources[source]:
@@ -170,10 +182,17 @@ def main() -> int:
     initial_keyword = args.keyword if args.keyword in sources[args.source] else sources[args.source][0]
     j_columns = list(range(case.embedded_lgr().get_dims()[1]))
     initial_j = case.embedded_lgr().get_dims()[1] // 2 if args.j_column is None else args.j_column
-    output = _interactive_html(case, sources, j_columns, args.record, args.z_scale, args.source, initial_keyword, initial_j)
+    output = _interactive_html(case, sources, j_columns, args.record, args.z_scale, args.source, initial_keyword, initial_j, timing)
+    timing["total_before_write"] = time.perf_counter() - started
     args.output.parent.mkdir(parents=True, exist_ok=True)
+    write_started = time.perf_counter()
     args.output.write_text(output, encoding="utf-8")
+    timing["html_write"] = time.perf_counter() - write_started
     print(f"Wrote WellViz XZ HTML: {args.output} ({args.output.stat().st_size / 1024**2:.1f} MB)")
+    if args.timing:
+        print("Timing:")
+        for name, elapsed in timing.items():
+            print(f"  {name}: {elapsed:.3f}s")
     if args.open:
         webbrowser.open(args.output.resolve().as_uri())
     return 0

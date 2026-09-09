@@ -30,6 +30,11 @@ class ResdataCase:
         restart_path = prefix.with_suffix(".UNRST")
         self.restart = ResdataRestartFile(self.grid, str(restart_path)) if restart_path.exists() else None
         self.index = self.grid.export_index()
+        self._lgr = None
+        self._lgr_parent_indices = None
+        self._parent_centers = None
+        self._parent_values_cache: dict[tuple[str, str, int], np.ndarray] = {}
+        self._slice_cache: dict[int, dict[str, np.ndarray]] = {}
 
     @property
     def dimensions(self) -> tuple[int, int, int, int]:
@@ -76,6 +81,8 @@ class ResdataCase:
 
     def lgr_parent_indices(self) -> np.ndarray:
         """Return combined-grid active indices that own an embedded LGR."""
+        if self._lgr_parent_indices is not None:
+            return self._lgr_parent_indices
         parent_indices = []
         for index in self.index["active"]:
             try:
@@ -83,14 +90,18 @@ class ResdataCase:
                     parent_indices.append(int(index))
             except IndexError:
                 continue
-        return np.asarray(parent_indices, dtype=int)
+        self._lgr_parent_indices = np.asarray(parent_indices, dtype=int)
+        return self._lgr_parent_indices
 
     def embedded_lgr(self):
         """Return the embedded LGR object, or ``None`` when no LGR exists."""
+        if self._lgr is not None:
+            return self._lgr
         parent_indices = self.lgr_parent_indices()
         if len(parent_indices) == 0:
             return None
-        return self.grid.get_cell_lgr(active_index=int(parent_indices[0]))
+        self._lgr = self.grid.get_cell_lgr(active_index=int(parent_indices[0]))
+        return self._lgr
 
     def lgr_slice_indices(self, j: int | None = None) -> np.ndarray:
         """Return embedded-LGR cell indices for one J column."""
@@ -108,10 +119,23 @@ class ResdataCase:
         lgr = self.embedded_lgr()
         if lgr is None:
             return {"indices": np.asarray([], dtype=int), "centers": np.empty((0, 3)), "corners": np.empty((0, 8, 3))}
-        indices = self.lgr_slice_indices(j)
+        selected_j = lgr.get_dims()[1] // 2 if j is None else j
+        if selected_j in self._slice_cache:
+            return self._slice_cache[selected_j]
+        indices = self.lgr_slice_indices(selected_j)
         centers = np.asarray([lgr.get_xyz(active_index=int(index)) for index in indices], dtype=float)
         corners = np.asarray(lgr.export_corners(lgr.export_index().loc[lgr.export_index()["active"].isin(indices)]), dtype=float)
-        return {"indices": indices, "centers": centers, "corners": corners.reshape((-1, 8, 3))}
+        if self._parent_centers is None:
+            self._parent_centers = self.cell_centers(self.lgr_parent_indices())
+        nearest_parent = np.abs(centers[:, 2, None] - self._parent_centers[None, :, 2]).argmin(axis=1)
+        result = {
+            "indices": indices,
+            "centers": centers,
+            "corners": corners.reshape((-1, 8, 3)),
+            "parent_lookup": nearest_parent,
+        }
+        self._slice_cache[selected_j] = result
+        return result
 
     def lgr_property_slice(self, source: str, keyword: str, record: int = 0, j: int | None = None) -> dict[str, np.ndarray]:
         """Return LGR slice geometry and parent-cell property values."""
@@ -119,13 +143,12 @@ class ResdataCase:
         if not len(slice_data["indices"]):
             return {**slice_data, "properties": np.asarray([], dtype=float)}
 
-        values = self.init_array(keyword, record) if source == "INIT" else self.restart_array(keyword, record)
-        parent_centers = self.cell_centers(self.lgr_parent_indices())
-        parent_values = values.reshape(-1, order="F")[self.lgr_parent_indices()]
-        lgr_z = slice_data["centers"][:, 2]
-        parent_z = parent_centers[:, 2]
-        nearest_parent = np.abs(lgr_z[:, None] - parent_z[None, :]).argmin(axis=1)
-        return {**slice_data, "properties": parent_values[nearest_parent].astype(float)}
+        cache_key = (source, keyword, record)
+        if cache_key not in self._parent_values_cache:
+            values = self.init_array(keyword, record) if source == "INIT" else self.restart_array(keyword, record)
+            self._parent_values_cache[cache_key] = values.reshape(-1, order="F")[self.lgr_parent_indices()]
+        parent_values = self._parent_values_cache[cache_key]
+        return {**slice_data, "properties": parent_values[slice_data["parent_lookup"]].astype(float)}
 
     @staticmethod
     def south_xz_view(vertical_scale: float = 0.005) -> dict[str, object]:
