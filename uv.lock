@@ -2922,6 +2922,7 @@ dependencies = [
 
 [package.optional-dependencies]
 visualization = [
+    { name = "plotly" },
     { name = "webviz-subsurface-components" },
 ]
 
@@ -2949,6 +2950,7 @@ requires-dist = [
     { name = "numpy", specifier = ">=2.4.1" },
     { name = "openpyxl", specifier = ">=3.1.5" },
     { name = "pandas", specifier = ">=3.0.0" },
+    { name = "plotly", marker = "extra == 'visualization'", specifier = ">=6.0.0" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "resdata", specifier = ">=6.3.3" },

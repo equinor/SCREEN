@@ -21,7 +21,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-visualization = ["webviz-subsurface-components>=1.0.6"]
+visualization = ["plotly>=6.0.0", "webviz-subsurface-components>=1.0.6"]
 
 [dependency-groups]
 dev = [
@@ -31,10 +31,7 @@ dev = [
     "jupyter-dash==0.4.2",
     "jupyterlab==4.6.3",
 ]
-docs = [
-    "mkdocs==1.5.3",
-    "mkdocs-material==9.4.14",
-]
+docs = ["mkdocs==1.5.3", "mkdocs-material==9.4.14"]
 test = ["pytest==9.0.3", "pytest-cov==4.1.0", "ruff==0.5.3"]
 
 [tool.setuptools.packages.find]

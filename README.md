@@ -320,6 +320,21 @@ selected LGR J-column, colored by the selected property, and requires no
 server. Use `--source UNRST` for restart properties such as `PRESSURE` or
 `SWAT`.
 
+For the maintained Plotly-based WellViz-style view, install the visualization
+extra and export an interactive heatmap with hoverable I/J/K metadata:
+
+```bash
+uv sync --all-groups --extra visualization
+uv run python runscripts/export_wellviz_xz.py \
+    --results-root work/results \
+    --case baseline \
+    --source UNRST \
+    --property PRESSURE \
+    --j-column 7 \
+    --z-scale 0.001 \
+    --output work/results/baseline_wellviz.html
+```
+
 ## Webviz simulation viewer
 
 The optional Webviz viewer provides a predefined SCREEN view for completed
