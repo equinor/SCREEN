@@ -336,6 +336,12 @@ uv run python runscripts/export_wellviz_xz.py \
     --open
 ```
 
+This controller-enabled file includes the available INIT and UNRST properties
+for all LGR J columns, so it is larger than a single-property export. Use
+`export_scenario_xz_html.py` when you want a smaller fixed-property HTML file;
+use this WellViz-style exporter when browser-side property and J-column
+selection is more important than file size.
+
 ## Webviz simulation viewer
 
 The optional Webviz viewer provides a predefined SCREEN view for completed
