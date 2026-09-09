@@ -11,6 +11,7 @@ from flask import Flask, jsonify, request, send_from_directory
 
 
 def create_app(package_dir: Path) -> Flask:
+    package_dir = package_dir.resolve()
     app = Flask(__name__, static_folder=str(package_dir), static_url_path="")
     data = pd.read_parquet(package_dir / "data.parquet")
 
