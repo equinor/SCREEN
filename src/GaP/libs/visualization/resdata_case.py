@@ -153,6 +153,9 @@ class ResdataCase:
         indices = self.lgr_slice_indices(selected_j)
         centers = np.asarray([lgr.get_xyz(active_index=int(index)) for index in indices], dtype=float)
         corners = np.asarray(lgr.export_corners(lgr.export_index().loc[lgr.export_index()["active"].isin(indices)]), dtype=float)
+        corners = corners.reshape((-1, 8, 3))
+        depth_min = float(corners[:, :, 2].min())
+        depth_max = float(corners[:, :, 2].max())
         if self._parent_centers is None:
             self._parent_centers = self.cell_centers(self.lgr_parent_indices())
         nearest_parent = np.abs(centers[:, 2, None] - self._parent_centers[None, :, 2]).argmin(axis=1)
@@ -165,13 +168,15 @@ class ResdataCase:
         result = {
             "indices": indices,
             "centers": centers,
-            "corners": corners.reshape((-1, 8, 3)),
+            "corners": corners,
             "parent_lookup": nearest_parent,
             "x_values": x_values,
             "z_values": z_values,
             "row_index": row_index,
             "column_index": column_index,
             "ijk": np.column_stack((lgr_index["i"].to_numpy()[indices], lgr_index["j"].to_numpy()[indices], lgr_index["k"].to_numpy()[indices])),
+            "depth_min": depth_min,
+            "depth_max": depth_max,
         }
         self._slice_cache[selected_j] = result
         return result

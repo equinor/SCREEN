@@ -22,7 +22,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--property", dest="keyword", default="PORV")
     parser.add_argument("--j-column", type=int, default=None)
     parser.add_argument("--record", type=int, default=0, help="UNRST record/timestep index.")
-    parser.add_argument("--z-scale", type=float, default=0.001)
+    parser.add_argument("--z-scale", type=float, default=1.0, help="Deprecated; depth is now plotted at physical scale.")
+    parser.add_argument("--x-min", type=float, default=None)
+    parser.add_argument("--x-max", type=float, default=None)
+    parser.add_argument("--y-min", type=float, default=None, help="Bottom depth bound.")
+    parser.add_argument("--y-max", type=float, default=None, help="Top depth bound.")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--open", action="store_true", help="Open the generated HTML in the default browser.")
     parser.add_argument("--timing", action="store_true", help="Print phase timing information.")
@@ -47,6 +51,12 @@ def _matrix(case: ResdataCase, source: str, keyword: str, j_column: int | None, 
     hover[rows, columns, 0] = data["properties"]
     hover[rows, columns, 1:] = data["ijk"]
     return x_values, z_values, matrix, hover
+
+
+def _axis_bounds(case: ResdataCase, j_column: int | None) -> tuple[float, float, float, float]:
+    data = case.lgr_xz_slice(j_column)
+    x_center = float(data["centers"][:, 0].mean())
+    return x_center - 10.0, x_center + 10.0, data["depth_min"], data["depth_max"]
 
 
 def _numeric_keywords(case: ResdataCase, source: str) -> list[str]:

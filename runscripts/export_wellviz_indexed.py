@@ -20,14 +20,14 @@ INDEX_HTML = """<!doctype html>
 <style>body{font-family:sans-serif;margin:1rem}#controls{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}label{display:flex;flex-direction:column}#plot{width:100%}</style></head>
 <body><h1>SCREEN WellViz XZ</h1><div id="controls">
 <label>Source<select id="source"></select></label><label>Property<select id="property"></select></label><label>Timestep<select id="record"></select></label>
-<label>J column<select id="j-column"></select></label><label>Z scale<input id="z-scale" type="number" min="0.00001" step="0.0001" value="0.001"></label></div>
+<label>J column<select id="j-column"></select></label><label>X min<input id="x-min" type="number"></label><label>X max<input id="x-max" type="number"></label><label>Y min<input id="y-min" type="number"></label><label>Y max<input id="y-max" type="number"></label></div>
 <div id="status">Loading manifest...</div><div id="plot"></div><script>
-const source=document.getElementById('source'), property=document.getElementById('property'), record=document.getElementById('record'), jColumn=document.getElementById('j-column'), zScale=document.getElementById('z-scale'), status=document.getElementById('status');
+const source=document.getElementById('source'), property=document.getElementById('property'), record=document.getElementById('record'), jColumn=document.getElementById('j-column'), xmin=document.getElementById('x-min'), xmax=document.getElementById('x-max'), ymin=document.getElementById('y-min'), ymax=document.getElementById('y-max'), status=document.getElementById('status');
 let manifest;
-async function loadManifest(){ manifest=await fetch('manifest.json').then(r=>r.json()); for(const name of manifest.sources) source.add(new Option(name,name)); for(const step of manifest.timesteps) record.add(new Option(`step ${step.record} (${step.days} days)`,step.record)); for(const j of manifest.j_columns) jColumn.add(new Option(`J ${j}`,j)); source.value=manifest.sources[0]; record.value=0; jColumn.value=manifest.middle_j; updateProperties(); }
+async function loadManifest(){ manifest=await fetch('manifest.json').then(r=>r.json()); for(const name of manifest.sources) source.add(new Option(name,name)); for(const step of manifest.timesteps) record.add(new Option(`step ${step.record} (${step.days} days)`,step.record)); for(const j of manifest.j_columns) jColumn.add(new Option(`J ${j}`,j)); source.value=manifest.sources[0]; record.value=0; jColumn.value=manifest.middle_j; xmin.value=manifest.bounds.x_min; xmax.value=manifest.bounds.x_max; ymin.value=manifest.bounds.y_min; ymax.value=manifest.bounds.y_max; updateProperties(); }
 function updateProperties(){ property.replaceChildren(...manifest.properties[source.value].map(name=>new Option(name,name))); property.value=manifest.properties[source.value][0]; render(); }
-async function render(){ if(!manifest||!property.value)return; const key=`/api/data?source=${source.value}&property=${property.value}&record=${record.value}&j=${jColumn.value}`; status.textContent=`Loading ${key}...`; const item=await fetch(key).then(r=>r.json()); const scale=Number(zScale.value)||0.001; const stride=Math.max(1,Math.floor(item.z.length/8)); const ticks=item.z.filter((_,index)=>index % stride === 0); Plotly.react('plot',[{x:item.x,y:item.z.map(v=>v*scale),z:item.values,customdata:item.hover,type:'heatmap',colorscale:'Viridis',colorbar:{title:property.value},connectgaps:false,zsmooth:false,hovertemplate:`${property.value}: %{customdata[0]:.6g}<br>ijk: %{customdata[1]:.0f} %{customdata[2]:.0f} %{customdata[3]:.0f}<extra></extra>`}],{title:`${source.value} | ${property.value} | step=${record.value} | J=${jColumn.value}`,xaxis:{title:'X [m]'},yaxis:{title:'Depth [m]',autorange:'reversed',tickvals:ticks.map(v=>v*scale),ticktext:ticks.map(v=>String(v))},height:900,template:'plotly_white'}); status.textContent='Ready'; }
-source.addEventListener('change',()=>{updateProperties()}); property.addEventListener('change',render); record.addEventListener('change',render); jColumn.addEventListener('change',render); zScale.addEventListener('input',render); loadManifest().catch(error=>{status.textContent=error});
+async function render(){ if(!manifest||!property.value)return; const key=`/api/data?source=${source.value}&property=${property.value}&record=${record.value}&j=${jColumn.value}`; status.textContent=`Loading ${key}...`; const item=await fetch(key).then(r=>r.json()); Plotly.react('plot',[{x:item.x,y:item.z,z:item.values,customdata:item.hover,type:'heatmap',colorscale:'Viridis',colorbar:{title:property.value},connectgaps:false,zsmooth:false,hovertemplate:`${property.value}: %{customdata[0]:.6g}<br>ijk: %{customdata[1]:.0f} %{customdata[2]:.0f} %{customdata[3]:.0f}<extra></extra>`}],{title:`${source.value} | ${property.value} | step=${record.value} | J=${jColumn.value}`,xaxis:{title:'X [m]',range:[Number(xmin.value),Number(xmax.value)]},yaxis:{title:'Depth [m]',range:[Number(ymin.value),Number(ymax.value)],autorange:false},height:900,template:'plotly_white'}); status.textContent='Ready'; }
+source.addEventListener('change',()=>{updateProperties()}); property.addEventListener('change',render); record.addEventListener('change',render); jColumn.addEventListener('change',render); [xmin,xmax,ymin,ymax].forEach(control=>control.addEventListener('change',render)); loadManifest().catch(error=>{status.textContent=error});
 </script></body></html>"""
 
 
@@ -88,6 +88,14 @@ def write_package(
         "j_columns": j_columns,
         "middle_j": lgr.get_dims()[1] // 2,
         "timesteps": [step for step in case.restart_timesteps if step["record"] in records["UNRST"]],
+    }
+    middle_slice = case.lgr_xz_slice(manifest["middle_j"])
+    x_center = float(middle_slice["centers"][:, 0].mean())
+    manifest["bounds"] = {
+        "x_min": x_center - 10.0,
+        "x_max": x_center + 10.0,
+        "y_min": middle_slice["depth_min"],
+        "y_max": middle_slice["depth_max"],
     }
     output_dir.mkdir(parents=True, exist_ok=True)
     parquet_started = time.perf_counter()
