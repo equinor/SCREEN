@@ -150,12 +150,23 @@ Supported for ongoing use:
 - Canonical JSON workflow and adapters through WellClass -> GaP.
 - Workbook-driven preprocessing adapter (`runscripts/prepare_init_case_from_xlsx.py`) for organized user input.
 - Canonical notebooks: `notebooks/01_wellclass.ipynb`, `notebooks/02_gap_grid.ipynb`, `notebooks/03_wellclass_to_gap.ipynb`, `notebooks/04_init_case_preprocessing.ipynb`, `notebooks/05_workbook_to_cirrus_lgr.ipynb`.
+- Optional simulator-result inspection through the maintained Plotly/Parquet WellViz-style exporters:
+  - `runscripts/export_wellviz_xz.py` creates a standalone interactive XZ HTML view.
+  - `runscripts/export_wellviz_indexed.py` creates a compact indexed Parquet package.
+  - `runscripts/serve_wellviz_parquet.py` serves filtered property, timestep, and J-column data locally.
 
 Deprecated or historical (kept as references, not recommended as entry points):
 
 - Scripts under `experiments/legacy/`.
 - `_originals` assets and historical notebooks not listed above.
+- `src/WellViz/` historical Dash/Plotly application code; its vector-reading ideas informed the maintained exporters, but it is not part of the supported runtime.
 - Legacy CSV-style input recipes for new projects; keep only for backward compatibility and migration.
+
+The result-visualization layer is intentionally optional and downstream of the
+GaP workflow. It consumes completed `.EGRID`, `.INIT`, and `.UNRST` outputs but
+does not define grid generation, simulator execution, or the WellClass/GaP
+ownership boundary. Further viewer features are parked until the core GaP
+contracts require them.
 
 These are important smoke paths, not yet a complete production guarantee.
 

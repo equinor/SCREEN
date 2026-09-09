@@ -59,6 +59,11 @@ Completed coarse-grid preparation slices:
     - Each result records the selected assumptions in `scenario.json` beside the shared `well_input.json`.
     - `--plot` optionally saves a WellClass sketch and pressure QC image as `qc_plot.png`.
     - `runscripts/validate_scenario_outputs.py` checks required outputs, logs, file sizes, and checksums.
+- Optional result inspection is implemented and intentionally kept downstream of GaP:
+    - `runscripts/export_wellviz_xz.py` provides a standalone Plotly XZ export.
+    - `runscripts/export_wellviz_indexed.py` creates a compact Parquet-backed package with source, property, timestep, and J-column selection.
+    - `runscripts/serve_wellviz_parquet.py` serves filtered slices locally.
+    - The historical `src/WellViz/` Dash application is retained only as reference; it is not a supported entry point.
 
 These helpers do not create native `.EGRID`/`.INIT` files unless an external simulator command is explicitly supplied.
 
@@ -68,6 +73,12 @@ The single-reservoir design-matrix workflow is complete for the current
 contract. The next step is to validate scenario influence using the generated
 QC plots and CIRRUS visualization tools, then identify which result quantities
 are worth comparing automatically.
+
+The visualization investigation is currently parked. The maintained local
+viewer/export path is sufficient for predefined XZ inspection; future work can
+resume with timestep animation, logarithmic permeability/transmissibility
+coloring, richer hover metadata, or integration with a larger Webviz/FMU
+environment when there is a concrete use case.
 
 ## Later
 
