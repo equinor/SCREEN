@@ -1,4 +1,16 @@
+import importlib.util
+import shutil
+from pathlib import Path
+
 from src.GaP.libs.visualization import hexahedron_polygons
+
+
+def _load_viewer():
+    path = Path("runscripts/run_webviz_viewer.py")
+    spec = importlib.util.spec_from_file_location("run_webviz_viewer", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def test_polygons_encode_six_quad_faces_per_cell():
@@ -9,3 +21,19 @@ def test_polygons_encode_six_quad_faces_per_cell():
     assert len(polygons) == 2 * 6 * 5
     assert polygons[:5] == [4, 0, 1, 2, 3]
     assert polygons[-5:] == [4, 11, 8, 12, 15]
+
+
+def test_viewer_callback_constructs_component_for_installed_webviz(tmp_path):
+    source = Path("test_data/examples/wildcat/model")
+    model = tmp_path / "baseline" / "model"
+    model.mkdir(parents=True)
+    for suffix in ("EGRID", "INIT"):
+        shutil.copy(source / f"TEMP-0.{suffix}", model / f"TEMP-0.{suffix}")
+
+    app = _load_viewer().create_app(tmp_path)
+    callback = next(value for key, value in app.callback_map.items() if key.startswith("viewer.children"))["callback"]
+    component = callback.__wrapped__("baseline", "INIT", "PORV")
+
+    assert component.id == "screen-viewer"
+    assert component.verticalScale == 0.005
+    assert "style" not in component.to_plotly_json()["props"]

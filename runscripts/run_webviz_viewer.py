@@ -42,12 +42,11 @@ def _payload(case: ResdataCase, source: str, keyword: str) -> dict[str, list[flo
 def create_app(results_root: Path):
     try:
         import dash
-        from dash import Input, Output, dcc, html
         import webviz_subsurface_components as wsc
+        from dash import Input, Output, dcc, html
     except ImportError as exc:
         raise RuntimeError(
-            "The Webviz viewer requires optional dependencies. Install with "
-            "`uv pip install webviz-subsurface-components`."
+            "The Webviz viewer requires optional dependencies. Install with " "`uv pip install webviz-subsurface-components`."
         ) from exc
 
     cases = _case_names(results_root)
@@ -67,7 +66,7 @@ def create_app(results_root: Path):
                 ],
                 style={"display": "grid", "gridTemplateColumns": "1fr 1fr 2fr", "gap": "8px"},
             ),
-            html.Div(id="viewer"),
+            html.Div(id="viewer", style={"height": "80vh", "width": "100%"}),
         ],
         style={"fontFamily": "sans-serif", "padding": "16px"},
     )
@@ -75,7 +74,11 @@ def create_app(results_root: Path):
     @app.callback(Output("keyword", "options"), Output("keyword", "value"), Input("case", "value"), Input("source", "value"))
     def update_keywords(case_name: str, source: str):
         keywords = loaded_cases[case_name].keywords if source == "INIT" else loaded_cases[case_name].restart_keywords
-        numeric = [keyword for keyword in keywords if keyword not in {"SEQNUM", "INTEHEAD", "LOGIHEAD", "DOUBHEAD", "LGR", "LGRNAMES", "LGRHEADI", "LGRHEADQ", "LGRHEADD", "LGRSGONE"}]
+        numeric = [
+            keyword
+            for keyword in keywords
+            if keyword not in {"SEQNUM", "INTEHEAD", "LOGIHEAD", "DOUBHEAD", "LGR", "LGRNAMES", "LGRHEADI", "LGRHEADQ", "LGRHEADD", "LGRSGONE"}
+        ]
         return [{"label": keyword, "value": keyword} for keyword in numeric], numeric[0] if numeric else None
 
     @app.callback(Output("viewer", "children"), Input("case", "value"), Input("source", "value"), Input("keyword", "value"))
@@ -99,10 +102,13 @@ def create_app(results_root: Path):
                     "ZIncreasingDownwards": False,
                 }
             ],
-            views={"layout": [1, 1], "showLabel": True, "viewports": [{"id": "screen-xz", "show3D": True, "name": "South XZ", "layerIds": ["screen-lgr-middle-j"]}]},
+            views={
+                "layout": [1, 1],
+                "showLabel": True,
+                "viewports": [{"id": "screen-xz", "show3D": True, "name": "South XZ", "layerIds": ["screen-lgr-middle-j"]}],
+            },
             verticalScale=0.005,
             coordinateUnit="m",
-            style={"height": "80vh", "width": "100%"},
         )
 
     @app.server.route("/screen-data/<case_name>/<source>/<keyword>/<kind>")
