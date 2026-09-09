@@ -32,9 +32,11 @@ def _case_names(results_root: Path) -> list[str]:
 def _payload(case: ResdataCase, source: str, keyword: str, j: int | None = None) -> dict[str, list[float] | list[int]]:
     data = case.lgr_property_slice(source, keyword, j=j)
     corners = data["corners"].copy()
+    if not len(corners):
+        return {"points": [], "polys": [], "properties": []}
     original_y = corners[:, :, 1].copy()
     corners[:, :, 1] = corners[:, :, 2]
-    corners[:, :, 2] = original_y
+    corners[:, :, 2] = original_y - original_y.mean()
     properties = np.repeat(data["properties"], 6)
     return {
         "points": corners.reshape(-1, 3).astype(np.float32).ravel().tolist(),
