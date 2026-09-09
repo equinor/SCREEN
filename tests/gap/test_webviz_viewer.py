@@ -45,4 +45,5 @@ def test_viewer_callback_constructs_component_for_installed_webviz(tmp_path):
 
     assert response.status_code == 200
     assert response.content_type == "application/json"
-    assert response.get_json() == []
+    points = response.get_json()
+    assert len(points) == 0

@@ -33,7 +33,8 @@ def _payload(case: ResdataCase, source: str, keyword: str, j: int | None = None)
     data = case.lgr_property_slice(source, keyword, j=j)
     corners = data["corners"].copy()
     corners[:, :, 1] = corners[:, :, 2]
-    corners[:, :, 2] = 0.0
+    corners[:, :4, 2] = -0.0005
+    corners[:, 4:, 2] = 0.0005
     properties = np.repeat(data["properties"], 6)
     return {
         "points": corners.reshape(-1, 3).astype(np.float32).ravel().tolist(),
@@ -94,7 +95,9 @@ def create_app(results_root: Path):
         middle = lgr.get_dims()[1] // 2
         return [{"label": f"J {column}", "value": column} for column in columns], middle
 
-    @app.callback(Output("viewer", "children"), Input("case", "value"), Input("source", "value"), Input("keyword", "value"), Input("j-column", "value"))
+    @app.callback(
+        Output("viewer", "children"), Input("case", "value"), Input("source", "value"), Input("keyword", "value"), Input("j-column", "value")
+    )
     def update_viewer(case_name: str, source: str, keyword: str, j_column: int | None):
         if not keyword:
             return html.Div("No numeric properties available")
