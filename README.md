@@ -299,6 +299,27 @@ uv run python -m pytest --cov=src --cov-report=html tests
 
 The report is written to `htmlcov/index.html`.
 
+## Standalone XZ result viewer
+
+For a lightweight local visualization, export a self-contained HTML file
+without starting Dash or installing Webviz components:
+
+```bash
+uv run python runscripts/export_scenario_xz_html.py \
+    --results-root work/results \
+    --case baseline \
+    --source INIT \
+    --property PORV \
+    --j-column 7 \
+    --z-scale 0.001 \
+    --output work/results/baseline_xz.html
+```
+
+Open `work/results/baseline_xz.html` in a browser. The file contains the
+selected LGR J-column, colored by the selected property, and requires no
+server. Use `--source UNRST` for restart properties such as `PRESSURE` or
+`SWAT`.
+
 ## Webviz simulation viewer
 
 The optional Webviz viewer provides a predefined SCREEN view for completed
