@@ -139,7 +139,7 @@ class ResdataCase:
         }
 
     def south_xz_camera(self, vertical_scale: float = 0.001) -> dict[str, object]:
-        """Return a South-facing camera fit to the scaled LGR height."""
+        """Return a 2D XZ camera fit to the full LGR height."""
         slice_data = self.lgr_xz_slice()
         if not len(slice_data["corners"]):
             raise ValueError("South XZ camera requires an embedded LGR")
@@ -147,18 +147,16 @@ class ResdataCase:
         minimum = corners.reshape(-1, 3).min(axis=0)
         maximum = corners.reshape(-1, 3).max(axis=0)
         center = (minimum + maximum) / 2.0
-        scaled_height = max((maximum[2] - minimum[2]) * vertical_scale, 1e-6)
-        fit_box = [
-            center[0] - scaled_height / 2.0,
-            center[1] - scaled_height / 2.0,
-            center[2] * vertical_scale - scaled_height / 2.0,
-            center[0] + scaled_height / 2.0,
-            center[1] + scaled_height / 2.0,
-            center[2] * vertical_scale + scaled_height / 2.0,
-        ]
+        height = max(maximum[2] - minimum[2], 1e-6)
+        half_width = height * 0.002
         return {
-            "target": center.tolist(),
-            "zoom": fit_box,
-            "rotationX": 0,
-            "rotationOrbit": 180,
+            "target": [float(center[0]), float(center[2])],
+            "zoom": [
+                float(center[0] - half_width),
+                float(minimum[2]),
+                0.0,
+                float(center[0] + half_width),
+                float(maximum[2]),
+                0.0,
+            ],
         }

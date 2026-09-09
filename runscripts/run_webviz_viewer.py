@@ -29,12 +29,15 @@ def _case_names(results_root: Path) -> list[str]:
     return sorted(path.name for path in results_root.iterdir() if path.is_dir() and (path / "model" / "TEMP-0.EGRID").exists())
 
 
-def _payload(case: ResdataCase, source: str, keyword: str) -> dict[str, list[float] | list[int]]:
-    data = case.lgr_property_slice(source, keyword)
+def _payload(case: ResdataCase, source: str, keyword: str, j: int | None = None) -> dict[str, list[float] | list[int]]:
+    data = case.lgr_property_slice(source, keyword, j=j)
+    corners = data["corners"].copy()
+    corners[:, :, 1] = corners[:, :, 2]
+    corners[:, :, 2] = 0.0
     properties = np.repeat(data["properties"], 6)
     return {
-        "points": data["corners"].reshape(-1, 3).astype(np.float32).ravel().tolist(),
-        "polys": hexahedron_polygons(len(data["corners"])),
+        "points": corners.reshape(-1, 3).astype(np.float32).ravel().tolist(),
+        "polys": hexahedron_polygons(len(corners)),
         "properties": properties.astype(np.float32).tolist(),
     }
 
@@ -63,8 +66,9 @@ def create_app(results_root: Path):
                     dcc.Dropdown(cases, cases[0], id="case", clearable=False),
                     dcc.Dropdown(["INIT", "UNRST"], "INIT", id="source", clearable=False),
                     dcc.Dropdown(id="keyword", clearable=False),
+                    dcc.Dropdown(id="j-column", clearable=False),
                 ],
-                style={"display": "grid", "gridTemplateColumns": "1fr 1fr 2fr", "gap": "8px"},
+                style={"display": "grid", "gridTemplateColumns": "1fr 1fr 2fr 1fr", "gap": "8px"},
             ),
             html.Div(id="viewer", style={"height": "80vh", "width": "100%"}),
         ],
@@ -81,11 +85,20 @@ def create_app(results_root: Path):
         ]
         return [{"label": keyword, "value": keyword} for keyword in numeric], numeric[0] if numeric else None
 
-    @app.callback(Output("viewer", "children"), Input("case", "value"), Input("source", "value"), Input("keyword", "value"))
-    def update_viewer(case_name: str, source: str, keyword: str):
+    @app.callback(Output("j-column", "options"), Output("j-column", "value"), Input("case", "value"))
+    def update_j_columns(case_name: str):
+        lgr = loaded_cases[case_name].embedded_lgr()
+        if lgr is None:
+            return [], None
+        columns = list(range(lgr.get_dims()[1]))
+        middle = lgr.get_dims()[1] // 2
+        return [{"label": f"J {column}", "value": column} for column in columns], middle
+
+    @app.callback(Output("viewer", "children"), Input("case", "value"), Input("source", "value"), Input("keyword", "value"), Input("j-column", "value"))
+    def update_viewer(case_name: str, source: str, keyword: str, j_column: int | None):
         if not keyword:
             return html.Div("No numeric properties available")
-        layer_url = f"/screen-data/{case_name}/{source}/{keyword}"
+        layer_url = f"/screen-data/{case_name}/{source}/{keyword}/{j_column}"
         camera = (
             loaded_cases[case_name].south_xz_camera()
             if len(loaded_cases[case_name].lgr_parent_indices())
@@ -110,18 +123,17 @@ def create_app(results_root: Path):
             views={
                 "layout": [1, 1],
                 "showLabel": True,
-                "viewports": [{"id": "screen-xz", "show3D": True, "name": "South XZ", "layerIds": ["screen-lgr-middle-j"]}],
+                "viewports": [{"id": "screen-xz", "show3D": False, "name": "South XZ", "layerIds": ["screen-lgr-middle-j"]}],
             },
             cameraPosition=camera,
-            verticalScale=0.001,
             coordinateUnit="m",
         )
 
-    @app.server.route("/screen-data/<case_name>/<source>/<keyword>/<kind>.json")
-    def screen_data(case_name: str, source: str, keyword: str, kind: str):
+    @app.server.route("/screen-data/<case_name>/<source>/<keyword>/<j>/<kind>.json")
+    def screen_data(case_name: str, source: str, keyword: str, j: str, kind: str):
         from flask import jsonify
 
-        payload = _payload(loaded_cases[case_name], source, keyword)
+        payload = _payload(loaded_cases[case_name], source, keyword, None if j == "None" else int(j))
         return jsonify(payload[kind])
 
     return app
