@@ -54,7 +54,7 @@ def _matrix(case: ResdataCase, source: str, keyword: str, j_column: int | None, 
         matrix[iz, ix] = value
         index = int(cell_index)
         hover[iz, ix] = [value, lgr_i[index], lgr_j[index], lgr_k[index]]
-    return x_values, z_values * z_scale, matrix, hover
+    return x_values, z_values, matrix, hover
 
 
 def _numeric_keywords(case: ResdataCase, source: str) -> list[str]:
@@ -135,7 +135,7 @@ const model={metadata}; const source=document.getElementById('source'), property
 for (const name of Object.keys(model.sources)) source.add(new Option(name,name)); source.value=model.initial_source; zScale.value=model.z_scale;
 for (const j of model.j_columns) jColumn.add(new Option(`J ${{j}}`,j)); jColumn.value=model.initial_j;
 function properties() {{ property.replaceChildren(...model.sources[source.value].map(name => new Option(name,name))); property.value=model.initial_keyword; }}
-function render() {{ const item=model.data[`${{source.value}}|${{property.value}}|${{jColumn.value}}`]; if (!item) return; const scale=Number(zScale.value)||model.z_scale; const custom=item.hover.map(row => row.map(cell => cell === null ? null : cell)); Plotly.react('wellviz-xz-plot',[{{x:item.x,y:item.z.map(value => value*scale),z:item.values,customdata:custom,type:'heatmap',colorscale:'Viridis',colorbar:{{title:property.value}},connectgaps:false,zsmooth:false,hovertemplate:`${{property.value}}: %{{customdata[0]:.6g}}<br>ijk: %{{customdata[1]:.0f}} %{{customdata[2]:.0f}} %{{customdata[3]:.0f}}<extra></extra>`}}],{{title:`${{source.value}} | ${{property.value}} | J=${{jColumn.value}}`,xaxis:{{title:'X [m]'}},yaxis:{{title:`Z scaled by ${{scale}} [m]`,autorange:'reversed'}},height:900,template:'plotly_white'}}); }}
+function render() {{ const item=model.data[`${{source.value}}|${{property.value}}|${{jColumn.value}}`]; if (!item) return; const scale=Number(zScale.value)||model.z_scale; const custom=item.hover.map(row => row.map(cell => cell === null ? null : cell)); const stride=Math.max(1,Math.floor(item.z.length/8)); const ticks=item.z.filter((_,index)=>index % stride === 0); Plotly.react('wellviz-xz-plot',[{{x:item.x,y:item.z.map(value => value*scale),z:item.values,customdata:custom,type:'heatmap',colorscale:'Viridis',colorbar:{{title:property.value}},connectgaps:false,zsmooth:false,hovertemplate:`${{property.value}}: %{{customdata[0]:.6g}}<br>ijk: %{{customdata[1]:.0f}} %{{customdata[2]:.0f}} %{{customdata[3]:.0f}}<extra></extra>`}}],{{title:`${{source.value}} | ${{property.value}} | J=${{jColumn.value}}`,xaxis:{{title:'X [m]'}},yaxis:{{title:'Depth [m]',autorange:'reversed',tickvals:ticks.map(value=>value*scale),ticktext:ticks.map(value=>String(value))}},height:900,template:'plotly_white'}}); }}
 source.addEventListener('change',() => {{ properties(); render(); }}); property.addEventListener('change',render); jColumn.addEventListener('change',render); zScale.addEventListener('input',render); properties(); render();
 </script></body></html>"""
 
@@ -144,9 +144,11 @@ def build_figure(case: ResdataCase, source: str, keyword: str, j_column: int | N
     import plotly.graph_objects as go
 
     x_values, z_values, matrix, hover = _matrix(case, source, keyword, j_column, record, z_scale)
+    scaled_z = z_values * z_scale
+    tick_indices = np.linspace(0, len(z_values) - 1, min(8, len(z_values)), dtype=int)
     heatmap = go.Heatmap(
         x=x_values,
-        y=z_values,
+        y=scaled_z,
         z=matrix,
         customdata=hover,
         colorscale="Viridis",
@@ -159,8 +161,8 @@ def build_figure(case: ResdataCase, source: str, keyword: str, j_column: int | N
     figure.update_layout(
         title=f"{case.prefix.parent.parent.name} | {source} | {keyword} | J={j_column if j_column is not None else 'middle'}",
         xaxis_title="X [m]",
-        yaxis_title=f"Z scaled by {z_scale:g} [m]",
-        yaxis={"autorange": "reversed"},
+        yaxis_title="Depth [m]",
+        yaxis={"autorange": "reversed", "tickvals": scaled_z[tick_indices], "ticktext": [f"{value:g}" for value in z_values[tick_indices]]},
         height=900,
         template="plotly_white",
     )
