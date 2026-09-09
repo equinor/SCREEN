@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import webbrowser
 from pathlib import Path
 
 import numpy as np
@@ -21,6 +22,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--record", type=int, default=0, help="UNRST record/timestep index.")
     parser.add_argument("--z-scale", type=float, default=0.001)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--open", action="store_true", help="Open the generated HTML in the default browser.")
     return parser.parse_args()
 
 
@@ -84,6 +86,9 @@ def main() -> int:
     figure = build_figure(case, args.source, args.keyword, args.j_column, args.record, args.z_scale)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     figure.write_html(args.output, include_plotlyjs=True, full_html=True)
+    print(f"Wrote WellViz XZ HTML: {args.output} ({args.output.stat().st_size / 1024**2:.1f} MB)")
+    if args.open:
+        webbrowser.open(args.output.resolve().as_uri())
     return 0
 
 

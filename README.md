@@ -332,7 +332,8 @@ uv run python runscripts/export_wellviz_xz.py \
     --property PRESSURE \
     --j-column 7 \
     --z-scale 0.001 \
-    --output work/results/baseline_wellviz.html
+    --output work/results/baseline_wellviz.html \
+    --open
 ```
 
 ## Webviz simulation viewer
