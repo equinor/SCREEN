@@ -82,6 +82,16 @@ environment when there is a concrete use case.
 
 ## Later
 
+- Consider an optional LWRES-inspired low-resolution LGR strategy for quick
+    sensitivity studies. This is deliberately lower priority than the current
+    standard workflow: reuse the existing WellClass-to-GaP geometry and CARFIN
+    boundaries, while varying the refinement policy through a named mode rather
+    than copying the legacy monolithic script. Candidate controls include a
+    casing-sized minimum cell, fixed overburden subdivision, preserved coarse
+    reservoir layers, and opt-in overburden isolation. Validate parent-cell DZ
+    conservation, material/property precedence, simulator index conversion, and
+    unchanged output from the default standard mode before treating it as
+    supported.
 - Adapt or extend coarse cells when the well envelope is not covered.
 - Preserve existing properties when adapting a grid.
 - Support separate PFLOTRAN and CIRRUS input/output backends.
