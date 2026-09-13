@@ -30,15 +30,12 @@ def _write_multi_scenario_workbook(path: Path, num_scenarios: int = 3) -> None:
         {
             "key": [
                 "top_depth",
-                "water_depth",
-                "reservoir_top",
-                "bottom_depth",
                 "target_dz_water",
                 "target_dz_overburden",
                 "target_dz_reservoir",
                 "cells_per_layer",
             ],
-            "value": [4.0, 104.0, 1004.0, 1504.0, 50.0, 60.0, 10.0, 400],
+            "value": [4.0, 50.0, 60.0, 10.0, 400],
         }
     )
 

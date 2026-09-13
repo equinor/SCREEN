@@ -27,14 +27,12 @@ def _write_minimal_workbook(path: Path) -> None:
         {
             "key": [
                 "top_depth",
-                "reservoir_top",
-                "bottom_depth",
                 "target_dz_water",
                 "target_dz_overburden",
                 "target_dz_reservoir",
                 "cells_per_layer",
             ],
-            "value": [4.0, 1004.0, 1504.0, 50.0, 60.0, 10.0, 400],
+            "value": [4.0, 50.0, 60.0, 10.0, 400],
         }
     )
 
@@ -53,6 +51,24 @@ def _write_minimal_workbook(path: Path) -> None:
                 "p_resrv": [250.0],
             }
         ).to_excel(writer, sheet_name="SubsurfaceAssumptions", index=False)
+        pd.DataFrame(
+            {
+                "name": ["RESERVOIR"],
+                "top_rkb": [1027.0],
+                "bottom_rkb": [1400.0],
+                "unit_type": ["reservoir"],
+            }
+        ).to_excel(writer, sheet_name="Stratigraphy", index=False)
+        pd.DataFrame(
+            {
+                "name": ["Hole"],
+                "type": ["hole"],
+                "top_rkb": [444.0],
+                "bottom_rkb": [1812.0],
+                "diameter_in": [17.5],
+                "shoe": [False],
+            }
+        ).to_excel(writer, sheet_name="HoleCasings", index=False)
 
 
 def test_prepare_init_case_from_xlsx_stages_files(tmp_path):
@@ -88,21 +104,21 @@ def test_prepare_init_case_from_xlsx_stages_files(tmp_path):
     recipe = tops.read_text(encoding="utf-8")
     assert "TOPS 4" in recipe
     assert "1200*33.6667" in recipe
-    assert "6000*59.9333" in recipe
-    assert "20000*10" in recipe
+    assert "6000*59.6667" in recipe
+    assert "16000*10" in recipe
     assert "DATABASE ../include/co2_db_new.dat" in deck.read_text(encoding="utf-8")
     assert "TEMP_LGR.grdecl" not in grdecl.read_text(encoding="utf-8")
     grdecl_text = grdecl.read_text(encoding="utf-8")
     assert "EQLNUM 1 1 20 1 20 1 18 /" in grdecl_text
-    assert "EQLNUM 2 1 20 1 20 19 68 /" in grdecl_text
+    assert "EQLNUM 2 1 20 1 20 19 58 /" in grdecl_text
     assert "PERMX 10000 1 20 1 20 1 3 /" in grdecl_text
     assert "PERMX 0.001 1 20 1 20 4 18 /" in grdecl_text
     assert "PORO 1 1 20 1 20 1 3 /" in grdecl_text
-    assert "FIPLEG 3 1 20 1 20 19 65 /" in grdecl_text
-    assert "FIPLEG 5 1 20 1 20 66 68 /" in grdecl_text
-    assert "PERMX 0.01 1 20 1 20 66 68 /" in grdecl_text
+    assert "FIPLEG 3 1 20 1 20 19 55 /" in grdecl_text
+    assert "FIPLEG 5 1 20 1 20 56 58 /" in grdecl_text
+    assert "PERMX 0.01 1 20 1 20 56 58 /" in grdecl_text
     assert "TRANZ 0 1 20 1 20 19 19 /" in grdecl_text
-    assert "PERMZ 0.1 1 20 1 20 4 68 /" in grdecl_text
+    assert "PERMZ 0.1 1 20 1 20 4 58 /" in grdecl_text
 
 
 def test_workbook_keeps_simulation_assumptions_outside_well_model(tmp_path):

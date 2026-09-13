@@ -121,8 +121,6 @@ def xlsx_grid_policy(xlsx_file: str | Path) -> dict[str, Any]:
 
     Required keys in the GridPolicy sheet:
     - top_depth
-    - reservoir_top
-    - bottom_depth
     - target_dz_water
     - target_dz_overburden
     - target_dz_reservoir
@@ -155,8 +153,6 @@ def xlsx_grid_policy(xlsx_file: str | Path) -> dict[str, Any]:
     policy = _key_value_sheet(policy_sheet, sheet_name="GridPolicy")
     required = {
         "top_depth",
-        "reservoir_top",
-        "bottom_depth",
         "target_dz_water",
         "target_dz_overburden",
         "target_dz_reservoir",

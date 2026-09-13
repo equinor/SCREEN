@@ -112,7 +112,9 @@ def run_workflow(args: argparse.Namespace) -> Path:
         scenario = design.select(args.case_name)
     except ValueError as exc:
         raise ValueError(f"Invalid case-name '{args.case_name}': {exc}") from None
-    stage_args = derive_stage_args_from_policy(args, policy)
+    stage_args = derive_stage_args_from_policy(args, policy, model)
+    args.reservoir_top = stage_args.reservoir_top
+    args.bottom_depth = stage_args.bottom_depth
     deck_path, grdecl_path, _ = stage_case(stage_args)
 
     args.final_run = False
