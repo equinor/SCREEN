@@ -299,27 +299,6 @@ uv run python -m pytest --cov=src --cov-report=html tests
 
 The report is written to `htmlcov/index.html`.
 
-## Standalone XZ result viewer
-
-For a lightweight local visualization, export a self-contained HTML file
-without starting Dash or installing Webviz components:
-
-```bash
-uv run python runscripts/export_scenario_xz_html.py \
-    --results-root work/results \
-    --case baseline \
-    --source INIT \
-    --property PORV \
-    --j-column 7 \
-    --z-scale 0.001 \
-    --output work/results/baseline_xz.html
-```
-
-Open `work/results/baseline_xz.html` in a browser. The file contains the
-selected LGR J-column, colored by the selected property, and requires no
-server. Use `--source UNRST` for restart properties such as `PRESSURE` or
-`SWAT`.
-
 For the maintained Plotly-based WellViz-style view, install the visualization
 extra and export an interactive heatmap with hoverable I/J/K metadata:
 
@@ -338,9 +317,8 @@ uv run python runscripts/export_wellviz_xz.py \
 
 This controller-enabled file includes the available INIT and UNRST properties
 for all LGR J columns, so it is larger than a single-property export. Use
-`export_scenario_xz_html.py` when you want a smaller fixed-property HTML file;
-use this WellViz-style exporter when browser-side property and J-column
-selection is more important than file size.
+this WellViz-style exporter when browser-side property and J-column selection
+is important.
 
 For the same controls without embedding the data in one large HTML file,
 export an indexed package and serve it locally:
