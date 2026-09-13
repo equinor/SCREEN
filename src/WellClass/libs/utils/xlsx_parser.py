@@ -135,7 +135,8 @@ def xlsx_grid_policy(xlsx_file: str | Path) -> dict[str, Any]:
     - max_reservoir_layers
     - nx, ny (default 20)
     - dx, dy (default 200 m)
-    - reservoir_permx (default 0.01)
+    - reservoir_permx (default 1000.0)
+    - overburden_permx (default 0.001)
     - aquifer_permx (default reservoir_permx)
     - aquifer_layers (default 3)
     - porv_multiplier (default 2000)

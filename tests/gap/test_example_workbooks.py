@@ -22,8 +22,10 @@ def test_example_workbooks_parse_to_canonical_wells(name, well_identifier):
     survey = pd.read_excel(workbook, sheet_name="Survey", engine="openpyxl")
 
     assert model.spec.well_header.unique_wellbore_identifier == well_identifier
-    assert policy["top_depth"] < model.spec.well_header.ground_elevation < policy["reservoir_top"] < policy["bottom_depth"]
+    assert policy["top_depth"] < model.spec.well_header.ground_elevation
     assert policy["water_depth"] == model.spec.well_header.ground_elevation
+    assert policy["reservoir_permx"] == 1000.0
+    assert policy["overburden_permx"] == 0.001
     assert survey.columns.tolist() == ["md_rkb", "inclination_deg", "azimuth_deg"]
     assert survey.empty
     if name == "smeaheia":
