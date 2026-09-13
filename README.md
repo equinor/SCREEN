@@ -219,9 +219,16 @@ uv run python runscripts/run_workbook_scenarios_batch.py \
     --output-root work/results \
     --template-root test_data/examples/wildcat-pflotran \
     --sim-command "cirrus {deck}" \
+    --jobs 3 \
     --plot \
     --run-final
 ```
+
+The `--jobs` option controls the maximum number of scenarios running at the
+same time. Set it to the concurrency supported by the local machine or
+on-premises queue. The simulator command must remain blocking until the
+submitted simulation has finished; for a queue command, use its wait or
+foreground mode so the batch wrapper can collect the real exit status.
 
 The resulting layout is:
 

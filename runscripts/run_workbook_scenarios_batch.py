@@ -20,6 +20,7 @@ Output structure:
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import subprocess
 import sys
 from pathlib import Path
@@ -47,7 +48,7 @@ def parse_args() -> argparse.Namespace:
         "--jobs",
         type=int,
         default=1,
-        help="Number of parallel scenarios (currently sequential only; reserved for future use).",
+        help="Maximum number of scenarios to run concurrently.",
     )
     return parser.parse_args()
 
@@ -107,8 +108,52 @@ def run_scenario_case(
     return result.returncode
 
 
+def run_scenarios(design, args: argparse.Namespace) -> tuple[list[str], list[str]]:
+    """Run scenario cases concurrently and return successful and failed names."""
+
+    successful_cases = []
+    failed_cases = []
+    futures = {}
+
+    with ThreadPoolExecutor(max_workers=args.jobs) as executor:
+        for scenario in design.scenarios:
+            case_name = scenario.case_name
+            case_output_root = args.output_root / case_name
+            future = executor.submit(
+                run_scenario_case,
+                args.xlsx,
+                case_name,
+                case_output_root,
+                args.template_root,
+                args.sim_command,
+                args,
+            )
+            futures[future] = case_name
+
+        for future in as_completed(futures):
+            case_name = futures[future]
+            try:
+                exit_code = future.result()
+            except Exception as exc:  # pragma: no cover - defensive worker boundary
+                print(f"Scenario '{case_name}' raised an exception: {exc}")
+                exit_code = 1
+
+            if exit_code != 0:
+                failed_cases.append(case_name)
+                print(f"❌ Scenario '{case_name}' failed with exit code {exit_code}")
+            else:
+                successful_cases.append(case_name)
+                print(f"✅ Scenario '{case_name}' completed successfully")
+
+    return successful_cases, failed_cases
+
+
 def main() -> int:
     args = parse_args()
+
+    if args.jobs < 1:
+        print("Error: --jobs must be at least 1.")
+        return 2
 
     args.output_root.mkdir(parents=True, exist_ok=True)
 
@@ -125,27 +170,7 @@ def main() -> int:
     scenario_names = [scenario.case_name for scenario in design.scenarios]
     print(f"Found {len(scenario_names)} scenario(s): {', '.join(scenario_names)}")
 
-    failed_cases = []
-    successful_cases = []
-
-    for scenario in design.scenarios:
-        case_name = scenario.case_name
-        case_output_root = args.output_root / case_name
-        exit_code = run_scenario_case(
-            args.xlsx,
-            case_name,
-            case_output_root,
-            args.template_root,
-            args.sim_command,
-            args,
-        )
-
-        if exit_code != 0:
-            failed_cases.append(case_name)
-            print(f"❌ Scenario '{case_name}' failed with exit code {exit_code}")
-        else:
-            successful_cases.append(case_name)
-            print(f"✅ Scenario '{case_name}' completed successfully")
+    successful_cases, failed_cases = run_scenarios(design, args)
 
     print(f"\n{'='*70}")
     print("Batch execution summary:")
