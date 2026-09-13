@@ -58,6 +58,7 @@ Completed coarse-grid preparation slices:
     - Workbook generators create named multi-scenario inputs and updated Wildcat/Smeaheia examples.
     - Each result records the selected assumptions in `scenario.json` beside the shared `well_input.json`.
     - `--plot` optionally saves a WellClass sketch and pressure QC image as `qc_plot.png`.
+    - `GridPolicy` exposes explicit `reservoir_permx` and `overburden_permx` values in mD, with backward-compatible defaults for older workbooks.
     - `runscripts/validate_scenario_outputs.py` checks required outputs, logs, file sizes, and checksums.
 - Optional result inspection is implemented and intentionally kept downstream of GaP:
     - `runscripts/export_wellviz_xz.py` provides a standalone Plotly XZ export.
@@ -96,7 +97,7 @@ environment when there is a concrete use case.
 - Preserve existing properties when adapting a grid.
 - Support separate PFLOTRAN and CIRRUS input/output backends.
 - Add a small committed synthetic grid for pure-Python tests.
-- Replace hard-coded permeability and cell-size assumptions with modeled configuration.
+- Replace remaining hard-coded permeability and cell-size assumptions with a typed modeled configuration and explicit unit validation; coarse-grid reservoir and overburden permeability are now workbook-configurable through `GridPolicy`.
 - Extend the single-reservoir design matrix beyond the current workbook assumptions. A future `DesignMatrix` sheet could hold additional variable parameters such as casing-hole geometry, cement permeability, grid policy, or salinity. Define precedence as: item-specific well override -> selected design-matrix value -> documented default.
     - The current workbook staging path supports named `SubsurfaceAssumptions` rows and propagates selected pressure/contact values into CIRRUS initialization.
     - Keep the physical well description shared and immutable across scenarios; scenario results remain isolated under `<output-root>/<scenario-name>/`.

@@ -250,6 +250,7 @@ Architecture clarifications agreed in this pass:
 - The workbook path is an **input adapter**, not a replacement for simulator-generated `.EGRID`/`.INIT`.
 - Geometry/topology authority remains in the initialization run path (`TEMP-0.in` + GRDECL + include files).
 - The current coarse-grid abstraction remains three-zone (`water`, `overburden`, `reservoir`) with user-configurable counts and an optional target-DZ-driven layer-count calculation.
+- Coarse-grid permeability belongs to `GridPolicy`, not the physical well model. The workbook may explicitly set `reservoir_permx` and `overburden_permx` in mD; current defaults are `1000 mD` and `0.001 mD` respectively, retained for older workbooks that omit those keys.
 - Multi-reservoir interval modeling remains a planned extension and is not yet part of the supported contract.
 
 ### Milestone: 2026-08-25 (Single-reservoir workbook-to-LGR workflow)
