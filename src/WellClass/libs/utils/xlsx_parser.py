@@ -121,7 +121,6 @@ def xlsx_grid_policy(xlsx_file: str | Path) -> dict[str, Any]:
 
     Required keys in the GridPolicy sheet:
     - top_depth
-    - water_depth
     - reservoir_top
     - bottom_depth
     - target_dz_water
@@ -156,7 +155,6 @@ def xlsx_grid_policy(xlsx_file: str | Path) -> dict[str, Any]:
     policy = _key_value_sheet(policy_sheet, sheet_name="GridPolicy")
     required = {
         "top_depth",
-        "water_depth",
         "reservoir_top",
         "bottom_depth",
         "target_dz_water",
@@ -166,5 +164,12 @@ def xlsx_grid_policy(xlsx_file: str | Path) -> dict[str, Any]:
     missing = sorted(required - set(policy.keys()))
     if missing:
         raise ValueError(f"GridPolicy is missing required keys: {', '.join(missing)}")
-
+    header_sheet = _read_sheet(workbook, "Header")
+    if header_sheet is None:
+        raise ValueError("missing required sheet: Header")
+    header = _key_value_sheet(header_sheet, sheet_name="Header")
+    if "ground_elevation" not in header:
+        raise ValueError("Header is missing required key: ground_elevation")
+    # Header owns the physical water/ground boundary; legacy GridPolicy values are ignored.
+    policy["water_depth"] = float(header["ground_elevation"])
     return policy

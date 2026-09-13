@@ -82,7 +82,6 @@ def main() -> int:
         {
             "key": [
                 "top_depth",
-                "water_depth",
                 "reservoir_top",
                 "bottom_depth",
                 "target_dz_water",
@@ -93,7 +92,7 @@ def main() -> int:
                 "min_overburden_layers",
                 "min_reservoir_layers",
             ],
-            "value": [4.0, 104.0, 1004.0, 1504.0, 50.0, 60.0, 8.0, 400, 1, 1, 1],
+            "value": [4.0, 1004.0, 1504.0, 50.0, 60.0, 8.0, 400, 1, 1, 1],
         }
     )
     survey = pd.DataFrame(
