@@ -127,6 +127,7 @@ def main() -> int:
             "unit_perm": [None, None],
         }
     )
+    plugs = pd.DataFrame(columns=["name", "type", "top_rkb", "bottom_rkb", "cement_perm"])
     if args.well_template == "smeaheia":
         source = Path("test_data/examples/smeaheia/smeaheia.json")
         payload = json.loads(source.read_text(encoding="utf-8"))
@@ -135,6 +136,7 @@ def main() -> int:
         header = pd.DataFrame({"key": list(spec["well_header"]), "value": list(spec["well_header"].values())})
         survey = pd.DataFrame(spec.get("well_survey", {}))
         hole_casings = pd.DataFrame(spec.get("hole_casings", []))
+        plugs = pd.DataFrame(spec.get("plugs", []))
         stratigraphy = pd.DataFrame(spec.get("stratigraphy", []))
         grid_policy = pd.DataFrame(
             {
@@ -159,6 +161,7 @@ def main() -> int:
         grid_policy.to_excel(writer, sheet_name="GridPolicy", index=False)
         survey.to_excel(writer, sheet_name="Survey", index=False)
         hole_casings.to_excel(writer, sheet_name="HoleCasings", index=False)
+        plugs.to_excel(writer, sheet_name="Plugs", index=False)
         stratigraphy.to_excel(writer, sheet_name="Stratigraphy", index=False)
         assumptions.to_excel(writer, sheet_name="SubsurfaceAssumptions", index=False)
 
