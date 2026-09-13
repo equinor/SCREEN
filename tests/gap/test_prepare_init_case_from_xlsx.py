@@ -27,7 +27,6 @@ def _write_minimal_workbook(path: Path) -> None:
         {
             "key": [
                 "top_depth",
-                "water_depth",
                 "reservoir_top",
                 "bottom_depth",
                 "target_dz_water",
@@ -35,7 +34,7 @@ def _write_minimal_workbook(path: Path) -> None:
                 "target_dz_reservoir",
                 "cells_per_layer",
             ],
-            "value": [4.0, 104.0, 1004.0, 1504.0, 50.0, 60.0, 10.0, 400],
+            "value": [4.0, 1004.0, 1504.0, 50.0, 60.0, 10.0, 400],
         }
     )
 
@@ -88,22 +87,22 @@ def test_prepare_init_case_from_xlsx_stages_files(tmp_path):
 
     recipe = tops.read_text(encoding="utf-8")
     assert "TOPS 4" in recipe
-    assert "800*50" in recipe
-    assert "6000*60" in recipe
+    assert "1200*33.6667" in recipe
+    assert "6000*59.9333" in recipe
     assert "20000*10" in recipe
     assert "DATABASE ../include/co2_db_new.dat" in deck.read_text(encoding="utf-8")
     assert "TEMP_LGR.grdecl" not in grdecl.read_text(encoding="utf-8")
     grdecl_text = grdecl.read_text(encoding="utf-8")
-    assert "EQLNUM 1 1 20 1 20 1 17 /" in grdecl_text
-    assert "EQLNUM 2 1 20 1 20 18 67 /" in grdecl_text
-    assert "PERMX 10000 1 20 1 20 1 2 /" in grdecl_text
-    assert "PERMX 0.001 1 20 1 20 3 17 /" in grdecl_text
-    assert "PORO 1 1 20 1 20 1 2 /" in grdecl_text
-    assert "FIPLEG 3 1 20 1 20 18 64 /" in grdecl_text
-    assert "FIPLEG 5 1 20 1 20 65 67 /" in grdecl_text
-    assert "PERMX 0.01 1 20 1 20 65 67 /" in grdecl_text
-    assert "TRANZ 0 1 20 1 20 18 18 /" in grdecl_text
-    assert "PERMZ 0.1 1 20 1 20 3 67 /" in grdecl_text
+    assert "EQLNUM 1 1 20 1 20 1 18 /" in grdecl_text
+    assert "EQLNUM 2 1 20 1 20 19 68 /" in grdecl_text
+    assert "PERMX 10000 1 20 1 20 1 3 /" in grdecl_text
+    assert "PERMX 0.001 1 20 1 20 4 18 /" in grdecl_text
+    assert "PORO 1 1 20 1 20 1 3 /" in grdecl_text
+    assert "FIPLEG 3 1 20 1 20 19 65 /" in grdecl_text
+    assert "FIPLEG 5 1 20 1 20 66 68 /" in grdecl_text
+    assert "PERMX 0.01 1 20 1 20 66 68 /" in grdecl_text
+    assert "TRANZ 0 1 20 1 20 19 19 /" in grdecl_text
+    assert "PERMZ 0.1 1 20 1 20 4 68 /" in grdecl_text
 
 
 def test_workbook_keeps_simulation_assumptions_outside_well_model(tmp_path):
@@ -144,9 +143,9 @@ def test_prepare_init_case_from_xlsx_configures_final_run(tmp_path):
     assert "PRESSURE  210 Bar" in deck
     assert "WGC_D  2400 m" in deck
     assert "     4    4" in deck
-    assert "     104    4" in deck
-    assert "     2400    75.176" in deck
-    assert deck.count("     2400    75.176") == 2
+    assert "     105    4" in deck
+    assert "     2400    75.145" in deck
+    assert deck.count("     2400    75.145") == 2
     assert deck.count("SALTVD\n     4 0.032\n     2400 0.032") == 2
     assert "WELL_DATA INJ_01" not in deck
     assert "external_file ../include/TEMP_LGR.grdecl /" in grdecl
