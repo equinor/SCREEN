@@ -299,50 +299,34 @@ uv run python -m pytest --cov=src --cov-report=html tests
 
 The report is written to `htmlcov/index.html`.
 
-For the maintained Plotly-based WellViz-style view, install the visualization
-extra and export an interactive heatmap with hoverable I/J/K metadata:
+## Visualization of results
+
+**ResInsight is the recommended tool** for general interactive inspection of
+EGRID, INIT, UNRST, and LGR results. It provides mature 3D navigation,
+filtering, clipping, and property visualization.
+
+SCREEN also provides a smaller WellViz-style feature for a predefined XZ view
+of the LGR. It stores the indexed data in Parquet and serves only the selected
+scenario, property, timestep, and J column. This avoids embedding all results
+in the browser and keeps the visualization reproducible.
+
+Install the visualization dependencies and start the complete workflow with one
+command:
 
 ```bash
 uv sync --all-groups --extra visualization
-uv run python runscripts/export_wellviz_xz.py \
+uv run python runscripts/run_wellviz_parquet.py \
     --results-root work/results \
     --case baseline \
-    --source UNRST \
-    --property PRESSURE \
-    --j-column 7 \
-    --z-scale 0.001 \
-    --output work/results/baseline_wellviz.html \
-    --open
-```
-
-This controller-enabled file includes the available INIT and UNRST properties
-for all LGR J columns, so it is larger than a single-property export. Use
-this WellViz-style exporter when browser-side property and J-column selection
-is important.
-
-For the same controls without embedding the data in one large HTML file,
-export an indexed package and serve it locally:
-
-```bash
-uv run python runscripts/export_wellviz_indexed.py \
-    --results-root work/results \
-    --case baseline \
-    --output-dir work/results/baseline_wellviz_indexed \
-    --all-records
-
-uv run python runscripts/serve_wellviz_parquet.py \
-    --package-dir work/results/baseline_wellviz_indexed \
+    --all-records \
+    --timing \
     --port 8000
 ```
 
-Open `http://localhost:8000`. The page loads only the selected
-`source/property/J-column` slice from Parquet. This keeps the initial HTML small while
-retaining the old WellViz-style browser controls.
-
-The package stores the indexed values in one `data.parquet` file. The server
-filters that file and returns only the selected heatmap payload.
-By default only timestep 0 is exported; add `--all-records` to include the
-full UNRST time series and enable timestep selection in the browser.
+Open `http://localhost:8000`. The browser provides controls for source,
+property, restart timestep, J column, and physical X/Y bounds. The default
+view is the predefined LGR XZ inspection view; further visualization work is
+parked until a specific analysis need is identified.
 
 ## Documentation
 
