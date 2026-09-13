@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
 import pandas as pd
@@ -12,6 +13,12 @@ import pandas as pd
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True, help="Path to output .xlsx file.")
+    parser.add_argument(
+        "--well-template",
+        choices=("smeaheia", "simple"),
+        default="smeaheia",
+        help="Physical well template; Smeaheia is the default canonical example.",
+    )
     parser.add_argument(
         "--scenarios",
         type=str,
@@ -82,8 +89,6 @@ def main() -> int:
         {
             "key": [
                 "top_depth",
-                "reservoir_top",
-                "bottom_depth",
                 "target_dz_water",
                 "target_dz_overburden",
                 "target_dz_reservoir",
@@ -92,7 +97,7 @@ def main() -> int:
                 "min_overburden_layers",
                 "min_reservoir_layers",
             ],
-            "value": [4.0, 1004.0, 1504.0, 50.0, 60.0, 8.0, 400, 1, 1, 1],
+            "value": [4.0, 50.0, 60.0, 8.0, 400, 1, 1, 1],
         }
     )
     survey = pd.DataFrame(
@@ -122,6 +127,30 @@ def main() -> int:
             "unit_perm": [None, None],
         }
     )
+    if args.well_template == "smeaheia":
+        source = Path("test_data/examples/smeaheia/smeaheia.json")
+        payload = json.loads(source.read_text(encoding="utf-8"))
+        spec = payload["spec"]
+        metadata = pd.DataFrame({"key": list(payload.get("metadata", {})), "value": list(payload.get("metadata", {}).values())})
+        header = pd.DataFrame({"key": list(spec["well_header"]), "value": list(spec["well_header"].values())})
+        survey = pd.DataFrame(spec.get("well_survey", {}))
+        hole_casings = pd.DataFrame(spec.get("hole_casings", []))
+        stratigraphy = pd.DataFrame(spec.get("stratigraphy", []))
+        grid_policy = pd.DataFrame(
+            {
+                "key": [
+                    "top_depth",
+                    "target_dz_water",
+                    "target_dz_overburden",
+                    "target_dz_reservoir",
+                    "cells_per_layer",
+                    "min_water_layers",
+                    "min_overburden_layers",
+                    "min_reservoir_layers",
+                ],
+                "value": [4.0, 50.0, 60.0, 10.0, 400, 1, 1, 1],
+            }
+        )
     assumptions = _generate_scenario_variations(args.scenarios)
 
     with pd.ExcelWriter(args.output, engine="openpyxl") as writer:

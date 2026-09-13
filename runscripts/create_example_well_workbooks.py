@@ -14,8 +14,6 @@ EXAMPLES = {
         "output": Path("test_data/examples/wildcat/wildcat_workbook.xlsx"),
         "grid_policy": {
             "top_depth": 4.0,
-            "reservoir_top": 2238.0,
-            "bottom_depth": 3970.0,
             "target_dz_water": 50.0,
             "target_dz_overburden": 60.0,
             "target_dz_reservoir": 10.0,
@@ -52,8 +50,6 @@ EXAMPLES = {
         "output": Path("test_data/examples/smeaheia/smeaheia_workbook.xlsx"),
         "grid_policy": {
             "top_depth": 4.0,
-            "reservoir_top": 1214.5,
-            "bottom_depth": 3162.5,
             "target_dz_water": 50.0,
             "target_dz_overburden": 60.0,
             "target_dz_reservoir": 10.0,

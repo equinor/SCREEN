@@ -23,6 +23,7 @@ from prepare_init_case import run_initialization, stage_case
 
 from src.GaP.libs.deck_config import CirrusDeckParameters, parameterize_cirrus_deck
 from src.WellClass.libs.utils import xlsx_grid_policy, xlsx_to_simulation_design, xlsx_to_well_model
+from src.WellClass.libs.well_class.well_processed import WellProcessed
 from src.WellClass.libs.well_pressure.pressure_table import PressureTable
 
 
@@ -98,11 +99,15 @@ def _as_optional_int(policy: dict, key: str) -> int | None:
     return int(value)
 
 
-def derive_stage_args_from_policy(args: argparse.Namespace, policy: dict) -> argparse.Namespace:
+def derive_stage_args_from_policy(args: argparse.Namespace, policy: dict, well_model) -> argparse.Namespace:
     top_depth = float(policy["top_depth"])
     water_depth = float(policy["water_depth"])
-    reservoir_top = float(policy["reservoir_top"])
-    bottom_depth = float(policy["bottom_depth"])
+    processed_well = WellProcessed.from_pydantic(well_model)
+    reservoir_intervals = [item for item in processed_well.stratigraphy or [] if item.get("unit_type") == "reservoir"]
+    if not reservoir_intervals:
+        raise ValueError("Stratigraphy must contain a reservoir interval to derive reservoir_top")
+    reservoir_top = min(float(item["tvd_msl_top"]) for item in reservoir_intervals)
+    bottom_depth = reservoir_top + float(policy.get("reservoir_thickness", 400.0))
 
     if not top_depth < water_depth < reservoir_top < bottom_depth:
         raise ValueError("GridPolicy depths must satisfy top_depth < water_depth < reservoir_top < bottom_depth")
@@ -164,7 +169,7 @@ def parameterize_staged_deck(args: argparse.Namespace, policy: dict, well_header
     final_date = _add_years(start_date, args.simulation_years) if args.final_run else start_date
     assumptions = scenario.model_dump(exclude_none=True)
     seafloor_depth = float(policy["water_depth"])
-    reservoir_top = float(policy["reservoir_top"])
+    reservoir_top = float(args.reservoir_top)
     overburden_datum_depth = float(assumptions.get("overburden_datum_depth", (seafloor_depth + reservoir_top) / 2))
     if not seafloor_depth < overburden_datum_depth < reservoir_top:
         raise ValueError("overburden_datum_depth must be between water_depth and reservoir_top")
@@ -180,7 +185,7 @@ def parameterize_staged_deck(args: argparse.Namespace, policy: dict, well_header
         final_date=final_date,
         top_depth=float(policy["top_depth"]),
         seafloor_depth=seafloor_depth,
-        bottom_depth=float(policy["bottom_depth"]),
+        bottom_depth=float(args.bottom_depth),
         overburden_datum_depth=overburden_datum_depth,
         overburden_pressure_bar=pressure_table.get_values_at_depth(overburden_datum_depth)["hydrostatic_pressure"],
         fluid_contact_depth=float(assumptions.get("z_fluid_contact", assumptions.get("z_resrv", 1500.0))),
@@ -200,16 +205,18 @@ def main() -> int:
     args = parse_args()
 
     policy = xlsx_grid_policy(args.xlsx)
-    well_model = xlsx_to_well_model(args.xlsx)
+    model = xlsx_to_well_model(args.xlsx)
     design = xlsx_to_simulation_design(args.xlsx)
     try:
         scenario = design.select(args.case_name)
     except ValueError as exc:
         print(f"Error: {exc}")
         return 1
-    stage_args = derive_stage_args_from_policy(args, policy)
+    stage_args = derive_stage_args_from_policy(args, policy, model)
+    args.reservoir_top = stage_args.reservoir_top
+    args.bottom_depth = stage_args.bottom_depth
     output_deck, output_grdecl, output_tops = stage_case(stage_args)
-    parameterize_staged_deck(args, policy, well_model.spec.well_header, scenario)
+    parameterize_staged_deck(args, policy, model.spec.well_header, scenario)
 
     print("Staged initialization case files from workbook:")
     print(f"  deck:   {output_deck}")
@@ -223,7 +230,7 @@ def main() -> int:
     if args.write_well_json:
         output_json = args.output_root / "well_input.json"
         output_json.parent.mkdir(parents=True, exist_ok=True)
-        output_json.write_text(json.dumps(well_model.model_dump(mode="json"), indent=2), encoding="utf-8")
+        output_json.write_text(json.dumps(model.model_dump(mode="json"), indent=2), encoding="utf-8")
         print(f"Wrote parsed well model JSON: {output_json}")
 
     if not args.sim_command:

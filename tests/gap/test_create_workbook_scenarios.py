@@ -4,7 +4,7 @@ from pathlib import Path
 import subprocess
 import sys
 
-from src.WellClass.libs.utils.xlsx_parser import xlsx_to_simulation_design
+from src.WellClass.libs.utils.xlsx_parser import xlsx_to_simulation_design, xlsx_to_well_model
 
 
 def test_create_workbook_with_single_scenario(tmp_path):
@@ -27,6 +27,21 @@ def test_create_workbook_with_single_scenario(tmp_path):
     design = xlsx_to_simulation_design(output)
     assert len(design.scenarios) == 1
     assert design.scenarios[0].case_name == "default"
+    assert xlsx_to_well_model(output).spec.well_header.unique_wellbore_identifier == "NO 32/4-1"
+
+
+def test_create_workbook_can_use_simple_template(tmp_path):
+    output = tmp_path / "simple_template.xlsx"
+    repo_root = Path(__file__).parents[2]
+    subprocess.run(
+        [sys.executable, "runscripts/create_well_input_workbook.py", "--output", str(output), "--well-template", "simple"],
+        cwd=repo_root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert xlsx_to_well_model(output).spec.well_header.unique_wellbore_identifier == "NO 00/0-0"
 
 
 def test_create_workbook_with_multi_scenarios(tmp_path):
