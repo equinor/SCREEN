@@ -30,9 +30,11 @@ def _write_minimal_workbook(path: Path) -> None:
                 "target_dz_water",
                 "target_dz_overburden",
                 "target_dz_reservoir",
+                "reservoir_permx",
+                "overburden_permx",
                 "cells_per_layer",
             ],
-            "value": [4.0, 50.0, 60.0, 10.0, 400],
+            "value": [4.0, 50.0, 60.0, 10.0, 1000.0, 0.001, 400],
         }
     )
 
@@ -116,7 +118,7 @@ def test_prepare_init_case_from_xlsx_stages_files(tmp_path):
     assert "PORO 1 1 20 1 20 1 3 /" in grdecl_text
     assert "FIPLEG 3 1 20 1 20 19 55 /" in grdecl_text
     assert "FIPLEG 5 1 20 1 20 56 58 /" in grdecl_text
-    assert "PERMX 0.01 1 20 1 20 56 58 /" in grdecl_text
+    assert "PERMX 1000 1 20 1 20 56 58 /" in grdecl_text
     assert "TRANZ 0 1 20 1 20 19 19 /" in grdecl_text
     assert "PERMZ 0.1 1 20 1 20 4 58 /" in grdecl_text
 

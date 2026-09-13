@@ -92,12 +92,14 @@ def main() -> int:
                 "target_dz_water",
                 "target_dz_overburden",
                 "target_dz_reservoir",
+                "reservoir_permx",
+                "overburden_permx",
                 "cells_per_layer",
                 "min_water_layers",
                 "min_overburden_layers",
                 "min_reservoir_layers",
             ],
-            "value": [4.0, 50.0, 60.0, 8.0, 400, 1, 1, 1],
+            "value": [4.0, 50.0, 60.0, 8.0, 1000.0, 0.001, 400, 1, 1, 1],
         }
     )
     survey = pd.DataFrame(
@@ -145,12 +147,14 @@ def main() -> int:
                     "target_dz_water",
                     "target_dz_overburden",
                     "target_dz_reservoir",
+                    "reservoir_permx",
+                    "overburden_permx",
                     "cells_per_layer",
                     "min_water_layers",
                     "min_overburden_layers",
                     "min_reservoir_layers",
                 ],
-                "value": [4.0, 50.0, 60.0, 10.0, 400, 1, 1, 1],
+                "value": [4.0, 50.0, 60.0, 10.0, 1000.0, 0.001, 400, 1, 1, 1],
             }
         )
     assumptions = _generate_scenario_variations(args.scenarios)

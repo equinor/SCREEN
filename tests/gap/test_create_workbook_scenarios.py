@@ -6,7 +6,7 @@ import sys
 
 import pandas as pd
 
-from src.WellClass.libs.utils.xlsx_parser import xlsx_to_simulation_design, xlsx_to_well_model
+from src.WellClass.libs.utils.xlsx_parser import xlsx_grid_policy, xlsx_to_simulation_design, xlsx_to_well_model
 
 
 def test_create_workbook_with_single_scenario(tmp_path):
@@ -30,6 +30,9 @@ def test_create_workbook_with_single_scenario(tmp_path):
     assert len(design.scenarios) == 1
     assert design.scenarios[0].case_name == "default"
     assert xlsx_to_well_model(output).spec.well_header.unique_wellbore_identifier == "NO 32/4-1"
+    policy = xlsx_grid_policy(output)
+    assert policy["reservoir_permx"] == 1000.0
+    assert policy["overburden_permx"] == 0.001
     plugs = pd.read_excel(output, sheet_name="Plugs", engine="openpyxl")
     assert plugs["name"].tolist() == ["cplug9", "mplug2"]
 
