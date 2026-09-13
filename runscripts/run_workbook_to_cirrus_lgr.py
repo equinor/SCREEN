@@ -65,9 +65,14 @@ def save_qc_plot(model, scenario, output_path: Path) -> None:
 
     from src.WellClass.libs.plotting.plot_sketch import plot_sketch
 
-    z_fluid_contact = scenario.z_fluid_contact or scenario.z_resrv
-    if z_fluid_contact is None:
-        raise ValueError("--plot requires z_fluid_contact or z_resrv in the selected scenario")
+    if scenario.z_fluid_contact is not None and scenario.p_fluid_contact is not None:
+        z_fluid_contact = scenario.z_fluid_contact
+        p_fluid_contact = scenario.p_fluid_contact
+    elif scenario.z_resrv is not None and scenario.p_resrv is not None:
+        z_fluid_contact = scenario.z_resrv
+        p_fluid_contact = scenario.p_resrv
+    else:
+        raise ValueError("--plot requires a complete fluid-contact or reservoir depth/pressure pair")
 
     processed_well = WellProcessed.from_pydantic(model)
     pressure = Pressure(
@@ -77,7 +82,11 @@ def save_qc_plot(model, scenario, output_path: Path) -> None:
         geothermal_gradient=scenario.temperature_gradient,
         fluid_type=scenario.fluid_type,
     )
-    pressure_scenario = pressure.scenarios["default"]
+    pressure_scenario = pressure.add_scenario(
+        "workbook",
+        z_fluid_datum=z_fluid_contact,
+        p_fluid_datum=p_fluid_contact,
+    )
     curves = pressure_scenario.display_curves()
     fig, (ax_well, ax_pressure) = plt.subplots(1, 2, figsize=(12, 8), sharey=True)
     plot_sketch(processed_well, ax=ax_well)
