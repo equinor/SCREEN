@@ -70,53 +70,84 @@ These helpers do not create native `.EGRID`/`.INIT` files unless an external sim
 
 ## Next
 
-The single-reservoir design-matrix workflow is complete for the current
-contract. The next step is to validate scenario influence using the generated
-QC plots and CIRRUS visualization tools, then identify which result quantities
-are worth comparing automatically.
-
-The visualization investigation is currently parked. The maintained local
-viewer/export path is sufficient for predefined XZ inspection; future work can
-resume with timestep animation, logarithmic permeability/transmissibility
-coloring, richer hover metadata, or integration with a larger Webviz/FMU
 environment when there is a concrete use case.
+### 1. Automate scenario influence validation
+
+Deliver a report for a batch run that compares selected quantities across
+scenario directories and labels them as expected invariants or scenario-driven
+outputs.
+
+- Invariant checks: grid dimensions, LGR geometry, and static `EGRID`/`INIT`
+    structure where applicable.
+- Influence checks: `scenario.json`, WellClass `qc_plot.png`, and selected
+    `UNRST` pressure/saturation values.
+- Output: a machine-readable JSON report plus a concise CLI summary.
+
+Done when a deliberately changed `p_fluid_contact` case is reported as
+different in pressure outputs and a changed geometry/grid policy is reported
+as different in the corresponding grid artifacts.
+
+### 2. Make the input contract explicit
+
+Add typed validation and unit declarations for `GridPolicy` and the
+WellClass-to-GaP adapter, including permeability, pressure, and depth fields.
+Keep legacy workbook parsing compatible through documented defaults.
+
+Done when invalid units or missing required policy values fail before simulator
+execution, and the workbook documentation lists field names, units, defaults,
+and precedence.
+
+### 3. Strengthen pure GaP regression coverage
+
+Add a small committed `.EGRID`/`.INIT` fixture and golden CARFIN checks for one
+vertical well. Cover boundary indices, material precedence, and output closure
+without requiring CIRRUS or PFLOTRAN.
+
+Done when the GaP mesh transformation can be verified in a clean Python-only
+environment with deterministic artifacts.
+
+The local Parquet viewer remains sufficient for the current predefined XZ
+inspection. Timestep animation, richer hover metadata, and hosted Webviz/FMU
+integration remain parked until a concrete analysis need appears.
 
 ## Later
 
-- Consider an optional LWRES-inspired low-resolution LGR strategy for quick
-    sensitivity studies. This is deliberately lower priority than the current
-    standard workflow: reuse the existing WellClass-to-GaP geometry and CARFIN
-    boundaries, while varying the refinement policy through a named mode rather
-    than copying the legacy monolithic script. Candidate controls include a
-    casing-sized minimum cell, fixed overburden subdivision, preserved coarse
-    reservoir layers, and opt-in overburden isolation. Validate parent-cell DZ
-    conservation, material/property precedence, simulator index conversion, and
-    unchanged output from the default standard mode before treating it as
-    supported.
-- Adapt or extend coarse cells when the well envelope is not covered.
-- Preserve existing properties when adapting a grid.
-- Support separate PFLOTRAN and CIRRUS input/output backends.
-- Add a small committed synthetic grid for pure-Python tests.
-- Replace remaining hard-coded permeability and cell-size assumptions with a typed modeled configuration and explicit unit validation; coarse-grid reservoir and overburden permeability are now workbook-configurable through `GridPolicy`.
-- Extend the single-reservoir design matrix beyond the current workbook assumptions. A future `DesignMatrix` sheet could hold additional variable parameters such as casing-hole geometry, cement permeability, grid policy, or salinity. Define precedence as: item-specific well override -> selected design-matrix value -> documented default.
-    - The current workbook staging path supports named `SubsurfaceAssumptions` rows and propagates selected pressure/contact values into CIRRUS initialization.
-    - Keep the physical well description shared and immutable across scenarios; scenario results remain isolated under `<output-root>/<scenario-name>/`.
-    - Interval-aware/multi-reservoir selection remains a separate later design.
-- Design interval-aware and multi-reservoir policies only after the single-reservoir contract is stable; they are explicitly out of scope for the current milestone.
-- Migrate GaP-owned grid and LGR modules from `src/WellClass/libs/grid_utils/` into `src/GaP/libs/`, keeping `WellDataFrame` as an explicit compatibility adapter until callers have migrated. Preserve temporary re-exports so the tested workflow remains stable during the move.
-- Model explicit wellbore-defect scenarios as simulation inputs separate from the physical well description. The workbook should describe casing holes (default or explicit diameter) and cement defects: channel/hole diameter, fracture opening, or microannulus geometry. WellClass should display these scenarios in sketches without changing the base well geometry. GaP/CARFIN should own their grid-property representation:
-    - casing holes: a localized transmissibility variation replacing the default zero casing transmissibility, with a geometric area-based multiplier considered as a candidate model;
-    - cement channels/holes, microannuli, and fractures: use literature-backed relationships to derive an effective permeability from the channel diameter, microannulus size, or fracture opening. This approach may combine low-permeability cement with a high-permeability defect contribution and assign the resulting effective value to the full cement-plug region;
-    - cement channels/holes: alternatively represent the defect explicitly as a high-permeability column of grid cells within the cement-plug region while retaining the cement permeability elsewhere. When the channel cross-sectional area is smaller than the cell `DX * DY` area, derive the cell porosity, vertical transmissibility, and permeability consistently from the sub-cell geometry.
-    Validate each defect representation against CIRRUS transmissibility conventions and literature before treating the proposed relationships as supported physics.
+These are intentionally lower priority than the Next items:
+
+1. **LWRES-inspired low-resolution LGR mode.** Add a named refinement policy
+   using current WellClass geometry and CARFIN writers. Validate parent-cell DZ
+   conservation, material precedence, simulator index conversion, and unchanged
+   output from standard mode before supporting it.
+2. **Multi-reservoir design policy.** Define interval selection, layer counts,
+   equilibration regions, and permeability precedence before changing the
+   single-reservoir contract. Done when one workbook can produce two explicitly
+   separated reservoir regions with deterministic tests.
+3. **GaP module relocation.** Move GaP-owned grid/LGR modules out of the
+   WellClass namespace while retaining temporary re-exports. Done when imports,
+   notebooks, and tests use the new location and the compatibility layer is
+   documented.
+4. **Wellbore-defect scenarios.** Specify casing holes, cement channels,
+   microannuli, and fractures as separate scenario inputs; implement one
+   representation and validate it against simulator transmissibility behavior
+   before adding more defect types.
 
 ## Boundaries
 
-- Do not put coarse-grid creation inside `LGRBuilder`; it should receive a validated coarse grid.
-- Keep simulator execution optional and explicit.
-- Keep `TOPS`/`DZ` text generation separate from native EGRID/INIT generation.
-- Keep units, depth coordinates, margins, and target cell sizes explicit.
-- Preserve the existing pre-existing-grid workflow as a regression path.
+These are implementation rules with concrete checks:
+
+- `LGRBuilder` receives a validated coarse grid; test that it does not create
+    `.EGRID`/`.INIT` files.
+- `prepare_init_case` may write `TOPS`/`DZ` and GRDECL text, but only an
+    explicit simulator command may create native `.EGRID`/`.INIT` files.
+- Every depth, pressure, and permeability input has a declared unit and
+    coordinate system; reject ambiguous workbook values before execution.
+- Scenario output is isolated under `<output-root>/<case-name>/`; batch tests
+    must verify no case writes into another case's directory.
+- The existing pre-existing-grid JSON-to-LGR path remains a regression test
+    while coarse-grid preparation evolves.
+- Legacy scripts under `experiments/legacy/` and `originals/` may inform
+    behavior but cannot become supported entry points without tests and an
+    explicit ownership decision.
 
 The scripts in `experiments/legacy/` contain historical examples of tops generation, template handling, pressure initialization, and simulator orchestration. They are references for future work, not new implementation boundaries.
 
