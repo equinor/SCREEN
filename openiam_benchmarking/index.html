@@ -1,0 +1,1749 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../gap_roadmap/">
+      
+      
+        <link rel="next" href="../mkdocs/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.14">
+    
+    
+      
+        <title>OpenIAM Benchmarking Notes - SCREEN</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.fad675c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.356b1318.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="amber">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#openiam-and-screen-benchmarking" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="SCREEN" class="md-header__button md-logo" aria-label="SCREEN" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SCREEN
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              OpenIAM Benchmarking Notes
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9v1Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7M9 21v-1h6v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1m3-17a5 5 0 0 0-5 5c0 2.05 1.23 3.81 3 4.58V16h4v-2.42c1.77-.77 3-2.53 3-4.58a5 5 0 0 0-5-5Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/equinor/SCREEN" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="SCREEN" class="md-nav__button md-logo" aria-label="SCREEN" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    SCREEN
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/equinor/SCREEN" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Introduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../well_class/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Pre‐processing and Preliminary Assessment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gap/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Detailed Simulation workflow
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Developer Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Developer Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture_manifesto/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Architecture Manifesto
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gap_roadmap/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GaP Roadmap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    OpenIAM Benchmarking Notes
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    OpenIAM Benchmarking Notes
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      Purpose
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#external-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      External Repository
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-the-tools-think" class="md-nav__link">
+    <span class="md-ellipsis">
+      How the Tools Think
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#openiam-wellbore-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      OpenIAM Wellbore Options
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#screen-representation" class="md-nav__link">
+    <span class="md-ellipsis">
+      SCREEN Representation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-default-examples-are-not-direct-benchmarks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why Default Examples Are Not Direct Benchmarks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Why Default Examples Are Not Direct Benchmarks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#different-model-purposes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Different Model Purposes
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#different-leakage-pathway-abstractions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Different Leakage Pathway Abstractions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#different-plug-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Different Plug Semantics
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#different-stratigraphy-and-overburden-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Different Stratigraphy and Overburden Handling
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#different-boundaries-and-reference-conditions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Different Boundaries and Reference Conditions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#different-output-meanings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Different Output Meanings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-practical-walkthrough" class="md-nav__link">
+    <span class="md-ellipsis">
+      A Practical Walkthrough
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="A Practical Walkthrough">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-choose-the-benchmark-question" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 1: Choose the Benchmark Question
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-pick-the-openiam-component-family" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 2: Pick the OpenIAM Component Family
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-convert-the-physical-story-not-just-the-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 3: Convert the Physical Story, Not Just the File
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-use-wellclass-for-visualization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 4: Use WellClass for Visualization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-build-a-dedicated-screen-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 5: Build a Dedicated SCREEN Case
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-6-compare-only-like-for-like-quantities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 6: Compare Only Like-for-Like Quantities
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-openiam-ex2c-as-a-round-1-anchor" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example: OpenIAM ex2c as a Round 1 Anchor
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommended-benchmark-stages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recommended Benchmark Stages
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recommended Benchmark Stages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#round-1-conceptual-alignment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Round 1: Conceptual Alignment
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#round-2-dedicated-screen-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      Round 2: Dedicated SCREEN Model
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#round-3-quantitative-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      Round 3: Quantitative Comparison
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#round-4-plug-and-uncertainty-studies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Round 4: Plug and Uncertainty Studies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommended-wording" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recommended Wording
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mkdocs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    MkDocs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../INSTALLATION/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_6" id="__nav_4_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Code References
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_6">
+            <span class="md-nav__icon md-icon"></span>
+            Code References
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_6_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_6_1" id="__nav_4_6_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    GaP
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_6_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_6_1">
+            <span class="md-nav__icon md-icon"></span>
+            GaP
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_references/gap/gap_carfin/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CARFIN
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_references/gap/gap_geometry/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bounding boxes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_6_2" id="__nav_4_6_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    WellClass
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            WellClass
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_references/well_class/well_class/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Well class
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_references/well_class/well_pressure/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Well pressure
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_references/well_class/models/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_6_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_6_2_4" id="__nav_4_6_2_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Grids
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_4_6_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_6_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            Grids
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_references/well_class/grids/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Various grids
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_references/well_class/lgr_builder/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    LGR builder
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      Purpose
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#external-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      External Repository
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-the-tools-think" class="md-nav__link">
+    <span class="md-ellipsis">
+      How the Tools Think
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#openiam-wellbore-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      OpenIAM Wellbore Options
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#screen-representation" class="md-nav__link">
+    <span class="md-ellipsis">
+      SCREEN Representation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-default-examples-are-not-direct-benchmarks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why Default Examples Are Not Direct Benchmarks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Why Default Examples Are Not Direct Benchmarks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#different-model-purposes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Different Model Purposes
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#different-leakage-pathway-abstractions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Different Leakage Pathway Abstractions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#different-plug-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Different Plug Semantics
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#different-stratigraphy-and-overburden-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Different Stratigraphy and Overburden Handling
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#different-boundaries-and-reference-conditions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Different Boundaries and Reference Conditions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#different-output-meanings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Different Output Meanings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-practical-walkthrough" class="md-nav__link">
+    <span class="md-ellipsis">
+      A Practical Walkthrough
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="A Practical Walkthrough">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-choose-the-benchmark-question" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 1: Choose the Benchmark Question
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-pick-the-openiam-component-family" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 2: Pick the OpenIAM Component Family
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-convert-the-physical-story-not-just-the-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 3: Convert the Physical Story, Not Just the File
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-use-wellclass-for-visualization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 4: Use WellClass for Visualization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-build-a-dedicated-screen-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 5: Build a Dedicated SCREEN Case
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-6-compare-only-like-for-like-quantities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 6: Compare Only Like-for-Like Quantities
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-openiam-ex2c-as-a-round-1-anchor" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example: OpenIAM ex2c as a Round 1 Anchor
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommended-benchmark-stages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recommended Benchmark Stages
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recommended Benchmark Stages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#round-1-conceptual-alignment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Round 1: Conceptual Alignment
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#round-2-dedicated-screen-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      Round 2: Dedicated SCREEN Model
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#round-3-quantitative-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      Round 3: Quantitative Comparison
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#round-4-plug-and-uncertainty-studies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Round 4: Plug and Uncertainty Studies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommended-wording" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recommended Wording
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="openiam-and-screen-benchmarking">OpenIAM and SCREEN Benchmarking</h1>
+<h2 id="purpose">Purpose</h2>
+<p>OpenIAM and SCREEN both support reasoning about leakage risk from legacy wells in CO2 storage settings, but they are not direct substitutes. A useful comparison should start by documenting what each tool is designed to represent, then define a common physical scenario and only compare quantities that have the same meaning in both workflows.</p>
+<p>The short conclusion is:</p>
+<blockquote>
+<p>OpenIAM and SCREEN are not directly benchmarkable by running a default example from each code and comparing the numbers. OpenIAM is a component-based integrated assessment model with reduced-order wellbore, reservoir, aquifer, and risk components. SCREEN is a WellClass-to-GaP-to-CIRRUS workflow that builds a gridded simulation representation of a well and its surrounding domain. A fair comparison requires a purpose-built case with matched stratigraphy, leakage targets, pressure assumptions, material properties, and output definitions.</p>
+</blockquote>
+<p>This page gives a walkthrough for building that comparison without overstating equivalence.</p>
+<h2 id="external-repository">External Repository</h2>
+<p>OpenIAM is not vendored into this SCREEN repository. The benchmark exploration used a local checkout under <code>work/benchmark/repos/OpenIAM</code>, which is ignored by SCREEN and should not be committed here.</p>
+<p>The upstream project is available at <a href="https://gitlab.com/NRAP/OpenIAM">NRAP / NRAP-Open-IAM on GitLab</a>. Treat that repository, its license, and its documentation as the source of truth for OpenIAM behavior and installation requirements.</p>
+<p>To run the local benchmark notebook, clone OpenIAM under SCREEN's ignored <code>work/</code> folder:</p>
+<pre class="highlight"><code class="language-bash">mkdir -p work/benchmark/repos
+git clone https://gitlab.com/NRAP/OpenIAM.git work/benchmark/repos/OpenIAM</code></pre>
+<p>The notebook <code>notebooks/07_round1_openiam_screen_benchmark.ipynb</code> expects the checkout at exactly this path:</p>
+<pre class="highlight"><code class="language-text">work/benchmark/repos/OpenIAM</code></pre>
+<p>Keeping the checkout under <code>work/</code> avoids committing the external repository or its generated outputs into SCREEN.</p>
+<h2 id="how-the-tools-think">How the Tools Think</h2>
+<p>OpenIAM assembles a system from components. A reservoir component can provide pressure and CO2 saturation to a wellbore component; the wellbore component can estimate leakage rates into aquifers or the atmosphere; aquifer or area-of-review components can consume those leakage rates. Many examples are designed for sensitivity, uncertainty, screening, and area-of-review studies.</p>
+<p>SCREEN starts from well description and simulator geometry. WellClass validates and processes the well construction and stratigraphy, GaP maps the processed well into a local grid refinement and CARFIN/GRDECL-style artifacts, and CIRRUS/PFLOTRAN-OGS runs the gridded simulation. The workflow is closer to a detailed case-building pipeline than to a reduced-order integrated assessment model.</p>
+<pre class="mermaid"><code>flowchart LR
+    subgraph OpenIAM[OpenIAM component workflow]
+        OR[Reservoir component]
+        OW[Wellbore component]
+        OA[Aquifer / AoR / impact component]
+        OC[CSV plots and risk metrics]
+        OR --&gt;|pressure and CO2 saturation| OW
+        OW --&gt;|CO2 and brine leakage rates| OA
+        OA --&gt; OC
+    end
+
+    subgraph SCREEN[SCREEN simulator workflow]
+        SW[WellClass input]
+        SG[GaP LGR construction]
+        SS[CIRRUS/PFLOTRAN-OGS case]
+        SO[Simulator fields and post-processing]
+        SW --&gt; SG
+        SG --&gt; SS
+        SS --&gt; SO
+    end</code></pre>
+<h2 id="openiam-wellbore-options">OpenIAM Wellbore Options</h2>
+<p>OpenIAM contains several wellbore pathways that are relevant to leakage benchmarking. The best choice depends on the question.</p>
+<table>
+<thead>
+<tr>
+<th>OpenIAM option</th>
+<th>Typical use</th>
+<th>Main representation</th>
+<th>SCREEN comparison difficulty</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>OpenWellbore</code></td>
+<td>Conservative or worst-case open conduit leakage</td>
+<td>Drift-flux style open wellbore/tubing/casing leakage, optionally with critical pressure</td>
+<td>High, unless SCREEN is configured as an open high-permeability pathway</td>
+</tr>
+<tr>
+<td><code>MultisegmentedWellbore</code></td>
+<td>Effective leakage through impaired cement across layered geology</td>
+<td>1D multiphase Darcy flow through segments, with leakage into multiple aquifers</td>
+<td>Moderate, if SCREEN is collapsed to equivalent leakage intervals or a matching grid is built</td>
+</tr>
+<tr>
+<td><code>MultisegmentedWellboreAI</code></td>
+<td>Similar target as multisegmented wellbore with an ML model</td>
+<td>Data-driven/ML version of multisegmented behavior</td>
+<td>High, because the ML training domain and dependencies add another abstraction layer</td>
+</tr>
+<tr>
+<td><code>CementedWellbore</code> / <code>CementedWellboreWR</code></td>
+<td>Reduced-order cemented well leakage</td>
+<td>FEHM-derived reduced-order model with parameter bounds</td>
+<td>Moderate to high, because SCREEN plug/cement geometry must be mapped to ROM parameters</td>
+</tr>
+<tr>
+<td><code>WellData</code></td>
+<td>Well description, categorization, and visualization</td>
+<td>Holes, casings, reservoirs, plugs, and annuli represented as data arrays</td>
+<td>Useful for visual comparison, not by itself a leakage simulator</td>
+</tr>
+<tr>
+<td><code>SALSA</code></td>
+<td>Aquifer/shale hydraulic response and leakage status studies</td>
+<td>Standalone aquifer-aquitard/well leakage model with plugged/unplugged shale status</td>
+<td>Potentially useful for plugged/unplugged concepts, but not direct WellClass plug geometry</td>
+</tr>
+</tbody>
+</table>
+<p>The key point is that OpenIAM often works with effective parameters and component-level outputs. SCREEN can represent explicit well construction, but its output must be post-processed into the same quantities if a numerical comparison is desired.</p>
+<h2 id="screen-representation">SCREEN Representation</h2>
+<p>SCREEN separates three concerns:</p>
+<ol>
+<li><strong>WellClass</strong> stores and processes the physical well description: header, survey, holes, casings, casing cement, plugs, and stratigraphy.</li>
+<li><strong>GaP</strong> converts the processed well into grid refinement and material assignments.</li>
+<li><strong>CIRRUS/PFLOTRAN-OGS</strong> runs the staged model and produces grid/restart outputs.</li>
+</ol>
+<p>The workbook path makes these boundaries explicit. Physical well data are converted to canonical WellClass JSON, while <code>GridPolicy</code> and <code>SubsurfaceAssumptions</code> parameterize the simulator case.</p>
+<pre class="highlight"><code class="language-text">XLSX -&gt; well_input.json -&gt; parameterized TEMP-0.in
+     -&gt; CIRRUS initialization -&gt; .EGRID + .INIT
+     -&gt; WellProcessed -&gt; WellDataFrame -&gt; LGRBuilder
+     -&gt; TEMP_LGR.grdecl -&gt; final CIRRUS simulation</code></pre>
+<p>This gives SCREEN a richer physical well representation, but it also means a comparison requires more setup: the overburden, aquifer intervals, pressure regions, material properties, grid resolution, and leakage receptors must be represented deliberately.</p>
+<h2 id="why-default-examples-are-not-direct-benchmarks">Why Default Examples Are Not Direct Benchmarks</h2>
+<h3 id="different-model-purposes">Different Model Purposes</h3>
+<p>OpenIAM examples are often screening or integrated assessment examples. They may demonstrate deterministic forward runs, Latin hypercube sampling, parameter studies, area-of-review plots, or aquifer impact models.</p>
+<p>SCREEN examples are simulator-preprocessing and grid-construction examples. They focus on turning well construction and stratigraphy into a gridded representation that can be run externally.</p>
+<p>Example: OpenIAM <code>ControlFile_ex2c.yaml</code> demonstrates how initial pressures can be enforced for an <code>AnalyticalReservoir</code> plus <code>MultisegmentedWellbore</code>. A SCREEN workbook example demonstrates how a well and grid policy become a CIRRUS case. Those are different demonstrations.</p>
+<h3 id="different-leakage-pathway-abstractions">Different Leakage Pathway Abstractions</h3>
+<p>OpenIAM wellbore components usually expose effective parameters such as:</p>
+<pre class="highlight"><code class="language-yaml">logWellPerm: -13.5
+logAquPerm: -12.0
+wellRadius: 0.05</code></pre>
+<p>SCREEN can assign properties to explicit well-construction elements:</p>
+<pre class="highlight"><code class="language-text">open hole permeability
+casing cement permeability
+cement plug permeability
+overburden permeability
+reservoir permeability
+transmissibility multipliers around casing</code></pre>
+<p>These can be made conceptually compatible, but only after deciding how a detailed SCREEN geometry should collapse into OpenIAM's effective parameter space, or how OpenIAM's effective pathway should be expanded into a SCREEN grid.</p>
+<h3 id="different-plug-semantics">Different Plug Semantics</h3>
+<p>SCREEN/WellClass can represent cement plugs as physical intervals with top and bottom depths. OpenIAM has plug-related concepts, but they appear in different places:</p>
+<ul>
+<li><code>WellData</code> can store plug data for well condition processing and visualization.</li>
+<li>SALSA can mark shale intervals as plugged or unplugged with parameters such as <code>leakingWell#StatShale#</code>.</li>
+<li>Wellbore leakage components such as <code>MultisegmentedWellbore</code> typically model leakage through effective segment permeability rather than explicit plug geometry.</li>
+</ul>
+<p>Therefore, a plug comparison is not direct. It needs a mapping rule, for example: a SCREEN cement plug interval becomes a low-permeability OpenIAM well segment, or an OpenIAM plugged shale status becomes a SCREEN barrier interval with selected permeability.</p>
+<h3 id="different-stratigraphy-and-overburden-handling">Different Stratigraphy and Overburden Handling</h3>
+<p>OpenIAM examples often use explicit shale/aquifer layer stacks and report leakage into named aquifers. SCREEN's current canonical template path is simpler: it builds water/overburden/reservoir regions, then refines around the well. To match OpenIAM, SCREEN must be given a custom case where overburden flow units are separated and assigned appropriate properties.</p>
+<p>Example OpenIAM-style layering:</p>
+<pre class="highlight"><code class="language-text">surface
+shale3
+aquifer2      &lt;- shallow leakage receptor
+shale2
+aquifer1      &lt;- deeper leakage receptor
+shale1
+reservoir     &lt;- source</code></pre>
+<p>A comparable SCREEN case would need these intervals represented in the WellClass stratigraphy, vertical grid, material assignment, pressure initialization, and output extraction.</p>
+<h3 id="different-boundaries-and-reference-conditions">Different Boundaries and Reference Conditions</h3>
+<p>OpenIAM examples can be onshore or offshore depending on setup. The <code>ControlFile_ex2c.yaml</code> case is treated as onshore because it uses a surface datum pressure of <code>101325 Pa</code> and no seawater column.</p>
+<p>Several SCREEN examples are offshore and include a water column. Those examples should not be compared numerically to an onshore OpenIAM case without changing the datum, water depth, pressure initialization, and reservoir assumptions.</p>
+<h3 id="different-output-meanings">Different Output Meanings</h3>
+<p>OpenIAM writes component-level CSV outputs such as leakage rate and accumulated mass:</p>
+<pre class="highlight"><code class="language-text">CO2_aquifer1 [kg/s]
+CO2_aquifer2 [kg/s]
+mass_CO2_aquifer1 [kg]
+mass_CO2_aquifer2 [kg]</code></pre>
+<p>SCREEN/CIRRUS produces simulator outputs. To compare with OpenIAM, those outputs must be reduced to equivalent metrics: flux into a named aquifer interval, cumulative mass into that interval, reservoir pressure at a comparable location, and saturation driver values.</p>
+<h2 id="a-practical-walkthrough">A Practical Walkthrough</h2>
+<h3 id="step-1-choose-the-benchmark-question">Step 1: Choose the Benchmark Question</h3>
+<p>Start by deciding what is being compared. Reasonable questions include:</p>
+<ul>
+<li>How do effective well permeability assumptions influence leakage rate?</li>
+<li>How different are reservoir-to-aquifer leakage predictions under a simple onshore layer stack?</li>
+<li>Can SCREEN reproduce the qualitative sensitivity trends from an OpenIAM wellbore component?</li>
+<li>How does explicit plug geometry in SCREEN translate into OpenIAM's effective or plugged/unplugged abstractions?</li>
+</ul>
+<p>Avoid beginning with the question "which code is faster or more accurate?" until the physical setup and output quantities are aligned.</p>
+<h3 id="step-2-pick-the-openiam-component-family">Step 2: Pick the OpenIAM Component Family</h3>
+<p>For an initial legacy-well benchmark, <code>MultisegmentedWellbore</code> is often the most useful OpenIAM starting point because it can represent leakage into multiple aquifers through an effective well path. <code>OpenWellbore</code> is better for a conservative open-conduit case. <code>CementedWellbore</code> is useful when the ROM assumptions fit the intended cemented-well scenario. SALSA is useful for aquifer/shale leakage status studies.</p>
+<h3 id="step-3-convert-the-physical-story-not-just-the-file">Step 3: Convert the Physical Story, Not Just the File</h3>
+<p>The physical story should be written independently of either code:</p>
+<pre class="highlight"><code class="language-text">onshore or offshore setting
+depth datum
+reservoir top and thickness
+overburden shale/aquifer layering
+target leakage receptors
+well pathway type
+effective permeability or plug/barrier assumptions
+initial pressure and saturation drivers
+simulation duration</code></pre>
+<p>Only after this neutral description exists should inputs be generated for OpenIAM and SCREEN.</p>
+<h3 id="step-4-use-wellclass-for-visualization">Step 4: Use WellClass for Visualization</h3>
+<p>WellClass is useful even when the final comparison is not yet quantitative. A conceptual sketch can show the interpreted OpenIAM layer stack and the assumed leakage pathway.</p>
+<pre class="mermaid"><code>flowchart TD
+    A[OpenIAM control file]
+    B[Extract layer stack and wellbore parameters]
+    C[Conceptual WellClass JSON]
+    D[WellClass sketch]
+    E[Benchmark notes]
+    A --&gt; B
+    B --&gt; C
+    C --&gt; D
+    D --&gt; E</code></pre>
+<p>The notebook <code>notebooks/07_round1_openiam_screen_benchmark.ipynb</code> performs this first visualization step for a simple no-plug effective-leakage case. The generated files are written under:</p>
+<pre class="highlight"><code class="language-text">work/benchmark/cases/round1_openiam_screen/</code></pre>
+<p>The sketch should be labelled as conceptual. If casing and annulus dimensions are added only for plotting, they are not OpenIAM model inputs.</p>
+<h3 id="step-5-build-a-dedicated-screen-case">Step 5: Build a Dedicated SCREEN Case</h3>
+<p>For a quantitative comparison, do not use an unrelated SCREEN example. Build a dedicated SCREEN case that matches the neutral benchmark story.</p>
+<p>Required SCREEN-side work may include:</p>
+<ul>
+<li>onshore/offshore datum selection matching the OpenIAM case</li>
+<li>vertical grid layers that honor the same shale/aquifer/reservoir intervals</li>
+<li>material properties for each shale, aquifer, and reservoir interval</li>
+<li>pressure initialization consistent with OpenIAM pressure gradients or enforced pressures</li>
+<li>a well pathway whose permeability represents the same effective leakage assumption</li>
+<li>simulator outputs or post-processing for leakage into the same receptor intervals</li>
+</ul>
+<p>This is the step where the comparison becomes meaningful. Without it, the exercise is only a qualitative model-structure comparison.</p>
+<h3 id="step-6-compare-only-like-for-like-quantities">Step 6: Compare Only Like-for-Like Quantities</h3>
+<p>A defensible first comparison table should include:</p>
+<table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th>OpenIAM source</th>
+<th>SCREEN source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reservoir pressure driver</td>
+<td>reservoir component CSV</td>
+<td>pressure at comparable grid location/depth</td>
+</tr>
+<tr>
+<td>CO2 saturation driver</td>
+<td>reservoir component CSV</td>
+<td>saturation at comparable grid location/depth</td>
+</tr>
+<tr>
+<td>CO2 leakage rate to aquifer</td>
+<td>wellbore component CSV</td>
+<td>flux into matching aquifer interval</td>
+</tr>
+<tr>
+<td>Brine leakage rate to aquifer</td>
+<td>wellbore component CSV</td>
+<td>flux into matching aquifer interval</td>
+</tr>
+<tr>
+<td>Cumulative CO2 leaked mass</td>
+<td>accumulated leakage CSV</td>
+<td>integrated flux/mass balance into matching interval</td>
+</tr>
+<tr>
+<td>Case geometry</td>
+<td>control-file stratigraphy</td>
+<td>WellClass JSON, grid recipe, and generated grid</td>
+</tr>
+</tbody>
+</table>
+<p>Runtime and solver cost can be reported, but they should not be the primary benchmark until the physics and outputs are aligned.</p>
+<h2 id="example-openiam-ex2c-as-a-round-1-anchor">Example: OpenIAM ex2c as a Round 1 Anchor</h2>
+<p><code>ControlFile_ex2c.yaml</code> is a useful example because it is small, deterministic, and reports leakage into two aquifers. It uses an <code>AnalyticalReservoir</code> connected to a <code>MultisegmentedWellbore</code>, with enforced initial pressures.</p>
+<p>The leakage path is reservoir-to-aquifers, not primarily reservoir-to-atmosphere:</p>
+<pre class="highlight"><code class="language-text">surface
+shale3
+aquifer2
+shale2
+aquifer1
+shale1
+reservoir</code></pre>
+<p>The selected outputs are:</p>
+<pre class="highlight"><code class="language-yaml">Outputs: [CO2_aquifer1, brine_aquifer1,
+          CO2_aquifer2, brine_aquifer2]</code></pre>
+<p>This is enough for a conceptual WellClass sketch and for defining comparison quantities. It is not enough for a direct numerical comparison against SCREEN unless a matching SCREEN model is built.</p>
+<h2 id="recommended-benchmark-stages">Recommended Benchmark Stages</h2>
+<pre class="mermaid"><code>flowchart TD
+    R1[Round 1: conceptual alignment]
+    R2[Round 2: dedicated SCREEN model]
+    R3[Round 3: quantitative comparison]
+    R4[Round 4: plug and uncertainty studies]
+
+    R1 --&gt; R2
+    R2 --&gt; R3
+    R3 --&gt; R4</code></pre>
+<h3 id="round-1-conceptual-alignment">Round 1: Conceptual Alignment</h3>
+<p>Document the OpenIAM component choice, layer stack, leakage pathway, receptor units, and effective parameters. Use WellClass to visualize the interpreted case.</p>
+<h3 id="round-2-dedicated-screen-model">Round 2: Dedicated SCREEN Model</h3>
+<p>Build a SCREEN/CIRRUS case with matching stratigraphy, pressure assumptions, material properties, and output extraction. This may require extending the current template assumptions if multiple overburden aquifers must be represented explicitly.</p>
+<h3 id="round-3-quantitative-comparison">Round 3: Quantitative Comparison</h3>
+<p>Run both tools and compare leakage rates, cumulative masses, pressure drivers, and saturation drivers for the same receptors and time points.</p>
+<h3 id="round-4-plug-and-uncertainty-studies">Round 4: Plug and Uncertainty Studies</h3>
+<p>Introduce explicit SCREEN cement plugs, OpenIAM effective segment reductions, SALSA plugged/unplugged shale statuses, or uncertainty ranges. Report these as model-translation studies, not one-to-one verification.</p>
+<h2 id="recommended-wording">Recommended Wording</h2>
+<p>Use this wording when describing the current state:</p>
+<blockquote>
+<p>OpenIAM and SCREEN address overlapping legacy-well leakage questions, but they are not directly benchmarkable from their default examples. OpenIAM is a component-based integrated assessment framework using reduced-order or analytical components for reservoir, wellbore, aquifer, and area-of-review behavior. SCREEN is a well-description and gridded simulation workflow that builds explicit WellClass/GaP/CIRRUS artifacts. A fair comparison requires a dedicated common case with matched stratigraphy, pressure assumptions, leakage receptors, material properties, and post-processed output quantities.</p>
+</blockquote>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["search.suggest", "search.highlight", "content.tabs.link", "navigation.indexes", "content.tooltips", "navigation.path", "content.code.annotate", "content.code.copy", "content.code.select"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.cd18aaf1.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10.9.0/dist/mermaid.min.js"></script>
+      
+    
+  </body>
+</html>
