@@ -106,6 +106,85 @@ without requiring CIRRUS or PFLOTRAN.
 Done when the GaP mesh transformation can be verified in a clean Python-only
 environment with deterministic artifacts.
 
+### 4. Make salinity a shared pressure and CIRRUS input
+
+Define one salinity contract across the WellClass pressure calculations and the
+CIRRUS input deck. The implementation should:
+
+- Allow a `PressureTable` to receive either `rho_brine` or salinity. If salinity
+    is supplied, derive the brine density through the PVT model; if both are
+    supplied, define and validate the precedence rather than silently mixing the
+    two. The salinity unit and basis must be explicit, including the conversion
+    between the pressure/PVT representation and CIRRUS concentration units.
+- Propagate the selected salinity into the generated CIRRUS equilibration deck.
+    The generated `SALT_TABLE` should use `CONCENTRATION_UNITS MASS` and replace
+    the fixed `0.032` values in `SALTVD` with the mass concentration used by the
+    pressure calculation, while retaining the generated depth interval.
+- Support both a single salinity value, stretched over the required depth
+    interval, and a depth-dependent salinity curve. The latter should accept
+    salinity control points and interpolate or otherwise validate them according
+    to the same depth-coordinate contract used by the pressure table.
+
+Done when pressure tests prove density-only, salinity-only, and depth-varying
+inputs; deck-generation tests prove the concentration units and values are
+updated; and a scenario using one salinity definition produces consistent
+pressure and CIRRUS salt-table inputs.
+
+### 5. Generalize the workbook into a design matrix
+
+Rename the user-facing `SubsurfaceAssumptions` sheet to `DesignMatrix` while
+keeping a documented compatibility path for existing workbooks. Each row
+should define one named simulation case and may override parameters that are
+shared by the physical well description. The design matrix should support, at
+minimum:
+
+- `reservoir_permx` and `overburden_permx` from `GridPolicy`;
+- casing-cement permeability;
+- plug-cement permeability; and
+- the existing pressure, salinity, temperature, fluid-contact, and other
+    scenario assumptions.
+
+The shared well sheets should remain the source of physical geometry, while
+scenario overrides should be applied through one typed, validated merge step
+with explicit units, defaults, and precedence. A selected case must produce a
+self-contained resolved scenario record so batch runs are reproducible and
+cannot accidentally inherit values from another case.
+
+Done when one workbook can build multiple isolated cases from the same well,
+each with independently varied grid and cement permeability values; the
+resolved `scenario.json` records every effective parameter; legacy
+`SubsurfaceAssumptions` workbooks remain readable; and tests verify that
+changing material permeability affects the relevant outputs without changing
+the shared well geometry or unrelated grid structure.
+
+### 6. Give generated cases unique, navigable names
+
+Keep `TEMP-*` for canonical template assets only. When a design matrix is
+expanded into multiple cases, derive a unique filesystem and simulator case
+stem from the workbook metadata and the scenario identity, for example a
+sanitized project/well name plus the scenario name or a stable scenario index.
+The naming contract should:
+
+- be deterministic, filesystem-safe, and collision-resistant;
+- preserve the human-readable scenario name where possible;
+- include a stable index or identifier when names are duplicated or changed;
+- apply consistently to output directories, model/deck files, generated
+    includes, logs, and result exports; and
+- retain the original template provenance separately from the generated case
+    name.
+
+The resolved case metadata should record the source template, workbook
+metadata, scenario name, scenario index, and final case stem. Where supported
+by CIRRUS, write the human-readable scenario name into the generated input
+deck as well, so the file remains identifiable when viewed outside its output
+directory.
+
+Done when a workbook with ten scenarios produces ten uniquely named,
+independently navigable case directories and simulator decks, with no
+overwriting or ambiguous `TEMP` results; rerunning the same workbook produces
+the same names; and the batch manifest plus each `scenario.json` can map every
+result back to its design-matrix row and template source.
+
 The local Parquet viewer remains sufficient for the current predefined XZ
 inspection. Timestep animation, richer hover metadata, and hosted Webviz/FMU
 integration remain parked until a concrete analysis need appears.
