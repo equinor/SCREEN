@@ -1,0 +1,53 @@
+Feedback on the leakage-tool prototype inspection
+=================================================
+
+The solved network and node connections are very clear and neat. The main
+source of confusion was the depth convention in the final plots. The input
+CSV files contain physical/reference depths, but `Welldata.get_depths()`
+normalizes the geometry to a local zero before the solver paths are built:
+
+	self.depths = self.depths - self.depths[0]
+
+The plotting routines then display the already-normalized path coordinates;
+they do not create or restore a mean-sea-level datum. The origin can differ
+between wells because zero-valued cement fields are included when the minimum
+depth is chosen. This makes the water gap visible in some schematics but not
+others.
+
+The absence of plugs is not the controlling factor. In some wells, zero-valued
+placeholder fields make the local solver zero coincide with CSV zero. Those
+schematics therefore appear to be correctly anchored to mean sea level, but
+this is a coincidence of the input placeholders rather than an explicit MSL
+coordinate convention.
+
+For interpretation and comparison, zero should consistently represent mean
+sea level, or every plot should clearly show both the physical datum and the
+local solver offset. The raw/reference depth and normalized solver depth
+should remain separate, with the applied transformation included in plot
+labels or metadata.
+
+The other difficult point was anchoring CO2 pressure at the bottom. The
+current examples appear to build a hydrostatic profile from the top boundary
+and then add an offset at the bottom. In CCS containment, the pressure driving
+leakage is normally the reservoir pressure, which should be prescribed as the
+primary boundary condition and then used to derive the pressure profile.
+
+This interpretation was supported by running `co2_example_complex_flow`. The
+pressure at approximately 1000 m was about 18 bar. This is consistent with a
+top-anchored pressure of roughly 1 bar, a CO2 hydrostatic increase to about
+13 bar over the modeled depth, and the added 5 bar overpressure at the bottom:
+
+	approximately 1 bar + approximately 12-13 bar hydrostatic CO2 pressure
+	+ 5 bar overpressure = approximately 18 bar
+
+Thus the example appears to use the top pressure to construct the hydrostatic
+profile and then apply the bottom overpressure, rather than prescribing the
+reservoir pressure as the primary anchor.
+
+I was able to implement a bottom-anchored case, but the procedure was not
+straightforward because it required constructing a custom formation boundary
+condition. A simpler API for specifying the bottom reservoir pressure directly
+would make the workflow much easier and reduce the risk of inconsistent top,
+formation, and bottom pressures. It would also be useful to document clearly
+whether each example is top-anchored or reservoir-anchored, and whether the
+boundary fluid is CO2 or brine.

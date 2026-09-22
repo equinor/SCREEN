@@ -43,6 +43,9 @@ test_data/**/include/*LGR.grdecl
 
 work/
 
+# notebook-generated prototype results
+notebooks/results/
+
 # wildcat-pflotran
 test_data/examples/wildcat-pflotran*/model/*.EGRID
 test_data/examples/wildcat-pflotran*/model/*.INIT

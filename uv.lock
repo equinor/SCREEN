@@ -2960,6 +2960,7 @@ dependencies = [
     { name = "pyyaml" },
     { name = "resdata" },
     { name = "scipy" },
+    { name = "thermopack" },
     { name = "wellpathpy" },
 ]
 
@@ -2999,6 +3000,7 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "resdata", specifier = ">=6.3.3" },
     { name = "scipy", specifier = ">=1.17.0" },
+    { name = "thermopack", specifier = ">=2.2.3" },
     { name = "wellpathpy", specifier = ">=0.5.2" },
 ]
 provides-extras = ["visualization"]
@@ -3083,6 +3085,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/8a/11/965c6fd8e5cc254f1fe142d547387da17a8ebfd75a3455f637c663fb38a0/terminado-0.18.1.tar.gz", hash = "sha256:de09f2c4b85de4765f7714688fff57d3e75bad1f909b589fde880460c753fd2e", size = 32701, upload-time = "2024-03-12T14:34:39.026Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/6a/9e/2064975477fdc887e47ad42157e214526dcad8f317a948dee17e1659a62f/terminado-0.18.1-py3-none-any.whl", hash = "sha256:a4468e1b37bb318f8a86514f65814e1afc977cf29b3992a4500d9dd305dcceb0", size = 14154, upload-time = "2024-03-12T14:34:36.569Z" },
+]
+
+[[package]]
+name = "thermopack"
+version = "2.2.3"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c0/7e/befc12515bb18cfb5f28348bed1c367e501ca6e95a7b07e2850026359a39/thermopack-2.2.3-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:1ee878f52d0ee4ecc92aef2871bcf89753996c2b6d8691dcbccb287c311e1f00", size = 7173797, upload-time = "2024-05-15T09:24:45.754Z" },
+    { url = "https://files.pythonhosted.org/packages/50/9b/a6bb3ac31f9644e41203de65df2b8c8e54a59d371c5fcf563be8d8ffa280/thermopack-2.2.3-py3-none-macosx_11_0_arm64.whl", hash = "sha256:e0206ac44bc8389332694d37275e322b8d6f2a8e2a1c339b896924e9e5ae738e", size = 4438843, upload-time = "2024-05-15T09:06:09.957Z" },
+    { url = "https://files.pythonhosted.org/packages/d2/cd/1d06358777d5ea89142c655d3c4026a537432e22282dd848a2f39d7c65e9/thermopack-2.2.3-py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:481313f4c6f31499973afe08068e28637f91311b283d19a92ec4314fbf38347b", size = 4124014, upload-time = "2024-05-26T12:02:18.291Z" },
+    { url = "https://files.pythonhosted.org/packages/48/25/d6a1954e2e430e3874d24e006329ba120ead323c6e0c20399b85fb287274/thermopack-2.2.3-py3-none-win32.whl", hash = "sha256:2b8a551d9ccdc5d0cf13d0e94e967b64c42404e74ed21ba98768c49202f7a52d", size = 3266325, upload-time = "2024-05-26T12:02:33.839Z" },
+    { url = "https://files.pythonhosted.org/packages/b5/e6/b1b3f56bccb61004f281f3f586d6edd970ebde94b6cf21dd857cf19fa5d4/thermopack-2.2.3-py3-none-win_amd64.whl", hash = "sha256:621643cf9d79c2ae676224f3073423aa35767471db9a9c047a491bb1a06b36e7", size = 3497217, upload-time = "2024-05-26T12:02:36.018Z" },
 ]
 
 [[package]]

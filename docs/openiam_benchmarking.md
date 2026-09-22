@@ -10,9 +10,11 @@ The short conclusion is:
 
 This page gives a walkthrough for building that comparison without overstating equivalence.
 
-## External Repository
+## External Repositories
 
-OpenIAM is not vendored into this SCREEN repository. The benchmark exploration used a local checkout under `work/benchmark/repos/OpenIAM`, which is ignored by SCREEN and should not be committed here.
+Neither OpenIAM nor the leakage tool prototype is vendored into this SCREEN repository. The benchmark notebooks expect both to be cloned locally under `work/benchmark/repos/`, which is ignored by SCREEN and should not be committed here. Losing these local checkouts (and anything else under `work/`) when switching branches or committing is expected and not a problem — just re-clone them as shown below.
+
+### OpenIAM
 
 The upstream project is available at [NRAP / NRAP-Open-IAM on GitLab](https://gitlab.com/NRAP/OpenIAM). Treat that repository, its license, and its documentation as the source of truth for OpenIAM behavior and installation requirements.
 
@@ -29,7 +31,24 @@ The notebook `notebooks/07_round1_openiam_screen_benchmark.ipynb` expects the ch
 work/benchmark/repos/OpenIAM
 ```
 
-Keeping the checkout under `work/` avoids committing the external repository or its generated outputs into SCREEN.
+### Leakage Tool Prototype
+
+The leakage tool prototype (`leakage_model` package) is a separate internal repository, not published to PyPI. Clone it under the same ignored `work/` folder:
+
+```bash
+mkdir -p work/benchmark/repos
+git clone git@gitlab.sintef.no:1630/research-projects/legacy/leakage_tool_prototype.git work/benchmark/repos/leakage_tool_prototype
+```
+
+The notebooks `notebooks/08A_round2_leakage_tool_screen_reproduction.ipynb` and `notebooks/08B_smeaheia_to_leakage_tool_adapter.ipynb` expect the checkout at exactly this path:
+
+```text
+work/benchmark/repos/leakage_tool_prototype
+```
+
+Both notebooks add this path (and, for 08A, its `examples` subfolder) to `sys.path` so that `leakage_model` and its helper modules can be imported without installing the package.
+
+Keeping both checkouts under `work/` avoids committing the external repositories or their generated outputs into SCREEN.
 
 ## How the Tools Think
 
