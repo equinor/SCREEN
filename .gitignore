@@ -46,6 +46,9 @@ work/
 notebooks/results
 imported_cases
 
+# notebook-generated prototype results
+notebooks/results/
+
 # wildcat-pflotran
 test_data/examples/wildcat-pflotran*/model/*.EGRID
 test_data/examples/wildcat-pflotran*/model/*.INIT
