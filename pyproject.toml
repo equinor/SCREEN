@@ -35,7 +35,12 @@ docs = ["mkdocs==1.5.3", "mkdocs-material==9.4.14"]
 test = ["pytest==9.0.3", "pytest-cov==4.1.0", "ruff==0.5.3"]
 
 [tool.uv]
-constraint-dependencies = ["anyio>=4.14.2"]
+constraint-dependencies = [
+    "anyio>=4.14.2",
+    "pillow>=12.3.0",
+    "tornado>=6.5.5",
+    "urllib3>=2.7.0",
+]
 
 [tool.setuptools.packages.find]
 where = ["."]
