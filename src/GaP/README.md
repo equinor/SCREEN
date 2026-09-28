@@ -77,11 +77,16 @@ uv run python runscripts/compare_scenario_outputs.py \
 	--report cases/scenario_comparison.json
 ```
 
-The report expects static `EGRID`, `INIT`, and LGR artifacts to remain invariant
-while selected `UNRST` quantities such as `PRESSURE`, `SWAT`, and `SGAS` differ
-when scenario inputs change. The baseline defaults to the first case in sorted
-order when `--baseline` is omitted. This comparison requires completed
-simulator output and does not rerun CIRRUS.
+This is the default initialization/physics sensitivity comparison: grid geometry
+must remain invariant, while static `INIT` properties (for example `PERMX`,
+`PORO`, and `EQLNUM`) and selected `UNRST` quantities may vary with the case
+assumptions. Each newly generated case records its effective `GridPolicy` in
+`grid_policy.json`, so the report can distinguish property-policy changes from
+geometry-affecting changes. A geometry-affecting policy change is flagged for a
+separate grid sensitivity study rather than treated as an ordinary batch
+variation. The baseline defaults to the first case in sorted order when
+`--baseline` is omitted. This comparison requires completed simulator output
+and does not rerun CIRRUS.
 
 ## Grid Build Pipeline (Canonical)
 
