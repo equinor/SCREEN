@@ -14,6 +14,7 @@ class SimulationScenario(BaseModel):
     fluid_type: str = "co2"
     depth_unit: Literal["m"] = "m"
     pressure_unit: Literal["bar"] = "bar"
+    permeability_unit: Literal["mD"] = "mD"
     salinity_basis: Literal["mass_fraction"] = "mass_fraction"
     z_fluid_contact: Optional[float] = Field(default=None, allow_inf_nan=False, description="Fluid-contact TVDMSL depth in m")
     p_fluid_contact: Optional[float] = Field(default=None, allow_inf_nan=False, description="Fluid-contact pressure in bar")
@@ -21,6 +22,11 @@ class SimulationScenario(BaseModel):
     z_resrv: Optional[float] = Field(default=None, allow_inf_nan=False, description="Reservoir TVDMSL depth in m")
     p_resrv: Optional[float] = Field(default=None, allow_inf_nan=False, description="Reservoir pressure in bar")
     salinity: float = Field(default=0.032, ge=0, lt=1, allow_inf_nan=False, description="NaCl mass fraction of solution")
+    reservoir_permx: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False, description="Reservoir PERMX override in mD")
+    overburden_permx: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False, description="Overburden PERMX override in mD")
+    oh_perm: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False, description="Open-hole permeability override in mD")
+    cb_perm: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False, description="Casing-cement permeability override in mD")
+    barrier_perm: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False, description="Plug-cement permeability override in mD")
 
     @field_validator("case_name")
     @classmethod

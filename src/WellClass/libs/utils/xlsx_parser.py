@@ -149,12 +149,15 @@ def xlsx_to_well_model(xlsx_file: str | Path) -> WellModel:
 
 
 def xlsx_to_simulation_design(xlsx_file: str | Path) -> SimulationDesign:
-    """Parse workbook scenario assumptions without modifying the physical WellModel."""
+    """Parse DesignMatrix rows, retaining SubsurfaceAssumptions compatibility."""
 
     workbook = Path(xlsx_file)
     if not workbook.exists():
         raise FileNotFoundError(f"workbook not found: {workbook}")
-    scenarios = _records_sheet(_read_sheet(workbook, "SubsurfaceAssumptions"))
+    scenario_sheet = _read_sheet(workbook, "DesignMatrix")
+    if scenario_sheet is None:
+        scenario_sheet = _read_sheet(workbook, "SubsurfaceAssumptions")
+    scenarios = _records_sheet(scenario_sheet)
     return SimulationDesign(scenarios=scenarios or [{}])
 
 

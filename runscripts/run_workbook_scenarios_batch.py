@@ -2,7 +2,7 @@
 """Run multiple simulation scenarios from a workbook and collect results.
 
 Executes the workbook -> CIRRUS initialization -> GaP LGR workflow for each
-scenario in the SubsurfaceAssumptions sheet, organizing outputs by case_name.
+DesignMatrix case, organizing outputs by case_name.
 
 Output structure:
   <output-root>/
@@ -20,9 +20,9 @@ Output structure:
 from __future__ import annotations
 
 import argparse
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from src.WellClass.libs.utils import xlsx_to_simulation_design
@@ -164,7 +164,7 @@ def main() -> int:
         return 1
 
     if not design.scenarios:
-        print("Error: No scenarios found in workbook SubsurfaceAssumptions sheet.")
+        print("Error: No cases found in workbook DesignMatrix or legacy SubsurfaceAssumptions sheet.")
         return 1
 
     scenario_names = [scenario.case_name for scenario in design.scenarios]

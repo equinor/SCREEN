@@ -83,7 +83,7 @@ SCREEN separates three concerns:
 2. **GaP** converts the processed well into grid refinement and material assignments.
 3. **CIRRUS/PFLOTRAN-OGS** runs the staged model and produces grid/restart outputs.
 
-The workbook path makes these boundaries explicit. Physical well data are converted to canonical WellClass JSON, while `GridPolicy` and `SubsurfaceAssumptions` parameterize the simulator case.
+The workbook path makes these boundaries explicit. Physical well data are converted to canonical WellClass JSON, while `GridPolicy` and `DesignMatrix` parameterize the simulator case. Legacy `SubsurfaceAssumptions` workbooks remain readable.
 
 ```text
 XLSX -> well_input.json -> parameterized TEMP-0.in

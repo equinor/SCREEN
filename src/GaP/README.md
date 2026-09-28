@@ -9,7 +9,7 @@ The resulting simulation model is a 3D representation of the wellbore, with the 
 
 Users should start with the canonical GaP and WellClass notebooks, especially `notebooks/02_gap_grid.ipynb` and `notebooks/03_wellclass_to_gap.ipynb`. Simulator-dependent experiments require copies of the template files and explicit external-tool setup; see `experiments/README.md` for the optional command-line utilities.
 
-For a repeatable command-line workflow, a multi-sheet workbook can be used as the input deck. Its physical well sheets are converted to canonical WellClass JSON, while `GridPolicy` and `SubsurfaceAssumptions` are parsed as separate GaP/CIRRUS simulation inputs used to parameterize the deck:
+For a repeatable command-line workflow, a multi-sheet workbook can be used as the input deck. Its physical well sheets are converted to canonical WellClass JSON, while `GridPolicy` and `DesignMatrix` are parsed as separate GaP/CIRRUS simulation inputs used to parameterize the deck. Legacy `SubsurfaceAssumptions` sheets remain supported:
 
 ```text
 XLSX -> well_input.json -> parameterized TEMP-0.in
@@ -34,7 +34,7 @@ Ready-to-edit examples are provided beside the canonical fixtures:
 - `test_data/examples/wildcat/wildcat_workbook.xlsx`
 - `test_data/examples/smeaheia/smeaheia_workbook.xlsx`
 
-Their well-construction sheets are copied from the corresponding canonical JSON files. `GridPolicy` and `SubsurfaceAssumptions` contain illustrative scenario values that must be reviewed before running CIRRUS. Regenerate both examples after changing their source fixtures with:
+Their well-construction sheets are copied from the corresponding canonical JSON files. `GridPolicy` and `DesignMatrix` contain illustrative scenario values that must be reviewed before running CIRRUS. Regenerate both examples after changing their source fixtures with:
 
 ```bash
 python runscripts/create_example_well_workbooks.py

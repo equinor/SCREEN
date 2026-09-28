@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import pytest
 
 from src.WellClass.libs.grid_utils import WellDataFrame
@@ -85,3 +86,20 @@ def test_processed_well_permeability_is_millidarcy_and_nonnegative():
 
     with pytest.raises(ValueError, match="finite and nonnegative in mD"):
         WellDataFrame(make_vertical_well(), oh_perm=-1.0, cb_perm=1.0, barrier_perm=1.0)
+
+
+def test_scenario_permeability_override_changes_material_not_geometry():
+    well = make_vertical_well()
+    baseline = WellDataFrame(well, oh_perm=10000.0, cb_perm=0.05, barrier_perm=0.05)
+    sensitivity = WellDataFrame(
+        well,
+        oh_perm=10000.0,
+        cb_perm=0.05,
+        barrier_perm=0.05,
+        permeability_overrides={"cb_perm": 0.2},
+    )
+
+    geometry_columns = ["diameter_m", "top_msl", "bottom_msl", "toc_msl", "boc_msl"]
+    pd.testing.assert_frame_equal(baseline.casings_df[geometry_columns], sensitivity.casings_df[geometry_columns])
+    assert baseline.casings_df["cb_perm"].tolist() == [0.05]
+    assert sensitivity.casings_df["cb_perm"].tolist() == [0.2]

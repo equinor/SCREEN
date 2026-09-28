@@ -3,7 +3,7 @@ import pandas as pd
 
 
 class WellDataFrame:
-    def __init__(self, my_well, *, oh_perm=None, cb_perm=None, barrier_perm=None, permeability_unit="mD"):
+    def __init__(self, my_well, *, oh_perm=None, cb_perm=None, barrier_perm=None, permeability_unit="mD", permeability_overrides=None):
         """Expose canonical/legacy GaP frames; processed depths are TVDMSL m and permeability is mD."""
 
         if permeability_unit != "mD":
@@ -11,7 +11,7 @@ class WellDataFrame:
         if hasattr(my_well, "drilling"):
             self._from_legacy_well(my_well)
         elif hasattr(my_well, "hole_casings"):
-            self._from_processed_well(my_well, oh_perm, cb_perm, barrier_perm)
+            self._from_processed_well(my_well, oh_perm, cb_perm, barrier_perm, permeability_overrides or {})
         else:
             raise TypeError("WellDataFrame requires a legacy Well or WellProcessed instance")
 
@@ -31,10 +31,13 @@ class WellDataFrame:
         self.barriers_mod_df = pd.DataFrame(my_well.barriers_mod)
         self._set_canonical_aliases()
 
-    def _from_processed_well(self, my_well, oh_perm, cb_perm, barrier_perm):
+    def _from_processed_well(self, my_well, oh_perm, cb_perm, barrier_perm, permeability_overrides):
         """Adapt WellProcessed records to the fields consumed by GaP."""
         if not hasattr(my_well, "borehole") or not hasattr(my_well, "annulus"):
             raise TypeError("WellDataFrame requires a processed well with derived geometry")
+        unknown_overrides = set(permeability_overrides) - {"oh_perm", "cb_perm", "barrier_perm"}
+        if unknown_overrides:
+            raise ValueError(f"unknown permeability overrides: {sorted(unknown_overrides)}")
 
         records = my_well.hole_casings or []
         holes = [record for record in records if record["type"] == "hole"]
@@ -47,6 +50,8 @@ class WellDataFrame:
             permeability_field="hc_perm",
             default_permeability=oh_perm,
         ).rename(columns={"tvd_msl_top": "top_msl", "tvd_msl_bottom": "bottom_msl"})
+        if "oh_perm" in permeability_overrides:
+            self.drilling_df["hc_perm"] = permeability_overrides["oh_perm"]
         self.drilling_df["oh_perm"] = self.drilling_df["hc_perm"]
         self._require_permeability(self.drilling_df, "oh_perm", "oh_perm")
 
@@ -71,6 +76,8 @@ class WellDataFrame:
                 }
             )
         self.casings_df = pd.DataFrame(casing_rows)
+        if "cb_perm" in permeability_overrides:
+            self.casings_df["cb_perm"] = permeability_overrides["cb_perm"]
         self._require_permeability(self.casings_df, "cb_perm", "cb_perm")
 
         self.borehole_df = pd.DataFrame(my_well.borehole)
@@ -87,6 +94,9 @@ class WellDataFrame:
         self.geology_df = pd.DataFrame(my_well.stratigraphy or [])
         self.barriers_df = pd.DataFrame(my_well.plugs or [])
         self.barriers_mod_df = self._processed_barriers(my_well, barrier_perm)
+        if "barrier_perm" in permeability_overrides:
+            self.barriers_mod_df["barrier_perm"] = permeability_overrides["barrier_perm"]
+        self._require_permeability(self.barriers_mod_df, "barrier_perm", "barrier_perm")
         self._set_canonical_aliases()
 
     def _set_canonical_aliases(self):

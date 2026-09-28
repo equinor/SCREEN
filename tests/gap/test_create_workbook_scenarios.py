@@ -25,6 +25,7 @@ def test_create_workbook_with_single_scenario(tmp_path):
     assert result.returncode == 0
     assert output.exists()
     assert "default" in result.stdout
+    assert "DesignMatrix" in pd.ExcelFile(output, engine="openpyxl").sheet_names
 
     design = xlsx_to_simulation_design(output)
     assert len(design.scenarios) == 1
@@ -33,6 +34,8 @@ def test_create_workbook_with_single_scenario(tmp_path):
     assert design.scenarios[0].pressure_unit == "bar"
     assert design.scenarios[0].salinity == 0.032
     assert design.scenarios[0].salinity_basis == "mass_fraction"
+    assert design.scenarios[0].permeability_unit == "mD"
+    assert design.scenarios[0].reservoir_permx is None
     assert xlsx_to_well_model(output).spec.well_header.unique_wellbore_identifier == "NO 32/4-1"
     policy = xlsx_grid_policy(output)
     assert policy["depth_unit"] == "m"
