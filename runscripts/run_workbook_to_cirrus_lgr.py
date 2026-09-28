@@ -142,7 +142,7 @@ def run_workflow(args: argparse.Namespace) -> Path:
     scenario_record["effective_permeability_mD"] = {
         "reservoir_permx": policy.get("reservoir_permx", 1000.0),
         "overburden_permx": policy.get("overburden_permx", 0.001),
-        "oh_perm": scenario.oh_perm if scenario.oh_perm is not None else args.oh_perm,
+        "oh_perm": args.oh_perm,
         "cb_perm": scenario.cb_perm if scenario.cb_perm is not None else args.cb_perm,
         "barrier_perm": scenario.barrier_perm if scenario.barrier_perm is not None else args.barrier_perm,
     }
@@ -171,7 +171,6 @@ def run_workflow(args: argparse.Namespace) -> Path:
         permeability_overrides={
             key: value
             for key, value in {
-                "oh_perm": scenario.oh_perm,
                 "cb_perm": scenario.cb_perm,
                 "barrier_perm": scenario.barrier_perm,
             }.items()

@@ -128,7 +128,7 @@ def create_workbook(example: dict) -> Path:
         scenarios["salinity_basis"] = "mass_fraction"
         scenarios["salinity"] = 0.032
         scenarios["permeability_unit"] = "mD"
-        for field in ("reservoir_permx", "overburden_permx", "oh_perm", "cb_perm", "barrier_perm"):
+        for field in ("reservoir_permx", "overburden_permx", "cb_perm", "barrier_perm"):
             scenarios[field] = None
         scenarios.to_excel(writer, sheet_name="DesignMatrix", index=False)
         notes.to_excel(writer, sheet_name="Notes", index=False)
