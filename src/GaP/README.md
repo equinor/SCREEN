@@ -67,6 +67,22 @@ The wrapper validates that the configured CIRRUS executable is available before 
 
 Notebook 3 also supports an optional generated-grid mode for visual QC after a wrapper run. Set `input_mode = 'generated'` in `notebooks/03_wellclass_to_gap.ipynb` and point `generated_case_root` at a completed case directory containing `well_input.json`, `model/TEMP-0.EGRID`, and `model/TEMP-0.INIT`.
 
+To compare completed scenarios, select a baseline case and compare the static
+grid artifacts with the dynamic pressure and saturation results:
+
+```bash
+uv run python runscripts/compare_scenario_outputs.py \
+	--output-root cases \
+	--baseline base_case \
+	--report cases/scenario_comparison.json
+```
+
+The report expects static `EGRID`, `INIT`, and LGR artifacts to remain invariant
+while selected `UNRST` quantities such as `PRESSURE`, `SWAT`, and `SGAS` differ
+when scenario inputs change. The baseline defaults to the first case in sorted
+order when `--baseline` is omitted. This comparison requires completed
+simulator output and does not rerun CIRRUS.
+
 ## Grid Build Pipeline (Canonical)
 
 The supported simulator-facing workflow is intentionally explicit:
