@@ -1,13 +1,55 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import pandas as pd
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from src.GaP.libs.models.simulation_scenario import SimulationDesign
 
 from ..models.well_model import WellModel
+
+
+class GridPolicy(BaseModel):
+    """Validated grid inputs; legacy workbook values are interpreted as m and mD."""
+
+    model_config = ConfigDict(extra="allow")
+
+    depth_unit: Literal["m"] = "m"
+    permeability_unit: Literal["mD"] = "mD"
+    top_depth: float = Field(ge=0, description="Vertical grid depth in metres")
+    water_depth: float = Field(ge=0, description="Derived from Header.ground_elevation in metres")
+    target_dz_water: float = Field(gt=0, description="Water-layer thickness in metres")
+    target_dz_overburden: float = Field(gt=0, description="Overburden-layer thickness in metres")
+    target_dz_reservoir: float = Field(gt=0, description="Reservoir-layer thickness in metres")
+    reservoir_thickness: float = Field(default=400.0, gt=0, description="Reservoir interval thickness in metres")
+    cells_per_layer: int = Field(default=400, gt=0)
+    min_water_layers: int = Field(default=1, gt=0)
+    min_overburden_layers: int = Field(default=1, gt=0)
+    min_reservoir_layers: int = Field(default=1, gt=0)
+    max_water_layers: int | None = Field(default=None, gt=0)
+    max_overburden_layers: int | None = Field(default=None, gt=0)
+    max_reservoir_layers: int | None = Field(default=None, gt=0)
+    nx: int = Field(default=20, gt=0)
+    ny: int = Field(default=20, gt=0)
+    dx: float = Field(default=200.0, gt=0, description="Cell width in metres")
+    dy: float = Field(default=200.0, gt=0, description="Cell height in metres")
+    reservoir_permx: float = Field(default=1000.0, ge=0, description="Reservoir permeability in mD")
+    overburden_permx: float = Field(default=0.001, ge=0, description="Overburden permeability in mD")
+    aquifer_permx: float | None = Field(default=None, ge=0, description="Aquifer permeability in mD")
+    aquifer_layers: int = Field(default=3, gt=0)
+    porv_multiplier: float = Field(default=2000.0, gt=0)
+    permz_multiplier: float = Field(default=0.1, ge=0)
+
+    @model_validator(mode="after")
+    def validate_layer_limits(self) -> GridPolicy:
+        for name in ("water", "overburden", "reservoir"):
+            minimum = getattr(self, f"min_{name}_layers")
+            maximum = getattr(self, f"max_{name}_layers")
+            if maximum is not None and maximum < minimum:
+                raise ValueError(f"max_{name}_layers must be >= min_{name}_layers")
+        return self
 
 
 def _read_sheet(workbook: Path, sheet_name: str) -> pd.DataFrame | None:
@@ -151,7 +193,7 @@ def xlsx_grid_policy(xlsx_file: str | Path) -> dict[str, Any]:
     if policy_sheet is None:
         raise ValueError("missing required sheet: GridPolicy")
 
-    policy = _key_value_sheet(policy_sheet, sheet_name="GridPolicy")
+    policy = {key: value for key, value in _key_value_sheet(policy_sheet, sheet_name="GridPolicy").items() if not pd.isna(value)}
     required = {
         "top_depth",
         "target_dz_water",
@@ -167,6 +209,13 @@ def xlsx_grid_policy(xlsx_file: str | Path) -> dict[str, Any]:
     header = _key_value_sheet(header_sheet, sheet_name="Header")
     if "ground_elevation" not in header:
         raise ValueError("Header is missing required key: ground_elevation")
-    # Header owns the physical water/ground boundary; legacy GridPolicy values are ignored.
-    policy["water_depth"] = float(header["ground_elevation"])
-    return policy
+    # Header owns the water/ground boundary; legacy GridPolicy values are ignored.
+    elevation_unit = header.get("ground_elevation_unit", "m")
+    if elevation_unit not in ("m", "ft"):
+        raise ValueError("Header ground_elevation_unit must be 'm' or 'ft'")
+    elevation_to_m = 0.3048 if elevation_unit == "ft" else 1.0
+    policy["water_depth"] = float(header["ground_elevation"]) * elevation_to_m
+    try:
+        return GridPolicy.model_validate(policy).model_dump(exclude_none=True)
+    except ValueError as exc:
+        raise ValueError(f"invalid GridPolicy: {exc}") from exc

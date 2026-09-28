@@ -2,7 +2,9 @@ from pathlib import Path
 import subprocess
 import sys
 
+from openpyxl import load_workbook
 import pandas as pd
+import pytest
 
 from src.WellClass.libs.utils.xlsx_parser import xlsx_grid_policy, xlsx_to_simulation_design, xlsx_to_well_model
 
@@ -183,6 +185,53 @@ def test_xlsx_grid_policy_requires_keys(tmp_path):
         assert "missing required keys" in str(exc)
     else:
         raise AssertionError("Expected ValueError for missing GridPolicy keys")
+
+
+def test_xlsx_grid_policy_applies_legacy_units_and_defaults(tmp_path):
+    workbook = tmp_path / "legacy_policy.xlsx"
+    _write_minimal_workbook(workbook)
+
+    policy = xlsx_grid_policy(workbook)
+
+    assert policy["depth_unit"] == "m"
+    assert policy["permeability_unit"] == "mD"
+    assert policy["dx"] == 200.0
+    assert policy["reservoir_permx"] == 1000.0
+
+
+@pytest.mark.parametrize(
+    ("key", "value"),
+    [("depth_unit", "ft"), ("permeability_unit", "D"), ("target_dz_water", 0), ("reservoir_permx", -1)],
+)
+def test_xlsx_grid_policy_rejects_invalid_values(tmp_path, key, value):
+    workbook = tmp_path / "invalid_policy.xlsx"
+    _write_minimal_workbook(workbook)
+    excel = load_workbook(workbook)
+    sheet = excel["GridPolicy"]
+    matching_rows = [row for row in range(2, sheet.max_row + 1) if sheet.cell(row, 1).value == key]
+    if matching_rows:
+        sheet.cell(matching_rows[0], 2).value = value
+    else:
+        sheet.append([key, value])
+    excel.save(workbook)
+
+    with pytest.raises(ValueError, match="invalid GridPolicy"):
+        xlsx_grid_policy(workbook)
+
+
+def test_xlsx_grid_policy_converts_header_elevation_from_feet(tmp_path):
+    workbook = tmp_path / "feet_header.xlsx"
+    _write_minimal_workbook(workbook)
+    excel = load_workbook(workbook)
+    sheet = excel["Header"]
+    for row in range(2, sheet.max_row + 1):
+        if sheet.cell(row, 1).value == "ground_elevation":
+            sheet.cell(row, 2).value = 1000.0
+        elif sheet.cell(row, 1).value == "ground_elevation_unit":
+            sheet.cell(row, 2).value = "ft"
+    excel.save(workbook)
+
+    assert xlsx_grid_policy(workbook)["water_depth"] == pytest.approx(304.8)
 
 
 def test_case_name_defaults_to_default_when_omitted(tmp_path):

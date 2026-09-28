@@ -88,6 +88,8 @@ def main() -> int:
     grid_policy = pd.DataFrame(
         {
             "key": [
+                "depth_unit",
+                "permeability_unit",
                 "top_depth",
                 "target_dz_water",
                 "target_dz_overburden",
@@ -99,7 +101,7 @@ def main() -> int:
                 "min_overburden_layers",
                 "min_reservoir_layers",
             ],
-            "value": [4.0, 50.0, 60.0, 8.0, 1000.0, 0.001, 400, 1, 1, 1],
+            "value": ["m", "mD", 4.0, 50.0, 60.0, 8.0, 1000.0, 0.001, 400, 1, 1, 1],
         }
     )
     survey = pd.DataFrame(

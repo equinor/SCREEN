@@ -40,6 +40,21 @@ Their well-construction sheets are copied from the corresponding canonical JSON 
 python runscripts/create_example_well_workbooks.py
 ```
 
+`GridPolicy` lengths use metres in the model vertical-depth coordinate; `dx` and
+`dy` are metres, and permeability uses mD. New workbooks state
+`depth_unit=m` and `permeability_unit=mD`; legacy workbooks default to those
+units. Required fields are `top_depth` and `target_dz_water`,
+`target_dz_overburden`, and `target_dz_reservoir`. Defaults: `reservoir_thickness`
+400 m; `cells_per_layer` 400; minimum layer counts 1; maximum layer counts
+unset; `nx`/`ny` 20; `dx`/`dy` 200 m; `reservoir_permx` 1000 mD;
+`overburden_permx` 0.001 mD; `aquifer_permx` unset; `aquifer_layers` 3;
+`porv_multiplier` 2000; `permz_multiplier` 0.1. Spacing and layer counts must
+be positive, permeabilities nonnegative, and maximum layer counts cannot be
+below their minimums. `water_depth` comes from `Header.ground_elevation`
+(converted from ft when declared); legacy GridPolicy values for water depth,
+reservoir top, and bottom depth are ignored because those boundaries are
+derived from the header and well stratigraphy.
+
 After `.EGRID` and `.INIT` have been produced, build the LGR/CARFIN include:
 
 ```bash

@@ -13,6 +13,8 @@ EXAMPLES = {
         "json": Path("test_data/examples/wildcat/wildcat.json"),
         "output": Path("test_data/examples/wildcat/wildcat_workbook.xlsx"),
         "grid_policy": {
+            "depth_unit": "m",
+            "permeability_unit": "mD",
             "top_depth": 4.0,
             "target_dz_water": 50.0,
             "target_dz_overburden": 60.0,
@@ -51,6 +53,8 @@ EXAMPLES = {
         "json": Path("test_data/examples/smeaheia/smeaheia.json"),
         "output": Path("test_data/examples/smeaheia/smeaheia_workbook.xlsx"),
         "grid_policy": {
+            "depth_unit": "m",
+            "permeability_unit": "mD",
             "top_depth": 4.0,
             "target_dz_water": 50.0,
             "target_dz_overburden": 60.0,
