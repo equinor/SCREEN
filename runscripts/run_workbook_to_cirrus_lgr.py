@@ -37,7 +37,7 @@ def parse_args() -> argparse.Namespace:
         "--case-name",
         type=str,
         default="default",
-        help="Name of the simulation scenario from workbook SubsurfaceAssumptions sheet.",
+        help="Name of the simulation case from the workbook DesignMatrix.",
     )
     return parser.parse_args()
 
@@ -122,6 +122,11 @@ def run_workflow(args: argparse.Namespace) -> Path:
         scenario = design.select(args.case_name)
     except ValueError as exc:
         raise ValueError(f"Invalid case-name '{args.case_name}': {exc}") from None
+    policy = dict(policy)
+    for field in ("reservoir_permx", "overburden_permx"):
+        override = getattr(scenario, field)
+        if override is not None:
+            policy[field] = override
     stage_args = derive_stage_args_from_policy(args, policy, model)
     args.reservoir_top = stage_args.reservoir_top
     args.bottom_depth = stage_args.bottom_depth
@@ -133,7 +138,15 @@ def run_workflow(args: argparse.Namespace) -> Path:
     grid_policy_json = args.output_root / "grid_policy.json"
     output_json = args.output_root / "well_input.json"
     output_json.parent.mkdir(parents=True, exist_ok=True)
-    scenario_json.write_text(json.dumps(scenario.model_dump(mode="json"), indent=2) + "\n", encoding="utf-8")
+    scenario_record = scenario.model_dump(mode="json")
+    scenario_record["effective_permeability_mD"] = {
+        "reservoir_permx": policy.get("reservoir_permx", 1000.0),
+        "overburden_permx": policy.get("overburden_permx", 0.001),
+        "oh_perm": scenario.oh_perm if scenario.oh_perm is not None else args.oh_perm,
+        "cb_perm": scenario.cb_perm if scenario.cb_perm is not None else args.cb_perm,
+        "barrier_perm": scenario.barrier_perm if scenario.barrier_perm is not None else args.barrier_perm,
+    }
+    scenario_json.write_text(json.dumps(scenario_record, indent=2) + "\n", encoding="utf-8")
     grid_policy_json.write_text(
         json.dumps(policy, indent=2, default=lambda value: value.item() if hasattr(value, "item") else str(value)) + "\n",
         encoding="utf-8",
@@ -155,6 +168,15 @@ def run_workflow(args: argparse.Namespace) -> Path:
         oh_perm=args.oh_perm,
         cb_perm=args.cb_perm,
         barrier_perm=args.barrier_perm,
+        permeability_overrides={
+            key: value
+            for key, value in {
+                "oh_perm": scenario.oh_perm,
+                "cb_perm": scenario.cb_perm,
+                "barrier_perm": scenario.barrier_perm,
+            }.items()
+            if value is not None
+        },
         ali_way=args.ali_way,
     )
     lgr_path = build_lgr(lgr_args)

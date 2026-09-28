@@ -4,7 +4,7 @@
 The workbook is expected to contain:
 - Header (key/value)
 - GridPolicy (key/value)
-- Optional well sheets (Survey, HoleCasings, Plugs, Stratigraphy, SubsurfaceAssumptions)
+- Optional well sheets (Survey, HoleCasings, Plugs, Stratigraphy, DesignMatrix)
 
 The script computes layer counts from thickness/target-DZ settings and stages
 TEMP-0 files using the existing prepare_init_case workflow.
@@ -65,7 +65,7 @@ def parse_args() -> argparse.Namespace:
         "--case-name",
         type=str,
         default="default",
-        help="Name of the simulation scenario from workbook SubsurfaceAssumptions sheet.",
+        help="Name of the simulation case from the workbook DesignMatrix.",
     )
     return parser.parse_args()
 

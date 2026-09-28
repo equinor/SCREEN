@@ -60,6 +60,12 @@ def _generate_scenario_variations(
                 "p_fluid_contact": p_fluid,
                 "z_resrv": z_fluid + 50.0,
                 "p_resrv": p_fluid + 5.0,
+                "permeability_unit": "mD",
+                "reservoir_permx": None,
+                "overburden_permx": None,
+                "oh_perm": None,
+                "cb_perm": None,
+                "barrier_perm": None,
             }
         )
     return pd.DataFrame(scenarios)
@@ -173,7 +179,7 @@ def main() -> int:
         hole_casings.to_excel(writer, sheet_name="HoleCasings", index=False)
         plugs.to_excel(writer, sheet_name="Plugs", index=False)
         stratigraphy.to_excel(writer, sheet_name="Stratigraphy", index=False)
-        assumptions.to_excel(writer, sheet_name="SubsurfaceAssumptions", index=False)
+        assumptions.to_excel(writer, sheet_name="DesignMatrix", index=False)
 
     scenario_str = ", ".join(args.scenarios)
     print(f"Created workbook template with {len(args.scenarios)} scenario(s): {scenario_str}")

@@ -175,7 +175,8 @@ In addition, the **PVT** values are included in the directory `pvt_contants` for
 ## Multi-scenario workbook workflow
 
 Workbook inputs can contain multiple simulation scenarios in the
-`SubsurfaceAssumptions` sheet. Each row must have a unique `case_name`.
+`DesignMatrix` sheet. Each row must have a unique `case_name`. Existing
+`SubsurfaceAssumptions` sheets remain supported for backwards compatibility.
 The remaining workbook sheets describe the physical well and grid policy and
 are shared by all scenarios.
 
