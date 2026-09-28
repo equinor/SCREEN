@@ -9,7 +9,9 @@ import threading
 import time
 
 import pandas as pd
+import pytest
 
+from src.GaP.libs.models.simulation_scenario import SimulationScenario
 from src.WellClass.libs.utils.xlsx_parser import xlsx_to_simulation_design
 
 
@@ -76,6 +78,17 @@ def test_batch_scenario_execution_creates_output_directories(tmp_path):
     design = xlsx_to_simulation_design(workbook)
     assert len(design.scenarios) == 3
     assert [s.case_name for s in design.scenarios] == ["case_0", "case_1", "case_2"]
+    assert design.scenarios[0].depth_unit == "m"
+    assert design.scenarios[0].pressure_unit == "bar"
+
+
+def test_scenario_depth_and_pressure_units_are_validated():
+    assert SimulationScenario().depth_unit == "m"
+    assert SimulationScenario().pressure_unit == "bar"
+    with pytest.raises(ValueError):
+        SimulationScenario(depth_unit="ft")
+    with pytest.raises(ValueError):
+        SimulationScenario(pressure_unit="psi")
 
 
 def test_batch_execution_script_summary(tmp_path):

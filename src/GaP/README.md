@@ -55,6 +55,14 @@ below their minimums. `water_depth` comes from `Header.ground_elevation`
 reservoir top, and bottom depth are ignored because those boundaries are
 derived from the header and well stratigraphy.
 
+Scenario depths (`z_fluid_contact`, `z_resrv`, and
+`overburden_datum_depth`) are TVDMSL metres; scenario pressures are bar. New
+workbooks include `depth_unit=m` and `pressure_unit=bar`; legacy scenario rows
+default to these units. The WellClass-to-GaP adapter expects processed interval
+depths in TVDMSL metres and all open-hole, casing-cement, and barrier
+permeabilities in mD. Unsupported units, missing required permeabilities, and
+negative or non-finite permeability values fail before LGR generation.
+
 After `.EGRID` and `.INIT` have been produced, build the LGR/CARFIN include:
 
 ```bash

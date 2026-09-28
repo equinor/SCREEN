@@ -1,15 +1,13 @@
+import numpy as np
 import pandas as pd
 
 
 class WellDataFrame:
-    def __init__(self, my_well, *, oh_perm=None, cb_perm=None, barrier_perm=None):
-        """Expose GaP dataframe inputs with canonical and legacy names.
+    def __init__(self, my_well, *, oh_perm=None, cb_perm=None, barrier_perm=None, permeability_unit="mD"):
+        """Expose canonical/legacy GaP frames; processed depths are TVDMSL m and permeability is mD."""
 
-        ``holes_df``, ``plugs_df``, and ``barrier_regions_df`` are the canonical
-        names. Legacy dataframe attributes remain aliases while callers migrate.
-        while GaP callers are migrated.
-        """
-
+        if permeability_unit != "mD":
+            raise ValueError("permeability_unit must be 'mD'")
         if hasattr(my_well, "drilling"):
             self._from_legacy_well(my_well)
         elif hasattr(my_well, "hole_casings"):
@@ -112,8 +110,14 @@ class WellDataFrame:
 
     @staticmethod
     def _require_permeability(frame, field, parameter_name):
-        if not frame.empty and frame[field].isna().any():
+        if frame.empty:
+            return
+        values = pd.to_numeric(frame[field], errors="coerce")
+        if values.isna().any():
             raise ValueError(f"{parameter_name} must be provided for processed wells")
+        if not np.isfinite(values).all() or (values < 0).any():
+            raise ValueError(f"{parameter_name} must be finite and nonnegative in mD")
+        frame[field] = values
 
     @staticmethod
     def _processed_barriers(my_well, barrier_perm):

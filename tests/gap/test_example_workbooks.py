@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from src.WellClass.libs.utils.xlsx_parser import xlsx_grid_policy, xlsx_to_well_model
+from src.WellClass.libs.utils.xlsx_parser import xlsx_grid_policy, xlsx_to_simulation_design, xlsx_to_well_model
 
 
 @pytest.mark.parametrize(
@@ -19,6 +19,7 @@ def test_example_workbooks_parse_to_canonical_wells(name, well_identifier):
 
     model = xlsx_to_well_model(workbook)
     policy = xlsx_grid_policy(workbook)
+    design = xlsx_to_simulation_design(workbook)
     survey = pd.read_excel(workbook, sheet_name="Survey", engine="openpyxl")
 
     assert model.spec.well_header.unique_wellbore_identifier == well_identifier
@@ -26,6 +27,8 @@ def test_example_workbooks_parse_to_canonical_wells(name, well_identifier):
     assert policy["water_depth"] == model.spec.well_header.ground_elevation
     assert policy["reservoir_permx"] == 1000.0
     assert policy["overburden_permx"] == 0.001
+    assert all(scenario.depth_unit == "m" for scenario in design.scenarios)
+    assert all(scenario.pressure_unit == "bar" for scenario in design.scenarios)
     assert survey.columns.tolist() == ["md_rkb", "inclination_deg", "azimuth_deg"]
     assert survey.empty
     if name == "smeaheia":

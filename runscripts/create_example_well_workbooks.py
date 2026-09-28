@@ -122,7 +122,10 @@ def create_workbook(example: dict) -> Path:
         pd.DataFrame(spec.get("hole_casings", [])).to_excel(writer, sheet_name="HoleCasings", index=False)
         pd.DataFrame(spec.get("plugs", [])).to_excel(writer, sheet_name="Plugs", index=False)
         pd.DataFrame(spec.get("stratigraphy", [])).to_excel(writer, sheet_name="Stratigraphy", index=False)
-        pd.DataFrame(example["scenarios"]).to_excel(writer, sheet_name="SubsurfaceAssumptions", index=False)
+        scenarios = pd.DataFrame(example["scenarios"])
+        scenarios["depth_unit"] = "m"
+        scenarios["pressure_unit"] = "bar"
+        scenarios.to_excel(writer, sheet_name="SubsurfaceAssumptions", index=False)
         notes.to_excel(writer, sheet_name="Notes", index=False)
     return output
 

@@ -49,6 +49,8 @@ def _generate_scenario_variations(
         scenarios.append(
             {
                 "case_name": name,
+                "depth_unit": "m",
+                "pressure_unit": "bar",
                 "temperature_gradient": temp_gradient,
                 "ground_temperature": ground_temp,
                 "fluid_type": "co2",

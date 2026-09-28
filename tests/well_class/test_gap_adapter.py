@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from src.WellClass.libs.grid_utils import WellDataFrame
 from src.WellClass.libs.well_class import WellProcessed
@@ -76,3 +77,11 @@ def test_processed_well_requires_explicit_permeability():
         assert str(error) == "oh_perm must be provided for processed wells"
     else:
         raise AssertionError("Expected missing open-hole permeability to fail")
+
+
+def test_processed_well_permeability_is_millidarcy_and_nonnegative():
+    with pytest.raises(ValueError, match="permeability_unit must be 'mD'"):
+        WellDataFrame(make_vertical_well(), oh_perm=1.0, cb_perm=1.0, barrier_perm=1.0, permeability_unit="D")
+
+    with pytest.raises(ValueError, match="finite and nonnegative in mD"):
+        WellDataFrame(make_vertical_well(), oh_perm=-1.0, cb_perm=1.0, barrier_perm=1.0)

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -12,11 +12,13 @@ class SimulationScenario(BaseModel):
     temperature_gradient: float = 31.0
     ground_temperature: float = 4.0
     fluid_type: str = "co2"
-    z_fluid_contact: Optional[float] = None
-    p_fluid_contact: Optional[float] = None
-    overburden_datum_depth: Optional[float] = None
-    z_resrv: Optional[float] = None
-    p_resrv: Optional[float] = None
+    depth_unit: Literal["m"] = "m"
+    pressure_unit: Literal["bar"] = "bar"
+    z_fluid_contact: Optional[float] = Field(default=None, allow_inf_nan=False, description="Fluid-contact TVDMSL depth in m")
+    p_fluid_contact: Optional[float] = Field(default=None, allow_inf_nan=False, description="Fluid-contact pressure in bar")
+    overburden_datum_depth: Optional[float] = Field(default=None, allow_inf_nan=False, description="Overburden datum TVDMSL depth in m")
+    z_resrv: Optional[float] = Field(default=None, allow_inf_nan=False, description="Reservoir TVDMSL depth in m")
+    p_resrv: Optional[float] = Field(default=None, allow_inf_nan=False, description="Reservoir pressure in bar")
     salinity: float = 0.032
 
     @field_validator("case_name")

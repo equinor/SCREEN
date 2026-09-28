@@ -22,9 +22,9 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--output-folder", type=Path, required=True, help="Folder for the generated LGR GRDECL.")
     parser.add_argument("--lgr-name", default="TEMP_LGR", help="Generated LGR name and file stem.")
-    parser.add_argument("--oh-perm", type=float, default=10000.0, help="Open-hole permeability default.")
-    parser.add_argument("--cb-perm", type=float, default=0.05, help="Cement-bond permeability default.")
-    parser.add_argument("--barrier-perm", type=float, default=0.05, help="Barrier permeability default.")
+    parser.add_argument("--oh-perm", type=float, default=10000.0, help="Open-hole permeability default in mD.")
+    parser.add_argument("--cb-perm", type=float, default=0.05, help="Cement-bond permeability default in mD.")
+    parser.add_argument("--barrier-perm", type=float, default=0.05, help="Barrier permeability default in mD.")
     parser.add_argument("--ali-way", action="store_true", help="Use the legacy Ali refinement mode.")
     return parser.parse_args()
 
