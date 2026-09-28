@@ -36,6 +36,9 @@ def test_create_workbook_with_single_scenario(tmp_path):
     assert design.scenarios[0].salinity_basis == "mass_fraction"
     assert design.scenarios[0].permeability_unit == "mD"
     assert design.scenarios[0].reservoir_permx is None
+    matrix = pd.read_excel(output, sheet_name="DesignMatrix", engine="openpyxl")
+    assert "oh_perm" not in matrix.columns
+    assert {"cb_perm", "barrier_perm"} <= set(matrix.columns)
     assert xlsx_to_well_model(output).spec.well_header.unique_wellbore_identifier == "NO 32/4-1"
     policy = xlsx_grid_policy(output)
     assert policy["depth_unit"] == "m"

@@ -73,6 +73,16 @@ uses its existing constant-density hydrostatic approximation. Generated CIRRUS
 both ends of the generated `SALTVD` interval. This keeps pressure and deck inputs
 consistent; it does not yet support a depth-varying salinity profile.
 
+Each `DesignMatrix` row is one case sharing the same physical well. Optional
+`reservoir_permx` and `overburden_permx` values override the corresponding
+`GridPolicy` values. `cb_perm` and `barrier_perm` are case-wide overrides applied
+to all casing-cement or plug intervals; they do not yet select an individual
+interval. Precedence is DesignMatrix override, then the well interval's own
+permeability, then the CLI default. `oh_perm` remains a fixed high-permeability
+workflow default, not a DesignMatrix sensitivity variable. Effective values are
+recorded in `scenario.json`, and the resolved grid policy is saved in
+`grid_policy.json`.
+
 After `.EGRID` and `.INIT` have been produced, build the LGR/CARFIN include:
 
 ```bash

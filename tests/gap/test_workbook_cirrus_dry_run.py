@@ -85,7 +85,6 @@ def test_design_matrix_permeability_overrides_reach_case_outputs(tmp_path):
     for field, value in {
         "reservoir_permx": 750.0,
         "overburden_permx": 0.002,
-        "oh_perm": 12000.0,
         "cb_perm": 0.2,
         "barrier_perm": 0.3,
     }.items():
@@ -121,7 +120,7 @@ def test_design_matrix_permeability_overrides_reach_case_outputs(tmp_path):
     assert scenario["effective_permeability_mD"] == {
         "reservoir_permx": 750.0,
         "overburden_permx": 0.002,
-        "oh_perm": 12000.0,
+        "oh_perm": 10000.0,
         "cb_perm": 0.2,
         "barrier_perm": 0.3,
     }

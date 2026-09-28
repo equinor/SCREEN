@@ -63,7 +63,6 @@ def _generate_scenario_variations(
                 "permeability_unit": "mD",
                 "reservoir_permx": None,
                 "overburden_permx": None,
-                "oh_perm": None,
                 "cb_perm": None,
                 "barrier_perm": None,
             }

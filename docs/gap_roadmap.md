@@ -144,6 +144,16 @@ minimum:
 - the existing pressure, salinity, temperature, fluid-contact, and other
     scenario assumptions.
 
+The current `cb_perm` and `barrier_perm` fields are case-wide overrides applied
+to all casing-cement and plug intervals. A follow-up should allow overrides to
+target one named row in `HoleCasings` or `Plugs`, with an explicit `ALL` target
+for the current broad behavior. Prefer stable source-row identifiers over
+matching display names alone. Also replace abbreviated user-facing fields
+(`cb_perm`, `barrier_perm`, `reservoir_permx`, `overburden_permx`) with clear
+names that identify the material/property and unit, retaining aliases for older
+workbooks during migration. Open-hole permeability is a shared high-permeability
+default, not a DesignMatrix sensitivity variable.
+
 The shared well sheets should remain the source of physical geometry, while
 scenario overrides should be applied through one typed, validated merge step
 with explicit units, defaults, and precedence. A selected case must produce a
@@ -155,7 +165,9 @@ each with independently varied grid and cement permeability values; the
 resolved `scenario.json` records every effective parameter; legacy
 `SubsurfaceAssumptions` workbooks remain readable; and tests verify that
 changing material permeability affects the relevant outputs without changing
-the shared well geometry or unrelated grid structure.
+the shared well geometry or unrelated grid structure. Targeted cement overrides
+should affect only the selected intervals, while `ALL` preserves case-wide
+override behavior.
 
 ### 6. Give generated cases unique, navigable names
 
