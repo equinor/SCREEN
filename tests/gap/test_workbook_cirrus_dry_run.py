@@ -88,6 +88,7 @@ def test_qc_plot_uses_workbook_fluid_contact_pressure(tmp_path, monkeypatch):
 
     class FakePressure:
         def __init__(self, **kwargs):
+            captured["pressure_options"] = kwargs
             self.table = SimpleNamespace(
                 depth=np.array([0.0, 10.0]),
                 hydrostatic_pressure=np.array([100.0, 105.0]),
@@ -113,9 +114,11 @@ def test_qc_plot_uses_workbook_fluid_contact_pressure(tmp_path, monkeypatch):
         ground_temperature=4.0,
         temperature_gradient=31.0,
         fluid_type="co2",
+        salinity=0.032,
     )
 
     workflow.save_qc_plot(SimpleNamespace(), scenario, tmp_path / "qc_plot.png")
 
     assert captured["z_fluid_datum"] == 2400.0
     assert captured["p_fluid_datum"] == 245.0
+    assert captured["pressure_options"]["salinity"] == 0.032

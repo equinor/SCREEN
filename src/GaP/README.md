@@ -63,6 +63,16 @@ depths in TVDMSL metres and all open-hole, casing-cement, and barrier
 permeabilities in mD. Unsupported units, missing required permeabilities, and
 negative or non-finite permeability values fail before LGR generation.
 
+Scenario salinity is the NaCl mass fraction of the solution (`kg salt / kg
+solution`), default `0.032`; new workbooks declare `salinity_basis=mass_fraction`
+and legacy values are interpreted the same way. The PVT model uses this
+fraction for the Laliberté brine-density correction. `PressureTable` evaluates
+the corresponding reference density at ground temperature and 1.01325 bar, then
+uses its existing constant-density hydrostatic approximation. Generated CIRRUS
+`SALT_TABLE` blocks use `CONCENTRATION_UNITS MASS` and the same mass fraction at
+both ends of the generated `SALTVD` interval. This keeps pressure and deck inputs
+consistent; it does not yet support a depth-varying salinity profile.
+
 After `.EGRID` and `.INIT` have been produced, build the LGR/CARFIN include:
 
 ```bash

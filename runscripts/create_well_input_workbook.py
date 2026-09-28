@@ -51,6 +51,8 @@ def _generate_scenario_variations(
                 "case_name": name,
                 "depth_unit": "m",
                 "pressure_unit": "bar",
+                "salinity_basis": "mass_fraction",
+                "salinity": 0.032,
                 "temperature_gradient": temp_gradient,
                 "ground_temperature": ground_temp,
                 "fluid_type": "co2",

@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from src.WellClass.libs.pvt.pvt import default_pvt_path, get_hydrostatic_P, get_pvt
 
@@ -24,6 +25,15 @@ def test_get_pvt_loads_bundled_tables():
     assert np.all(rho_brine > 0)
 
 
+def test_get_pvt_salinity_is_a_validated_mass_fraction():
+    _, _, _, default_brine = get_pvt()
+    _, _, _, higher_salinity_brine = get_pvt(salinity=0.04)
+
+    assert not np.array_equal(default_brine, higher_salinity_brine)
+    with pytest.raises(ValueError, match="mass fraction"):
+        get_pvt(salinity=1.0)
+
+
 def test_hydrostatic_pressure_accepts_canonical_header():
     table = get_hydrostatic_P(canonical_header(), dz=100)
 
@@ -31,3 +41,10 @@ def test_hydrostatic_pressure_accepts_canonical_header():
     assert table.iloc[0]["depth_msl"] == 0.0
     assert np.all(np.diff(table["hs_p"]) > 0)
     assert table.iloc[-1]["depth_msl"] == 5200.0
+
+
+def test_hydrostatic_pressure_uses_supplied_salinity():
+    default = get_hydrostatic_P(canonical_header(), dz=500)
+    saline = get_hydrostatic_P(canonical_header(), dz=500, salinity=0.04)
+
+    assert not np.array_equal(default["hs_p"].to_numpy(), saline["hs_p"].to_numpy())

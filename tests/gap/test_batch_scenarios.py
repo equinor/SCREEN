@@ -89,6 +89,10 @@ def test_scenario_depth_and_pressure_units_are_validated():
         SimulationScenario(depth_unit="ft")
     with pytest.raises(ValueError):
         SimulationScenario(pressure_unit="psi")
+    with pytest.raises(ValueError):
+        SimulationScenario(salinity_basis="mass_ratio")
+    with pytest.raises(ValueError):
+        SimulationScenario(salinity=1.0)
 
 
 def test_batch_execution_script_summary(tmp_path):

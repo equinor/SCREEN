@@ -81,6 +81,7 @@ def save_qc_plot(model, scenario, output_path: Path) -> None:
         ground_temperature=scenario.ground_temperature,
         geothermal_gradient=scenario.temperature_gradient,
         fluid_type=scenario.fluid_type,
+        salinity=scenario.salinity,
     )
     pressure_scenario = pressure.add_scenario(
         "workbook",

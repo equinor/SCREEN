@@ -180,6 +180,7 @@ def parameterize_staged_deck(args: argparse.Namespace, policy: dict, well_header
         ground_elevation=float(well_header.ground_elevation),
         ground_temperature=float(assumptions.get("ground_temperature", 4.0)),
         geothermal_gradient=float(assumptions.get("temperature_gradient", 31.0)),
+        salinity=float(assumptions.get("salinity", 0.032)),
     )
     parameters = CirrusDeckParameters(
         start_date=start_date,
@@ -191,6 +192,7 @@ def parameterize_staged_deck(args: argparse.Namespace, policy: dict, well_header
         overburden_pressure_bar=pressure_table.get_values_at_depth(overburden_datum_depth)["hydrostatic_pressure"],
         fluid_contact_depth=float(assumptions.get("z_fluid_contact", assumptions.get("z_resrv", 1500.0))),
         fluid_contact_pressure_bar=float(assumptions.get("p_fluid_contact", assumptions.get("p_resrv", 144.5))),
+        salinity_mass_fraction=float(assumptions.get("salinity", 0.032)),
         ground_temperature_c=float(assumptions.get("ground_temperature", 4.0)),
         geothermal_gradient_c_per_km=float(assumptions.get("temperature_gradient", 31.0)),
         enable_lgr=args.final_run,

@@ -1,10 +1,13 @@
 import warnings
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import List
 
 import numpy as np
 from scipy import constants as const
 from scipy.interpolate import interp1d
+
+from ..pvt.pvt import get_brine_density
 
 
 def shmin_data_interpolator(
@@ -54,7 +57,9 @@ class PressureTable:
     ground_elevation: float  # ground elevation (m)
     ground_temperature: float  # ground temperature (°C)
     geothermal_gradient: float  # geothermal gradient (°C/km)
-    rho_brine: float = 1030  # brine density (kg/m³)
+    rho_brine: float | None = None  # brine density (kg/m³)
+    salinity: float | None = None  # NaCl mass fraction of solution (kg/kg)
+    pvt_path: str | Path | None = None
 
     # Minimum horizontal stress parameters
     shmin_gradient: float = 0.1695
@@ -66,6 +71,14 @@ class PressureTable:
     min_horizontal_stress: np.ndarray = field(init=False)  # minimum horizontal stress (bar)
 
     def __post_init__(self):
+        if self.rho_brine is not None and self.salinity is not None:
+            raise ValueError("provide either rho_brine or salinity, not both")
+        if self.salinity is not None:
+            self.rho_brine = get_brine_density(self.salinity, self.ground_temperature, pvt_path=self.pvt_path)
+        elif self.rho_brine is None:
+            self.rho_brine = 1030.0
+        if not np.isfinite(self.rho_brine) or self.rho_brine <= 0:
+            raise ValueError("rho_brine must be a positive finite density in kg/m3")
         # Compute temperature array based on depth and geothermal gradient
         self.temperature = self.compute_temperature()
         self.hydrostatic_pressure = self.compute_hydrostatic_pressure()
