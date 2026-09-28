@@ -2,14 +2,16 @@ from pathlib import Path
 import subprocess
 import sys
 
+import numpy as np
 from openpyxl import load_workbook
 import pandas as pd
 import pytest
 
 from src.WellClass.libs.utils.xlsx_parser import xlsx_grid_policy, xlsx_to_simulation_design, xlsx_to_well_model
+from src.WellClass.libs.well_pressure.pressure_table import PressureTable
 
 
-def _write_minimal_workbook(path: Path) -> None:
+def _write_minimal_workbook(path: Path, *, salinity: float = 0.032) -> None:
     metadata = pd.DataFrame({"key": ["namespace", "name", "author"], "value": ["screen", "xlsx-test", "pytest"]})
     header = pd.DataFrame(
         {
@@ -48,6 +50,8 @@ def _write_minimal_workbook(path: Path) -> None:
             {
                 "temperature_gradient": [31.0],
                 "ground_temperature": [4.0],
+                "salinity": [salinity],
+                "salinity_basis": ["mass_fraction"],
                 "z_fluid_contact": [2400.0],
                 "p_fluid_contact": [210.0],
                 "overburden_datum_depth": [500.0],
@@ -139,7 +143,7 @@ def test_workbook_keeps_simulation_assumptions_outside_well_model(tmp_path):
 
 def test_prepare_init_case_from_xlsx_configures_final_run(tmp_path):
     workbook = tmp_path / "well_input.xlsx"
-    _write_minimal_workbook(workbook)
+    _write_minimal_workbook(workbook, salinity=0.04)
     output_root = tmp_path / "staged_case"
     repo_root = Path(__file__).parents[2]
 
@@ -158,7 +162,16 @@ def test_prepare_init_case_from_xlsx_configures_final_run(tmp_path):
     grdecl = (output_root / "include" / "TEMP_GRD.grdecl").read_text(encoding="utf-8")
     assert "FINAL_DATE  1 JAN 2125" in deck
     assert "DATUM_D  500 m" in deck
-    assert "PRESSURE  51.5175 Bar" in deck
+    pressure_table = PressureTable(
+        name="expected",
+        depth=np.arange(0.0, 510.0, 10.0),
+        ground_elevation=105.0,
+        ground_temperature=4.0,
+        geothermal_gradient=31.0,
+        salinity=0.04,
+    )
+    expected_pressure = pressure_table.get_values_at_depth(500.0)["hydrostatic_pressure"]
+    assert f"PRESSURE  {expected_pressure:g} Bar" in deck
     assert "DATUM_D  2400 m" in deck
     assert "PRESSURE  210 Bar" in deck
     assert "WGC_D  2400 m" in deck
@@ -166,7 +179,9 @@ def test_prepare_init_case_from_xlsx_configures_final_run(tmp_path):
     assert "     105    4" in deck
     assert "     2400    75.145" in deck
     assert deck.count("     2400    75.145") == 2
-    assert deck.count("SALTVD\n     4 0.032\n     2400 0.032") == 2
+    assert deck.count("CONCENTRATION_UNITS MASS") == 2
+    assert deck.count("CONCENTRATION_UNITS MASS") == 2
+    assert deck.count("SALTVD\n     4 0.04\n     2400 0.04") == 2
     assert "WELL_DATA INJ_01" not in deck
     assert "external_file ../include/TEMP_LGR.grdecl /" in grdecl
 

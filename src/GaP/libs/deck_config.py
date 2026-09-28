@@ -19,6 +19,7 @@ class CirrusDeckParameters:
     overburden_pressure_bar: float
     fluid_contact_depth: float
     fluid_contact_pressure_bar: float
+    salinity_mass_fraction: float = 0.032
     ground_temperature_c: float = 4.0
     geothermal_gradient_c_per_km: float = 31.0
     enable_lgr: bool = False
@@ -65,12 +66,14 @@ def format_rtempvd(
     return "\n".join(f"     {depth:g}    {value:g}" for depth, value in points)
 
 
-def format_saltvd(*, top_depth: float, bottom_depth: float, concentration_mole: float = 0.032) -> str:
-    """Create a constant-salinity table spanning the required equilibration depth."""
+def format_saltvd(*, top_depth: float, bottom_depth: float, salinity_mass_fraction: float = 0.032) -> str:
+    """Create a constant mass-fraction salinity table over the equilibration interval."""
 
     if not top_depth < bottom_depth:
         raise ValueError("salt-table depths must satisfy top < bottom")
-    return f"     {top_depth:g} {concentration_mole:g}\n     {bottom_depth:g} {concentration_mole:g}"
+    if not 0 <= salinity_mass_fraction < 1:
+        raise ValueError("salinity_mass_fraction must be in [0, 1)")
+    return f"     {top_depth:g} {salinity_mass_fraction:g}\n     {bottom_depth:g} {salinity_mass_fraction:g}"
 
 
 def _replace_co2_equilibration(text: str, parameters: CirrusDeckParameters) -> str:
@@ -116,15 +119,27 @@ def _replace_overburden_equilibration(text: str, parameters: CirrusDeckParameter
     return text[: match.start(2)] + block + text[match.end(2) :]
 
 
-def _replace_salt_tables(text: str, *, top_depth: float, bottom_depth: float) -> str:
-    salt_table = format_saltvd(top_depth=top_depth, bottom_depth=bottom_depth)
-    updated, count = re.subn(
-        r"(?ms)(^\s*SALTVD\s*\n).*?^(\s*/\s*$)",
-        lambda match: f"{match.group(1)}{salt_table}\n{match.group(2)}",
-        text,
-    )
-    if count == 0:
-        raise ValueError("deck is missing SALTVD")
+def _replace_salt_tables(text: str, *, top_depth: float, bottom_depth: float, salinity_mass_fraction: float) -> str:
+    salt_table = format_saltvd(top_depth=top_depth, bottom_depth=bottom_depth, salinity_mass_fraction=salinity_mass_fraction)
+
+    def replace_table(match: re.Match) -> str:
+        block = match.group(2)
+        block, unit_count = re.subn(r"(?m)^(\s*CONCENTRATION_UNITS)\s+\S+\s*$", r"\1 MASS", block, count=1)
+        if unit_count != 1:
+            raise ValueError("SALT_TABLE is missing CONCENTRATION_UNITS")
+        block, salt_count = re.subn(
+            r"(?ms)(^\s*SALTVD\s*\n).*?^(\s*/\s*$)",
+            lambda salt_match: f"{salt_match.group(1)}{salt_table}\n{salt_match.group(2)}",
+            block,
+            count=1,
+        )
+        if salt_count != 1:
+            raise ValueError("SALT_TABLE is missing SALTVD")
+        return f"{match.group(1)}{block}{match.group(3)}"
+
+    updated, count = re.subn(r"(?ms)(^\s*SALT_TABLE\s*\n)(.*?)(^\s*END\s*$)", replace_table, text)
+    if count != 2:
+        raise ValueError(f"deck must define two SALT_TABLE blocks, found {count}")
     return updated
 
 
@@ -160,6 +175,7 @@ def parameterize_cirrus_deck(deck_path: str | Path, parameters: CirrusDeckParame
         text,
         top_depth=parameters.top_depth,
         bottom_depth=max(parameters.bottom_depth, parameters.fluid_contact_depth),
+        salinity_mass_fraction=parameters.salinity_mass_fraction,
     )
     text = _remove_unused_wells_section(text)
     deck_path.write_text(text, encoding="utf-8")

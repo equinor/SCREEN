@@ -38,8 +38,10 @@ class Pressure:
             variable-density integration (only "co2" is available today).
         ground_temperature (float): ground/seafloor temperature (degC).
         geothermal_gradient (float): geothermal gradient (degC/km).
-        rho_brine (float): constant brine density (kg/m3) used for the hydrostatic
-            pressure curve.
+        rho_brine (float): optional constant brine density (kg/m3) used for the
+            hydrostatic pressure curve. Mutually exclusive with salinity.
+        salinity (float): optional NaCl mass fraction of solution (kg/kg), used
+            with the PVT model to derive reference brine density.
         shmin_gradient (float): linear Shmin gradient (bar/m) used when shmin_data
             is not provided.
         shmin_data (list): optional [[depth, Shmin], ...] control points.
@@ -57,7 +59,8 @@ class Pressure:
     fluid_type: str = "co2"
     ground_temperature: float = None
     geothermal_gradient: float = None
-    rho_brine: float = 1030.0
+    rho_brine: Optional[float] = None
+    salinity: Optional[float] = None
     shmin_gradient: Optional[float] = 0.1695
     shmin_data: Optional[List[List[float]]] = None
     depth_step: float = 10.0
@@ -103,8 +106,8 @@ class Pressure:
         """
         Create, register, and return a new named PressureTable for this well.
 
-        Any of ground_temperature/geothermal_gradient/rho_brine/shmin_gradient/
-        shmin_data can be overridden per table, to run sensitivities on those
+        Any of ground_temperature/geothermal_gradient/rho_brine/salinity/
+        shmin_gradient/shmin_data can be overridden per table, to run sensitivities on those
         assumptions while keeping the same depth range.
         """
         if name in self.tables:
@@ -121,6 +124,8 @@ class Pressure:
             ground_temperature=overrides.pop("ground_temperature", self.ground_temperature),
             geothermal_gradient=overrides.pop("geothermal_gradient", self.geothermal_gradient),
             rho_brine=overrides.pop("rho_brine", self.rho_brine),
+            salinity=overrides.pop("salinity", self.salinity),
+            pvt_path=self.pvt_path,
             shmin_gradient=overrides.pop("shmin_gradient", self.shmin_gradient),
             shmin_data=overrides.pop("shmin_data", self.shmin_data),
         )

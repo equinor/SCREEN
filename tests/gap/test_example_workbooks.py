@@ -29,6 +29,7 @@ def test_example_workbooks_parse_to_canonical_wells(name, well_identifier):
     assert policy["overburden_permx"] == 0.001
     assert all(scenario.depth_unit == "m" for scenario in design.scenarios)
     assert all(scenario.pressure_unit == "bar" for scenario in design.scenarios)
+    assert all(scenario.salinity_basis == "mass_fraction" for scenario in design.scenarios)
     assert survey.columns.tolist() == ["md_rkb", "inclination_deg", "azimuth_deg"]
     assert survey.empty
     if name == "smeaheia":

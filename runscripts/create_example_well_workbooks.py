@@ -125,6 +125,8 @@ def create_workbook(example: dict) -> Path:
         scenarios = pd.DataFrame(example["scenarios"])
         scenarios["depth_unit"] = "m"
         scenarios["pressure_unit"] = "bar"
+        scenarios["salinity_basis"] = "mass_fraction"
+        scenarios["salinity"] = 0.032
         scenarios.to_excel(writer, sheet_name="SubsurfaceAssumptions", index=False)
         notes.to_excel(writer, sheet_name="Notes", index=False)
     return output
