@@ -1,4 +1,4 @@
-# OpenIAM and SCREEN Benchmarking
+# OpenIAM and SCREEN: Exploratory Comparison Notes
 
 ## Purpose
 
@@ -6,24 +6,24 @@ OpenIAM and SCREEN both support reasoning about leakage risk from legacy wells i
 
 The short conclusion is:
 
-> OpenIAM and SCREEN are not directly benchmarkable by running a default example from each code and comparing the numbers. OpenIAM is a component-based integrated assessment model with reduced-order wellbore, reservoir, aquifer, and risk components. SCREEN is a WellClass-to-GaP-to-CIRRUS workflow that builds a gridded simulation representation of a well and its surrounding domain. A fair comparison requires a purpose-built case with matched stratigraphy, leakage targets, pressure assumptions, material properties, and output definitions.
+> OpenIAM and SCREEN are not directly comparable by running a default example from each code and comparing the numbers. OpenIAM is a component-based integrated assessment model with reduced-order wellbore, reservoir, aquifer, and risk components. SCREEN is a WellClass-to-GaP-to-CIRRUS workflow that builds a gridded simulation representation of a well and its surrounding domain. A meaningful comparison requires a purpose-built case with matched stratigraphy, leakage targets, pressure assumptions, material properties, and output definitions.
 
 This page gives a walkthrough for building that comparison without overstating equivalence.
 
 ## External Repository
 
-OpenIAM is not vendored into this SCREEN repository. The benchmark exploration used a local checkout under `work/benchmark/repos/OpenIAM`, which is ignored by SCREEN and should not be committed here.
+OpenIAM is not vendored into this SCREEN repository. The comparison exploration used a local checkout under `work/benchmark/repos/OpenIAM`, which is ignored by SCREEN and should not be committed here.
 
 The upstream project is available at [NRAP / NRAP-Open-IAM on GitLab](https://gitlab.com/NRAP/OpenIAM). Treat that repository, its license, and its documentation as the source of truth for OpenIAM behavior and installation requirements.
 
-To run the local benchmark notebook, clone OpenIAM under SCREEN's ignored `work/` folder:
+To run the local comparison notebook, clone OpenIAM under SCREEN's ignored `work/` folder:
 
 ```bash
 mkdir -p work/benchmark/repos
 git clone https://gitlab.com/NRAP/OpenIAM.git work/benchmark/repos/OpenIAM
 ```
 
-The notebook `notebooks/07_round1_openiam_screen_benchmark.ipynb` expects the checkout at exactly this path:
+The notebook `notebooks/07_openiam_screen_comparison.ipynb` expects the checkout at exactly this path:
 
 ```text
 work/benchmark/repos/OpenIAM
@@ -62,7 +62,7 @@ flowchart LR
 
 ## OpenIAM Wellbore Options
 
-OpenIAM contains several wellbore pathways that are relevant to leakage benchmarking. The best choice depends on the question.
+OpenIAM contains several wellbore pathways that may be relevant to a leakage comparison. The best choice depends on the question.
 
 | OpenIAM option | Typical use | Main representation | SCREEN comparison difficulty |
 | --- | --- | --- | --- |
@@ -94,7 +94,7 @@ XLSX -> well_input.json -> parameterized TEMP-0.in
 
 This gives SCREEN a richer physical well representation, but it also means a comparison requires more setup: the overburden, aquifer intervals, pressure regions, material properties, grid resolution, and leakage receptors must be represented deliberately.
 
-## Why Default Examples Are Not Direct Benchmarks
+## Why Default Examples Are Not Directly Comparable
 
 ### Different Model Purposes
 
@@ -176,7 +176,7 @@ SCREEN/CIRRUS produces simulator outputs. To compare with OpenIAM, those outputs
 
 ## A Practical Walkthrough
 
-### Step 1: Choose the Benchmark Question
+### Step 1: Choose the Comparison Question
 
 Start by deciding what is being compared. Reasonable questions include:
 
@@ -189,7 +189,7 @@ Avoid beginning with the question "which code is faster or more accurate?" until
 
 ### Step 2: Pick the OpenIAM Component Family
 
-For an initial legacy-well benchmark, `MultisegmentedWellbore` is often the most useful OpenIAM starting point because it can represent leakage into multiple aquifers through an effective well path. `OpenWellbore` is better for a conservative open-conduit case. `CementedWellbore` is useful when the ROM assumptions fit the intended cemented-well scenario. SALSA is useful for aquifer/shale leakage status studies.
+For an initial legacy-well comparison, `MultisegmentedWellbore` is often the most useful OpenIAM starting point because it can represent leakage into multiple aquifers through an effective well path. `OpenWellbore` is better for a conservative open-conduit case. `CementedWellbore` is useful when the ROM assumptions fit the intended cemented-well scenario. SALSA is useful for aquifer/shale leakage status studies.
 
 ### Step 3: Convert the Physical Story, Not Just the File
 
@@ -219,14 +219,14 @@ flowchart TD
     B[Extract layer stack and wellbore parameters]
     C[Conceptual WellClass JSON]
     D[WellClass sketch]
-    E[Benchmark notes]
+    E[Comparison notes]
     A --> B
     B --> C
     C --> D
     D --> E
 ```
 
-The notebook `notebooks/07_round1_openiam_screen_benchmark.ipynb` performs this first visualization step for a simple no-plug effective-leakage case. The generated files are written under:
+The notebook `notebooks/07_openiam_screen_comparison.ipynb` performs this first visualization step for a simple no-plug effective-leakage case. The generated files are written under:
 
 ```text
 work/benchmark/cases/round1_openiam_screen/
@@ -236,7 +236,7 @@ The sketch should be labelled as conceptual. If casing and annulus dimensions ar
 
 ### Step 5: Build a Dedicated SCREEN Case
 
-For a quantitative comparison, do not use an unrelated SCREEN example. Build a dedicated SCREEN case that matches the neutral benchmark story.
+For a quantitative comparison, do not use an unrelated SCREEN example. Build a dedicated SCREEN case that matches the neutral comparison scenario.
 
 Required SCREEN-side work may include:
 
@@ -262,7 +262,7 @@ A defensible first comparison table should include:
 | Cumulative CO2 leaked mass | accumulated leakage CSV | integrated flux/mass balance into matching interval |
 | Case geometry | control-file stratigraphy | WellClass JSON, grid recipe, and generated grid |
 
-Runtime and solver cost can be reported, but they should not be the primary benchmark until the physics and outputs are aligned.
+Runtime and solver cost can be reported, but they should not be the primary comparison until the physics and outputs are aligned.
 
 ## Example: OpenIAM ex2c as a Round 1 Anchor
 
@@ -289,7 +289,7 @@ Outputs: [CO2_aquifer1, brine_aquifer1,
 
 This is enough for a conceptual WellClass sketch and for defining comparison quantities. It is not enough for a direct numerical comparison against SCREEN unless a matching SCREEN model is built.
 
-## Recommended Benchmark Stages
+## Recommended Comparison Stages
 
 ```mermaid
 flowchart TD
@@ -323,4 +323,4 @@ Introduce explicit SCREEN cement plugs, OpenIAM effective segment reductions, SA
 
 Use this wording when describing the current state:
 
-> OpenIAM and SCREEN address overlapping legacy-well leakage questions, but they are not directly benchmarkable from their default examples. OpenIAM is a component-based integrated assessment framework using reduced-order or analytical components for reservoir, wellbore, aquifer, and area-of-review behavior. SCREEN is a well-description and gridded simulation workflow that builds explicit WellClass/GaP/CIRRUS artifacts. A fair comparison requires a dedicated common case with matched stratigraphy, pressure assumptions, leakage receptors, material properties, and post-processed output quantities.
+> OpenIAM and SCREEN address overlapping legacy-well leakage questions, but their default examples are not directly comparable. OpenIAM is a component-based integrated assessment framework using reduced-order or analytical components for reservoir, wellbore, aquifer, and area-of-review behavior. SCREEN is a well-description and gridded simulation workflow that builds explicit WellClass/GaP/CIRRUS artifacts. A meaningful comparison requires a dedicated common case with matched stratigraphy, pressure assumptions, leakage receptors, material properties, and post-processed output quantities.

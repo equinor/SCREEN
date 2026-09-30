@@ -106,68 +106,39 @@ without requiring CIRRUS or PFLOTRAN.
 Done when the GaP mesh transformation can be verified in a clean Python-only
 environment with deterministic artifacts.
 
-### 4. Make salinity a shared pressure and CIRRUS input
+### 4. Share scalar salinity between pressure and CIRRUS
 
-Define one salinity contract across the WellClass pressure calculations and the
-CIRRUS input deck. The implementation should:
+**Status: complete for scalar salinity.** The canonical input is a NaCl mass
+fraction of total solution mass, default `0.032`. `PressureTable` accepts either
+that salinity or an explicit `rho_brine`; supplying both is rejected. The PVT
+model derives reference brine density from the selected salinity, and generated
+CIRRUS salt tables use `CONCENTRATION_UNITS MASS` with the same value over the
+generated depth interval. The old template's `MOLE` label is not a conversion
+contract; the canonical value is interpreted directly as mass fraction.
 
-- Allow a `PressureTable` to receive either `rho_brine` or salinity. If salinity
-    is supplied, derive the brine density through the PVT model; if both are
-    supplied, define and validate the precedence rather than silently mixing the
-    two. The salinity unit and basis must be explicit, including the conversion
-    between the pressure/PVT representation and CIRRUS concentration units.
-- Propagate the selected salinity into the generated CIRRUS equilibration deck.
-    The generated `SALT_TABLE` should use `CONCENTRATION_UNITS MASS` and replace
-    the fixed `0.032` values in `SALTVD` with the mass concentration used by the
-    pressure calculation, while retaining the generated depth interval.
-- Support both a single salinity value, stretched over the required depth
-    interval, and a depth-dependent salinity curve. The latter should accept
-    salinity control points and interpolate or otherwise validate them according
-    to the same depth-coordinate contract used by the pressure table.
-
-Done when pressure tests prove density-only, salinity-only, and depth-varying
-inputs; deck-generation tests prove the concentration units and values are
-updated; and a scenario using one salinity definition produces consistent
-pressure and CIRRUS salt-table inputs.
+Regression tests cover density-only and salinity-driven pressure, invalid
+inputs, and an end-to-end non-default scalar shared by pressure and deck output.
+Depth-varying salinity profiles are not currently supported and are deferred
+until a concrete modeling use case requires them.
 
 ### 5. Generalize the workbook into a design matrix
 
-Rename the user-facing `SubsurfaceAssumptions` sheet to `DesignMatrix` while
-keeping a documented compatibility path for existing workbooks. Each row
-should define one named simulation case and may override parameters that are
-shared by the physical well description. The design matrix should support, at
-minimum:
+**Status: initial case-wide sensitivity support is implemented.** New workbooks
+use `DesignMatrix`; legacy `SubsurfaceAssumptions` sheets remain readable. Each
+row defines a named case sharing the same physical well. Rows can override
+`reservoir_permx` and `overburden_permx` in mD, plus case-wide `cb_perm` and
+`barrier_perm` values for all casing-cement or plug intervals. Empty overrides
+fall back to the grid policy, the individual well record where present, then
+CLI defaults as documented. Effective permeability values are saved with case
+metadata. Open-hole permeability remains a fixed high-permeability default and
+is deliberately not a scenario sensitivity.
 
-- `reservoir_permx` and `overburden_permx` from `GridPolicy`;
-- casing-cement permeability;
-- plug-cement permeability; and
-- the existing pressure, salinity, temperature, fluid-contact, and other
-    scenario assumptions.
-
-The current `cb_perm` and `barrier_perm` fields are case-wide overrides applied
-to all casing-cement and plug intervals. A follow-up should allow overrides to
-target one named row in `HoleCasings` or `Plugs`, with an explicit `ALL` target
-for the current broad behavior. Prefer stable source-row identifiers over
-matching display names alone. Also replace abbreviated user-facing fields
-(`cb_perm`, `barrier_perm`, `reservoir_permx`, `overburden_permx`) with clear
-names that identify the material/property and unit, retaining aliases for older
-workbooks during migration. Open-hole permeability is a shared high-permeability
-default, not a DesignMatrix sensitivity variable.
-
-The shared well sheets should remain the source of physical geometry, while
-scenario overrides should be applied through one typed, validated merge step
-with explicit units, defaults, and precedence. A selected case must produce a
-self-contained resolved scenario record so batch runs are reproducible and
-cannot accidentally inherit values from another case.
-
-Done when one workbook can build multiple isolated cases from the same well,
-each with independently varied grid and cement permeability values; the
-resolved `scenario.json` records every effective parameter; legacy
-`SubsurfaceAssumptions` workbooks remain readable; and tests verify that
-changing material permeability affects the relevant outputs without changing
-the shared well geometry or unrelated grid structure. Targeted cement overrides
-should affect only the selected intervals, while `ALL` preserves case-wide
-override behavior.
+**Follow-up work:** allow cement overrides to target a stable source-row ID in
+`HoleCasings` or `Plugs`, with `ALL` retaining the current case-wide behavior.
+Replace abbreviated user-facing fields with names that clearly identify
+material/property and unit, retaining compatibility aliases for older
+workbooks. Tests should verify a targeted override changes only its intended
+material interval while shared geometry and unrelated intervals remain fixed.
 
 ### 6. Give generated cases unique, navigable names
 
