@@ -18,6 +18,7 @@ import shlex
 import subprocess
 from pathlib import Path
 
+from src.GaP.libs.case_naming import CaseFiles
 from src.WellClass.libs.grid_utils import (
     CoarseGridSpec,
     build_vertical_grid_schedule,
@@ -61,7 +62,12 @@ def parse_args() -> argparse.Namespace:
         "--sim-command",
         type=str,
         default="",
-        help="Optional external initialization command template. Use {deck} placeholder for TEMP-0.in.",
+        help="Optional external initialization command template. Use {deck} placeholder for the staged deck.",
+    )
+    parser.add_argument(
+        "--case-stem",
+        default=None,
+        help="Generated deck/grid file stem; defaults to the template names (TEMP-0, TEMP_GRD).",
     )
     return parser.parse_args()
 
@@ -207,20 +213,32 @@ def parameterize_grdecl(
     grdecl_path.write_text(updated, encoding="utf-8")
 
 
+def set_grid_reference(deck_path: Path, grid_file_name: str) -> None:
+    content = deck_path.read_text(encoding="utf-8")
+    updated, count = re.subn(r"(?m)^(\s*TYPE\s+grdecl\s+\.\./include/)\S+", rf"\g<1>{grid_file_name}", content, count=1)
+    if count != 1:
+        raise ValueError(f"deck is missing a grdecl GRID reference: {deck_path}")
+    deck_path.write_text(updated, encoding="utf-8")
+
+
 def stage_case(args: argparse.Namespace) -> tuple[Path, Path, Path]:
     template_root = args.template_root
     output_root = args.output_root
+    template_files = CaseFiles.template()
+    case_stem = getattr(args, "case_stem", None)
+    case_files = CaseFiles.for_stem(case_stem) if case_stem else template_files
 
-    source_deck = template_root / "model" / "TEMP-0.in"
-    source_grdecl = template_root / "include" / "TEMP_GRD.grdecl"
+    source_deck = template_root / template_files.deck
+    source_grdecl = template_root / template_files.grid
     source_co2_database = template_root / "include" / "co2_db_new.dat"
 
-    output_deck = output_root / "model" / "TEMP-0.in"
-    output_grdecl = output_root / "include" / "TEMP_GRD.grdecl"
+    output_deck = output_root / case_files.deck
+    output_grdecl = output_root / case_files.grid
     output_co2_database = output_root / "include" / "co2_db_new.dat"
     output_tops = output_root / "include" / "tops_dz.inc"
 
     copy_required_file(source_deck, output_deck, force=args.force)
+    set_grid_reference(output_deck, output_grdecl.name)
     copy_initialization_grid(source_grdecl, output_grdecl, force=args.force)
     copy_required_file(source_co2_database, output_co2_database, force=args.force)
 

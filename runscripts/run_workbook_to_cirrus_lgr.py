@@ -9,8 +9,9 @@ from pathlib import Path
 
 from build_lgr_from_json import build_lgr
 from prepare_init_case import stage_case
-from prepare_init_case_from_xlsx import derive_stage_args_from_policy, parameterize_staged_deck
+from prepare_init_case_from_xlsx import derive_stage_args_from_policy, parameterize_staged_deck, resolve_case_identity
 
+from src.GaP.libs.case_naming import CaseFiles, well_label
 from src.GaP.libs.cirrus_backend import CirrusBackend
 from src.WellClass.libs.utils import xlsx_grid_policy, xlsx_to_simulation_design, xlsx_to_well_model
 from src.WellClass.libs.well_class.well_processed import WellProcessed
@@ -26,7 +27,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--run-final", action="store_true", help="Run CIRRUS again after the LGR is generated.")
     parser.add_argument("--simulation-years", type=int, default=100, help="Final duration in years.")
     parser.add_argument("--start-date", default="2025-01-01", help="Simulation start date in ISO format.")
-    parser.add_argument("--lgr-name", default="TEMP_LGR", help="Generated LGR file stem.")
+    parser.add_argument("--lgr-name", default="TEMP_LGR", help="CARFIN LGR name inside the generated LGR file.")
     parser.add_argument("--oh-perm", type=float, default=10000.0, help="Open-hole permeability default in mD.")
     parser.add_argument("--cb-perm", type=float, default=0.05, help="Cement-bond permeability default in mD.")
     parser.add_argument("--barrier-perm", type=float, default=0.05, help="Barrier permeability default in mD.")
@@ -44,7 +45,7 @@ def parse_args() -> argparse.Namespace:
 
 def find_simulator_case(output_root: Path, deck_path: Path) -> Path:
     prefix = deck_path.with_suffix("")
-    candidates = (prefix, output_root / "model" / "TEMP-0", output_root / "TEMP-0")
+    candidates = (prefix, output_root / CaseFiles.template().prefix)
     for candidate in candidates:
         if candidate.with_suffix(".EGRID").exists() and candidate.with_suffix(".INIT").exists():
             return candidate
@@ -122,6 +123,8 @@ def run_workflow(args: argparse.Namespace) -> Path:
         scenario = design.select(args.case_name)
     except ValueError as exc:
         raise ValueError(f"Invalid case-name '{args.case_name}': {exc}") from None
+    resolve_case_identity(args, model, design, scenario)
+    case_files = CaseFiles.for_stem(args.case_stem)
     policy = dict(policy)
     for field in ("reservoir_permx", "overburden_permx"):
         override = getattr(scenario, field)
@@ -146,6 +149,17 @@ def run_workflow(args: argparse.Namespace) -> Path:
         "cb_perm": scenario.cb_perm if scenario.cb_perm is not None else args.cb_perm,
         "barrier_perm": scenario.barrier_perm if scenario.barrier_perm is not None else args.barrier_perm,
     }
+    template_files = CaseFiles.template()
+    scenario_record["case_metadata"] = {
+        "case_stem": args.case_stem,
+        "case_index": args.case_index,
+        "case_name": scenario.case_name,
+        "well_label": well_label(model),
+        "workbook": str(args.xlsx),
+        "template_root": str(args.template_root),
+        "template_files": {"deck": str(template_files.deck), "grid": str(template_files.grid)},
+        "case_files": {"deck": str(case_files.deck), "grid": str(case_files.grid), "lgr": str(case_files.lgr)},
+    }
     scenario_json.write_text(json.dumps(scenario_record, indent=2) + "\n", encoding="utf-8")
     grid_policy_json.write_text(
         json.dumps(policy, indent=2, default=lambda value: value.item() if hasattr(value, "item") else str(value)) + "\n",
@@ -165,6 +179,7 @@ def run_workflow(args: argparse.Namespace) -> Path:
         sim_case=sim_case,
         output_folder=args.output_root / "include",
         lgr_name=args.lgr_name,
+        lgr_file_stem=case_files.lgr.stem,
         oh_perm=args.oh_perm,
         cb_perm=args.cb_perm,
         barrier_perm=args.barrier_perm,

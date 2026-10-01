@@ -2,30 +2,34 @@
 """Run multiple simulation scenarios from a workbook and collect results.
 
 Executes the workbook -> CIRRUS initialization -> GaP LGR workflow for each
-DesignMatrix case, organizing outputs by case_name.
+DesignMatrix case. Each case gets a deterministic stem derived from the
+workbook well name and case name (see src/GaP/libs/case_naming.py), used for
+its directory and generated files.
 
 Output structure:
   <output-root>/
-    <case_name_1>/
-      model/
-      include/
+    batch_manifest.json
+    <well>_<case_name_1>/
+      model/<well>_<case_name_1>.in
+      include/<well>_<case_name_1>_GRD.grdecl, <well>_<case_name_1>_LGR.grdecl
+      logs/
+      scenario.json
       well_input.json
-    <case_name_2>/
-      model/
-      include/
-      well_input.json
+    <well>_<case_name_2>/
     ...
 """
 
 from __future__ import annotations
 
 import argparse
+import json
 import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-from src.WellClass.libs.utils import xlsx_to_simulation_design
+from src.GaP.libs.case_naming import resolve_case_stems, well_label
+from src.WellClass.libs.utils import xlsx_to_simulation_design, xlsx_to_well_model
 
 
 def parse_args() -> argparse.Namespace:
@@ -37,7 +41,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--run-final", action="store_true", help="Run CIRRUS again after the LGR is generated.")
     parser.add_argument("--simulation-years", type=int, default=100, help="Final duration in years.")
     parser.add_argument("--start-date", default="2025-01-01", help="Simulation start date in ISO format.")
-    parser.add_argument("--lgr-name", default="TEMP_LGR", help="Generated LGR file stem.")
+    parser.add_argument("--lgr-name", default="TEMP_LGR", help="CARFIN LGR name inside each generated LGR file.")
     parser.add_argument("--oh-perm", type=float, default=10000.0)
     parser.add_argument("--cb-perm", type=float, default=0.05)
     parser.add_argument("--barrier-perm", type=float, default=0.05)
@@ -108,17 +112,45 @@ def run_scenario_case(
     return result.returncode
 
 
+def case_stems(design, xlsx_file: Path) -> dict[str, str]:
+    """Map each case name to its directory and file stem."""
+    names = [scenario.case_name for scenario in design.scenarios]
+    return dict(zip(names, resolve_case_stems(well_label(xlsx_to_well_model(xlsx_file)), names)))
+
+
+def write_batch_manifest(design, args: argparse.Namespace, failed_cases: list[str]) -> Path:
+    stems = case_stems(design, args.xlsx)
+    manifest = {
+        "workbook": str(args.xlsx),
+        "template_root": str(args.template_root),
+        "cases": [
+            {
+                "case_index": index,
+                "case_name": scenario.case_name,
+                "case_stem": stems[scenario.case_name],
+                "case_dir": stems[scenario.case_name],
+                "status": "failed" if scenario.case_name in failed_cases else "succeeded",
+            }
+            for index, scenario in enumerate(design.scenarios, 1)
+        ],
+    }
+    path = args.output_root / "batch_manifest.json"
+    path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    return path
+
+
 def run_scenarios(design, args: argparse.Namespace) -> tuple[list[str], list[str]]:
     """Run scenario cases concurrently and return successful and failed names."""
 
     successful_cases = []
     failed_cases = []
     futures = {}
+    stems = case_stems(design, args.xlsx)
 
     with ThreadPoolExecutor(max_workers=args.jobs) as executor:
         for scenario in design.scenarios:
             case_name = scenario.case_name
-            case_output_root = args.output_root / case_name
+            case_output_root = args.output_root / stems[case_name]
             future = executor.submit(
                 run_scenario_case,
                 args.xlsx,
@@ -159,7 +191,7 @@ def main() -> int:
 
     try:
         design = xlsx_to_simulation_design(args.xlsx)
-    except FileNotFoundError as exc:
+    except (FileNotFoundError, ValueError) as exc:
         print(f"Error: {exc}")
         return 1
 
@@ -171,23 +203,26 @@ def main() -> int:
     print(f"Found {len(scenario_names)} scenario(s): {', '.join(scenario_names)}")
 
     successful_cases, failed_cases = run_scenarios(design, args)
+    manifest_path = write_batch_manifest(design, args, failed_cases)
+    stems = case_stems(design, args.xlsx)
 
     print(f"\n{'='*70}")
     print("Batch execution summary:")
     print(f"  Total scenarios: {len(scenario_names)}")
     print(f"  Successful: {len(successful_cases)}")
     print(f"  Failed: {len(failed_cases)}")
+    print(f"  Manifest: {manifest_path}")
 
     if successful_cases:
         print("\n  Successful cases:")
         for case_name in successful_cases:
-            case_root = args.output_root / case_name
+            case_root = args.output_root / stems[case_name]
             print(f"    - {case_name}: {case_root}")
 
     if failed_cases:
         print("\n  Failed cases:")
         for case_name in failed_cases:
-            case_root = args.output_root / case_name
+            case_root = args.output_root / stems[case_name]
             print(f"    - {case_name}: {case_root}")
         print(f"{'='*70}")
         return 1
