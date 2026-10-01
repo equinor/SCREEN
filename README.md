@@ -212,7 +212,7 @@ uv run python runscripts/run_workbook_to_cirrus_lgr.py \
 ```
 
 To execute every scenario, use the batch wrapper. It creates one output
-directory per `case_name`:
+directory per case, named by the case stem described below:
 
 ```bash
 uv run python runscripts/run_workbook_scenarios_batch.py \
@@ -235,15 +235,37 @@ The resulting layout is:
 
 ```text
 work/results/
-├── baseline/
+├── batch_manifest.json
+├── wildcat_baseline/
 │   ├── include/
+│   │   ├── wildcat_baseline_GRD.grdecl
+│   │   └── wildcat_baseline_LGR.grdecl
+│   ├── logs/
+│   │   ├── wildcat_baseline_initialization.log
+│   │   └── wildcat_baseline_final.log
 │   ├── model/
+│   │   └── wildcat_baseline.in
 │   ├── qc_plot.png
 │   ├── scenario.json
 │   └── well_input.json
-├── hot_case/
-└── conservative/
+├── wildcat_hot_case/
+└── wildcat_conservative/
 ```
+
+Each case stem is `<well>_<case_name>`: the workbook `Metadata` name (or the
+`unique_wellbore_identifier` when no name is given) joined with the
+`DesignMatrix` `case_name`, with every run of characters other than letters and
+digits replaced by `_`. The stem names the case directory, deck, coarse-grid
+and LGR includes, simulator outputs, and logs. `case_name` values must be
+unique; when two names only differ by punctuation or letter case (for example
+`hot case` and `hot-case`), the 1-based `DesignMatrix` row index is appended to
+each of them (`wildcat_hot_case_02`). The names depend only on the workbook, so
+rerunning it reproduces them. The generated deck starts with a
+`# SCREEN case:` comment naming the stem, scenario, row, and source template.
+`TEMP-*` names are reserved for the canonical template assets.
+
+`batch_manifest.json` maps every `DesignMatrix` row (index and `case_name`) to
+its case directory and run status, and records the workbook and template root.
 
 The simulator command must accept the staged deck path in place of `{deck}`.
 The examples use a generic `cirrus {deck}` command; replace it with the
@@ -262,13 +284,16 @@ uv run python runscripts/validate_scenario_outputs.py \
     --report work/results/validation.json
 ```
 
-The command checks `TEMP_GRD.grdecl`, `TEMP_LGR.grdecl`, `TEMP-0.EGRID`, and
-`TEMP-0.INIT` for every case. It returns a non-zero exit code if a required
+The command checks the coarse-grid and LGR includes and the `.EGRID` and
+`.INIT` files named in each case's `scenario.json` (falling back to the
+`TEMP-*` names for outputs generated before case naming). It returns a non-zero exit code if a required
 file is missing or empty, a log contains an error, or no scenario directories
 are found. The optional JSON report includes file sizes and SHA-256 checksums.
 
 Each case directory also contains `scenario.json`, which records the exact
-scenario assumptions selected from the workbook for that run. The separate
+scenario assumptions selected from the workbook for that run. Its
+`case_metadata` entry records the case stem, `DesignMatrix` row index, workbook,
+template root and template files, and the generated case file names. The separate
 `well_input.json` continues to store the shared physical well model.
 
 The optional `--plot` flag saves `qc_plot.png`, containing the WellClass well

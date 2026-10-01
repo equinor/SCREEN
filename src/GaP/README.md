@@ -12,11 +12,13 @@ Users should start with the canonical GaP and WellClass notebooks, especially `n
 For a repeatable command-line workflow, a multi-sheet workbook can be used as the input deck. Its physical well sheets are converted to canonical WellClass JSON, while `GridPolicy` and `DesignMatrix` are parsed as separate GaP/CIRRUS simulation inputs used to parameterize the deck. Legacy `SubsurfaceAssumptions` sheets remain supported:
 
 ```text
-XLSX -> well_input.json -> parameterized TEMP-0.in
+XLSX -> well_input.json -> parameterized <case_stem>.in
 	 -> CIRRUS initialization -> .EGRID + .INIT
 	 -> WellProcessed -> WellDataFrame -> LGRBuilder
-	 -> TEMP_LGR.grdecl -> final CIRRUS simulation
+	 -> <case_stem>_LGR.grdecl -> final CIRRUS simulation
 ```
+
+Workbook-driven runs name generated files by a case stem, `<well>_<case_name>`, derived from the workbook `Metadata` name and the selected `DesignMatrix` case (for example `wildcat_baseline`). The rules and the batch layout are described in the multi-scenario section of the [installation guide](INSTALLATION.md). `TEMP-*` names are reserved for the canonical template assets.
 
 Create a starter workbook and stage a case:
 
@@ -88,12 +90,12 @@ After `.EGRID` and `.INIT` have been produced, build the LGR/CARFIN include:
 ```bash
 python runscripts/build_lgr_from_json.py \
 	--well-json case/well_input.json \
-	--sim-case case/model/TEMP-0 \
+	--sim-case case/model/wildcat_baseline \
 	--output-folder case/include \
-	--lgr-name TEMP_LGR
+	--lgr-file-stem wildcat_baseline_LGR
 ```
 
-The first command uses `FINAL_DATE = START_DATE` and disables `TEMP_LGR.grdecl` for initialization. The second command writes `TEMP_LGR.grdecl`; the same deck can then be configured for the final simulation by enabling that include and setting the requested final date. CIRRUS must be installed separately and available on `PATH`, or its absolute executable path can be supplied in `--sim-command`.
+The first command uses `FINAL_DATE = START_DATE` and disables the case LGR include for initialization. The second command writes `wildcat_baseline_LGR.grdecl`; `--lgr-name` sets the CARFIN LGR name inside it (default `TEMP_LGR`). The same deck can then be configured for the final simulation by enabling that include and setting the requested final date. CIRRUS must be installed separately and available on `PATH`, or its absolute executable path can be supplied in `--sim-command`.
 
 The wrapper performs the complete handoff in one command:
 
@@ -104,11 +106,11 @@ python runscripts/run_workbook_to_cirrus_lgr.py \
 	--sim-command "runcirrus -i -nm 6 {deck}"
 ```
 
-It stages the workbook, runs CIRRUS initialization, verifies `.EGRID` and `.INIT`, writes `TEMP_LGR.grdecl`, and configures the same deck for its final run. Add `--run-final` only when the final CIRRUS simulation should be launched immediately.
+It stages the workbook, runs CIRRUS initialization, verifies `.EGRID` and `.INIT`, writes `<case_stem>_LGR.grdecl`, and configures the same deck for its final run. Add `--run-final` only when the final CIRRUS simulation should be launched immediately.
 
-The wrapper validates that the configured CIRRUS executable is available before running. It writes captured output for each phase to `case/logs/initialization.log` and, when `--run-final` is used, `case/logs/final.log`. Errors report the log path, exit code, and whether the required `.EGRID`/`.INIT` files were found.
+The wrapper validates that the configured CIRRUS executable is available before running. It writes captured output for each phase to `case/logs/<case_stem>_initialization.log` and, when `--run-final` is used, `case/logs/<case_stem>_final.log`. Errors report the log path, exit code, and whether the required `.EGRID`/`.INIT` files were found.
 
-Notebook 3 also supports an optional generated-grid mode for visual QC after a wrapper run. Set `input_mode = 'generated'` in `notebooks/03_wellclass_to_gap.ipynb` and point `generated_case_root` at a completed case directory containing `well_input.json`, `model/TEMP-0.EGRID`, and `model/TEMP-0.INIT`.
+Notebook 3 also supports an optional generated-grid mode for visual QC after a wrapper run. Set `input_mode = 'generated'` in `notebooks/03_wellclass_to_gap.ipynb` and point `generated_case_root` at a completed case directory; the notebook reads the case's `scenario.json` to locate `well_input.json`, `model/<case_stem>.EGRID`, and `model/<case_stem>.INIT`.
 
 To compare completed scenarios, select a baseline case and compare the static
 grid artifacts with the dynamic pressure and saturation results:
@@ -180,7 +182,7 @@ python runscripts/prepare_init_case.py \
 	--sim-command "runcirrus -i -nm 6 {deck}"
 ```
 
-`{deck}` is replaced with the generated `TEMP-0.in` path.
+`{deck}` is replaced with the staged deck path: `TEMP-0.in` by default, or `<case_stem>.in` when `--case-stem` is given.
 
 The first run should not include `TEMP_LGR.grdecl`; that file belongs to the later GaP CARFIN/LGR stage after `.EGRID` and `.INIT` have been produced. The staged initialization case is therefore self-contained with the coarse-grid GRDECL, `tops_dz.inc`, and `co2_db_new.dat`.
 

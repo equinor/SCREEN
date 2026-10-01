@@ -42,7 +42,7 @@ Completed coarse-grid preparation slices:
 - Ready-to-edit workbook examples are included for Wildcat and Smeaheia, including optional survey sheets:
     - `test_data/examples/wildcat/wildcat_workbook.xlsx`
     - `test_data/examples/smeaheia/smeaheia_workbook.xlsx`
-- The single-reservoir workbook-to-CIRRUS-to-LGR path is complete for the current supported contract. It parameterizes the coarse GRDECL, preserves required CIRRUS assets, creates `.EGRID`/`.INIT`, generates `TEMP_LGR.grdecl`, and prepares the same deck for the final run.
+- The single-reservoir workbook-to-CIRRUS-to-LGR path is complete for the current supported contract. It parameterizes the coarse GRDECL, preserves required CIRRUS assets, creates `.EGRID`/`.INIT`, generates the case LGR include (`<case_stem>_LGR.grdecl`), and prepares the same deck for the final run.
 - Smeaheia validation completed on a CIRRUS-enabled Linux host: the 10-year run used `FINAL_DATE 1 JAN 2035` and produced `.EGRID`, `.INIT`, and `TEMP_LGR.grdecl`. The generated deck used `DATUM_D = WGC_D = 1282.5 m` and `PRESSURE = 129.99 Bar`.
 - Notebook 3 supports an optional generated-grid mode: it can consume a completed workbook-wrapper output directory while fixture mode remains deterministic for CI.
 - The complete workbook wrapper has simulator-free dry-run coverage: a fake CIRRUS executable supplies a valid coarse `.EGRID`/`.INIT` pair, then the test verifies LGR creation, final-deck configuration, and both captured logs.
@@ -141,6 +141,25 @@ workbooks. Tests should verify a targeted override changes only its intended
 material interval while shared geometry and unrelated intervals remain fixed.
 
 ### 6. Give generated cases unique, navigable names
+
+**Status: complete.** Workbook-driven runs derive a case stem
+`<well>_<case_name>` from the workbook `Metadata` name (or wellbore identifier)
+and the `DesignMatrix` case name, sanitized to letters, digits, and `_`.
+Duplicate `case_name` values are rejected; names that only collide after
+sanitizing or by letter case get the 1-based row index appended. The stem names
+the batch case directory, deck, coarse-grid and LGR includes, simulator outputs,
+and logs, and the deck starts with a `# SCREEN case:` comment. `scenario.json`
+records the stem, row index, workbook, and template provenance under
+`case_metadata`, and the batch writes `batch_manifest.json`. Validation,
+comparison, and WellViz export resolve case files from `scenario.json`, with a
+`TEMP-*` fallback for older outputs. A ten-row dry-run batch test checks unique
+names, the manifest mapping, and stable names on rerun.
+
+**Remaining:** the CARFIN LGR name inside generated LGR files still defaults to
+`TEMP_LGR` (`--lgr-name`); renaming it changes the simulator-visible LGR
+identifier and is deferred until checked against CIRRUS LGR-name limits.
+
+The original specification follows.
 
 Keep `TEMP-*` for canonical template assets only. When a design matrix is
 expanded into multiple cases, derive a unique filesystem and simulator case
