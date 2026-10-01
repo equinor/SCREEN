@@ -97,8 +97,8 @@ def test_prepare_init_case_from_xlsx_stages_files(tmp_path):
     ]
     subprocess.run(command, check=True, cwd=repo_root, capture_output=True, text=True)
 
-    deck = output_root / "model" / "TEMP-0.in"
-    grdecl = output_root / "include" / "TEMP_GRD.grdecl"
+    deck = output_root / "model" / "xlsx_test_default.in"
+    grdecl = output_root / "include" / "xlsx_test_default_GRD.grdecl"
     co2_database = output_root / "include" / "co2_db_new.dat"
     tops = output_root / "include" / "tops_dz.inc"
     well_json = output_root / "well_input.json"
@@ -108,14 +108,18 @@ def test_prepare_init_case_from_xlsx_stages_files(tmp_path):
     assert co2_database.exists()
     assert tops.exists()
     assert well_json.exists()
+    assert not list(output_root.rglob("TEMP*"))
 
     recipe = tops.read_text(encoding="utf-8")
     assert "TOPS 4" in recipe
     assert "1200*33.6667" in recipe
     assert "6000*59.6667" in recipe
     assert "16000*10" in recipe
-    assert "DATABASE ../include/co2_db_new.dat" in deck.read_text(encoding="utf-8")
-    assert "TEMP_LGR.grdecl" not in grdecl.read_text(encoding="utf-8")
+    deck_text = deck.read_text(encoding="utf-8")
+    assert "DATABASE ../include/co2_db_new.dat" in deck_text
+    assert "TYPE grdecl ../include/xlsx_test_default_GRD.grdecl" in deck_text
+    assert deck_text.startswith("# SCREEN case: xlsx_test_default | scenario 'default' (DesignMatrix row 1) | template ")
+    assert "_LGR.grdecl" not in grdecl.read_text(encoding="utf-8")
     grdecl_text = grdecl.read_text(encoding="utf-8")
     assert "EQLNUM 1 1 20 1 20 1 18 /" in grdecl_text
     assert "EQLNUM 2 1 20 1 20 19 58 /" in grdecl_text
@@ -158,8 +162,8 @@ def test_prepare_init_case_from_xlsx_configures_final_run(tmp_path):
     ]
     subprocess.run(command, check=True, cwd=repo_root, capture_output=True, text=True)
 
-    deck = (output_root / "model" / "TEMP-0.in").read_text(encoding="utf-8")
-    grdecl = (output_root / "include" / "TEMP_GRD.grdecl").read_text(encoding="utf-8")
+    deck = (output_root / "model" / "xlsx_test_default.in").read_text(encoding="utf-8")
+    grdecl = (output_root / "include" / "xlsx_test_default_GRD.grdecl").read_text(encoding="utf-8")
     assert "FINAL_DATE  1 JAN 2125" in deck
     assert "DATUM_D  500 m" in deck
     pressure_table = PressureTable(
@@ -183,7 +187,9 @@ def test_prepare_init_case_from_xlsx_configures_final_run(tmp_path):
     assert deck.count("CONCENTRATION_UNITS MASS") == 2
     assert deck.count("SALTVD\n     4 0.04\n     2400 0.04") == 2
     assert "WELL_DATA INJ_01" not in deck
-    assert "external_file ../include/TEMP_LGR.grdecl /" in grdecl
+    assert deck.count("# SCREEN case:") == 1
+    assert "external_file ../include/xlsx_test_default_LGR.grdecl /" in grdecl
+    assert "TEMP_LGR" not in grdecl
 
 
 def test_xlsx_grid_policy_requires_keys(tmp_path):
@@ -268,7 +274,7 @@ def test_case_name_defaults_to_default_when_omitted(tmp_path):
     subprocess.run(command, check=True, cwd=repo_root, capture_output=True, text=True)
 
     # Should succeed without specifying --case-name
-    assert (output_root / "model" / "TEMP-0.in").exists()
+    assert (output_root / "model" / "xlsx_test_default.in").exists()
 
 
 def test_case_name_selection_with_multi_scenario(tmp_path):

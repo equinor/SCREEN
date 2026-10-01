@@ -15,6 +15,7 @@ SPEC.loader.exec_module(compare)
 class FakeCase:
     def __init__(self, prefix):
         self.name = prefix.parent.parent.name
+        assert prefix.name == f"well_{self.name}"
         self.value = 0.0 if self.name == "alpha" else 1.0
         self.restart_keywords = ["PRESSURE", "SWAT", "SGAS"]
         self.restart_timesteps = [{"days": 0.0}]
@@ -39,19 +40,19 @@ class FakeCase:
 
 def _write_case(root: Path, name: str) -> None:
     case_root = root / name
-    lgr_path = case_root / compare.LGR_FILE
+    stem = f"well_{name}"
+    lgr_path = case_root / "include" / f"{stem}_LGR.grdecl"
     lgr_path.parent.mkdir(parents=True, exist_ok=True)
     lgr_path.write_text("CARFIN\nTEMP_LGR 10 10 10 10 1 63 22 22 270 /\nPERMX 100 5 18 5 18 71 82 /\n", encoding="utf-8")
-    (case_root / "scenario.json").write_text(
-        '{"case_name": "' + name + '", "p_fluid_contact": 100}\n', encoding="utf-8"
-    )
+    scenario = {"case_name": name, "p_fluid_contact": 100, "case_metadata": {"case_stem": stem, "case_index": len(name)}}
+    (case_root / "scenario.json").write_text(json.dumps(scenario) + "\n", encoding="utf-8")
     grid_policy = {"nx": 21 if name == "geometry_variant" else 20, "reservoir_permx": 200 if name == "zulu" else 100}
     (case_root / "grid_policy.json").write_text(
         json.dumps(grid_policy) + "\n", encoding="utf-8"
     )
     model_root = case_root / "model"
     model_root.mkdir(parents=True, exist_ok=True)
-    (model_root / "TEMP-0.UNRST").write_text("restart", encoding="utf-8")
+    (model_root / f"{stem}.UNRST").write_text("restart", encoding="utf-8")
 
 
 def test_compare_outputs_uses_named_baseline(monkeypatch, tmp_path):

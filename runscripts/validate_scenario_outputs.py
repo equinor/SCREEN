@@ -9,12 +9,8 @@ import json
 import re
 from pathlib import Path
 
-REQUIRED_FILES = (
-    Path("include/TEMP_GRD.grdecl"),
-    Path("include/TEMP_LGR.grdecl"),
-    Path("model/TEMP-0.EGRID"),
-    Path("model/TEMP-0.INIT"),
-)
+from src.GaP.libs.case_naming import case_files
+
 ERROR_PATTERN = re.compile(r"\b(error|fatal|failed)\b", re.IGNORECASE)
 
 
@@ -33,10 +29,15 @@ def file_info(path: Path) -> dict[str, int | str]:
     return {"size": path.stat().st_size, "sha256": digest.hexdigest()}
 
 
+def required_files(case_root: Path) -> tuple[Path, ...]:
+    files = case_files(case_root)
+    return files.grid, files.lgr, files.prefix.with_suffix(".EGRID"), files.prefix.with_suffix(".INIT")
+
+
 def validate_case(case_root: Path) -> dict[str, object]:
     missing = []
     files: dict[str, dict[str, int | str]] = {}
-    for relative_path in REQUIRED_FILES:
+    for relative_path in required_files(case_root):
         path = case_root / relative_path
         if not path.is_file() or path.stat().st_size == 0:
             missing.append(str(relative_path))

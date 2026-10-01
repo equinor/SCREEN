@@ -50,7 +50,7 @@ class CirrusBackend:
             raise FileNotFoundError(f"CIRRUS executable is not available: {self.executable}")
 
         command = self.command_template.format(deck=shlex.quote(str(deck_path)))
-        log_path = deck_path.parent.parent / "logs" / f"{phase}.log"
+        log_path = deck_path.parent.parent / "logs" / f"{deck_path.stem}_{phase}.log"
         log_path.parent.mkdir(parents=True, exist_ok=True)
         result = subprocess.run(command, shell=True, cwd=deck_path.parent, capture_output=True, text=True, check=False)
         log_path.write_text(result.stdout + result.stderr, encoding="utf-8")

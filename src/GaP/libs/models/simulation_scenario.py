@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Literal, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class SimulationScenario(BaseModel):
@@ -39,6 +39,14 @@ class SimulationDesign(BaseModel):
     """Named simulation scenarios that share one immutable well description."""
 
     scenarios: list[SimulationScenario] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def case_names_are_unique(self) -> SimulationDesign:
+        names = [scenario.case_name for scenario in self.scenarios]
+        duplicates = sorted({name for name in names if names.count(name) > 1})
+        if duplicates:
+            raise ValueError(f"case_name values must be unique; duplicated: {', '.join(duplicates)}")
+        return self
 
     def select(self, case_name: str = "default") -> SimulationScenario:
         for scenario in self.scenarios:

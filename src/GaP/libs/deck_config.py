@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
+CASE_LABEL_PREFIX = "# SCREEN case:"
+
 
 @dataclass(frozen=True)
 class CirrusDeckParameters:
@@ -150,8 +152,9 @@ def _remove_unused_wells_section(text: str) -> str:
 
 def _set_lgr_include(grdecl_path: Path, enabled: bool) -> None:
     text = grdecl_path.read_text(encoding="utf-8")
-    lgr_line = "external_file ../include/TEMP_LGR.grdecl /"
-    lines = [line for line in text.splitlines() if line.strip() != lgr_line]
+    lgr_file_name = re.sub(r"_GRD\.grdecl$", "_LGR.grdecl", grdecl_path.name)
+    lgr_line = f"external_file ../include/{lgr_file_name} /"
+    lines = [line for line in text.splitlines() if not re.fullmatch(r"external_file \.\./include/\S+_LGR\.grdecl /", line.strip())]
     if enabled:
         try:
             index = next(index for index, line in enumerate(lines) if "external_file ../include/tops_dz.inc" in line)
@@ -161,11 +164,24 @@ def _set_lgr_include(grdecl_path: Path, enabled: bool) -> None:
     grdecl_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def parameterize_cirrus_deck(deck_path: str | Path, parameters: CirrusDeckParameters, *, grdecl_path: str | Path | None = None) -> Path:
+def _set_case_label(text: str, case_label: str) -> str:
+    lines = [line for line in text.splitlines() if not line.startswith(CASE_LABEL_PREFIX)]
+    return "\n".join([f"{CASE_LABEL_PREFIX} {case_label}", *lines]) + "\n"
+
+
+def parameterize_cirrus_deck(
+    deck_path: str | Path,
+    parameters: CirrusDeckParameters,
+    *,
+    grdecl_path: str | Path | None = None,
+    case_label: str | None = None,
+) -> Path:
     """Apply workbook/WellClass values to a CIRRUS deck in place."""
 
     deck_path = Path(deck_path)
     text = deck_path.read_text(encoding="utf-8")
+    if case_label is not None:
+        text = _set_case_label(text, case_label)
     text = _replace_line(text, "START_DATE", _date_text(parameters.start_date))
     text = _replace_line(text, "FINAL_DATE", _date_text(parameters.final_date))
     text = _replace_overburden_equilibration(text, parameters)
