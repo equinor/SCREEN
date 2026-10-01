@@ -9,9 +9,10 @@ from pathlib import Path
 
 import numpy as np
 
+from src.GaP.libs.case_naming import case_files
 from src.GaP.libs.visualization import ResdataCase
 
-LGR_FILE = Path("include/TEMP_LGR.grdecl")
+SCENARIO_IDENTITY_FIELDS = {"case_name", "case_metadata"}
 DYNAMIC_KEYWORDS = ("PRESSURE", "SWAT", "SGAS")
 INIT_PROPERTIES = ("PERMX", "PERMY", "PERMZ", "PORO", "PORV", "EQLNUM", "SATNUM")
 LGR_PROPERTY_KEYWORDS = {"PERMX", "PERMY", "PERMZ", "PORO", "PORV", "EQLNUM", "SATNUM", "FIPLEG", "FIPNUM", "MULTX", "MULTY", "MULTZ"}
@@ -107,7 +108,9 @@ def compare_init_properties(baseline_case: ResdataCase, case_data: ResdataCase) 
 def compare_case(baseline_root: Path, case_root: Path) -> dict[str, object]:
     baseline = scenario_payload(baseline_root)
     case = scenario_payload(case_root)
-    changed_scenario_fields = sorted(key for key in set(baseline) | set(case) if key != "case_name" and baseline.get(key) != case.get(key))
+    changed_scenario_fields = sorted(
+        key for key in set(baseline) | set(case) if key not in SCENARIO_IDENTITY_FIELDS and baseline.get(key) != case.get(key)
+    )
     baseline_policy_path = baseline_root / "grid_policy.json"
     case_policy_path = case_root / "grid_policy.json"
     baseline_policy = grid_policy_payload(baseline_root)
@@ -121,16 +124,18 @@ def compare_case(baseline_root: Path, case_root: Path) -> dict[str, object]:
     geometry_policy_fields_changed = sorted(set(changed_grid_policy_fields) & GEOMETRY_POLICY_FIELDS)
 
     dynamic: dict[str, object] = {}
-    baseline_case = ResdataCase(baseline_root / "model" / "TEMP-0")
-    case_data = ResdataCase(case_root / "model" / "TEMP-0")
+    baseline_files = case_files(baseline_root)
+    files = case_files(case_root)
+    baseline_case = ResdataCase(baseline_root / baseline_files.prefix)
+    case_data = ResdataCase(case_root / files.prefix)
     baseline_corners = baseline_case.cell_corners()
     case_corners = case_data.cell_corners()
     dimensions_equal = baseline_case.dimensions == case_data.dimensions
     cell_corners_equal = baseline_corners.shape == case_corners.shape and bool(
         np.allclose(baseline_corners, case_corners, rtol=0, atol=1e-6, equal_nan=True)
     )
-    baseline_lgr_geometry = lgr_geometry_signature(baseline_root / LGR_FILE)
-    case_lgr_geometry = lgr_geometry_signature(case_root / LGR_FILE)
+    baseline_lgr_geometry = lgr_geometry_signature(baseline_root / baseline_files.lgr)
+    case_lgr_geometry = lgr_geometry_signature(case_root / files.lgr)
     lgr_geometry_equal = baseline_lgr_geometry is not None and baseline_lgr_geometry == case_lgr_geometry
     geometry_invariants_hold = dimensions_equal and cell_corners_equal and lgr_geometry_equal
 

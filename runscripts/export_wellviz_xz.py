@@ -11,6 +11,7 @@ from pathlib import Path
 
 import numpy as np
 
+from src.GaP.libs.case_naming import case_files
 from src.GaP.libs.visualization import ResdataCase
 
 
@@ -34,7 +35,8 @@ def parse_args() -> argparse.Namespace:
 
 
 def _case_prefix(results_root: Path, case_name: str) -> Path:
-    return results_root / case_name / "model" / "TEMP-0"
+    case_root = results_root / case_name
+    return case_root / case_files(case_root).prefix
 
 
 def _matrix(case: ResdataCase, source: str, keyword: str, j_column: int | None, record: int, z_scale: float):

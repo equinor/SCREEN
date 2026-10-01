@@ -10,7 +10,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from export_wellviz_xz import _matrix, _numeric_keywords
+from export_wellviz_xz import _case_prefix, _matrix, _numeric_keywords
 
 from src.GaP.libs.visualization import ResdataCase
 
@@ -113,7 +113,7 @@ def main() -> int:
     args = parse_args()
     timing: dict[str, float] = {}
     started = time.perf_counter()
-    case = ResdataCase(args.results_root / args.case / "model" / "TEMP-0")
+    case = ResdataCase(_case_prefix(args.results_root, args.case))
     timing["case_load"] = time.perf_counter() - started
     keyword_started = time.perf_counter()
     sources = {source: _numeric_keywords(case, source) for source in ("INIT", "UNRST")}
