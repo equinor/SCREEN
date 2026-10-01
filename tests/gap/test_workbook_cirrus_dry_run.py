@@ -65,14 +65,34 @@ def test_workbook_wrapper_runs_full_dry_run_without_cirrus(tmp_path):
     grid_policy = json.loads((output_root / "grid_policy.json").read_text(encoding="utf-8"))
     assert scenario["case_name"] == "baseline"
     assert scenario["temperature_gradient"] == 31.0
+    assert scenario["case_metadata"] == {
+        "case_stem": "wildcat_baseline",
+        "case_index": 1,
+        "case_name": "baseline",
+        "well_label": "wildcat",
+        "workbook": "test_data/examples/wildcat/wildcat_workbook.xlsx",
+        "template_root": "test_data/examples/wildcat-pflotran",
+        "template_files": {"deck": "model/TEMP-0.in", "grid": "include/TEMP_GRD.grdecl"},
+        "case_files": {
+            "deck": "model/wildcat_baseline.in",
+            "grid": "include/wildcat_baseline_GRD.grdecl",
+            "lgr": "include/wildcat_baseline_LGR.grdecl",
+        },
+    }
     assert grid_policy["top_depth"] == 4.0
     assert (output_root / "qc_plot.png").stat().st_size > 0
-    assert (output_root / "model/TEMP-0.EGRID").exists()
-    assert (output_root / "model/TEMP-0.INIT").exists()
-    assert (output_root / "include/TEMP_LGR.grdecl").exists()
-    assert (output_root / "logs/initialization.log").read_text(encoding="utf-8") == "fake CIRRUS completed\n"
-    assert (output_root / "logs/final.log").read_text(encoding="utf-8") == "fake CIRRUS completed\n"
-    assert "FINAL_DATE  1 JAN 2025" in (output_root / "model/TEMP-0.in").read_text(encoding="utf-8")
+    assert (output_root / "model/wildcat_baseline.EGRID").exists()
+    assert (output_root / "model/wildcat_baseline.INIT").exists()
+    assert (output_root / "include/wildcat_baseline_LGR.grdecl").exists()
+    assert not list(output_root.rglob("TEMP*"))
+    assert (output_root / "logs/wildcat_baseline_initialization.log").read_text(encoding="utf-8") == "fake CIRRUS completed\n"
+    assert (output_root / "logs/wildcat_baseline_final.log").read_text(encoding="utf-8") == "fake CIRRUS completed\n"
+    deck = (output_root / "model/wildcat_baseline.in").read_text(encoding="utf-8")
+    assert "FINAL_DATE  1 JAN 2025" in deck
+    assert deck.count("# SCREEN case: wildcat_baseline | scenario 'baseline' (DesignMatrix row 1)") == 1
+    assert "external_file ../include/wildcat_baseline_LGR.grdecl /" in (
+        output_root / "include/wildcat_baseline_GRD.grdecl"
+    ).read_text(encoding="utf-8")
 
 
 def test_design_matrix_permeability_overrides_reach_case_outputs(tmp_path):
@@ -115,8 +135,8 @@ def test_design_matrix_permeability_overrides_reach_case_outputs(tmp_path):
 
     scenario = json.loads((output_root / "scenario.json").read_text(encoding="utf-8"))
     policy = json.loads((output_root / "grid_policy.json").read_text(encoding="utf-8"))
-    coarse_grid = (output_root / "include/TEMP_GRD.grdecl").read_text(encoding="utf-8")
-    lgr = (output_root / "include/TEMP_LGR.grdecl").read_text(encoding="utf-8")
+    coarse_grid = (output_root / "include/wildcat_baseline_GRD.grdecl").read_text(encoding="utf-8")
+    lgr = (output_root / "include/wildcat_baseline_LGR.grdecl").read_text(encoding="utf-8")
     assert scenario["effective_permeability_mD"] == {
         "reservoir_permx": 750.0,
         "overburden_permx": 0.002,
