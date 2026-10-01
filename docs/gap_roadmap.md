@@ -83,6 +83,7 @@ less often. The technical detail follows for whoever picks the item up.
 | 5 | Generalize the workbook into a design matrix | Case-wide overrides done; per-interval overrides open |
 | 6 | Give generated cases unique, navigable names | Done; real-CIRRUS check pending (item 7) |
 | 7 | Confirm recent changes on a CIRRUS host | Open (reminder) |
+| 8 | Give user-facing names a clear meaning | Open |
 
 ### 1. Compare scenario outputs automatically
 
@@ -201,11 +202,10 @@ is deliberately not a scenario sensitivity.
 
 **Follow-up work:** let a cement override target one interval, identified by a
 stable row ID from the `HoleCasings` or `Plugs` sheet, with `ALL` keeping the
-current case-wide behavior. Rename abbreviated workbook fields (for example
-`cb_perm`) to names that state the material, property and unit, keeping the old
-names as aliases for existing workbooks. Tests should show that a targeted
+current case-wide behavior. Tests should show that a targeted
 override changes only its interval, while geometry and other intervals stay the
-same.
+same. Clearer names for the override fields (such as `cb_perm`) are covered by
+item 8.
 
 ### 6. Give generated cases unique, navigable names
 
@@ -274,6 +274,37 @@ Check that:
     `TEMP_LGR` is renamed.
 
 Done when the checks pass and the date, host and CIRRUS version are noted here.
+
+### 8. Give user-facing names a clear meaning
+
+**Status: open.**
+
+**In practice:** someone new to SCREEN, or returning after a break, should be
+able to fill in a workbook or run a script without decoding abbreviations.
+Today names such as `cb_perm` (casing-cement permeability), `oh_perm` (open-hole
+permeability), `z_resrv`/`p_resrv` (reservoir depth and pressure) or
+`--ali-way` (a legacy refinement mode named after a person) only make sense if
+you already know the code. Clear names also make `scenario.json` and the
+comparison reports readable on their own.
+
+Work in order of how often people see the name:
+
+1. **Workbook fields and command-line flags.** These are what users type. Give
+    each a name that states the material, property and unit, for example
+    `cb_perm` -> `casing_cement_permeability_mD`, and describe what a flag does
+    rather than who wrote it. Keep the old names working as aliases with a
+    deprecation warning, so existing workbooks and scripts do not break.
+2. **Output files** (`scenario.json`, `grid_policy.json`, reports), which people
+    read when checking results. Older outputs must still be readable by the
+    validation and comparison scripts.
+3. **Internal code** (for example `pt_df`, `hs_p`, `sf_depth_msl`,
+    `LGR_NAME`). Rename only when that code is being changed anyway, since these
+    renames carry the most risk for the least benefit to users.
+
+Start with a short table of current name, proposed name, meaning and unit, and
+agree it before renaming anything. Done when steps 1 and 2 are implemented, the
+workbook documentation uses the new names, and tests show that a workbook
+using the old names still produces the same case.
 
 ## Later
 
