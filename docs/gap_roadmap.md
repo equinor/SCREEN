@@ -82,7 +82,7 @@ less often. The technical detail follows for whoever picks the item up.
 | 4 | Share scalar salinity between pressure and CIRRUS | Done |
 | 5 | Generalize the workbook into a design matrix | Case-wide overrides done; per-interval overrides open |
 | 6 | Give generated cases unique, navigable names | Done; real-CIRRUS check pending (item 7) |
-| 7 | Confirm recent changes on a CIRRUS host | Open (reminder) |
+| 7 | Confirm recent changes on a CIRRUS host | LSF wait implemented; live check open |
 | 8 | Give user-facing names a clear meaning | Open |
 
 ### 1. Compare scenario outputs automatically
@@ -230,13 +230,19 @@ for the CIRRUS check in item 7.
 
 ### 7. Confirm recent changes on a CIRRUS host
 
-**Status: open (reminder).**
+**Status: queue wait implemented; real-CIRRUS verification remains open.**
 
 **In practice:** the automated tests use a fake simulator that only copies
 fixture grid files next to the deck. They prove SCREEN writes and finds the
-right files, but not that CIRRUS itself accepts the new case names. Until this
-check is done, the first real batch after PR #134 could fail or produce results
-under unexpected names.
+right files, but not that CIRRUS itself accepts the new case names. An LSF
+queue can also report a successful submission before the outputs exist; the
+backend now detects the submitted job ID and waits for `DONE` or `EXIT` before
+checking the files.
+
+`CirrusBackend` polls `bjobs -a -noheader -o stat <job_id>` every 15 seconds by
+default and allows up to 24 hours. Override those limits with
+`--queue-poll-interval` and `--queue-timeout` (seconds) on the single-case or
+batch command. Non-LSF commands that block until completion are unchanged.
 
 On a Linux host with CIRRUS, run a short two-case batch and the two checking
 scripts:
