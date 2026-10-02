@@ -64,3 +64,5 @@ def test_json_builds_reviewable_lgr_grdecl(
         assert "PERMX  10000.0  6  17  6  17  11  13  /" in output
         assert "EQLNUM  2  6  17  6  17  11  13  /" in output
         assert "PERMX  0.5  8  15  8  15  11  12  /" in output
+        golden = root / "tests/gap/fixtures/wildcat_TEMP-0_LGR.grdecl"
+        assert output == golden.read_text(encoding="utf-8")
