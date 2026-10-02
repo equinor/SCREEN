@@ -1,5 +1,6 @@
 import itertools
 
+import numpy as np
 import pandas as pd
 
 from src.WellClass.libs.grid_utils.grid_refine_base import GridRefineBase
@@ -15,6 +16,9 @@ def make_refine_stub():
                 "k": k,
                 "Zcorn_top": float(k * 10),
                 "Zcorn_bottom": float((k + 1) * 10),
+                "PERMX": 0.0,
+                "PERMY": 0.0,
+                "PERMZ": 0.0,
             }
         )
 
@@ -61,3 +65,30 @@ def test_permeability_follows_assigned_material():
     assert center.query("k == 0").iloc[0]["PERMX"] == 10000.0
     assert center.query("k == 1").iloc[0]["PERMX"] == 0.001
     assert refine.mesh_df.query("material == 'cement_bond_0'").iloc[0]["PERMX"] == 0.05
+
+
+def test_barrier_precedence_and_property_coverage():
+    refine = make_refine_stub()
+    drilling, casing, barriers = make_sections()
+    barriers.loc[0, "k_min"] = 0
+    barriers.loc[0, "k_max"] = 0
+
+    refine._set_material_type(drilling, casing, barriers)
+    refine._set_permeability(drilling, casing, barriers)
+
+    center = refine.mesh_df.query("i == 1 and j == 1 and k == 0").iloc[0]
+    cement = refine.mesh_df.query("i == 0 and j == 1 and k == 0").iloc[0]
+    assert (center["material"], center["PERMX"]) == ("barrier_0", 0.001)
+    assert (cement["material"], cement["PERMX"]) == ("cement_bond_0", 0.05)
+
+    expected_permeability = {
+        "overburden": 0.0,
+        "openhole": 10000.0,
+        "annulus": 0.0,
+        "cement_bond_0": 0.05,
+        "barrier_0": 0.001,
+    }
+    assert refine.mesh_df["material"].isin(expected_permeability).all()
+    expected = refine.mesh_df["material"].map(expected_permeability)
+    pd.testing.assert_series_equal(refine.mesh_df["PERMX"], expected, check_names=False)
+    assert np.isfinite(refine.mesh_df[["PERMX", "PERMY", "PERMZ"]].to_numpy()).all()

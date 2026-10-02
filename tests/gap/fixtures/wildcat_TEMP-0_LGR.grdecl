@@ -1,0 +1,262 @@
+--isolating OVB from reservoir
+EQUALS
+MULTZ  0  1  20 1  20 10 10 /
+MULTZ  1  10 10 10 10 10 10 /
+/
+ 
+CARFIN
+WILDCAT_TEMP-0_LGR 10 10 10 10 1 60 22 22 150 /
+ 
+NXFIN
+22 /
+ 
+NYFIN
+22 /
+ 
+NZFIN
+10 10 10 10 10 10 10 10 10 10 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 /
+ 
+HXFIN
+1748.35 141.11 11.39 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 11.39 141.11 1748.35 /
+ 
+HYFIN
+1748.35 141.11 11.39 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 11.39 141.11 1748.35 /
+ 
+ 
+EQUALS
+--pipe with ID of 29.99994 and perm of 10000.0  were set in WILDCAT_TEMP-0_LGR Local Grid refinement
+PERMX  10000.0  6  17  6  17  11  13  /
+PERMY  10000.0  6  17  6  17  11  13  /
+PERMZ  10000.0  6  17  6  17  11  13  /
+PORO  0.99  6  17  6  17  11  13  /
+SATNUM  2  6  17  6  17  11  13  /
+--FIPLEG (FIPNUM) defintion
+FIPLEG  6  6  17  6  17  11  13  /
+--EQLNUM defintion
+EQLNUM  2  6  17  6  17  11  13  /
+--Transmisibilities of the edge of the pipe set to zero
+MULTX  0  5  5  6  17  11  13  /
+MULTX  0  17  17  6  17  11  13  /
+MULTY  0  5  17  5  5  11  13  /
+MULTY  0  5  17  17  17  11  13  /
+/
+EQUALS
+--pipe with ID of 19.999959999999998 and perm of 10000.0  were set in WILDCAT_TEMP-0_LGR Local Grid refinement
+PERMX  10000.0  8  15  8  15  11  27  /
+PERMY  10000.0  8  15  8  15  11  27  /
+PERMZ  10000.0  8  15  8  15  11  27  /
+PORO  0.99  8  15  8  15  11  27  /
+SATNUM  2  8  15  8  15  11  27  /
+--FIPLEG (FIPNUM) defintion
+FIPLEG  6  8  15  8  15  11  27  /
+--EQLNUM defintion
+EQLNUM  2  8  15  8  15  11  27  /
+--Transmisibilities of the edge of the pipe set to zero
+MULTX  0  7  7  8  15  11  27  /
+MULTX  0  15  15  8  15  11  27  /
+MULTY  0  7  15  7  7  11  27  /
+MULTY  0  7  15  15  15  11  27  /
+/
+EQUALS
+--pipe with ID of 13.374973249999998 and perm of 10000.0  were set in WILDCAT_TEMP-0_LGR Local Grid refinement
+PERMX  10000.0  9  14  9  14  14  83  /
+PERMY  10000.0  9  14  9  14  14  83  /
+PERMZ  10000.0  9  14  9  14  14  83  /
+PORO  0.99  9  14  9  14  14  83  /
+SATNUM  2  9  14  9  14  14  83  /
+--FIPLEG (FIPNUM) defintion
+FIPLEG  6  9  14  9  14  14  83  /
+--EQLNUM defintion
+EQLNUM  2  9  14  9  14  14  83  /
+--Transmisibilities of the edge of the pipe set to zero
+MULTX  0  8  8  9  14  14  82  /
+MULTX  0  14  14  9  14  14  82  /
+MULTY  0  8  14  8  8  14  82  /
+MULTY  0  8  14  14  14  14  82  /
+/
+EQUALS
+--Open-hole section with ID of 17.499965 and perm of 10000.0  were set in WILDCAT_TEMP-0_LGR Local Grid refinement
+PERMX  10000.0  8  15  8  15  27  83  /
+PERMY  10000.0  8  15  8  15  27  83  /
+PERMZ  10000.0  8  15  8  15  27  83  /
+PORO  0.99  8  15  8  15  27  83  /
+SATNUM  2  8  15  8  15  27  83  /
+FIPLEG  6  8  15  8  15  27  83  /
+EQLNUM  2  8  15  8  15  27  83  /
+/
+EQUALS
+--Open-hole section with ID of 12.249975499999998 and perm of 10000.0  were set in WILDCAT_TEMP-0_LGR Local Grid refinement
+PERMX  10000.0  9  14  9  14  83  150  /
+PERMY  10000.0  9  14  9  14  83  150  /
+PERMZ  10000.0  9  14  9  14  83  150  /
+PORO  0.99  9  14  9  14  83  150  /
+SATNUM  2  9  14  9  14  83  150  /
+FIPLEG  6  9  14  9  14  83  150  /
+EQLNUM  2  9  14  9  14  83  150  /
+/
+EQUALS
+--cement around pipe with ID of 29.99994  and perm of 300.0  were set in WILDCAT_TEMP-0_LGR
+--Top side
+PERMX  300.0  4  19  4  5  11  15  /
+PERMY  300.0  4  19  4  5  11  15  /
+PERMZ  300.0  4  19  4  5  11  15  /
+PORO  0.01  4  19  4  5  11  15  /
+FIPLEG  6  4  19  4  5  11  15  /
+EQLNUM  1  4  19  4  5  11  15  /
+
+--Bottom side
+PERMX  300.0  4  19  18  19  11  15  /
+PERMY  300.0  4  19  18  19  11  15  /
+PERMZ  300.0  4  19  18  19  11  15  /
+PORO  0.01  4  19  18  19  11  15  /
+FIPLEG  6  4  19  18  19  11  15  /
+EQLNUM  1  4  19  18  19  11  15  /
+
+--Left side
+PERMX  300.0  4  5  6  17  11  15  /
+PERMY  300.0  4  5  6  17  11  15  /
+PERMZ  300.0  4  5  6  17  11  15  /
+PORO  0.01  4  5  6  17  11  15  /
+FIPLEG  6  4  5  6  17  11  15  /
+EQLNUM  1  4  5  6  17  11  15  /
+--Right side
+PERMX  300.0  18  19  6  17  11  15  /
+PERMY  300.0  18  19  6  17  11  15  /
+PERMZ  300.0  18  19  6  17  11  15  /
+PORO  0.01  18  19  6  17  11  15  /
+FIPLEG  6  18  19  6  17  11  15  /
+EQLNUM  1  18  19  6  17  11  15  /
+/
+EQUALS
+--cement around pipe with ID of 19.999959999999998  and perm of 0.05  were set in WILDCAT_TEMP-0_LGR
+--Top side
+PERMX  0.05  4  19  4  7  11  15  /
+PERMY  0.05  4  19  4  7  11  15  /
+PERMZ  0.05  4  19  4  7  11  15  /
+PORO  0.01  4  19  4  7  11  15  /
+FIPLEG  6  4  19  4  7  11  15  /
+EQLNUM  1  4  19  4  7  11  15  /
+
+--Bottom side
+PERMX  0.05  4  19  16  19  11  15  /
+PERMY  0.05  4  19  16  19  11  15  /
+PERMZ  0.05  4  19  16  19  11  15  /
+PORO  0.01  4  19  16  19  11  15  /
+FIPLEG  6  4  19  16  19  11  15  /
+EQLNUM  1  4  19  16  19  11  15  /
+
+--Left side
+PERMX  0.05  4  7  8  15  11  15  /
+PERMY  0.05  4  7  8  15  11  15  /
+PERMZ  0.05  4  7  8  15  11  15  /
+PORO  0.01  4  7  8  15  11  15  /
+FIPLEG  6  4  7  8  15  11  15  /
+EQLNUM  1  4  7  8  15  11  15  /
+--Right side
+PERMX  0.05  16  19  8  15  11  15  /
+PERMY  0.05  16  19  8  15  11  15  /
+PERMZ  0.05  16  19  8  15  11  15  /
+PORO  0.01  16  19  8  15  11  15  /
+FIPLEG  6  16  19  8  15  11  15  /
+EQLNUM  1  16  19  8  15  11  15  /
+/
+EQUALS
+--cement around pipe with ID of 19.999959999999998  and perm of 0.05  were set in WILDCAT_TEMP-0_LGR
+--Top side
+PERMX  0.05  6  17  6  7  15  27  /
+PERMY  0.05  6  17  6  7  15  27  /
+PERMZ  0.05  6  17  6  7  15  27  /
+PORO  0.01  6  17  6  7  15  27  /
+FIPLEG  6  6  17  6  7  15  27  /
+EQLNUM  1  6  17  6  7  15  27  /
+
+--Bottom side
+PERMX  0.05  6  17  16  17  15  27  /
+PERMY  0.05  6  17  16  17  15  27  /
+PERMZ  0.05  6  17  16  17  15  27  /
+PORO  0.01  6  17  16  17  15  27  /
+FIPLEG  6  6  17  16  17  15  27  /
+EQLNUM  1  6  17  16  17  15  27  /
+
+--Left side
+PERMX  0.05  6  7  8  15  15  27  /
+PERMY  0.05  6  7  8  15  15  27  /
+PERMZ  0.05  6  7  8  15  15  27  /
+PORO  0.01  6  7  8  15  15  27  /
+FIPLEG  6  6  7  8  15  15  27  /
+EQLNUM  1  6  7  8  15  15  27  /
+--Right side
+PERMX  0.05  16  17  8  15  15  27  /
+PERMY  0.05  16  17  8  15  15  27  /
+PERMZ  0.05  16  17  8  15  15  27  /
+PORO  0.01  16  17  8  15  15  27  /
+FIPLEG  6  16  17  8  15  15  27  /
+EQLNUM  1  16  17  8  15  15  27  /
+/
+EQUALS
+--cement around pipe with ID of 13.374973249999998  and perm of 500.0  were set in WILDCAT_TEMP-0_LGR
+--Top side
+PERMX  500.0  8  15  8  8  28  83  /
+PERMY  500.0  8  15  8  8  28  83  /
+PERMZ  500.0  8  15  8  8  28  83  /
+PORO  0.01  8  15  8  8  28  83  /
+FIPLEG  6  8  15  8  8  28  83  /
+EQLNUM  1  8  15  8  8  28  83  /
+
+--Bottom side
+PERMX  500.0  8  15  15  15  28  83  /
+PERMY  500.0  8  15  15  15  28  83  /
+PERMZ  500.0  8  15  15  15  28  83  /
+PORO  0.01  8  15  15  15  28  83  /
+FIPLEG  6  8  15  15  15  28  83  /
+EQLNUM  1  8  15  15  15  28  83  /
+
+--Left side
+PERMX  500.0  8  8  9  14  28  83  /
+PERMY  500.0  8  8  9  14  28  83  /
+PERMZ  500.0  8  8  9  14  28  83  /
+PORO  0.01  8  8  9  14  28  83  /
+FIPLEG  6  8  8  9  14  28  83  /
+EQLNUM  1  8  8  9  14  28  83  /
+--Right side
+PERMX  500.0  15  15  9  14  28  83  /
+PERMY  500.0  15  15  9  14  28  83  /
+PERMZ  500.0  15  15  9  14  28  83  /
+PORO  0.01  15  15  9  14  28  83  /
+FIPLEG  6  15  15  9  14  28  83  /
+EQLNUM  1  15  15  9  14  28  83  /
+/
+EQUALS
+--barrier with ID of 19.999959999999998 and perm of 0.5  were set in WILDCAT_TEMP-0_LGR
+PERMX  0.5  8  15  8  15  11  12  /
+PERMY  0.5  8  15  8  15  11  12  /
+PERMZ  0.5  8  15  8  15  11  12  /
+PORO  0.01  8  15  8  15  11  12  /
+/
+EQUALS
+--barrier with ID of 13.374973249999998 and perm of 100.0  were set in WILDCAT_TEMP-0_LGR
+PERMX  100.0  9  14  9  14  78  83  /
+PERMY  100.0  9  14  9  14  78  83  /
+PERMZ  100.0  9  14  9  14  78  83  /
+PORO  0.01  9  14  9  14  78  83  /
+/
+EQUALS
+--barrier with ID of 12.249975499999998 and perm of 100.0  were set in WILDCAT_TEMP-0_LGR
+PERMX  100.0  9  14  9  14  83  84  /
+PERMY  100.0  9  14  9  14  83  84  /
+PERMZ  100.0  9  14  9  14  83  84  /
+PORO  0.01  9  14  9  14  83  84  /
+/
+EQUALS
+--barrier with ID of 12.249975499999998 and perm of 5.0  were set in WILDCAT_TEMP-0_LGR
+PERMX  5.0  9  14  9  14  92  109  /
+PERMY  5.0  9  14  9  14  92  109  /
+PERMZ  5.0  9  14  9  14  92  109  /
+PORO  0.01  9  14  9  14  92  109  /
+/
+--isolating OVB from reservoir in the LGR
+EQUALS
+MULTZ  0  1  22 1  22 100 100 /
+MULTZ 1  9 14 9 14 100 100 /
+/
+ENDFIN

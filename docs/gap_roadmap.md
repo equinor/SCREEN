@@ -132,30 +132,22 @@ without unit fields default to these units.
 
 ### 3. Strengthen pure GaP regression coverage
 
-**Status: partly done.**
+**Status: done.** Uses the existing committed Wildcat `.EGRID`/`.INIT` fixture;
+no duplicate grid fixture was added.
 
-**In practice:** this is about being able to change the GaP code (the step that
-turns the well description into refined LGR cells) and find out in a normal
-`pytest` run, without CIRRUS, whether the generated LGR file changed. Today a
-change that shifts a cement interval by one cell, or changes which material wins
-where two intervals overlap, can pass the tests unless it happens to hit one of
-the few lines that are checked exactly.
+**In practice:** a change that moves a refined boundary, changes the CARFIN
+output, or alters which material is assigned to a cell now fails in a regular
+Python-only test run. The failure points to a small reviewable reference file,
+without requiring CIRRUS or PFLOTRAN.
 
-**Done so far:** committed `.EGRID`/`.INIT` fixtures (Wildcat `TEMP-0`, Smeaheia
-`TEMP-0` and `GEN_NOLGR_PH2`) and `tests/well_class/test_json_to_lgr.py`, which
-checks coarse and refined dimensions, exact CARFIN bounds, finite non-negative
-permeabilities, the closing `ENDFIN`, and three exact Wildcat property lines.
-
-**Remaining:**
-
-- a golden-file test: compare one complete generated LGR file with a committed
-    reference, so any change shows up as a reviewable diff;
-- an explicit material-precedence test where open hole, cement bond and plug
-    intervals overlap; and
-- a closure check that every refined cell receives the expected properties.
-
-Done when these run in a clean Python-only environment with deterministic
-artifacts.
+**Coverage:** `tests/well_class/test_json_to_lgr.py` checks coarse/refined
+dimensions, exact CARFIN bounds, non-negative finite permeability, `ENDFIN`,
+and compares the complete Wildcat LGR against
+`tests/gap/fixtures/wildcat_TEMP-0_LGR.grdecl` (8.4 KB). The existing tracked
+Wildcat `.EGRID`/`.INIT` fixture is reused. `tests/gap/test_grid_materials.py`
+checks that a plug replaces open-hole material at its depth while adjacent
+casing-cement cells keep cement material, and that every synthetic refined
+cell has the expected finite properties.
 
 ### 4. Share scalar salinity between pressure and CIRRUS
 
