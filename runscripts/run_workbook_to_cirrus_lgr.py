@@ -24,6 +24,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-root", type=Path, required=True, help="Case output directory.")
     parser.add_argument("--template-root", type=Path, default=Path("test_data/examples/wildcat-pflotran"))
     parser.add_argument("--sim-command", required=True, help="CIRRUS initialization command template using {deck}.")
+    parser.add_argument("--queue-poll-interval", type=float, default=15.0, help="Seconds between LSF job status checks.")
+    parser.add_argument("--queue-timeout", type=float, default=86400.0, help="Maximum seconds to wait for an LSF job.")
     parser.add_argument("--run-final", action="store_true", help="Run CIRRUS again after the LGR is generated.")
     parser.add_argument("--simulation-years", type=int, default=100, help="Final duration in years.")
     parser.add_argument("--start-date", default="2025-01-01", help="Simulation start date in ISO format.")
@@ -115,7 +117,11 @@ def save_qc_plot(model, scenario, output_path: Path) -> None:
 
 
 def run_workflow(args: argparse.Namespace) -> Path:
-    backend = CirrusBackend(args.sim_command)
+    backend = CirrusBackend(
+        args.sim_command,
+        queue_poll_interval_seconds=args.queue_poll_interval,
+        queue_timeout_seconds=args.queue_timeout,
+    )
     policy = xlsx_grid_policy(args.xlsx)
     model = xlsx_to_well_model(args.xlsx)
     design = xlsx_to_simulation_design(args.xlsx)
