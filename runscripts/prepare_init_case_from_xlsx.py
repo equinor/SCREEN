@@ -4,10 +4,10 @@
 The workbook is expected to contain:
 - Header (key/value)
 - GridPolicy (key/value)
-- Optional well sheets (Survey, HoleCasings, Plugs, Stratigraphy, SubsurfaceAssumptions)
+- Optional well sheets (Survey, HoleCasings, Plugs, Stratigraphy, DesignMatrix)
 
 The script computes layer counts from thickness/target-DZ settings and stages
-TEMP-0 files using the existing prepare_init_case workflow.
+uniquely named case files using the existing prepare_init_case workflow.
 """
 
 from __future__ import annotations
@@ -21,6 +21,7 @@ from pathlib import Path
 import numpy as np
 from prepare_init_case import run_initialization, stage_case
 
+from src.GaP.libs.case_naming import CaseFiles, case_label, resolve_case
 from src.GaP.libs.deck_config import CirrusDeckParameters, parameterize_cirrus_deck
 from src.WellClass.libs.utils import xlsx_grid_policy, xlsx_to_simulation_design, xlsx_to_well_model
 from src.WellClass.libs.well_class.well_processed import WellProcessed
@@ -59,13 +60,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--final-run",
         action="store_true",
-        help="Configure the same deck for the final run and enable TEMP_LGR.grdecl.",
+        help="Configure the same deck for the final run and enable the generated LGR include.",
     )
     parser.add_argument(
         "--case-name",
         type=str,
         default="default",
-        help="Name of the simulation scenario from workbook SubsurfaceAssumptions sheet.",
+        help="Name of the simulation case from the workbook DesignMatrix.",
     )
     return parser.parse_args()
 
@@ -152,6 +153,7 @@ def derive_stage_args_from_policy(args: argparse.Namespace, policy: dict, well_m
         aquifer_layers=int(policy.get("aquifer_layers", 3)),
         porv_multiplier=float(policy.get("porv_multiplier", 2000.0)),
         permz_multiplier=float(policy.get("permz_multiplier", 0.1)),
+        case_stem=getattr(args, "case_stem", None),
         force=args.force,
     )
 
@@ -180,6 +182,7 @@ def parameterize_staged_deck(args: argparse.Namespace, policy: dict, well_header
         ground_elevation=float(well_header.ground_elevation),
         ground_temperature=float(assumptions.get("ground_temperature", 4.0)),
         geothermal_gradient=float(assumptions.get("temperature_gradient", 31.0)),
+        salinity=float(assumptions.get("salinity", 0.032)),
     )
     parameters = CirrusDeckParameters(
         start_date=start_date,
@@ -191,15 +194,25 @@ def parameterize_staged_deck(args: argparse.Namespace, policy: dict, well_header
         overburden_pressure_bar=pressure_table.get_values_at_depth(overburden_datum_depth)["hydrostatic_pressure"],
         fluid_contact_depth=float(assumptions.get("z_fluid_contact", assumptions.get("z_resrv", 1500.0))),
         fluid_contact_pressure_bar=float(assumptions.get("p_fluid_contact", assumptions.get("p_resrv", 144.5))),
+        salinity_mass_fraction=float(assumptions.get("salinity", 0.032)),
         ground_temperature_c=float(assumptions.get("ground_temperature", 4.0)),
         geothermal_gradient_c_per_km=float(assumptions.get("temperature_gradient", 31.0)),
         enable_lgr=args.final_run,
     )
+    case_stem = getattr(args, "case_stem", None)
+    files = CaseFiles.for_stem(case_stem) if case_stem else CaseFiles.template()
     parameterize_cirrus_deck(
-        args.output_root / "model" / "TEMP-0.in",
+        args.output_root / files.deck,
         parameters,
-        grdecl_path=args.output_root / "include" / "TEMP_GRD.grdecl",
+        grdecl_path=args.output_root / files.grid,
+        case_label=getattr(args, "case_label", None),
     )
+
+
+def resolve_case_identity(args: argparse.Namespace, model, design, scenario) -> None:
+    """Store the design-matrix row index, case stem, and deck label on ``args``."""
+    args.case_index, args.case_stem = resolve_case(model, design, scenario.case_name)
+    args.case_label = case_label(args.case_stem, scenario.case_name, args.case_index, args.template_root)
 
 
 def main() -> int:
@@ -213,6 +226,7 @@ def main() -> int:
     except ValueError as exc:
         print(f"Error: {exc}")
         return 1
+    resolve_case_identity(args, model, design, scenario)
     stage_args = derive_stage_args_from_policy(args, policy, model)
     args.reservoir_top = stage_args.reservoir_top
     args.bottom_depth = stage_args.bottom_depth

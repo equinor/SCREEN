@@ -9,7 +9,9 @@ import threading
 import time
 
 import pandas as pd
+import pytest
 
+from src.GaP.libs.models.simulation_scenario import SimulationScenario
 from src.WellClass.libs.utils.xlsx_parser import xlsx_to_simulation_design
 
 
@@ -76,6 +78,45 @@ def test_batch_scenario_execution_creates_output_directories(tmp_path):
     design = xlsx_to_simulation_design(workbook)
     assert len(design.scenarios) == 3
     assert [s.case_name for s in design.scenarios] == ["case_0", "case_1", "case_2"]
+    assert design.scenarios[0].depth_unit == "m"
+    assert design.scenarios[0].pressure_unit == "bar"
+
+
+def test_design_matrix_is_preferred_over_legacy_scenario_sheet(tmp_path):
+    workbook = tmp_path / "design_matrix.xlsx"
+    with pd.ExcelWriter(workbook, engine="openpyxl") as writer:
+        pd.DataFrame({"case_name": ["legacy"], "p_fluid_contact": [100.0]}).to_excel(writer, sheet_name="SubsurfaceAssumptions", index=False)
+        pd.DataFrame(
+            {
+                "case_name": ["sensitivity"],
+                "reservoir_permx": [750.0],
+                "cb_perm": [0.2],
+            }
+        ).to_excel(writer, sheet_name="DesignMatrix", index=False)
+
+    design = xlsx_to_simulation_design(workbook)
+
+    assert len(design.scenarios) == 1
+    assert design.scenarios[0].case_name == "sensitivity"
+    assert design.scenarios[0].reservoir_permx == 750.0
+    assert design.scenarios[0].cb_perm == 0.2
+    assert design.scenarios[0].p_fluid_contact is None
+
+
+def test_scenario_depth_and_pressure_units_are_validated():
+    assert SimulationScenario().depth_unit == "m"
+    assert SimulationScenario().pressure_unit == "bar"
+    assert SimulationScenario().permeability_unit == "mD"
+    with pytest.raises(ValueError):
+        SimulationScenario(depth_unit="ft")
+    with pytest.raises(ValueError):
+        SimulationScenario(pressure_unit="psi")
+    with pytest.raises(ValueError):
+        SimulationScenario(permeability_unit="D")
+    with pytest.raises(ValueError):
+        SimulationScenario(salinity_basis="mass_ratio")
+    with pytest.raises(ValueError):
+        SimulationScenario(salinity=1.0)
 
 
 def test_batch_execution_script_summary(tmp_path):

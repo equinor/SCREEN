@@ -16,17 +16,16 @@ def default_pvt_path() -> Path:
     return Path(__file__).resolve().parents[2] / "data" / "pvt" / "co2"
 
 
-def get_pvt(pvt_path: str | Path | None = None) -> tuple:
-    """Reads the vectors for pressure and temperature and the matrix for rho
-    Note that the values for temperature and rho must be aligned with values in rho
-    Note also for rho: One temperature for each column
-                       One pressure for each row
-    It applies a salinity correction for a concentration of 3.5 gNaCl in 100 g H2O
-    based on the work done by
-    LALIBERTÉ, M. & COOPER, W. E. 2004. Model for Calculating the Density of
-    Aqueous Electrolyte Solutions. Journal of Chemical & Engineering Data, 49,
-    1141-1151.
-    https://www.calsep.com/13-density-of-brine/
+def get_pvt(pvt_path: str | Path | None = None, *, salinity: float = 0.032) -> tuple:
+    """Read PVT grids and calculate brine density for NaCl mass-fraction salinity.
+
+    ``salinity`` is salt mass divided by total solution mass, matching the
+    electrolyte weight fraction ``w_i`` in Laliberté and Cooper.
+    The returned density grids align with pressure rows and temperature columns.
+
+    Reference: Laliberté, M. & Cooper, W. E. (2004), "Model for Calculating the
+    Density of Aqueous Electrolyte Solutions," Journal of Chemical & Engineering
+    Data, 49, 1141-1151. https://doi.org/10.1021/je0498659
     """
     pvt_root = Path(pvt_path) if pvt_path is not None else default_pvt_path()
     fn_temp = pvt_root / "temperature.txt"
@@ -50,9 +49,9 @@ def get_pvt(pvt_path: str | Path | None = None) -> tuple:
     c3 = 0.014624
     c4 = 3315.6
 
-    # NaCl concentration
-    # TODO(gpb): Include salinity as input
-    w = 3.5 / 100
+    if not np.isfinite(salinity) or not 0 <= salinity < 1:
+        raise ValueError("salinity must be a finite mass fraction in [0, 1)")
+    w = salinity
 
     # Laliberté and Cooper model: Apparent density
     rho_app = (c0 * w + c1) * np.exp(0.000001 * (t_grid + c4) ** 2) / (w + c2 + c3 * t_grid)
@@ -61,6 +60,17 @@ def get_pvt(pvt_path: str | Path | None = None) -> tuple:
     rho_brine = 1 / (((1 - w) / rho_h2o) + (w / rho_app))
 
     return t, p, rho_co2, rho_brine
+
+
+def get_brine_density(salinity: float, temperature: float, pressure: float = 1.01325, pvt_path: str | Path | None = None) -> float:
+    """Return PVT brine density in kg/m3 for mass-fraction salinity, degC, and bar."""
+    temperatures, pressures, _, rho_brine = get_pvt(pvt_path, salinity=salinity)
+    if not temperatures.min() <= temperature <= temperatures.max():
+        raise ValueError("temperature is outside the bundled PVT table")
+    if not pressures.min() <= pressure <= pressures.max():
+        raise ValueError("pressure is outside the bundled PVT table")
+    interpolator = RectBivariateSpline(pressures, temperatures, rho_brine)
+    return float(interpolator(pressure, temperature)[0, 0])
 
 
 # Compute the temperature given the input gradient
@@ -78,11 +88,11 @@ def odesys(z: float, y: np.ndarray, well_header: dict, rho_getter: Callable) -> 
     return (dPdz,)
 
 
-def get_hydrostatic_P(well_header: dict, *, dz=1, pvt_path: str | Path | None = None) -> pd.DataFrame:
+def get_hydrostatic_P(well_header: dict, *, dz=1, salinity: float = 0.032, pvt_path: str | Path | None = None) -> pd.DataFrame:
     """Simple integration to get the hydrostatic pressure at a given depth
     Does also calculates the depth column, temperatur vs depth and water density (RHOH2O) vs depth (hydrostatic)
     """
-    t_vec, p_vec, rho_co2_vec, rho_h2o_vec = get_pvt(pvt_path)
+    t_vec, p_vec, rho_co2_vec, rho_h2o_vec = get_pvt(pvt_path, salinity=salinity)
 
     # Make the depth-vector from msl and downwards
     total_depth_rkb = well_header.get("total_depth_rkb", well_header.get("well_td_rkb"))

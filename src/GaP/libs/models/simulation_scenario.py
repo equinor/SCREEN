@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Literal, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class SimulationScenario(BaseModel):
@@ -12,12 +12,20 @@ class SimulationScenario(BaseModel):
     temperature_gradient: float = 31.0
     ground_temperature: float = 4.0
     fluid_type: str = "co2"
-    z_fluid_contact: Optional[float] = None
-    p_fluid_contact: Optional[float] = None
-    overburden_datum_depth: Optional[float] = None
-    z_resrv: Optional[float] = None
-    p_resrv: Optional[float] = None
-    salinity: float = 0.032
+    depth_unit: Literal["m"] = "m"
+    pressure_unit: Literal["bar"] = "bar"
+    permeability_unit: Literal["mD"] = "mD"
+    salinity_basis: Literal["mass_fraction"] = "mass_fraction"
+    z_fluid_contact: Optional[float] = Field(default=None, allow_inf_nan=False, description="Fluid-contact TVDMSL depth in m")
+    p_fluid_contact: Optional[float] = Field(default=None, allow_inf_nan=False, description="Fluid-contact pressure in bar")
+    overburden_datum_depth: Optional[float] = Field(default=None, allow_inf_nan=False, description="Overburden datum TVDMSL depth in m")
+    z_resrv: Optional[float] = Field(default=None, allow_inf_nan=False, description="Reservoir TVDMSL depth in m")
+    p_resrv: Optional[float] = Field(default=None, allow_inf_nan=False, description="Reservoir pressure in bar")
+    salinity: float = Field(default=0.032, ge=0, lt=1, allow_inf_nan=False, description="NaCl mass fraction of solution")
+    reservoir_permx: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False, description="Reservoir PERMX override in mD")
+    overburden_permx: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False, description="Overburden PERMX override in mD")
+    cb_perm: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False, description="Casing-cement permeability override in mD")
+    barrier_perm: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False, description="Plug-cement permeability override in mD")
 
     @field_validator("case_name")
     @classmethod
@@ -31,6 +39,14 @@ class SimulationDesign(BaseModel):
     """Named simulation scenarios that share one immutable well description."""
 
     scenarios: list[SimulationScenario] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def case_names_are_unique(self) -> SimulationDesign:
+        names = [scenario.case_name for scenario in self.scenarios]
+        duplicates = sorted({name for name in names if names.count(name) > 1})
+        if duplicates:
+            raise ValueError(f"case_name values must be unique; duplicated: {', '.join(duplicates)}")
+        return self
 
     def select(self, case_name: str = "default") -> SimulationScenario:
         for scenario in self.scenarios:

@@ -58,7 +58,7 @@ nav:
   - Developer Guides:
       - Architecture Manifesto: architecture_manifesto.md
       - GaP Roadmap: gap_roadmap.md
-      - OpenIAM Benchmarking Notes: openiam_benchmarking.md
+      - OpenIAM-SCREEN Comparison Notes: openiam_screen_comparison.md
       - MkDocs: mkdocs.md
       - Installation: INSTALLATION.md
       - Code References:

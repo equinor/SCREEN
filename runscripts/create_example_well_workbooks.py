@@ -13,6 +13,8 @@ EXAMPLES = {
         "json": Path("test_data/examples/wildcat/wildcat.json"),
         "output": Path("test_data/examples/wildcat/wildcat_workbook.xlsx"),
         "grid_policy": {
+            "depth_unit": "m",
+            "permeability_unit": "mD",
             "top_depth": 4.0,
             "target_dz_water": 50.0,
             "target_dz_overburden": 60.0,
@@ -51,6 +53,8 @@ EXAMPLES = {
         "json": Path("test_data/examples/smeaheia/smeaheia.json"),
         "output": Path("test_data/examples/smeaheia/smeaheia_workbook.xlsx"),
         "grid_policy": {
+            "depth_unit": "m",
+            "permeability_unit": "mD",
             "top_depth": 4.0,
             "target_dz_water": 50.0,
             "target_dz_overburden": 60.0,
@@ -104,9 +108,9 @@ def create_workbook(example: dict) -> Path:
             "note": [
                 "Physical well sheets are copied from the canonical JSON fixture.",
                 "Survey is optional: leave it empty for vertical wells or add md_rkb, inclination_deg, and azimuth_deg rows for deviation.",
-                "GridPolicy and SubsurfaceAssumptions are editable example scenario values and must be reviewed for a real case.",
+                "GridPolicy and DesignMatrix are editable example scenario values and must be reviewed for a real case.",
                 "z_fluid_contact and p_fluid_contact define the GAS_WATER datum and WGC depth in CIRRUS.",
-                "Multiple rows in SubsurfaceAssumptions define a design matrix of scenarios that can be run with --case-name selection.",
+                "Multiple rows in DesignMatrix define cases that can be run with --case-name selection.",
             ]
         }
     )
@@ -118,7 +122,15 @@ def create_workbook(example: dict) -> Path:
         pd.DataFrame(spec.get("hole_casings", [])).to_excel(writer, sheet_name="HoleCasings", index=False)
         pd.DataFrame(spec.get("plugs", [])).to_excel(writer, sheet_name="Plugs", index=False)
         pd.DataFrame(spec.get("stratigraphy", [])).to_excel(writer, sheet_name="Stratigraphy", index=False)
-        pd.DataFrame(example["scenarios"]).to_excel(writer, sheet_name="SubsurfaceAssumptions", index=False)
+        scenarios = pd.DataFrame(example["scenarios"])
+        scenarios["depth_unit"] = "m"
+        scenarios["pressure_unit"] = "bar"
+        scenarios["salinity_basis"] = "mass_fraction"
+        scenarios["salinity"] = 0.032
+        scenarios["permeability_unit"] = "mD"
+        for field in ("reservoir_permx", "overburden_permx", "cb_perm", "barrier_perm"):
+            scenarios[field] = None
+        scenarios.to_excel(writer, sheet_name="DesignMatrix", index=False)
         notes.to_excel(writer, sheet_name="Notes", index=False)
     return output
 

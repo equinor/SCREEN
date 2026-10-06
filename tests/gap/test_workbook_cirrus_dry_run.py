@@ -1,12 +1,14 @@
 from pathlib import Path
 import json
 import importlib.util
+import shutil
 import subprocess
 import sys
 import types
 from types import SimpleNamespace
 
 import numpy as np
+from openpyxl import load_workbook
 
 WORKFLOW_PATH = Path(__file__).parents[2] / "runscripts/run_workbook_to_cirrus_lgr.py"
 sys.path.insert(0, str(WORKFLOW_PATH.parent))
@@ -60,15 +62,94 @@ def test_workbook_wrapper_runs_full_dry_run_without_cirrus(tmp_path):
 
     assert (output_root / "well_input.json").exists()
     scenario = json.loads((output_root / "scenario.json").read_text(encoding="utf-8"))
+    grid_policy = json.loads((output_root / "grid_policy.json").read_text(encoding="utf-8"))
     assert scenario["case_name"] == "baseline"
     assert scenario["temperature_gradient"] == 31.0
+    assert scenario["case_metadata"] == {
+        "case_stem": "wildcat_baseline",
+        "case_index": 1,
+        "case_name": "baseline",
+        "well_label": "wildcat",
+        "workbook": "test_data/examples/wildcat/wildcat_workbook.xlsx",
+        "template_root": "test_data/examples/wildcat-pflotran",
+        "template_files": {"deck": "model/TEMP-0.in", "grid": "include/TEMP_GRD.grdecl"},
+        "case_files": {
+            "deck": "model/wildcat_baseline.in",
+            "grid": "include/wildcat_baseline_GRD.grdecl",
+            "lgr": "include/wildcat_baseline_LGR.grdecl",
+        },
+    }
+    assert grid_policy["top_depth"] == 4.0
     assert (output_root / "qc_plot.png").stat().st_size > 0
-    assert (output_root / "model/TEMP-0.EGRID").exists()
-    assert (output_root / "model/TEMP-0.INIT").exists()
-    assert (output_root / "include/TEMP_LGR.grdecl").exists()
-    assert (output_root / "logs/initialization.log").read_text(encoding="utf-8") == "fake CIRRUS completed\n"
-    assert (output_root / "logs/final.log").read_text(encoding="utf-8") == "fake CIRRUS completed\n"
-    assert "FINAL_DATE  1 JAN 2025" in (output_root / "model/TEMP-0.in").read_text(encoding="utf-8")
+    assert (output_root / "model/wildcat_baseline.EGRID").exists()
+    assert (output_root / "model/wildcat_baseline.INIT").exists()
+    assert (output_root / "include/wildcat_baseline_LGR.grdecl").exists()
+    assert not list(output_root.rglob("TEMP*"))
+    assert (output_root / "logs/wildcat_baseline_initialization.log").read_text(encoding="utf-8") == "fake CIRRUS completed\n"
+    assert (output_root / "logs/wildcat_baseline_final.log").read_text(encoding="utf-8") == "fake CIRRUS completed\n"
+    deck = (output_root / "model/wildcat_baseline.in").read_text(encoding="utf-8")
+    assert "FINAL_DATE  1 JAN 2025" in deck
+    assert deck.count("# SCREEN case: wildcat_baseline | scenario 'baseline' (DesignMatrix row 1)") == 1
+    assert "external_file ../include/wildcat_baseline_LGR.grdecl /" in (
+        output_root / "include/wildcat_baseline_GRD.grdecl"
+    ).read_text(encoding="utf-8")
+
+
+def test_design_matrix_permeability_overrides_reach_case_outputs(tmp_path):
+    root = Path(__file__).parents[2]
+    workbook = tmp_path / "design_matrix.xlsx"
+    shutil.copyfile(root / "test_data/examples/wildcat/wildcat_workbook.xlsx", workbook)
+    excel = load_workbook(workbook)
+    sheet = excel["DesignMatrix"]
+    columns = {sheet.cell(1, column).value: column for column in range(1, sheet.max_column + 1)}
+    for field, value in {
+        "reservoir_permx": 750.0,
+        "overburden_permx": 0.002,
+        "cb_perm": 0.2,
+        "barrier_perm": 0.3,
+    }.items():
+        sheet.cell(2, columns[field]).value = value
+    excel.save(workbook)
+
+    output_root = tmp_path / "overridden_case"
+    fixture_prefix = root / "test_data/examples/wildcat/model/TEMP-0"
+    runner = _fake_cirrus(tmp_path, fixture_prefix)
+    subprocess.run(
+        [
+            sys.executable,
+            "runscripts/run_workbook_to_cirrus_lgr.py",
+            "--xlsx",
+            str(workbook),
+            "--output-root",
+            str(output_root),
+            "--sim-command",
+            f"{runner} {{deck}}",
+            "--case-name",
+            "baseline",
+        ],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    scenario = json.loads((output_root / "scenario.json").read_text(encoding="utf-8"))
+    policy = json.loads((output_root / "grid_policy.json").read_text(encoding="utf-8"))
+    coarse_grid = (output_root / "include/wildcat_baseline_GRD.grdecl").read_text(encoding="utf-8")
+    lgr = (output_root / "include/wildcat_baseline_LGR.grdecl").read_text(encoding="utf-8")
+    assert scenario["effective_permeability_mD"] == {
+        "reservoir_permx": 750.0,
+        "overburden_permx": 0.002,
+        "oh_perm": 10000.0,
+        "cb_perm": 0.2,
+        "barrier_perm": 0.3,
+    }
+    assert policy["reservoir_permx"] == 750.0
+    assert policy["overburden_permx"] == 0.002
+    assert "PERMX 750" in coarse_grid
+    assert "PERMX  0.2" in lgr
+    assert "PERMX  0.3" in lgr
+    assert "CARFIN\nTEMP_LGR 10 10 10 10 1 60 22 22 150 /" in lgr
 
 
 def test_qc_plot_uses_workbook_fluid_contact_pressure(tmp_path, monkeypatch):
@@ -86,6 +167,7 @@ def test_qc_plot_uses_workbook_fluid_contact_pressure(tmp_path, monkeypatch):
 
     class FakePressure:
         def __init__(self, **kwargs):
+            captured["pressure_options"] = kwargs
             self.table = SimpleNamespace(
                 depth=np.array([0.0, 10.0]),
                 hydrostatic_pressure=np.array([100.0, 105.0]),
@@ -111,9 +193,11 @@ def test_qc_plot_uses_workbook_fluid_contact_pressure(tmp_path, monkeypatch):
         ground_temperature=4.0,
         temperature_gradient=31.0,
         fluid_type="co2",
+        salinity=0.032,
     )
 
     workflow.save_qc_plot(SimpleNamespace(), scenario, tmp_path / "qc_plot.png")
 
     assert captured["z_fluid_datum"] == 2400.0
     assert captured["p_fluid_datum"] == 245.0
+    assert captured["pressure_options"]["salinity"] == 0.032

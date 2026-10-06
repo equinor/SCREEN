@@ -2,12 +2,16 @@ from pathlib import Path
 import subprocess
 import sys
 
+import numpy as np
+from openpyxl import load_workbook
 import pandas as pd
+import pytest
 
 from src.WellClass.libs.utils.xlsx_parser import xlsx_grid_policy, xlsx_to_simulation_design, xlsx_to_well_model
+from src.WellClass.libs.well_pressure.pressure_table import PressureTable
 
 
-def _write_minimal_workbook(path: Path) -> None:
+def _write_minimal_workbook(path: Path, *, salinity: float = 0.032) -> None:
     metadata = pd.DataFrame({"key": ["namespace", "name", "author"], "value": ["screen", "xlsx-test", "pytest"]})
     header = pd.DataFrame(
         {
@@ -46,6 +50,8 @@ def _write_minimal_workbook(path: Path) -> None:
             {
                 "temperature_gradient": [31.0],
                 "ground_temperature": [4.0],
+                "salinity": [salinity],
+                "salinity_basis": ["mass_fraction"],
                 "z_fluid_contact": [2400.0],
                 "p_fluid_contact": [210.0],
                 "overburden_datum_depth": [500.0],
@@ -91,8 +97,8 @@ def test_prepare_init_case_from_xlsx_stages_files(tmp_path):
     ]
     subprocess.run(command, check=True, cwd=repo_root, capture_output=True, text=True)
 
-    deck = output_root / "model" / "TEMP-0.in"
-    grdecl = output_root / "include" / "TEMP_GRD.grdecl"
+    deck = output_root / "model" / "xlsx_test_default.in"
+    grdecl = output_root / "include" / "xlsx_test_default_GRD.grdecl"
     co2_database = output_root / "include" / "co2_db_new.dat"
     tops = output_root / "include" / "tops_dz.inc"
     well_json = output_root / "well_input.json"
@@ -102,14 +108,18 @@ def test_prepare_init_case_from_xlsx_stages_files(tmp_path):
     assert co2_database.exists()
     assert tops.exists()
     assert well_json.exists()
+    assert not list(output_root.rglob("TEMP*"))
 
     recipe = tops.read_text(encoding="utf-8")
     assert "TOPS 4" in recipe
     assert "1200*33.6667" in recipe
     assert "6000*59.6667" in recipe
     assert "16000*10" in recipe
-    assert "DATABASE ../include/co2_db_new.dat" in deck.read_text(encoding="utf-8")
-    assert "TEMP_LGR.grdecl" not in grdecl.read_text(encoding="utf-8")
+    deck_text = deck.read_text(encoding="utf-8")
+    assert "DATABASE ../include/co2_db_new.dat" in deck_text
+    assert "TYPE grdecl ../include/xlsx_test_default_GRD.grdecl" in deck_text
+    assert deck_text.startswith("# SCREEN case: xlsx_test_default | scenario 'default' (DesignMatrix row 1) | template ")
+    assert "_LGR.grdecl" not in grdecl.read_text(encoding="utf-8")
     grdecl_text = grdecl.read_text(encoding="utf-8")
     assert "EQLNUM 1 1 20 1 20 1 18 /" in grdecl_text
     assert "EQLNUM 2 1 20 1 20 19 58 /" in grdecl_text
@@ -137,7 +147,7 @@ def test_workbook_keeps_simulation_assumptions_outside_well_model(tmp_path):
 
 def test_prepare_init_case_from_xlsx_configures_final_run(tmp_path):
     workbook = tmp_path / "well_input.xlsx"
-    _write_minimal_workbook(workbook)
+    _write_minimal_workbook(workbook, salinity=0.04)
     output_root = tmp_path / "staged_case"
     repo_root = Path(__file__).parents[2]
 
@@ -152,11 +162,20 @@ def test_prepare_init_case_from_xlsx_configures_final_run(tmp_path):
     ]
     subprocess.run(command, check=True, cwd=repo_root, capture_output=True, text=True)
 
-    deck = (output_root / "model" / "TEMP-0.in").read_text(encoding="utf-8")
-    grdecl = (output_root / "include" / "TEMP_GRD.grdecl").read_text(encoding="utf-8")
+    deck = (output_root / "model" / "xlsx_test_default.in").read_text(encoding="utf-8")
+    grdecl = (output_root / "include" / "xlsx_test_default_GRD.grdecl").read_text(encoding="utf-8")
     assert "FINAL_DATE  1 JAN 2125" in deck
     assert "DATUM_D  500 m" in deck
-    assert "PRESSURE  51.5175 Bar" in deck
+    pressure_table = PressureTable(
+        name="expected",
+        depth=np.arange(0.0, 510.0, 10.0),
+        ground_elevation=105.0,
+        ground_temperature=4.0,
+        geothermal_gradient=31.0,
+        salinity=0.04,
+    )
+    expected_pressure = pressure_table.get_values_at_depth(500.0)["hydrostatic_pressure"]
+    assert f"PRESSURE  {expected_pressure:g} Bar" in deck
     assert "DATUM_D  2400 m" in deck
     assert "PRESSURE  210 Bar" in deck
     assert "WGC_D  2400 m" in deck
@@ -164,9 +183,13 @@ def test_prepare_init_case_from_xlsx_configures_final_run(tmp_path):
     assert "     105    4" in deck
     assert "     2400    75.145" in deck
     assert deck.count("     2400    75.145") == 2
-    assert deck.count("SALTVD\n     4 0.032\n     2400 0.032") == 2
+    assert deck.count("CONCENTRATION_UNITS MASS") == 2
+    assert deck.count("CONCENTRATION_UNITS MASS") == 2
+    assert deck.count("SALTVD\n     4 0.04\n     2400 0.04") == 2
     assert "WELL_DATA INJ_01" not in deck
-    assert "external_file ../include/TEMP_LGR.grdecl /" in grdecl
+    assert deck.count("# SCREEN case:") == 1
+    assert "external_file ../include/xlsx_test_default_LGR.grdecl /" in grdecl
+    assert "TEMP_LGR" not in grdecl
 
 
 def test_xlsx_grid_policy_requires_keys(tmp_path):
@@ -183,6 +206,53 @@ def test_xlsx_grid_policy_requires_keys(tmp_path):
         assert "missing required keys" in str(exc)
     else:
         raise AssertionError("Expected ValueError for missing GridPolicy keys")
+
+
+def test_xlsx_grid_policy_applies_legacy_units_and_defaults(tmp_path):
+    workbook = tmp_path / "legacy_policy.xlsx"
+    _write_minimal_workbook(workbook)
+
+    policy = xlsx_grid_policy(workbook)
+
+    assert policy["depth_unit"] == "m"
+    assert policy["permeability_unit"] == "mD"
+    assert policy["dx"] == 200.0
+    assert policy["reservoir_permx"] == 1000.0
+
+
+@pytest.mark.parametrize(
+    ("key", "value"),
+    [("depth_unit", "ft"), ("permeability_unit", "D"), ("target_dz_water", 0), ("reservoir_permx", -1)],
+)
+def test_xlsx_grid_policy_rejects_invalid_values(tmp_path, key, value):
+    workbook = tmp_path / "invalid_policy.xlsx"
+    _write_minimal_workbook(workbook)
+    excel = load_workbook(workbook)
+    sheet = excel["GridPolicy"]
+    matching_rows = [row for row in range(2, sheet.max_row + 1) if sheet.cell(row, 1).value == key]
+    if matching_rows:
+        sheet.cell(matching_rows[0], 2).value = value
+    else:
+        sheet.append([key, value])
+    excel.save(workbook)
+
+    with pytest.raises(ValueError, match="invalid GridPolicy"):
+        xlsx_grid_policy(workbook)
+
+
+def test_xlsx_grid_policy_converts_header_elevation_from_feet(tmp_path):
+    workbook = tmp_path / "feet_header.xlsx"
+    _write_minimal_workbook(workbook)
+    excel = load_workbook(workbook)
+    sheet = excel["Header"]
+    for row in range(2, sheet.max_row + 1):
+        if sheet.cell(row, 1).value == "ground_elevation":
+            sheet.cell(row, 2).value = 1000.0
+        elif sheet.cell(row, 1).value == "ground_elevation_unit":
+            sheet.cell(row, 2).value = "ft"
+    excel.save(workbook)
+
+    assert xlsx_grid_policy(workbook)["water_depth"] == pytest.approx(304.8)
 
 
 def test_case_name_defaults_to_default_when_omitted(tmp_path):
@@ -204,7 +274,7 @@ def test_case_name_defaults_to_default_when_omitted(tmp_path):
     subprocess.run(command, check=True, cwd=repo_root, capture_output=True, text=True)
 
     # Should succeed without specifying --case-name
-    assert (output_root / "model" / "TEMP-0.in").exists()
+    assert (output_root / "model" / "xlsx_test_default.in").exists()
 
 
 def test_case_name_selection_with_multi_scenario(tmp_path):

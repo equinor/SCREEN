@@ -50,6 +50,7 @@ def test_json_builds_reviewable_lgr_grdecl(
 
     output = output_file.read_text(encoding="utf-8")
     assert f"CARFIN\n{output_name}" in output
+    assert f"{output_name} 10 10 10 10 1 {coarse_dimensions[2]} 22 22 {refined_dimensions[2]} /" in output
     assert "NXFIN\n22 /" in output
     assert "NYFIN\n22 /" in output
     assert "NZFIN\n" in output
@@ -59,3 +60,9 @@ def test_json_builds_reviewable_lgr_grdecl(
     assert "10000.0" in output
     assert str(expected_casing_perm) in output
     assert output.rstrip().endswith("ENDFIN")
+    if well_name == "wildcat" and grid_case == "TEMP-0":
+        assert "PERMX  10000.0  6  17  6  17  11  13  /" in output
+        assert "EQLNUM  2  6  17  6  17  11  13  /" in output
+        assert "PERMX  0.5  8  15  8  15  11  12  /" in output
+        golden = root / "tests/gap/fixtures/wildcat_TEMP-0_LGR.grdecl"
+        assert output == golden.read_text(encoding="utf-8")

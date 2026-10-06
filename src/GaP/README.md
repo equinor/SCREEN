@@ -9,14 +9,16 @@ The resulting simulation model is a 3D representation of the wellbore, with the 
 
 Users should start with the canonical GaP and WellClass notebooks, especially `notebooks/02_gap_grid.ipynb` and `notebooks/03_wellclass_to_gap.ipynb`. Simulator-dependent experiments require copies of the template files and explicit external-tool setup; see `experiments/README.md` for the optional command-line utilities.
 
-For a repeatable command-line workflow, a multi-sheet workbook can be used as the input deck. Its physical well sheets are converted to canonical WellClass JSON, while `GridPolicy` and `SubsurfaceAssumptions` are parsed as separate GaP/CIRRUS simulation inputs used to parameterize the deck:
+For a repeatable command-line workflow, a multi-sheet workbook can be used as the input deck. Its physical well sheets are converted to canonical WellClass JSON, while `GridPolicy` and `DesignMatrix` are parsed as separate GaP/CIRRUS simulation inputs used to parameterize the deck. Legacy `SubsurfaceAssumptions` sheets remain supported:
 
 ```text
-XLSX -> well_input.json -> parameterized TEMP-0.in
+XLSX -> well_input.json -> parameterized <case_stem>.in
 	 -> CIRRUS initialization -> .EGRID + .INIT
 	 -> WellProcessed -> WellDataFrame -> LGRBuilder
-	 -> TEMP_LGR.grdecl -> final CIRRUS simulation
+	 -> <case_stem>_LGR.grdecl -> final CIRRUS simulation
 ```
+
+Workbook-driven runs name generated files by a case stem, `<well>_<case_name>`, derived from the workbook `Metadata` name and the selected `DesignMatrix` case (for example `wildcat_baseline`). The rules and the batch layout are described in the multi-scenario section of the [installation guide](INSTALLATION.md). `TEMP-*` names are reserved for the canonical template assets.
 
 Create a starter workbook and stage a case:
 
@@ -34,23 +36,66 @@ Ready-to-edit examples are provided beside the canonical fixtures:
 - `test_data/examples/wildcat/wildcat_workbook.xlsx`
 - `test_data/examples/smeaheia/smeaheia_workbook.xlsx`
 
-Their well-construction sheets are copied from the corresponding canonical JSON files. `GridPolicy` and `SubsurfaceAssumptions` contain illustrative scenario values that must be reviewed before running CIRRUS. Regenerate both examples after changing their source fixtures with:
+Their well-construction sheets are copied from the corresponding canonical JSON files. `GridPolicy` and `DesignMatrix` contain illustrative scenario values that must be reviewed before running CIRRUS. Regenerate both examples after changing their source fixtures with:
 
 ```bash
 python runscripts/create_example_well_workbooks.py
 ```
+
+`GridPolicy` lengths use metres in the model vertical-depth coordinate; `dx` and
+`dy` are metres, and permeability uses mD. New workbooks state
+`depth_unit=m` and `permeability_unit=mD`; legacy workbooks default to those
+units. Required fields are `top_depth` and `target_dz_water`,
+`target_dz_overburden`, and `target_dz_reservoir`. Defaults: `reservoir_thickness`
+400 m; `cells_per_layer` 400; minimum layer counts 1; maximum layer counts
+unset; `nx`/`ny` 20; `dx`/`dy` 200 m; `reservoir_permx` 1000 mD;
+`overburden_permx` 0.001 mD; `aquifer_permx` unset; `aquifer_layers` 3;
+`porv_multiplier` 2000; `permz_multiplier` 0.1. Spacing and layer counts must
+be positive, permeabilities nonnegative, and maximum layer counts cannot be
+below their minimums. `water_depth` comes from `Header.ground_elevation`
+(converted from ft when declared); legacy GridPolicy values for water depth,
+reservoir top, and bottom depth are ignored because those boundaries are
+derived from the header and well stratigraphy.
+
+Scenario depths (`z_fluid_contact`, `z_resrv`, and
+`overburden_datum_depth`) are TVDMSL metres; scenario pressures are bar. New
+workbooks include `depth_unit=m` and `pressure_unit=bar`; legacy scenario rows
+default to these units. The WellClass-to-GaP adapter expects processed interval
+depths in TVDMSL metres and all open-hole, casing-cement, and barrier
+permeabilities in mD. Unsupported units, missing required permeabilities, and
+negative or non-finite permeability values fail before LGR generation.
+
+Scenario salinity is the NaCl mass fraction of the solution (`kg salt / kg
+solution`), default `0.032`; new workbooks declare `salinity_basis=mass_fraction`
+and legacy values are interpreted the same way. The PVT model uses this
+fraction for the Laliberté brine-density correction. `PressureTable` evaluates
+the corresponding reference density at ground temperature and 1.01325 bar, then
+uses its existing constant-density hydrostatic approximation. Generated CIRRUS
+`SALT_TABLE` blocks use `CONCENTRATION_UNITS MASS` and the same mass fraction at
+both ends of the generated `SALTVD` interval. This keeps pressure and deck inputs
+consistent; it does not yet support a depth-varying salinity profile.
+
+Each `DesignMatrix` row is one case sharing the same physical well. Optional
+`reservoir_permx` and `overburden_permx` values override the corresponding
+`GridPolicy` values. `cb_perm` and `barrier_perm` are case-wide overrides applied
+to all casing-cement or plug intervals; they do not yet select an individual
+interval. Precedence is DesignMatrix override, then the well interval's own
+permeability, then the CLI default. `oh_perm` remains a fixed high-permeability
+workflow default, not a DesignMatrix sensitivity variable. Effective values are
+recorded in `scenario.json`, and the resolved grid policy is saved in
+`grid_policy.json`.
 
 After `.EGRID` and `.INIT` have been produced, build the LGR/CARFIN include:
 
 ```bash
 python runscripts/build_lgr_from_json.py \
 	--well-json case/well_input.json \
-	--sim-case case/model/TEMP-0 \
+	--sim-case case/model/wildcat_baseline \
 	--output-folder case/include \
-	--lgr-name TEMP_LGR
+	--lgr-file-stem wildcat_baseline_LGR
 ```
 
-The first command uses `FINAL_DATE = START_DATE` and disables `TEMP_LGR.grdecl` for initialization. The second command writes `TEMP_LGR.grdecl`; the same deck can then be configured for the final simulation by enabling that include and setting the requested final date. CIRRUS must be installed separately and available on `PATH`, or its absolute executable path can be supplied in `--sim-command`.
+The first command uses `FINAL_DATE = START_DATE` and disables the case LGR include for initialization. The second command writes `wildcat_baseline_LGR.grdecl`; `--lgr-name` sets the CARFIN LGR name inside it (default `TEMP_LGR`). The same deck can then be configured for the final simulation by enabling that include and setting the requested final date. CIRRUS must be installed separately and available on `PATH`, or its absolute executable path can be supplied in `--sim-command`.
 
 The wrapper performs the complete handoff in one command:
 
@@ -61,11 +106,32 @@ python runscripts/run_workbook_to_cirrus_lgr.py \
 	--sim-command "runcirrus -i -nm 6 {deck}"
 ```
 
-It stages the workbook, runs CIRRUS initialization, verifies `.EGRID` and `.INIT`, writes `TEMP_LGR.grdecl`, and configures the same deck for its final run. Add `--run-final` only when the final CIRRUS simulation should be launched immediately.
+It stages the workbook, runs CIRRUS initialization, verifies `.EGRID` and `.INIT`, writes `<case_stem>_LGR.grdecl`, and configures the same deck for its final run. Add `--run-final` only when the final CIRRUS simulation should be launched immediately.
 
-The wrapper validates that the configured CIRRUS executable is available before running. It writes captured output for each phase to `case/logs/initialization.log` and, when `--run-final` is used, `case/logs/final.log`. Errors report the log path, exit code, and whether the required `.EGRID`/`.INIT` files were found.
+The wrapper validates that the configured CIRRUS executable is available before running. It writes captured output for each phase to `case/logs/<case_stem>_initialization.log` and, when `--run-final` is used, `case/logs/<case_stem>_final.log`. Errors report the log path, exit code, and whether the required `.EGRID`/`.INIT` files were found.
 
-Notebook 3 also supports an optional generated-grid mode for visual QC after a wrapper run. Set `input_mode = 'generated'` in `notebooks/03_wellclass_to_gap.ipynb` and point `generated_case_root` at a completed case directory containing `well_input.json`, `model/TEMP-0.EGRID`, and `model/TEMP-0.INIT`.
+Notebook 3 also supports an optional generated-grid mode for visual QC after a wrapper run. Set `input_mode = 'generated'` in `notebooks/03_wellclass_to_gap.ipynb` and point `generated_case_root` at a completed case directory; the notebook reads the case's `scenario.json` to locate `well_input.json`, `model/<case_stem>.EGRID`, and `model/<case_stem>.INIT`.
+
+To compare completed scenarios, select a baseline case and compare the static
+grid artifacts with the dynamic pressure and saturation results:
+
+```bash
+uv run python runscripts/compare_scenario_outputs.py \
+	--output-root cases \
+	--baseline base_case \
+	--report cases/scenario_comparison.json
+```
+
+This is the default initialization/physics sensitivity comparison: grid geometry
+must remain invariant, while static `INIT` properties (for example `PERMX`,
+`PORO`, and `EQLNUM`) and selected `UNRST` quantities may vary with the case
+assumptions. Each newly generated case records its effective `GridPolicy` in
+`grid_policy.json`, so the report can distinguish property-policy changes from
+geometry-affecting changes. A geometry-affecting policy change is flagged for a
+separate grid sensitivity study rather than treated as an ordinary batch
+variation. The baseline defaults to the first case in sorted order when
+`--baseline` is omitted. This comparison requires completed simulator output
+and does not rerun CIRRUS.
 
 ## Grid Build Pipeline (Canonical)
 
@@ -116,7 +182,7 @@ python runscripts/prepare_init_case.py \
 	--sim-command "runcirrus -i -nm 6 {deck}"
 ```
 
-`{deck}` is replaced with the generated `TEMP-0.in` path.
+`{deck}` is replaced with the staged deck path: `TEMP-0.in` by default, or `<case_stem>.in` when `--case-stem` is given.
 
 The first run should not include `TEMP_LGR.grdecl`; that file belongs to the later GaP CARFIN/LGR stage after `.EGRID` and `.INIT` have been produced. The staged initialization case is therefore self-contained with the coarse-grid GRDECL, `tops_dz.inc`, and `co2_db_new.dat`.
 

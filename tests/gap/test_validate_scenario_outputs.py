@@ -63,6 +63,26 @@ def test_validate_outputs_reports_missing_files(tmp_path):
     assert "missing or empty file: model/TEMP-0.INIT" in result.stdout
 
 
+def test_validate_outputs_resolves_named_case_files(tmp_path):
+    case_root = tmp_path / "well_baseline"
+    for relative_path in ("include/well_baseline_GRD.grdecl", "include/well_baseline_LGR.grdecl", "model/well_baseline.EGRID"):
+        path = case_root / relative_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(relative_path, encoding="utf-8")
+    (case_root / "scenario.json").write_text(json.dumps({"case_metadata": {"case_stem": "well_baseline"}}), encoding="utf-8")
+
+    result = subprocess.run(
+        [sys.executable, "runscripts/validate_scenario_outputs.py", "--output-root", str(tmp_path)],
+        cwd=Path(__file__).parents[2],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 1
+    assert "missing or empty file: model/well_baseline.INIT" in result.stdout
+    assert "TEMP" not in result.stdout
+
+
 def test_validate_outputs_reports_log_errors(tmp_path):
     _write_case(tmp_path / "baseline", log_text="FATAL: simulator failed\n")
 

@@ -49,6 +49,10 @@ def _generate_scenario_variations(
         scenarios.append(
             {
                 "case_name": name,
+                "depth_unit": "m",
+                "pressure_unit": "bar",
+                "salinity_basis": "mass_fraction",
+                "salinity": 0.032,
                 "temperature_gradient": temp_gradient,
                 "ground_temperature": ground_temp,
                 "fluid_type": "co2",
@@ -56,6 +60,11 @@ def _generate_scenario_variations(
                 "p_fluid_contact": p_fluid,
                 "z_resrv": z_fluid + 50.0,
                 "p_resrv": p_fluid + 5.0,
+                "permeability_unit": "mD",
+                "reservoir_permx": None,
+                "overburden_permx": None,
+                "cb_perm": None,
+                "barrier_perm": None,
             }
         )
     return pd.DataFrame(scenarios)
@@ -88,6 +97,8 @@ def main() -> int:
     grid_policy = pd.DataFrame(
         {
             "key": [
+                "depth_unit",
+                "permeability_unit",
                 "top_depth",
                 "target_dz_water",
                 "target_dz_overburden",
@@ -99,7 +110,7 @@ def main() -> int:
                 "min_overburden_layers",
                 "min_reservoir_layers",
             ],
-            "value": [4.0, 50.0, 60.0, 8.0, 1000.0, 0.001, 400, 1, 1, 1],
+            "value": ["m", "mD", 4.0, 50.0, 60.0, 8.0, 1000.0, 0.001, 400, 1, 1, 1],
         }
     )
     survey = pd.DataFrame(
@@ -167,7 +178,7 @@ def main() -> int:
         hole_casings.to_excel(writer, sheet_name="HoleCasings", index=False)
         plugs.to_excel(writer, sheet_name="Plugs", index=False)
         stratigraphy.to_excel(writer, sheet_name="Stratigraphy", index=False)
-        assumptions.to_excel(writer, sheet_name="SubsurfaceAssumptions", index=False)
+        assumptions.to_excel(writer, sheet_name="DesignMatrix", index=False)
 
     scenario_str = ", ".join(args.scenarios)
     print(f"Created workbook template with {len(args.scenarios)} scenario(s): {scenario_str}")
