@@ -82,7 +82,7 @@ less often. The technical detail follows for whoever picks the item up.
 | 4 | Share scalar salinity between pressure and CIRRUS | Done |
 | 5 | Generalize the workbook into a design matrix | Case-wide overrides done; per-interval overrides open |
 | 6 | Give generated cases unique, navigable names | Done; real-CIRRUS check pending (item 7) |
-| 7 | Confirm recent changes on a CIRRUS host | LSF wait implemented; live check open |
+| 7 | Confirm recent changes on a CIRRUS host | Done for current case/LGR naming |
 | 8 | Give user-facing names a clear meaning | Open |
 
 ### 1. Compare scenario outputs automatically
@@ -230,48 +230,60 @@ for the CIRRUS check in item 7.
 
 ### 7. Confirm recent changes on a CIRRUS host
 
-**Status: queue wait implemented; real-CIRRUS verification remains open.**
+**Status: done for current case and LGR naming.** CIRRUS version recorded;
+`SCREEN_TEST_LGR` (15 characters) passed. The maximum identifier length remains
+unknown and is not needed while the production default remains `TEMP_LGR`.
 
-**In practice:** the automated tests use a fake simulator that only copies
-fixture grid files next to the deck. They prove SCREEN writes and finds the
-right files, but not that CIRRUS itself accepts the new case names. An LSF
-queue can also report a successful submission before the outputs exist; the
-backend now detects the submitted job ID and waits for `DONE` or `EXIT` before
-checking the files.
+**In practice:** a real two-case Wildcat batch completed through the LSF
+`bigmem` queue. CIRRUS accepted the case-stem deck names, generated the expected
+case-named files, and the final runs produced results that SCREEN could
+validate and compare. The LSF wait in `CirrusBackend` was exercised by this run.
 
 `CirrusBackend` polls `bjobs -a -noheader -o stat <job_id>` every 15 seconds by
 default and allows up to 24 hours. Override those limits with
 `--queue-poll-interval` and `--queue-timeout` (seconds) on the single-case or
 batch command. Non-LSF commands that block until completion are unchanged.
 
-On a Linux host with CIRRUS, run a short two-case batch and the two checking
-scripts:
+The verified command was:
 
 ```bash
 uv run python runscripts/run_workbook_scenarios_batch.py \
     --xlsx test_data/examples/wildcat/wildcat_workbook.xlsx \
-    --output-root work/cirrus_check \
-    --sim-command "runcirrus -i -nm 6 {deck}" \
-    --simulation-years 1 --run-final --force
-uv run python runscripts/validate_scenario_outputs.py --output-root work/cirrus_check
-uv run python runscripts/compare_scenario_outputs.py --output-root work/cirrus_check
+    --output-root work/cirrus_check_lsfwait \
+    --sim-command "runcirrus -q bigmem8 -nm 5 -nn 2 {deck}" \
+    --simulation-years 1 --run-final --queue-poll-interval 15 \
+    --queue-timeout 86400 --jobs 2
+uv run python runscripts/validate_scenario_outputs.py \
+    --output-root work/cirrus_check_lsfwait
+uv run python runscripts/compare_scenario_outputs.py \
+    --output-root work/cirrus_check_lsfwait \
+    --baseline wildcat_baseline \
+    --report work/cirrus_check_lsfwait/comparison.json
 ```
 
-Check that:
+Observed results:
 
-- CIRRUS accepts a deck whose first line is the `# SCREEN case:` comment (no
-    parse error in `logs/<case_stem>_initialization.log`);
-- CIRRUS names its outputs after the deck (`model/<case_stem>.EGRID`, `.INIT`,
-    `.UNRST`). If it does not, the wrapper stops with "did not produce both
-    .EGRID and .INIT";
-- the final run picks up `include/<case_stem>_LGR.grdecl`;
-- validation passes, and the comparison reports identical grid geometry with
-    different pressure results between the two cases (the first real-data run
-    of item 1); and
-- whether CIRRUS limits LGR name length (for example to 8 characters), before
-    `TEMP_LGR` is renamed.
+- LSF jobs completed successfully; the sample `bjobs -l` output showed status
+    `DONE`.
+- `validate_scenario_outputs.py` reported `OK` for `wildcat_baseline` and
+    `wildcat_hot_case`.
+- `compare_scenario_outputs.py` reported `OK: wildcat_hot_case vs
+    wildcat_baseline`: grid geometry matched, no `GridPolicy` fields or `INIT`
+    properties changed, and pressure/saturation outputs differed for the
+    changed scenario inputs.
+- Case-named `.EGRID`, `.INIT`, and `.UNRST` files were produced for both cases.
 
-Done when the checks pass and the date, host and CIRRUS version are noted here.
+The LSF output identified submit host `st-lintgx0003` and execution hosts
+`st-rsv15-15-09` and `st-rsv15-15-02`. CIRRUS reported `Cirrus SV3 2.0.7`,
+compiled August 4, 2026; the `runcirrus` wrapper resolved to `/global/bin/runcirrus`.
+
+An additional final run used `--lgr-name SCREEN_TEST_LGR` (15 characters).
+LSF job `366202` finished `DONE`, the final log recorded the same status, and
+`model/wildcat_baseline.UNRST` was written at 13:04 on 2026-10-06 (42,315,536
+bytes). This confirms CIRRUS accepted that longer CARFIN identifier.
+
+The maximum supported CARFIN name length was not tested. Revisit this only if
+the simulator-visible default `TEMP_LGR` is to be renamed.
 
 ### 8. Give user-facing names a clear meaning
 
@@ -299,10 +311,47 @@ Work in order of how often people see the name:
     `LGR_NAME`). Rename only when that code is being changed anyway, since these
     renames carry the most risk for the least benefit to users.
 
-Start with a short table of current name, proposed name, meaning and unit, and
-agree it before renaming anything. Done when steps 1 and 2 are implemented, the
-workbook documentation uses the new names, and tests show that a workbook
-using the old names still produces the same case.
+#### Name Proposal for Review
+
+These are proposals, not adopted API names. Please agree on the vocabulary
+before implementation. Workbook aliases would keep existing workbooks working;
+CLI aliases would keep existing scripts working. Units are written in the
+proposed name where they help distinguish otherwise ambiguous values.
+
+| Surface | Current name | Proposed name | Meaning | Unit |
+| --- | --- | --- | --- | --- |
+| DesignMatrix | `case_name` | `scenario_name` | Human-readable name for one assumptions row | none |
+| DesignMatrix | `temperature_gradient` | `geothermal_gradient_degC_per_km` | Temperature increase with depth | degC/km |
+| DesignMatrix | `ground_temperature` | `ground_temperature_degC` | Temperature at ground/seafloor | degC |
+| DesignMatrix | `z_fluid_contact` | `fluid_contact_depth_mTVDMSL` | Fluid-contact depth | m TVDMSL |
+| DesignMatrix | `p_fluid_contact` | `fluid_contact_pressure_bar` | Pressure at fluid-contact depth | bar |
+| DesignMatrix | `z_resrv` | `reservoir_depth_mTVDMSL` | Reservoir reference depth; legacy alias | m TVDMSL |
+| DesignMatrix | `p_resrv` | `reservoir_pressure_bar` | Pressure at reservoir reference depth; legacy alias | bar |
+| DesignMatrix | `overburden_datum_depth` | `overburden_datum_mTVDMSL` | Depth where overburden pressure is specified | m TVDMSL |
+| DesignMatrix | `salinity` | `salinity_mass_fraction` | NaCl mass divided by total solution mass | kg/kg (dimensionless) |
+| GridPolicy | `reservoir_permx` | `reservoir_permeability_mD` | Reservoir horizontal permeability | mD |
+| GridPolicy | `overburden_permx` | `overburden_permeability_mD` | Overburden horizontal permeability | mD |
+| GridPolicy | `aquifer_permx` | `aquifer_permeability_mD` | Aquifer horizontal permeability | mD |
+| GridPolicy | `target_dz_water` | `target_cell_dz_water_m` | Target vertical cell thickness in water | m |
+| GridPolicy | `target_dz_overburden` | `target_cell_dz_overburden_m` | Target vertical cell thickness in overburden | m |
+| GridPolicy | `target_dz_reservoir` | `target_cell_dz_reservoir_m` | Target vertical cell thickness in reservoir | m |
+| DesignMatrix | `cb_perm` | `cement_sheeth_permeability_mD` | Case-wide casing-cement permeability override | mD |
+| DesignMatrix | `barrier_perm` | `cement_plug_permeability_mD` | Case-wide plug/barrier permeability override | mD |
+| CLI | `--sim-command` | `--cirrus-command` | Command template containing `{deck}` | none |
+| CLI | `--case-name` | `--scenario-name` | Select the workbook assumptions row to run | none |
+| CLI | `--oh-perm` | `--open-hole-permeability-md` | Default permeability assigned to open-hole cells | mD |
+| CLI | `--cb-perm` | `--cement-sheeth-permeability-md` | Default permeability assigned to casing-cement cells | mD |
+| CLI | `--barrier-perm` | `--cement-plug-permeability-md` | Default permeability assigned to plug/barrier cells | mD |
+| CLI | `--ali-way` | `--legacy-depth-refinement` | Alternate refinement: uses coarse-grid reference depth, alternative lateral sizing, and a fixed 0.05 m minimum cell size | none |
+
+Potentially overlapping depth/pressure pairs (`fluid_contact_*` and
+`reservoir_*`) should stay separate: the former defines the fluid-contact
+boundary, while the latter is a compatibility input used when no fluid-contact
+pair is supplied. This distinction needs to remain explicit in any rename.
+
+Done when the names are agreed, steps 1 and 2 are implemented, workbook
+documentation uses the new names, and tests show that a workbook using the old
+names still produces the same case.
 
 ## Later
 
