@@ -77,13 +77,18 @@ consistent; it does not yet support a depth-varying salinity profile.
 
 Each `DesignMatrix` row is one case sharing the same physical well. Optional
 `reservoir_permx` and `overburden_permx` values override the corresponding
-`GridPolicy` values. `cb_perm` and `barrier_perm` are case-wide overrides applied
-to all casing-cement or plug intervals; they do not yet select an individual
-interval. Precedence is DesignMatrix override, then the well interval's own
-permeability, then the CLI default. `oh_perm` remains a fixed high-permeability
-workflow default, not a DesignMatrix sensitivity variable. Effective values are
-recorded in `scenario.json`, and the resolved grid policy is saved in
-`grid_policy.json`.
+`GridPolicy` values. `cb_perm` and `barrier_perm` override casing-cement and
+plug permeability. Their companion `cb_perm_interval` and
+`barrier_perm_interval` columns select the interval by its `name` in the
+`HoleCasings` or `Plugs` sheet; the default `ALL` applies the value to every
+interval of that type. For a named interval, only that interval changes. Other
+intervals retain their own workbook permeability, falling back to the CLI
+default when none is provided. Interval names used as targets must be unique
+within the relevant sheet and must match exactly. A target other than `ALL`
+requires its corresponding permeability value. `oh_perm` remains a fixed
+high-permeability workflow default, not a DesignMatrix sensitivity variable.
+Effective values and targeted overrides are recorded in `scenario.json`, and
+the resolved grid policy is saved in `grid_policy.json`.
 
 After `.EGRID` and `.INIT` have been produced, build the LGR/CARFIN include:
 
