@@ -111,6 +111,7 @@ def create_workbook(example: dict) -> Path:
                 "GridPolicy and DesignMatrix are editable example scenario values and must be reviewed for a real case.",
                 "z_fluid_contact and p_fluid_contact define the GAS_WATER datum and WGC depth in CIRRUS.",
                 "Multiple rows in DesignMatrix define cases that can be run with --case-name selection.",
+                "cb_perm_interval and barrier_perm_interval select a HoleCasings or Plugs name; ALL applies the permeability to every interval of that type.",
             ]
         }
     )
@@ -130,6 +131,8 @@ def create_workbook(example: dict) -> Path:
         scenarios["permeability_unit"] = "mD"
         for field in ("reservoir_permx", "overburden_permx", "cb_perm", "barrier_perm"):
             scenarios[field] = None
+        scenarios["cb_perm_interval"] = "ALL"
+        scenarios["barrier_perm_interval"] = "ALL"
         scenarios.to_excel(writer, sheet_name="DesignMatrix", index=False)
         notes.to_excel(writer, sheet_name="Notes", index=False)
     return output

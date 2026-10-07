@@ -64,7 +64,9 @@ def _generate_scenario_variations(
                 "reservoir_permx": None,
                 "overburden_permx": None,
                 "cb_perm": None,
+                "cb_perm_interval": "ALL",
                 "barrier_perm": None,
+                "barrier_perm_interval": "ALL",
             }
         )
     return pd.DataFrame(scenarios)

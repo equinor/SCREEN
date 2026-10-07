@@ -25,7 +25,9 @@ class SimulationScenario(BaseModel):
     reservoir_permx: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False, description="Reservoir PERMX override in mD")
     overburden_permx: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False, description="Overburden PERMX override in mD")
     cb_perm: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False, description="Casing-cement permeability override in mD")
+    cb_perm_interval: str = Field(default="ALL", description="HoleCasings casing-cement name to override, or ALL")
     barrier_perm: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False, description="Plug-cement permeability override in mD")
+    barrier_perm_interval: str = Field(default="ALL", description="Plugs name to override, or ALL")
 
     @field_validator("case_name")
     @classmethod
@@ -33,6 +35,21 @@ class SimulationScenario(BaseModel):
         if not value.strip():
             raise ValueError("case_name must not be blank")
         return value
+
+    @field_validator("cb_perm_interval", "barrier_perm_interval")
+    @classmethod
+    def interval_target_is_not_blank(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("permeability interval target must not be blank; use ALL for every interval")
+        return value.strip()
+
+    @model_validator(mode="after")
+    def interval_overrides_require_values(self) -> SimulationScenario:
+        if self.cb_perm_interval != "ALL" and self.cb_perm is None:
+            raise ValueError("cb_perm is required when cb_perm_interval targets a specific interval")
+        if self.barrier_perm_interval != "ALL" and self.barrier_perm is None:
+            raise ValueError("barrier_perm is required when barrier_perm_interval targets a specific interval")
+        return self
 
 
 class SimulationDesign(BaseModel):

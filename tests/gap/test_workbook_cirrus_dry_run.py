@@ -8,7 +8,11 @@ import types
 from types import SimpleNamespace
 
 import numpy as np
+import pytest
 from openpyxl import load_workbook
+
+from src.GaP.libs.models.simulation_scenario import SimulationScenario
+from src.WellClass.libs.utils.xlsx_parser import xlsx_to_well_model
 
 WORKFLOW_PATH = Path(__file__).parents[2] / "runscripts/run_workbook_to_cirrus_lgr.py"
 sys.path.insert(0, str(WORKFLOW_PATH.parent))
@@ -142,7 +146,9 @@ def test_design_matrix_permeability_overrides_reach_case_outputs(tmp_path):
         "overburden_permx": 0.002,
         "oh_perm": 10000.0,
         "cb_perm": 0.2,
+        "cb_perm_interval_overrides": {},
         "barrier_perm": 0.3,
+        "barrier_perm_interval_overrides": {},
     }
     assert policy["reservoir_permx"] == 750.0
     assert policy["overburden_permx"] == 0.002
@@ -150,6 +156,63 @@ def test_design_matrix_permeability_overrides_reach_case_outputs(tmp_path):
     assert "PERMX  0.2" in lgr
     assert "PERMX  0.3" in lgr
     assert "CARFIN\nTEMP_LGR 10 10 10 10 1 60 22 22 150 /" in lgr
+
+
+def test_unknown_interval_target_is_rejected_before_cirrus_runs():
+    root = Path(__file__).parents[2]
+    model = xlsx_to_well_model(root / "test_data/examples/smeaheia/smeaheia_workbook.xlsx")
+    scenario = SimulationScenario(barrier_perm=0.2, barrier_perm_interval="missing")
+
+    with pytest.raises(ValueError, match="unknown plug interval 'missing'"):
+        workflow.validate_scenario_interval_targets(model, scenario)
+
+
+def test_workbook_interval_permeability_overrides_are_isolated(tmp_path):
+    root = Path(__file__).parents[2]
+    workbook = tmp_path / "targeted.xlsx"
+    shutil.copyfile(root / "test_data/examples/smeaheia/smeaheia_workbook.xlsx", workbook)
+    excel = load_workbook(workbook)
+    sheet = excel["DesignMatrix"]
+    columns = {sheet.cell(1, column).value: column for column in range(1, sheet.max_column + 1)}
+    for field, value in {
+        "cb_perm": 0.25,
+        "cb_perm_interval": "Cement 9 5/8 in",
+        "barrier_perm": 0.75,
+        "barrier_perm_interval": "cplug9",
+    }.items():
+        sheet.cell(2, columns[field]).value = value
+    excel.save(workbook)
+
+    fixture_prefix = root / "test_data/examples/smeaheia/model/TEMP-0"
+    runner = _fake_cirrus(tmp_path, fixture_prefix)
+    output_root = tmp_path / "targeted"
+    subprocess.run(
+        [
+            sys.executable,
+            "runscripts/run_workbook_to_cirrus_lgr.py",
+            "--xlsx",
+            str(workbook),
+            "--output-root",
+            str(output_root),
+            "--sim-command",
+            f"{runner} {{deck}}",
+            "--case-name",
+            "baseline",
+        ],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    lgr = (output_root / "include/smeaheia_baseline_LGR.grdecl").read_text(encoding="utf-8")
+    assert "PERMX  0.25  9  14  9  9  49  91  /" in lgr
+    assert "PERMX  0.75  9  14  9  14  14  35  /" in lgr
+    scenario = json.loads((output_root / "scenario.json").read_text(encoding="utf-8"))
+    assert scenario["effective_permeability_mD"]["cb_perm"] == 0.05
+    assert scenario["effective_permeability_mD"]["cb_perm_interval_overrides"] == {"Cement 9 5/8 in": 0.25}
+    assert scenario["effective_permeability_mD"]["barrier_perm"] == 0.05
+    assert scenario["effective_permeability_mD"]["barrier_perm_interval_overrides"] == {"cplug9": 0.75}
 
 
 def test_qc_plot_uses_workbook_fluid_contact_pressure(tmp_path, monkeypatch):

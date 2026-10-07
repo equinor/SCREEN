@@ -56,6 +56,27 @@ def find_simulator_case(output_root: Path, deck_path: Path) -> Path:
     )
 
 
+def validate_scenario_interval_targets(model, scenario) -> None:
+    """Reject unknown or ambiguous workbook interval names before running CIRRUS."""
+    targets = (
+        (
+            "cb_perm_interval",
+            "casing cement",
+            [record.name for record in model.spec.hole_casings or [] if record.type == "casing cement"],
+        ),
+        ("barrier_perm_interval", "plug", [record.name for record in model.spec.plugs or []]),
+    )
+    for field, interval_type, identifiers in targets:
+        target = getattr(scenario, field)
+        if target == "ALL":
+            continue
+        count = identifiers.count(target)
+        if count == 0:
+            raise ValueError(f"unknown {interval_type} interval {target!r}; available intervals: {sorted(identifiers)}")
+        if count > 1:
+            raise ValueError(f"ambiguous {interval_type} interval {target!r}; names must be unique")
+
+
 def save_qc_plot(model, scenario, output_path: Path) -> None:
     """Save the notebook-style WellClass sketch and pressure QC plot."""
     try:
@@ -129,6 +150,7 @@ def run_workflow(args: argparse.Namespace) -> Path:
         scenario = design.select(args.case_name)
     except ValueError as exc:
         raise ValueError(f"Invalid case-name '{args.case_name}': {exc}") from None
+    validate_scenario_interval_targets(model, scenario)
     resolve_case_identity(args, model, design, scenario)
     case_files = CaseFiles.for_stem(args.case_stem)
     policy = dict(policy)
@@ -152,8 +174,24 @@ def run_workflow(args: argparse.Namespace) -> Path:
         "reservoir_permx": policy.get("reservoir_permx", 1000.0),
         "overburden_permx": policy.get("overburden_permx", 0.001),
         "oh_perm": args.oh_perm,
-        "cb_perm": scenario.cb_perm if scenario.cb_perm is not None else args.cb_perm,
-        "barrier_perm": scenario.barrier_perm if scenario.barrier_perm is not None else args.barrier_perm,
+        "cb_perm": (
+            args.cb_perm
+            if scenario.cb_perm_interval != "ALL"
+            else scenario.cb_perm if scenario.cb_perm is not None else args.cb_perm
+        ),
+        "cb_perm_interval_overrides": (
+            {scenario.cb_perm_interval: scenario.cb_perm} if scenario.cb_perm_interval != "ALL" else {}
+        ),
+        "barrier_perm": (
+            args.barrier_perm
+            if scenario.barrier_perm_interval != "ALL"
+            else scenario.barrier_perm if scenario.barrier_perm is not None else args.barrier_perm
+        ),
+        "barrier_perm_interval_overrides": (
+            {scenario.barrier_perm_interval: scenario.barrier_perm}
+            if scenario.barrier_perm_interval != "ALL"
+            else {}
+        ),
     }
     template_files = CaseFiles.template()
     scenario_record["case_metadata"] = {
@@ -192,10 +230,18 @@ def run_workflow(args: argparse.Namespace) -> Path:
         permeability_overrides={
             key: value
             for key, value in {
-                "cb_perm": scenario.cb_perm,
-                "barrier_perm": scenario.barrier_perm,
+                "cb_perm": scenario.cb_perm if scenario.cb_perm_interval == "ALL" else None,
+                "barrier_perm": scenario.barrier_perm if scenario.barrier_perm_interval == "ALL" else None,
             }.items()
             if value is not None
+        },
+        interval_permeability_overrides={
+            field: {target: value}
+            for field, target, value in (
+                ("cb_perm", scenario.cb_perm_interval, scenario.cb_perm),
+                ("barrier_perm", scenario.barrier_perm_interval, scenario.barrier_perm),
+            )
+            if target != "ALL" and value is not None
         },
         ali_way=args.ali_way,
     )

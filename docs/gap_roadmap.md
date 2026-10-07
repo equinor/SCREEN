@@ -80,7 +80,7 @@ less often. The technical detail follows for whoever picks the item up.
 | 2 | Make the input contract explicit | Done |
 | 3 | Strengthen pure GaP regression coverage | Done for current Wildcat and Smeaheia regression cases |
 | 4 | Share scalar salinity between pressure and CIRRUS | Done |
-| 5 | Generalize the workbook into a design matrix | Case-wide overrides done; per-interval overrides open |
+| 5 | Generalize the workbook into a design matrix | Case-wide and per-interval permeability overrides done |
 | 6 | Give generated cases unique, navigable names | Done; verified on a real CIRRUS host (item 7) |
 | 7 | Confirm recent changes on a CIRRUS host | Done for current case/LGR naming |
 | 8 | Give user-facing names a clear meaning | Open |
@@ -178,27 +178,28 @@ until a concrete modeling use case requires them.
 
 **In practice:** one workbook can define several cases on the same well, each
 with its own reservoir or overburden permeability and its own cement or plug
-permeability, and the batch runs them all. The limitation today is that a
-cement or plug permeability override applies to *every* cement or plug
-interval in the well at once; you cannot yet say "only the second plug is
-degraded".
+permeability, and the batch runs them all. `cb_perm` and `barrier_perm` can
+apply case-wide or target one named interval using `cb_perm_interval` or
+`barrier_perm_interval`. `ALL` keeps the case-wide behavior.
 
 **Details:** new workbooks
 use `DesignMatrix`; legacy `SubsurfaceAssumptions` sheets remain readable. Each
 row defines a named case sharing the same physical well. Rows can override
-`reservoir_permx` and `overburden_permx` in mD, plus case-wide `cb_perm` and
-`barrier_perm` values for all casing-cement or plug intervals. Empty overrides
-fall back to the grid policy, the individual well record where present, then
-CLI defaults as documented. Effective permeability values are saved with case
+`reservoir_permx` and `overburden_permx` in mD, plus `cb_perm` and `barrier_perm`
+values. The companion interval columns select by the `name` in the
+`HoleCasings` or `Plugs` sheet; `ALL` applies the value to every interval of
+that type. For a named target, only that interval changes. Other intervals
+retain their workbook permeability where present, then use CLI defaults.
+Effective permeability values and interval targets are saved with case
 metadata. Open-hole permeability remains a fixed high-permeability default and
 is deliberately not a scenario sensitivity.
 
-**Follow-up work:** let a cement override target one interval, identified by a
-stable row ID from the `HoleCasings` or `Plugs` sheet, with `ALL` keeping the
-current case-wide behavior. Tests should show that a targeted
-override changes only its interval, while geometry and other intervals stay the
-same. Clearer names for the override fields (such as `cb_perm`) are covered by
-item 8.
+**Per-interval overrides:** `cb_perm_interval` and `barrier_perm_interval`
+select an interval by its `name` in the `HoleCasings` or `Plugs` sheet;
+`ALL` preserves the case-wide behavior. Tests verify that targeted permeability
+changes affect only the selected interval and leave geometry and other
+intervals unchanged. Clearer names for the override fields (such as `cb_perm`)
+are covered by item 8.
 
 ### 6. Give generated cases unique, navigable names
 

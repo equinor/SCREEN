@@ -107,6 +107,8 @@ def test_scenario_depth_and_pressure_units_are_validated():
     assert SimulationScenario().depth_unit == "m"
     assert SimulationScenario().pressure_unit == "bar"
     assert SimulationScenario().permeability_unit == "mD"
+    assert SimulationScenario().cb_perm_interval == "ALL"
+    assert SimulationScenario().barrier_perm_interval == "ALL"
     with pytest.raises(ValueError):
         SimulationScenario(depth_unit="ft")
     with pytest.raises(ValueError):
@@ -117,6 +119,30 @@ def test_scenario_depth_and_pressure_units_are_validated():
         SimulationScenario(salinity_basis="mass_ratio")
     with pytest.raises(ValueError):
         SimulationScenario(salinity=1.0)
+    with pytest.raises(ValueError, match="cb_perm is required"):
+        SimulationScenario(cb_perm_interval="Cement 13 3/8 in")
+    with pytest.raises(ValueError, match="must not be blank"):
+        SimulationScenario(barrier_perm_interval=" ")
+
+
+def test_design_matrix_parses_interval_permeability_targets(tmp_path):
+    workbook = tmp_path / "interval-overrides.xlsx"
+    with pd.ExcelWriter(workbook, engine="openpyxl") as writer:
+        pd.DataFrame(
+            {
+                "case_name": ["targeted"],
+                "cb_perm": [0.2],
+                "cb_perm_interval": ["Cement 13 3/8 in"],
+                "barrier_perm": [0.3],
+                "barrier_perm_interval": ["cplug9"],
+            }
+        ).to_excel(writer, sheet_name="DesignMatrix", index=False)
+
+    scenario = xlsx_to_simulation_design(workbook).scenarios[0]
+    assert scenario.cb_perm == 0.2
+    assert scenario.cb_perm_interval == "Cement 13 3/8 in"
+    assert scenario.barrier_perm == 0.3
+    assert scenario.barrier_perm_interval == "cplug9"
 
 
 def test_batch_execution_script_summary(tmp_path):

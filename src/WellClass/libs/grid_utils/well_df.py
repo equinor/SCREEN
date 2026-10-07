@@ -1,9 +1,21 @@
+from collections.abc import Mapping
+
 import numpy as np
 import pandas as pd
 
 
 class WellDataFrame:
-    def __init__(self, my_well, *, oh_perm=None, cb_perm=None, barrier_perm=None, permeability_unit="mD", permeability_overrides=None):
+    def __init__(
+        self,
+        my_well,
+        *,
+        oh_perm=None,
+        cb_perm=None,
+        barrier_perm=None,
+        permeability_unit="mD",
+        permeability_overrides=None,
+        interval_permeability_overrides: Mapping[str, Mapping[str, float]] | None = None,
+    ):
         """Expose canonical/legacy GaP frames; processed depths are TVDMSL m and permeability is mD."""
 
         if permeability_unit != "mD":
@@ -11,7 +23,14 @@ class WellDataFrame:
         if hasattr(my_well, "drilling"):
             self._from_legacy_well(my_well)
         elif hasattr(my_well, "hole_casings"):
-            self._from_processed_well(my_well, oh_perm, cb_perm, barrier_perm, permeability_overrides or {})
+            self._from_processed_well(
+                my_well,
+                oh_perm,
+                cb_perm,
+                barrier_perm,
+                permeability_overrides or {},
+                interval_permeability_overrides or {},
+            )
         else:
             raise TypeError("WellDataFrame requires a legacy Well or WellProcessed instance")
 
@@ -31,13 +50,24 @@ class WellDataFrame:
         self.barriers_mod_df = pd.DataFrame(my_well.barriers_mod)
         self._set_canonical_aliases()
 
-    def _from_processed_well(self, my_well, oh_perm, cb_perm, barrier_perm, permeability_overrides):
+    def _from_processed_well(
+        self,
+        my_well,
+        oh_perm,
+        cb_perm,
+        barrier_perm,
+        permeability_overrides,
+        interval_permeability_overrides,
+    ):
         """Adapt WellProcessed records to the fields consumed by GaP."""
         if not hasattr(my_well, "borehole") or not hasattr(my_well, "annulus"):
             raise TypeError("WellDataFrame requires a processed well with derived geometry")
         unknown_overrides = set(permeability_overrides) - {"oh_perm", "cb_perm", "barrier_perm"}
         if unknown_overrides:
             raise ValueError(f"unknown permeability overrides: {sorted(unknown_overrides)}")
+        unknown_interval_fields = set(interval_permeability_overrides) - {"cb_perm", "barrier_perm"}
+        if unknown_interval_fields:
+            raise ValueError(f"unknown interval permeability overrides: {sorted(unknown_interval_fields)}")
 
         records = my_well.hole_casings or []
         holes = [record for record in records if record["type"] == "hole"]
@@ -72,12 +102,20 @@ class WellDataFrame:
                     "bottom_msl": casing["tvd_msl_bottom"],
                     "toc_msl": cement_row["tvd_msl_top"] if cement_row is not None else casing["tvd_msl_top"],
                     "boc_msl": cement_row["tvd_msl_bottom"] if cement_row is not None else casing["tvd_msl_bottom"],
+                    "cement_name": cement_row["name"] if cement_row is not None else None,
                     "cb_perm": (cement_row.get("hc_perm") if cement_row is not None and cement_row.get("hc_perm") is not None else cb_perm),
                 }
             )
         self.casings_df = pd.DataFrame(casing_rows)
         if "cb_perm" in permeability_overrides:
             self.casings_df["cb_perm"] = permeability_overrides["cb_perm"]
+        self._apply_interval_permeability_overrides(
+            self.casings_df,
+            "cement_name",
+            "cb_perm",
+            interval_permeability_overrides.get("cb_perm", {}),
+            "casing-cement",
+        )
         self._require_permeability(self.casings_df, "cb_perm", "cb_perm")
 
         self.borehole_df = pd.DataFrame(my_well.borehole)
@@ -96,8 +134,38 @@ class WellDataFrame:
         self.barriers_mod_df = self._processed_barriers(my_well, barrier_perm)
         if "barrier_perm" in permeability_overrides:
             self.barriers_mod_df["barrier_perm"] = permeability_overrides["barrier_perm"]
+        self._apply_interval_permeability_overrides(
+            self.barriers_mod_df,
+            "barrier_name",
+            "barrier_perm",
+            interval_permeability_overrides.get("barrier_perm", {}),
+            "plug",
+        )
         self._require_permeability(self.barriers_mod_df, "barrier_perm", "barrier_perm")
         self._set_canonical_aliases()
+
+    @staticmethod
+    def _apply_interval_permeability_overrides(frame, identifier_column, value_column, overrides, interval_type):
+        for identifier, value in overrides.items():
+            if not isinstance(identifier, str) or not identifier.strip() or identifier == "ALL":
+                raise ValueError(f"invalid {interval_type} interval identifier: {identifier!r}")
+            try:
+                numeric_value = float(value)
+            except (TypeError, ValueError) as exc:
+                raise ValueError(
+                    f"{value_column} override for {identifier!r} must be finite and nonnegative in mD"
+                ) from exc
+            if not np.isfinite(numeric_value) or numeric_value < 0:
+                raise ValueError(f"{value_column} override for {identifier!r} must be finite and nonnegative in mD")
+            matches = frame[identifier_column] == identifier if identifier_column in frame else pd.Series(dtype=bool)
+            match_count = int(matches.sum())
+            if match_count == 0:
+                available = sorted(frame[identifier_column].dropna().unique().tolist()) if identifier_column in frame else []
+                raise ValueError(f"unknown {interval_type} interval {identifier!r}; available intervals: {available}")
+            if match_count > 1:
+                raise ValueError(f"ambiguous {interval_type} interval {identifier!r}; names must be unique")
+            frame[value_column] = pd.to_numeric(frame[value_column], errors="coerce").astype(float)
+            frame.loc[matches, value_column] = numeric_value
 
     def _set_canonical_aliases(self):
         self.holes_df = self.drilling_df

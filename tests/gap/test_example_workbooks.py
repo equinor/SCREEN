@@ -31,6 +31,8 @@ def test_example_workbooks_parse_to_canonical_wells(name, well_identifier):
     assert all(scenario.pressure_unit == "bar" for scenario in design.scenarios)
     assert all(scenario.salinity_basis == "mass_fraction" for scenario in design.scenarios)
     assert all(scenario.permeability_unit == "mD" for scenario in design.scenarios)
+    assert all(scenario.cb_perm_interval == "ALL" for scenario in design.scenarios)
+    assert all(scenario.barrier_perm_interval == "ALL" for scenario in design.scenarios)
     assert survey.columns.tolist() == ["md_rkb", "inclination_deg", "azimuth_deg"]
     assert survey.empty
     if name == "smeaheia":
