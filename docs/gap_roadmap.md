@@ -76,19 +76,19 @@ less often. The technical detail follows for whoever picks the item up.
 
 | # | Item | Status |
 | --- | --- | --- |
-| 1 | Compare scenario outputs automatically | Done; first real-CIRRUS check pending (item 7) |
+| 1 | Compare scenario outputs automatically | Done; verified on a real CIRRUS batch (item 7) |
 | 2 | Make the input contract explicit | Done |
-| 3 | Strengthen pure GaP regression coverage | Partly done |
+| 3 | Strengthen pure GaP regression coverage | Done for current Wildcat and Smeaheia regression cases |
 | 4 | Share scalar salinity between pressure and CIRRUS | Done |
 | 5 | Generalize the workbook into a design matrix | Case-wide overrides done; per-interval overrides open |
-| 6 | Give generated cases unique, navigable names | Done; real-CIRRUS check pending (item 7) |
+| 6 | Give generated cases unique, navigable names | Done; verified on a real CIRRUS host (item 7) |
 | 7 | Confirm recent changes on a CIRRUS host | Done for current case/LGR naming |
 | 8 | Give user-facing names a clear meaning | Open |
 
 ### 1. Compare scenario outputs automatically
 
-**Status: done** in `runscripts/compare_scenario_outputs.py`, tested with
-synthetic simulator data. Not yet run on a real CIRRUS batch (see item 7).
+**Status: done** in `runscripts/compare_scenario_outputs.py`. Tested with
+synthetic simulator data and verified on a real CIRRUS batch (see item 7).
 
 **In practice:** after a batch run, one command tells you, for every case
 against a baseline case, what was changed in the inputs and what changed in the
@@ -132,8 +132,9 @@ without unit fields default to these units.
 
 ### 3. Strengthen pure GaP regression coverage
 
-**Status: done.** Uses the existing committed Wildcat `.EGRID`/`.INIT` fixture;
-no duplicate grid fixture was added.
+**Status: done for the current Wildcat and Smeaheia regression cases.** Coverage
+uses existing committed `.EGRID`/`.INIT` fixtures; no duplicate grid fixtures
+were added.
 
 **In practice:** a change that moves a refined boundary, changes the CARFIN
 output, or alters which material is assigned to a cell now fails in a regular
@@ -141,13 +142,13 @@ Python-only test run. The failure points to a small reviewable reference file,
 without requiring CIRRUS or PFLOTRAN.
 
 **Coverage:** `tests/well_class/test_json_to_lgr.py` checks coarse/refined
-dimensions, exact CARFIN bounds, non-negative finite permeability, `ENDFIN`,
-and compares the complete Wildcat LGR against
-`tests/gap/fixtures/wildcat_TEMP-0_LGR.grdecl` (8.4 KB). The existing tracked
-Wildcat `.EGRID`/`.INIT` fixture is reused. `tests/gap/test_grid_materials.py`
-checks that a plug replaces open-hole material at its depth while adjacent
-casing-cement cells keep cement material, and that every synthetic refined
-cell has the expected finite properties.
+dimensions, exact CARFIN bounds, non-negative finite permeability, and
+`ENDFIN`. It compares the complete Wildcat LGR against
+`tests/gap/fixtures/wildcat_TEMP-0_LGR.grdecl` (8.4 KB), and checks the exact
+permeability ranges of both plug intervals in the two Smeaheia grid variants.
+`tests/gap/test_grid_materials.py` checks that a plug replaces open-hole
+material at its depth while adjacent casing-cement cells keep cement material,
+and that every synthetic refined cell has the expected finite properties.
 
 ### 4. Share scalar salinity between pressure and CIRRUS
 
@@ -201,7 +202,7 @@ item 8.
 
 ### 6. Give generated cases unique, navigable names
 
-**Status: done** (PR #134). Confirmation on a real CIRRUS host is pending
+**Status: done** (PR #134), including confirmation on a real CIRRUS host
 (item 7).
 
 **In practice:** generated cases are no longer all called `TEMP-0`. A deck,
@@ -224,9 +225,10 @@ and WellViz export find case files through `scenario.json`, falling back to
 `TEMP-*` names for older outputs. `TEMP-*` is now reserved for the canonical
 template assets. The rules live in `src/GaP/libs/case_naming.py`.
 
-**Remaining:** the LGR name written inside generated LGR files is still
-`TEMP_LGR` (`--lgr-name`). It is visible to the simulator, so renaming it waits
-for the CIRRUS check in item 7.
+**Remaining:** the LGR name written inside generated LGR files remains
+`TEMP_LGR` (`--lgr-name`). A 15-character alternative (`SCREEN_TEST_LGR`) was
+accepted by CIRRUS; the maximum supported CARFIN name length is unknown and
+does not need to be established unless the production default is to be renamed.
 
 ### 7. Confirm recent changes on a CIRRUS host
 

@@ -8,16 +8,49 @@ from src.WellClass.libs.well_class import WellProcessed
 
 
 @pytest.mark.parametrize(
-    ("well_name", "grid_case", "coarse_dimensions", "refined_dimensions", "expected_casing_perm"),
+    (
+        "well_name",
+        "grid_case",
+        "coarse_dimensions",
+        "refined_dimensions",
+        "expected_casing_perm",
+        "expected_barrier_permx_ranges",
+    ),
     [
-        ("wildcat", "TEMP-0", (20, 20, 60), (22, 22, 150), 0.05),
-        ("smeaheia", "TEMP-0", (20, 20, 60), (22, 22, 150), 5.0),
-        ("smeaheia", "GEN_NOLGR_PH2", (20, 20, 82), (22, 22, 172), 5.0),
+        ("wildcat", "TEMP-0", (20, 20, 60), (22, 22, 150), 0.05, ()),
+        (
+            "smeaheia",
+            "TEMP-0",
+            (20, 20, 60),
+            (22, 22, 150),
+            5.0,
+            (
+                "PERMX  0.5  9  14  9  14  14  35  /",
+                "PERMX  100.0  10  13  10  13  82  84  /",
+            ),
+        ),
+        (
+            "smeaheia",
+            "GEN_NOLGR_PH2",
+            (20, 20, 82),
+            (22, 22, 172),
+            5.0,
+            (
+                "PERMX  0.5  9  14  9  14  15  36  /",
+                "PERMX  100.0  10  13  10  13  82  84  /",
+            ),
+        ),
     ],
     ids=["wildcat-TEMP-0", "smeaheia-TEMP-0", "smeaheia-GEN_NOLGR_PH2"],
 )
 def test_json_builds_reviewable_lgr_grdecl(
-    tmp_path, well_name, grid_case, coarse_dimensions, refined_dimensions, expected_casing_perm
+    tmp_path,
+    well_name,
+    grid_case,
+    coarse_dimensions,
+    refined_dimensions,
+    expected_casing_perm,
+    expected_barrier_permx_ranges,
 ):
     root = Path(__file__).parents[2]
     fixture_root = root / "test_data/examples" / well_name
@@ -60,6 +93,9 @@ def test_json_builds_reviewable_lgr_grdecl(
     assert "10000.0" in output
     assert str(expected_casing_perm) in output
     assert output.rstrip().endswith("ENDFIN")
+    for expected_range in expected_barrier_permx_ranges:
+        assert expected_range in output.splitlines()
+
     if well_name == "wildcat" and grid_case == "TEMP-0":
         assert "PERMX  10000.0  6  17  6  17  11  13  /" in output
         assert "EQLNUM  2  6  17  6  17  11  13  /" in output
