@@ -174,7 +174,8 @@ until a concrete modeling use case requires them.
 
 ### 5. Generalize the workbook into a design matrix
 
-**Status: initial case-wide sensitivity support is implemented.**
+**Status: case-wide and per-interval permeability overrides are implemented;
+per-interval overrides verified on CIRRUS.**
 
 **In practice:** one workbook can define several cases on the same well, each
 with its own reservoir or overburden permeability and its own cement or plug
@@ -200,6 +201,26 @@ select an interval by its `name` in the `HoleCasings` or `Plugs` sheet;
 changes affect only the selected interval and leave geometry and other
 intervals unchanged. Clearer names for the override fields (such as `cb_perm`)
 are covered by item 8.
+
+**CIRRUS verification (results reported October 9, 2026):** a Wildcat workbook
+contained an unchanged `baseline` and an otherwise identical
+`interval_override_check` case targeting `Cement 20 in` at `0.2 mD` and
+`cplug3` at `0.3 mD`. Outputs were written under
+`work/cirrus_interval_override_check`.
+
+- `validate_scenario_outputs.py` reported `OK` for both `wildcat_baseline`
+  and `wildcat_interval_override_check`.
+- `compare_scenario_outputs.py` reported
+  `OK: wildcat_interval_override_check vs wildcat_baseline`. Grid dimensions,
+  cell corners, and LGR geometry matched, and at least one compared dynamic
+  pressure/saturation output differed.
+- Changed scenario fields were `barrier_perm`, `barrier_perm_interval`,
+  `cb_perm`, `cb_perm_interval`, and `effective_permeability_mD`. No
+  `GridPolicy` fields or compared `INIT` properties changed.
+
+This confirms simulator acceptance and a changed simulation response without
+changing geometry. Isolation of non-target interval permeabilities is covered
+by regression tests, not independently established by this comparison summary.
 
 ### 6. Give generated cases unique, navigable names
 
