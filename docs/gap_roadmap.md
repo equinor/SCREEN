@@ -84,6 +84,7 @@ less often. The technical detail follows for whoever picks the item up.
 | 6 | Give generated cases unique, navigable names | Done; verified on a real CIRRUS host (item 7) |
 | 7 | Confirm recent changes on a CIRRUS host | Done for current case/LGR naming |
 | 8 | Give user-facing names a clear meaning | Open |
+| 9 | Represent a localized casing hole | Experimental implementation; CIRRUS connectivity verification pending |
 
 ### 1. Compare scenario outputs automatically
 
@@ -377,6 +378,61 @@ Done when the names are agreed, steps 1 and 2 are implemented, workbook
 documentation uses the new names, and tests show that a workbook using the old
 names still produces the same case.
 
+### 9. Represent a localized casing hole
+
+**Status: experimental implementation; CIRRUS connectivity verification
+pending.** First defect slice for a concrete well; no general defect framework
+is required.
+
+**In practice:** describe one hole using the affected casing's stable `name`
+from `HoleCasings`, depth in m TVDMSL, and hole diameter in m. Preserve the
+well geometry and open only the selected casing interface after generating
+the standard LGR and material assignments.
+
+**Placement assumption:** without an XY position or azimuth, use the midpoint
+of the casing's `+X` side. Record this deterministic assumption with the
+resolved casing, layer, affected faces, and multipliers in case metadata.
+It is a modeling convention, not a measured hole location.
+
+The implemented fields are `casing_hole_casing`,
+`casing_hole_depth_mTVDMSL`, and `casing_hole_diameter_m`: all three or none,
+one hole per scenario. The standalone builder accepts matching flags. Resolved
+faces/areas are saved beside the include and in workbook case metadata.
+Depth lookup uses absolute EGRID corners, not the internal cumulative-Z origin.
+The current implementation uses only `MULTX` on +X, nearest faces first along
+Y, and rejects coincident casing interfaces and unsupported grid geometry.
+See the [workflow guide](gap.md#experimental-localized-casing-hole) for the
+controlled sealed/partial/full-open CIRRUS acceptance check.
+
+**Area-equivalent opening:**
+
+- Locate the depth layer and the selected casing's sealed interface. Define
+  deterministic ownership at layer boundaries; reject depths outside that
+  casing and non-positive or non-finite diameters.
+- The circular opening area is `A = pi * (diameter / 2)^2`. For an X-normal
+  face use `A_face = DY * DZ`; for a Y-normal face use `DX * DZ`, not
+  `DX * DY`. A partially opened face receives `MULTX` or `MULTY` equal to
+  its allocated opening area divided by its face area.
+- Start at the side midpoint. If the area exceeds one face, allocate the
+  remainder deterministically to neighboring faces along the same casing
+  side and at the same K layer: along Y for an X-normal face, or along X
+  for a Y-normal face. Do not spread in Z, cross into another casing, or
+  rebuild the grid. Reject an opening larger than the available side area.
+- Keep each multiplier in `[0, 1]` and conserve total allocated area:
+  `sum(multiplier * face_area) = A` within a declared numerical tolerance.
+  Leave all other casing faces sealed and existing material properties
+  unchanged. This represents equivalent open area, not a resolved circular
+  hole shape when multiple faces are used.
+
+**Done when:** reuse the existing LGR/CARFIN writers with a small final
+face-override step; tests cover sub-face, exact-face, multi-face, invalid
+input, and unchanged no-defect output. Verify CIRRUS face indexing and
+keyword ordering so the opening replaces the existing zero casing multiplier
+rather than being multiplied by zero or overwritten later. A real CIRRUS
+baseline/defect run must confirm unchanged geometry and intended connectivity;
+the area ratio is a screening approximation, not a calibrated orifice-flow
+law.
+
 ## Later
 
 These are intentionally lower priority than the Next items:
@@ -401,13 +457,10 @@ These are intentionally lower priority than the Next items:
    WellClass namespace while retaining temporary re-exports. Done when imports,
    notebooks, and tests use the new location and the compatibility layer is
    documented.
-4. **Wellbore-defect scenarios.** *In practice:* describe a specific failure,
-   such as a casing hole at a given depth or a channel through the cement,
-   instead of only lowering the permeability of whole cement intervals.
-   Specify casing holes, cement channels,
-   microannuli, and fractures as separate scenario inputs; implement one
-   representation and validate it against simulator transmissibility behavior
-   before adding more defect types.
+4. **Additional wellbore-defect scenarios.** Casing holes are the first
+   concrete slice (Next item 9). Cement channels, microannuli, and fractures
+   remain deferred; choose a concrete use case and validate its representation
+   against simulator transmissibility behavior before adding another type.
 5. **Richer result viewing.** *In practice:* animate results over time or
    browse them in a hosted dashboard. The local Parquet viewer covers the
    current cross-section inspection; timestep animation, richer hover

@@ -4,6 +4,8 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from .casing_hole import CasingHole
+
 
 class SimulationScenario(BaseModel):
     """GaP/CIRRUS inputs for one simulation case of a physical wellbore."""
@@ -28,6 +30,27 @@ class SimulationScenario(BaseModel):
     cb_perm_interval: str = Field(default="ALL", description="HoleCasings casing-cement name to override, or ALL")
     barrier_perm: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False, description="Plug-cement permeability override in mD")
     barrier_perm_interval: str = Field(default="ALL", description="Plugs name to override, or ALL")
+    casing_hole_casing: Optional[str] = None
+    casing_hole_depth_mTVDMSL: Optional[float] = Field(default=None, allow_inf_nan=False)
+    casing_hole_diameter_m: Optional[float] = Field(default=None, gt=0, allow_inf_nan=False)
+
+    @property
+    def casing_hole(self) -> CasingHole | None:
+        fields = (self.casing_hole_casing, self.casing_hole_depth_mTVDMSL, self.casing_hole_diameter_m)
+        if all(value is None for value in fields):
+            return None
+        if self.casing_hole_casing is None or self.casing_hole_depth_mTVDMSL is None or self.casing_hole_diameter_m is None:
+            raise ValueError("casing hole requires casing, depth_mTVDMSL, and diameter_m together")
+        return CasingHole(
+            casing=self.casing_hole_casing,
+            depth_mTVDMSL=self.casing_hole_depth_mTVDMSL,
+            diameter_m=self.casing_hole_diameter_m,
+        )
+
+    @model_validator(mode="after")
+    def validate_casing_hole(self) -> SimulationScenario:
+        self.casing_hole
+        return self
 
     @field_validator("case_name")
     @classmethod

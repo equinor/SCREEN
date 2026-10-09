@@ -1,4 +1,9 @@
+import numpy as np
 import pandas as pd
+from resdata.grid import Grid
+
+from src.GaP.libs.grid_utils.casing_hole import refined_depth_edges, resolve_casing_hole
+from src.GaP.libs.models.casing_hole import CasingHole
 
 # coarse and refined grid
 from .grid_coarse import GridCoarse
@@ -21,6 +26,7 @@ class LGRBuilder(LGRBuilderBase):
         """
 
         ##### 1. grid_coarse
+        self.simcase = simcase
         # Loading the model
         self.grid_coarse = GridCoarse(str(simcase))
 
@@ -35,7 +41,14 @@ class LGRBuilder(LGRBuilderBase):
         )
 
     def build_grdecl(
-        self, output_folder: str, LGR_NAME: str, holes_df: pd.DataFrame, casings_df: pd.DataFrame, barrier_regions_df: pd.DataFrame
+        self,
+        output_folder: str,
+        LGR_NAME: str,
+        holes_df: pd.DataFrame,
+        casings_df: pd.DataFrame,
+        barrier_regions_df: pd.DataFrame,
+        *,
+        casing_hole: CasingHole | None = None,
     ) -> pd.DataFrame:
         """build .grdecl file and output it
 
@@ -50,6 +63,26 @@ class LGRBuilder(LGRBuilderBase):
 
         ##### 4. build LGR
         gap_casing_df = self.grid_refine.build_LGR(holes_df, casings_df, barrier_regions_df)
+        self.casing_hole_faces = ()
+        if casing_hole is not None:
+            grid = Grid(self.simcase + ".EGRID")
+            depth_edges = refined_depth_edges(
+                grid,
+                self.grid_coarse.main_grd_i,
+                self.grid_coarse.main_grd_j,
+                self.lgr_info.LGR_numb_z,
+                self.grid_coarse.main_grd_min_k,
+            )
+            if not np.allclose(np.diff(depth_edges), self.lgr_info.LGR_sizes_z, rtol=1e-6, atol=1e-8):
+                raise ValueError("casing hole physical layer thicknesses do not match the LGR material grid")
+            # CARFIN HYFIN uses rounded relative widths, normalized to the parent cell.
+            ratios_y = np.round(np.asarray(self.lgr_info.LGR_sizes_x) / self.lgr_info.min_grd_size, 2)
+            parent_cell = (self.grid_coarse.main_grd_i, self.grid_coarse.main_grd_j, self.grid_coarse.main_grd_min_k)
+            parent_dy = grid.get_cell_corner(2, ijk=parent_cell)[1] - grid.get_cell_corner(0, ijk=parent_cell)[1]
+            widths_y = ratios_y / ratios_y.sum() * parent_dy
+            self.casing_hole_faces = resolve_casing_hole(
+                casing_hole, gap_casing_df, depth_edges, widths_y, self.grid_refine.nx
+            )
 
         ##### 5. output LGR
         self._build_grdecl(
@@ -68,6 +101,7 @@ class LGRBuilder(LGRBuilderBase):
             self.lgr_info.LGR_sizes_x,
             self.lgr_info.LGR_numb_z,
             self.lgr_info.min_grd_size,
+            self.casing_hole_faces,
         )
 
         return gap_casing_df

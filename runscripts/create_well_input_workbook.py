@@ -67,6 +67,9 @@ def _generate_scenario_variations(
                 "cb_perm_interval": "ALL",
                 "barrier_perm": None,
                 "barrier_perm_interval": "ALL",
+                "casing_hole_casing": None,
+                "casing_hole_depth_mTVDMSL": None,
+                "casing_hole_diameter_m": None,
             }
         )
     return pd.DataFrame(scenarios)

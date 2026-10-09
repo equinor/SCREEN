@@ -90,6 +90,69 @@ high-permeability workflow default, not a DesignMatrix sensitivity variable.
 Effective values and targeted overrides are recorded in `scenario.json`, and
 the resolved grid policy is saved in `grid_policy.json`.
 
+### Experimental localized casing hole
+
+One optional hole per `DesignMatrix` row is supported. Supply all three fields
+or leave all three blank:
+
+| Field | Meaning |
+| --- | --- |
+| `casing_hole_casing` | Exact unique `HoleCasings.name` with `type=casing`, not casing cement |
+| `casing_hole_depth_mTVDMSL` | Hole depth in metres TVDMSL |
+| `casing_hole_diameter_m` | Finite positive circular opening diameter in metres |
+
+For example: `Casing 20 in`, `200`, `0.1` in the Wildcat example. Depth intervals
+are top-inclusive and bottom-exclusive, both for the casing and refined layer.
+Unknown or duplicate casing names, incomplete inputs, and depths outside the
+casing fail before CIRRUS initialization. Geometry-dependent checks run after
+initialization, before writing the LGR.
+
+Without measured XY/azimuth, placement is fixed at the **+X side midpoint**,
+choosing the lower J for a tie. The resolver uses absolute EGRID layer corners
+(including the grid's depth origin), the final sealed casing bounds, and the
+rounded CARFIN `HYFIN` ratios. It allocates `pi * (diameter / 2)^2` to lateral
+faces with area `DY * DZ`, writing `MULTX = allocated_area / face_area` after
+the ordinary seals. Larger holes fill nearest neighboring faces along Y, at
+the **same K**, without refining or changing the geometry. Multipliers stay
+within `[0, 1]`; allocated area is conserved to relative tolerance `1e-12`.
+An opening larger than the available side area is rejected, not spread in Z.
+Shared/ambiguous casing interfaces, absent lateral neighbors, non-Cartesian
+grids, non-flat layers, or inconsistent physical/material layer thicknesses
+are rejected.
+
+Only the selected casing's multiplier changes. Other casings, cement, plugs,
+material permeabilities and grid geometry remain unchanged, so a casing hole
+does **not** necessarily establish a whole-well leakage path. This is an
+area-equivalent screening aperture, not a resolved circular shape or calibrated
+orifice-flow model.
+
+The standalone builder accepts the same inputs via `--casing-hole-casing`,
+`--casing-hole-depth-mTVDMSL`, and `--casing-hole-diameter-m`. It writes
+`<lgr-file-stem>.casing_hole.json` beside the include, with the input, placement
+assumption, one-based face indices, face/opening areas, and multipliers. The
+workbook wrapper also records this under `resolved_casing_hole` in
+`scenario.json`. Omitting the inputs preserves the existing GRDECL output.
+
+**CIRRUS connectivity is not yet verified.** Before using this for decisions,
+run a controlled sealed/partial/full-open face check on the CIRRUS host:
+
+1. Keep the grid, materials, fluid properties and pressure gradient identical
+   across the three cases. Use one interior casing face with conductive cells
+   on both sides; do not rely on leakage through other cement/casings.
+2. Choose the partial and full diameters from the resolved face area:
+   `diameter = sqrt(4 * fraction * face_area / pi)`, for fractions `0.5` and
+   `1`. Confirm both resolve to the same recorded face.
+3. Read the **LGR**, not parent-grid, `MULTX` and `TRANX` in final INIT outputs.
+   The recorded positive-X face must have multipliers `0`, `0.5`, and `1`.
+   Effective transmissibility must be zero for the seal, positive for the
+   openings, and approximately half the full-open value for the partial case.
+   Check unchanged geometry and unchanged non-target multipliers/properties.
+4. Under a controlled cross-face pressure gradient, verify zero flow when
+   sealed and nonzero flow through the intended face when opened. If the
+   required LGR properties or fluxes are not exported, obtain simulator
+   diagnostics; completion or a global pressure/saturation change alone is
+   insufficient evidence of correct indexing and zero-multiplier replacement.
+
 After `.EGRID` and `.INIT` have been produced, build the LGR/CARFIN include:
 
 ```bash
@@ -220,7 +283,7 @@ The SCREEN workflow with CIRRUS provides a valuable approach for simulating well
 
 - **Vertical Wells**: The method is currently applicable only to vertical wells and does not support deviated or horizontal well trajectories.
 
-- **Leakage Pathways**: Leakage pathways such as holes in the casing are not automatically handled and must be manually added to the GRDECL file produced by the scripts.
+- **Leakage Pathways**: One experimental localized casing hole can be specified per scenario as described above. More general defects still require manual modeling, and the hole's CIRRUS connectivity must be verified before relying on results.
 
 - **CO2 Column Initialization**: The simulation is initialized with a CO2 column, which allows for the focus on long-term leakage but does not consider short-term dynamics.
 

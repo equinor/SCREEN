@@ -12,7 +12,7 @@ import pytest
 from openpyxl import load_workbook
 
 from src.GaP.libs.models.simulation_scenario import SimulationScenario
-from src.WellClass.libs.utils.xlsx_parser import xlsx_to_well_model
+from src.WellClass.libs.utils.xlsx_parser import xlsx_to_simulation_design, xlsx_to_well_model
 
 WORKFLOW_PATH = Path(__file__).parents[2] / "runscripts/run_workbook_to_cirrus_lgr.py"
 sys.path.insert(0, str(WORKFLOW_PATH.parent))
@@ -213,6 +213,74 @@ def test_workbook_interval_permeability_overrides_are_isolated(tmp_path):
     assert scenario["effective_permeability_mD"]["cb_perm_interval_overrides"] == {"Cement 9 5/8 in": 0.25}
     assert scenario["effective_permeability_mD"]["barrier_perm"] == 0.05
     assert scenario["effective_permeability_mD"]["barrier_perm_interval_overrides"] == {"cplug9": 0.75}
+
+
+def _hole_workbook(tmp_path, casing):
+    root = Path(__file__).parents[2]
+    workbook = tmp_path / "hole.xlsx"
+    shutil.copyfile(root / "test_data/examples/wildcat/wildcat_workbook.xlsx", workbook)
+    excel = load_workbook(workbook)
+    sheet = excel["DesignMatrix"]
+    columns = {sheet.cell(1, column).value: column for column in range(1, sheet.max_column + 1)}
+    for field, value in {
+        "casing_hole_casing": casing, "casing_hole_depth_mTVDMSL": 200, "casing_hole_diameter_m": 0.1,
+    }.items():
+        if field not in columns:
+            columns[field] = sheet.max_column + 1
+            sheet.cell(1, columns[field]).value = field
+        sheet.cell(2, columns[field]).value = value
+    excel.save(workbook)
+    return workbook
+
+
+@pytest.mark.parametrize("casing", ["missing", "Cement 20 in"])
+def test_invalid_hole_target_is_rejected_before_initialization(tmp_path, monkeypatch, casing):
+    workbook = _hole_workbook(tmp_path, casing)
+    monkeypatch.setattr(workflow, "stage_case", lambda *_: pytest.fail("invalid hole must not stage or run CIRRUS"))
+    args = SimpleNamespace(
+        xlsx=workbook, case_name="baseline", sim_command="never {deck}",
+        queue_poll_interval=15, queue_timeout=60,
+    )
+    with pytest.raises(ValueError, match="exactly one casing"):
+        workflow.run_workflow(args)
+
+
+def test_workbook_hole_reaches_lgr_and_resolved_metadata(tmp_path):
+    root = Path(__file__).parents[2]
+    workbook = _hole_workbook(tmp_path, "Casing 20 in")
+    runner = _fake_cirrus(tmp_path, root / "test_data/examples/wildcat/model/TEMP-0")
+    output_root = tmp_path / "hole_case"
+    subprocess.run(
+        [
+            sys.executable, "runscripts/run_workbook_to_cirrus_lgr.py",
+            "--xlsx", str(workbook), "--output-root", str(output_root),
+            "--sim-command", f"{runner} {{deck}}", "--case-name", "baseline",
+        ],
+        cwd=root, check=True, capture_output=True, text=True,
+    )
+    scenario = json.loads((output_root / "scenario.json").read_text())
+    report = scenario["resolved_casing_hole"]
+    lgr_path = output_root / "include/wildcat_baseline_LGR.grdecl"
+    assert report == json.loads(lgr_path.with_suffix(".casing_hole.json").read_text())
+    assert report["experimental"] is True
+    assert report["input"] == {"casing": "Casing 20 in", "depth_mTVDMSL": 200, "diameter_m": 0.1}
+    assert report["side"] == "+X"
+    assert report["allocated_area_m2"] == pytest.approx(np.pi * 0.05**2, rel=1e-12)
+    assert len(report["faces"]) == 1
+    face = report["faces"][0]
+    assert (face["i"], face["j"], face["k"]) == (15, 11, 17)
+    assert f"MULTX {face['multiplier']:.17g} 15 15 11 11 17 17 /" in lgr_path.read_text()
+
+
+def test_older_workbook_without_hole_columns_remains_valid(tmp_path):
+    workbook = _hole_workbook(tmp_path, "Casing 20 in")
+    excel = load_workbook(workbook)
+    sheet = excel["DesignMatrix"]
+    for column in range(sheet.max_column, 0, -1):
+        if str(sheet.cell(1, column).value).startswith("casing_hole_"):
+            sheet.delete_cols(column)
+    excel.save(workbook)
+    assert all(scenario.casing_hole is None for scenario in xlsx_to_simulation_design(workbook).scenarios)
 
 
 def test_qc_plot_uses_workbook_fluid_contact_pressure(tmp_path, monkeypatch):

@@ -1,10 +1,14 @@
 from pathlib import Path
 import subprocess
+import pytest
 
 
-def test_build_lgr_from_json_writes_carfin(tmp_path):
+@pytest.mark.parametrize("with_hole", [False, True])
+def test_build_lgr_from_json_writes_carfin(tmp_path, with_hole):
     root = Path(__file__).parents[2]
     output_path = tmp_path / "TEST_LGR.grdecl"
+    if not with_hole:
+        output_path.with_suffix(".casing_hole.json").write_text('{"stale": true}')
     subprocess.run(
         [
             "uv",
@@ -19,7 +23,13 @@ def test_build_lgr_from_json_writes_carfin(tmp_path):
             str(tmp_path),
             "--lgr-name",
             "TEST_LGR",
-        ],
+        ] + (
+            [
+                "--casing-hole-casing", "Casing 20 in",
+                "--casing-hole-depth-mTVDMSL", "200",
+                "--casing-hole-diameter-m", "0.1",
+            ] if with_hole else []
+        ),
         cwd=root,
         check=True,
         capture_output=True,
@@ -29,6 +39,8 @@ def test_build_lgr_from_json_writes_carfin(tmp_path):
     content = output_path.read_text(encoding="utf-8")
     assert "CARFIN" in content
     assert "TEST_LGR" in content
+    assert ("SCREEN experimental casing hole" in content) == with_hole
+    assert output_path.with_suffix(".casing_hole.json").exists() == with_hole
 
 
 def test_build_lgr_restricts_co2_region_after_deepest_plug(tmp_path):
