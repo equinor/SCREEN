@@ -55,6 +55,30 @@ def refined_depth_edges(grid: Grid, i: int, j: int, subdivisions: np.ndarray, fi
     return np.asarray(edges)
 
 
+def validate_layer_thicknesses(
+    depth_edges: np.ndarray, subdivisions: np.ndarray, material_sizes: np.ndarray
+) -> None:
+    """Allow float32 EGRID corner/INIT size roundoff, not a different layer schedule."""
+    physical_sizes = np.diff(depth_edges)
+    counts = np.asarray(subdivisions, dtype=int)
+    if len(physical_sizes) != len(material_sizes) or counts.sum() != len(material_sizes):
+        raise ValueError("casing hole physical layer thicknesses do not match the LGR material grid")
+    offsets = np.concatenate(([0], np.cumsum(counts)))
+    parent_tops = depth_edges[offsets[:-1]]
+    parent_bottoms = depth_edges[offsets[1:]]
+    # Subtracting float32 depths loses more precision at depth than storing DZ directly.
+    corner_roundoff = np.repeat(
+        np.finfo(np.float32).eps * (np.abs(parent_tops) + np.abs(parent_bottoms)) / counts, counts
+    )
+    size_roundoff = np.finfo(np.float32).eps * np.abs(material_sizes)
+    if not np.all(
+        np.isfinite(material_sizes)
+        & (material_sizes > 0)
+        & (np.abs(physical_sizes - material_sizes) <= corner_roundoff + size_roundoff + 1e-8)
+    ):
+        raise ValueError("casing hole physical layer thicknesses do not match the LGR material grid")
+
+
 def resolve_casing_hole(
     hole: CasingHole,
     casings: pd.DataFrame,

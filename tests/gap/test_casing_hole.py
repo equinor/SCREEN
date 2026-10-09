@@ -8,7 +8,12 @@ import pytest
 from pydantic import ValidationError
 from resdata.grid import Grid
 
-from src.GaP.libs.grid_utils.casing_hole import refined_depth_edges, resolve_casing_hole, write_casing_hole
+from src.GaP.libs.grid_utils.casing_hole import (
+    refined_depth_edges,
+    resolve_casing_hole,
+    validate_layer_thicknesses,
+    write_casing_hole,
+)
 from src.GaP.libs.models.casing_hole import CasingHole
 from src.GaP.libs.models.simulation_scenario import SimulationScenario
 from src.WellClass.libs.grid_utils import LGRBuilder, WellDataFrame
@@ -129,6 +134,31 @@ def test_real_grid_depth_edges_include_nonzero_origin():
     assert edges[[0, 10, 20]] == pytest.approx([4, 105, 248])
     assert np.diff(edges)[:10] == pytest.approx(np.full(10, 10.1))
     assert refined_depth_edges(grid, 9, 9, np.array([10]), first_k=1)[[0, 10]] == pytest.approx([105, 248])
+
+
+def test_layer_thickness_check_accepts_observed_cirrus_float32_roundoff():
+    physical_dz = 5.92498779296875
+    material_dz = 5.925000190734863
+    edges = 2000.0 + np.arange(11) * physical_dz
+    sizes = np.full(10, material_dz)
+    assert not np.allclose(np.diff(edges), sizes, rtol=1e-6, atol=1e-8)
+    validate_layer_thicknesses(edges, np.array([10]), sizes)
+    assert np.diff(edges) == pytest.approx(np.full(10, physical_dz), abs=1e-12)
+
+
+@pytest.mark.parametrize("depth", [0.0, 2000.0])
+def test_layer_thickness_check_rejects_real_schedule_mismatch(depth):
+    edges = depth + np.arange(11) * 5.925
+    with pytest.raises(ValueError, match="thicknesses"):
+        validate_layer_thicknesses(edges, np.array([10]), np.full(10, 5.935))
+
+
+def test_layer_thickness_check_rejects_reordered_layers_and_different_lengths():
+    edges = np.array([4.0, 5.0, 7.0, 10.0])
+    with pytest.raises(ValueError, match="thicknesses"):
+        validate_layer_thicknesses(edges, np.array([1, 1, 1]), np.array([3.0, 2.0, 1.0]))
+    with pytest.raises(ValueError, match="thicknesses"):
+        validate_layer_thicknesses(edges, np.array([1, 1]), np.array([1.0, 2.0]))
 
 
 @pytest.mark.parametrize("count", [0, -1, 1.5, float("nan")])

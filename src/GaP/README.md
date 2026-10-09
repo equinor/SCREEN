@@ -118,7 +118,9 @@ within `[0, 1]`; allocated area is conserved to relative tolerance `1e-12`.
 An opening larger than the available side area is rejected, not spread in Z.
 Shared/ambiguous casing interfaces, absent lateral neighbors, non-Cartesian
 grids, non-flat layers, or inconsistent physical/material layer thicknesses
-are rejected.
+are rejected. The thickness check allows roundoff from single-precision EGRID
+depth coordinates and INIT cell sizes, with a depth- and subdivision-dependent
+bound; opening areas still use EGRID geometry, not the rounded INIT sizes.
 
 Only the selected casing's multiplier changes. Other casings, cement, plugs,
 material permeabilities and grid geometry remain unchanged, so a casing hole

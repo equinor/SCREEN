@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from resdata.grid import Grid
 
-from src.GaP.libs.grid_utils.casing_hole import refined_depth_edges, resolve_casing_hole
+from src.GaP.libs.grid_utils.casing_hole import refined_depth_edges, resolve_casing_hole, validate_layer_thicknesses
 from src.GaP.libs.models.casing_hole import CasingHole
 
 # coarse and refined grid
@@ -73,8 +73,7 @@ class LGRBuilder(LGRBuilderBase):
                 self.lgr_info.LGR_numb_z,
                 self.grid_coarse.main_grd_min_k,
             )
-            if not np.allclose(np.diff(depth_edges), self.lgr_info.LGR_sizes_z, rtol=1e-6, atol=1e-8):
-                raise ValueError("casing hole physical layer thicknesses do not match the LGR material grid")
+            validate_layer_thicknesses(depth_edges, self.lgr_info.LGR_numb_z, self.lgr_info.LGR_sizes_z)
             # CARFIN HYFIN uses rounded relative widths, normalized to the parent cell.
             ratios_y = np.round(np.asarray(self.lgr_info.LGR_sizes_x) / self.lgr_info.min_grd_size, 2)
             parent_cell = (self.grid_coarse.main_grd_i, self.grid_coarse.main_grd_j, self.grid_coarse.main_grd_min_k)
