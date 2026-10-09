@@ -117,6 +117,10 @@ span: `allocated_area = circular_area * overlap / diameter`. It writes
 positive overlap participates, even if one tall, narrow face could hold the
 whole area. A midpoint on a cell boundary shares the opening between both
 cells; output faces are ordered by increasing J.
+Span endpoints coincident with cell edges are snapped within a
+double-precision cumulative-coordinate roundoff bound, preventing spurious
+near-zero openings on neighboring faces. Diameters below that coordinate
+resolution are rejected explicitly.
 All faces remain at the **same K**, without refining or changing geometry. Multipliers stay
 within `[0, 1]`; allocated area is conserved to relative tolerance `1e-12`.
 Reject a diameter extending beyond the casing side, an opening larger than
@@ -144,8 +148,13 @@ The report includes `lateral_overlap_m` for each face and identifies the
 overlap-weighted allocation rule. Earlier experimental reports using nearest-face
 filling are not equivalent; regenerate hole includes/reports before comparison.
 
-**CIRRUS connectivity is not yet verified.** Before using this for decisions,
-run a controlled sealed/partial/full-open face check on the CIRRUS host:
+**Static CIRRUS opening/isolation was verified on the generated Wildcat grid
+(2026-10-09); pressure-driven flow remains unverified.** The controls confirmed
+zero/half/full transmissibility scaling, and the diameter-span case changed
+only its two recorded faces while preserving geometry and checked LGR
+properties. See [roadmap evidence](gap_roadmap.md#9-represent-a-localized-casing-hole).
+The model remains experimental. Before using it for decisions, complete the
+pressure-driven check and repeat the relevant controls for the intended setup:
 
 1. Keep the grid, materials, fluid properties and pressure gradient identical
    across the three cases. Use one interior casing face with conductive cells

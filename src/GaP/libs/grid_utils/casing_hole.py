@@ -136,6 +136,12 @@ def resolve_casing_hole(
     if hole.diameter_m > side_width and not isclose(hole.diameter_m, side_width, rel_tol=1e-12, abs_tol=0):
         raise ValueError("casing hole diameter exceeds the available +X casing side width")
     edges_y = np.concatenate(([0.0], np.cumsum(side_widths))) - side_width / 2
+    # Snap coincident span endpoints within the cumulative-coordinate roundoff bound.
+    edge_tolerance = np.finfo(float).eps * (len(side_widths) + 2) * side_width
+    if hole.diameter_m <= 2 * edge_tolerance:
+        raise ValueError("casing hole diameter is too small to resolve on this casing side")
+    edges_y[np.abs(edges_y + radius) <= edge_tolerance] = -radius
+    edges_y[np.abs(edges_y - radius) <= edge_tolerance] = radius
     overlaps = np.maximum(0.0, np.minimum(edges_y[1:], radius) - np.maximum(edges_y[:-1], -radius))
     if not isclose(fsum(float(value) for value in overlaps), hole.diameter_m, rel_tol=1e-12, abs_tol=0):
         raise ValueError("casing hole span failed to conserve lateral diameter")

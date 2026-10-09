@@ -140,6 +140,39 @@ def test_exact_span_boundaries_do_not_open_nonoverlapping_neighbors():
     assert faces[0].lateral_overlap_m == pytest.approx(0.5)
 
 
+@pytest.mark.parametrize("scale", [1e-3, 1.0, 1e3])
+def test_decimal_span_boundary_roundoff_does_not_create_a_third_face(scale):
+    diameter = 0.1 * scale
+    faces = resolve_casing_hole(
+        CasingHole(casing="target", depth_mTVDMSL=10, diameter_m=diameter),
+        _casings().assign(ij_max=6), np.array([10., 20. * scale + 10.]),
+        np.full(8, 0.05 * scale), 8,
+    )
+    assert [face.j for face in faces] == [4, 5]
+    assert [face.lateral_overlap_m for face in faces] == pytest.approx([diameter / 2] * 2)
+    assert sum(face.opening_area_m2 for face in faces) == pytest.approx(pi * (diameter / 2)**2, rel=1e-12)
+    stream = StringIO()
+    write_casing_hole(faces, stream)
+    assert stream.getvalue().count("MULTX ") == 2
+
+
+def test_small_real_overlap_is_not_removed_as_roundoff():
+    diameter = 0.1 + 2e-10
+    faces = resolve_casing_hole(
+        CasingHole(casing="target", depth_mTVDMSL=12, diameter_m=diameter),
+        _casings().assign(ij_max=6), np.array([10., 20.]), np.full(8, 0.05), 8,
+    )
+    assert [face.j for face in faces] == [3, 4, 5, 6]
+    assert faces[0].lateral_overlap_m == pytest.approx(1e-10, rel=1e-6, abs=0)
+    assert faces[-1].lateral_overlap_m == pytest.approx(1e-10, rel=1e-6, abs=0)
+    assert sum(face.opening_area_m2 for face in faces) == pytest.approx(pi * (diameter / 2)**2, rel=1e-12)
+
+
+def test_unresolvable_span_is_rejected_explicitly():
+    with pytest.raises(ValueError, match="too small to resolve"):
+        _resolve(CasingHole(casing="target", depth_mTVDMSL=12, diameter_m=1e-18))
+
+
 def test_per_face_overallocation_is_rejected_even_when_total_side_area_fits():
     casings = _casings().assign(k_min=0, k_max=0)
     # Total side capacity is 1.2 m2, but the central face cannot hold its assigned share.

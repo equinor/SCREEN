@@ -84,7 +84,7 @@ less often. The technical detail follows for whoever picks the item up.
 | 6 | Give generated cases unique, navigable names | Done; verified on a real CIRRUS host (item 7) |
 | 7 | Confirm recent changes on a CIRRUS host | Done for current case/LGR naming |
 | 8 | Give user-facing names a clear meaning | Open |
-| 9 | Represent a localized casing hole | Experimental implementation; CIRRUS connectivity verification pending |
+| 9 | Represent a localized casing hole | Static CIRRUS opening/isolation verified; pressure-driven flow check pending |
 
 ### 1. Compare scenario outputs automatically
 
@@ -380,9 +380,9 @@ names still produces the same case.
 
 ### 9. Represent a localized casing hole
 
-**Status: experimental implementation; CIRRUS connectivity verification
-pending.** First defect slice for a concrete well; no general defect framework
-is required.
+**Status: experimental implementation; static CIRRUS opening and isolation
+verified; pressure-driven flow verification pending.** First defect slice for
+a concrete well; no general defect framework is required.
 
 **In practice:** describe one hole using the affected casing's stable `name`
 from `HoleCasings`, depth in m TVDMSL, and hole diameter in m. Preserve the
@@ -405,6 +405,33 @@ rejects coincident casing interfaces and unsupported grid geometry. This
 replaces the earlier experimental nearest-face filling rule.
 See the [workflow guide](gap.md#experimental-localized-casing-hole) for the
 controlled sealed/partial/full-open CIRRUS acceptance check.
+
+**Real CIRRUS evidence (2026-10-09, user-reported local runs):**
+
+- Generated Wildcat parent grid: `20 x 20 x 79`; `TEMP_LGR`:
+  `22 x 22 x 430`. Zero-duration controls used explicit final `MULTX`
+  assignments at one-based face `(15, 11, 47)`.
+- Sealed/half/full controls exported `MULTX` values `0`, `0.5`, and `1`,
+  with `TRANX` values `0`, `0.0025261160917580128`, and
+  `0.0050522321835160255`. The half/full ratio was exactly `0.5`;
+  only that entry changed in `MULTX` and `TRANX`, and `PERMX` was unchanged.
+  This confirms positive-X indexing and replacement of the existing zero
+  multiplier for this control, with exported transmissibility scaling.
+- The actual `Casing 20 in` hole at `200 m TVDMSL`, diameter `0.1 m`,
+  opened exactly faces `(15, 11, 47)` and `(15, 12, 47)`. Each exported
+  `MULTX` was `0.012651538476347923` and `TRANX` was
+  `6.391850911313668e-05`; no other LGR `MULTX` or `TRANX` entries changed.
+- Parent and LGR dimensions, index frames, and cell corners were identical
+  to the sealed case. Exported LGR `MULTY`, `MULTZ`, `PERMX`, `PERMY`,
+  `PERMZ`, `PORO`, and `EQLNUM` were unchanged.
+- Area reconstructed from exported multipliers was
+  `0.007853981766232154 m2`, versus requested
+  `0.007853981633974483 m2`, within the `1e-6` relative export tolerance.
+  Builder allocation retains its `1e-12` relative tolerance.
+
+These checks establish static opening and isolation for this case, not
+pressure-driven leakage, a calibrated hole-flow law, or arbitrary grids.
+The dynamic cross-face flow check remains pending.
 
 **Area-equivalent opening:**
 
