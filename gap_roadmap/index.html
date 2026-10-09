@@ -1,0 +1,2082 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../architecture_manifesto/">
+      
+      
+        <link rel="next" href="../openiam_screen_comparison/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>GaP Roadmap - SCREEN</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#gap-roadmap" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="SCREEN" class="md-header__button md-logo" aria-label="SCREEN" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SCREEN
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              GaP Roadmap
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7M9 21v-1h6v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1m3-17a5 5 0 0 0-5 5c0 2.05 1.23 3.81 3 4.58V16h4v-2.42c1.77-.77 3-2.53 3-4.58a5 5 0 0 0-5-5"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/equinor/SCREEN" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="SCREEN" class="md-nav__button md-logo" aria-label="SCREEN" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SCREEN
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/equinor/SCREEN" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../well_class/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pre‐processing and Preliminary Assessment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Detailed Simulation workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Developer Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture_manifesto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Manifesto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GaP Roadmap
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GaP Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#current-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current State
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Next">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-compare-scenario-outputs-automatically" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Compare scenario outputs automatically
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-make-the-input-contract-explicit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Make the input contract explicit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-strengthen-pure-gap-regression-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Strengthen pure GaP regression coverage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-share-scalar-salinity-between-pressure-and-cirrus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Share scalar salinity between pressure and CIRRUS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-generalize-the-workbook-into-a-design-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Generalize the workbook into a design matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-give-generated-cases-unique-navigable-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Give generated cases unique, navigable names
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-confirm-recent-changes-on-a-cirrus-host" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Confirm recent changes on a CIRRUS host
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-give-user-facing-names-a-clear-meaning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Give user-facing names a clear meaning
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Give user-facing names a clear meaning">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#name-proposal-for-review" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Name Proposal for Review
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#later" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Later
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Boundaries
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../openiam_screen_comparison/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenIAM-SCREEN Comparison Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mkdocs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MkDocs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../INSTALLATION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_6" id="__nav_4_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Code References
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Code References
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_6_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_6_1" id="__nav_4_6_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GaP
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_6_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_6_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    GaP
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_references/gap/gap_carfin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CARFIN
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_references/gap/gap_geometry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bounding boxes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_6_2" id="__nav_4_6_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WellClass
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    WellClass
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_references/well_class/well_class/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Well class
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_references/well_class/well_pressure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Well pressure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_references/well_class/models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_6_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_6_2_4" id="__nav_4_6_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grids
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_4_6_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_6_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Grids
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_references/well_class/grids/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Various grids
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_references/well_class/lgr_builder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LGR builder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#current-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current State
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Next">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-compare-scenario-outputs-automatically" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Compare scenario outputs automatically
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-make-the-input-contract-explicit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Make the input contract explicit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-strengthen-pure-gap-regression-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Strengthen pure GaP regression coverage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-share-scalar-salinity-between-pressure-and-cirrus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Share scalar salinity between pressure and CIRRUS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-generalize-the-workbook-into-a-design-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Generalize the workbook into a design matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-give-generated-cases-unique-navigable-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Give generated cases unique, navigable names
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-confirm-recent-changes-on-a-cirrus-host" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Confirm recent changes on a CIRRUS host
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-give-user-facing-names-a-clear-meaning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Give user-facing names a clear meaning
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Give user-facing names a clear meaning">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#name-proposal-for-review" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Name Proposal for Review
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#later" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Later
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Boundaries
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href=".." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Introduction
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../architecture_manifesto/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Developer Guides
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="gap-roadmap">GaP Roadmap</h1>
+<p>This document tracks implementation work for the GaP path. The architectural contract is defined by the <a href="../architecture_manifesto/">SCREEN Architecture Manifesto</a>; this roadmap does not redefine it.</p>
+<h2 id="current-state">Current State</h2>
+<p>The supported GaP path is:</p>
+<pre class="highlight"><code class="language-text">canonical well JSON + existing .EGRID/.INIT
+    -&gt; WellProcessed
+    -&gt; WellDataFrame
+    -&gt; LGRBuilder
+    -&gt; CARFIN/LGR GRDECL</code></pre>
+<p>The current <code>LGRBuilder</code> assumes that a suitable coarse grid already exists. This remains the regression path and must stay stable while coarse-grid preparation is developed upstream.</p>
+<p>Completed coarse-grid preparation slices:</p>
+<ul>
+<li><code>CoarseGridSpec</code> makes vertical domain and layer-count assumptions explicit.</li>
+<li><code>CoarseGridEnvelope</code> derives vertical coverage and reference-point lateral bounds from processed wells. GaP treats wells as vertical for coarse-grid sizing; WellClass retains deviation for TVDMSL conversion.</li>
+<li><code>build_vertical_grid_schedule</code> creates water, overburden, and reservoir <code>DZ</code> values.</li>
+<li>Well top/bottom coverage and invalid depth ordering are validated.</li>
+<li><code>format_vertical_grid_recipe</code> and <code>write_vertical_grid_recipe</code> produce a simulator-oriented <code>TOPS</code>/<code>DZ</code> text recipe.</li>
+<li>Notebook 2 demonstrates the recipe against the Wildcat JSON fixture.</li>
+<li>A standalone preprocessing notebook demonstrates recipe generation and dry-run case staging:<ul>
+<li><code>notebooks/04_init_case_preprocessing.ipynb</code></li>
+</ul>
+</li>
+<li>A workbook-driven adapter path stages init cases from a multi-sheet user input deck:<ul>
+<li><code>runscripts/prepare_init_case_from_xlsx.py</code></li>
+<li><code>src/WellClass/libs/utils/xlsx_parser.py</code></li>
+<li><code>runscripts/create_well_input_workbook.py</code></li>
+</ul>
+</li>
+<li>Template assets now have explicit integrity checks in CI-focused tests:<ul>
+<li><code>tests/gap/test_template_assets.py</code></li>
+</ul>
+</li>
+<li>A CLI bridge now converts WellClass JSON plus an existing <code>.EGRID</code>/<code>.INIT</code> case into LGR/CARFIN output:<ul>
+<li><code>runscripts/build_lgr_from_json.py</code></li>
+<li><code>tests/gap/test_build_lgr_from_json.py</code></li>
+</ul>
+</li>
+<li>The wrapper now orchestrates workbook staging, CIRRUS initialization, <code>.EGRID</code>/<code>.INIT</code> validation, LGR generation, and final-deck configuration:<ul>
+<li><code>runscripts/run_workbook_to_cirrus_lgr.py</code></li>
+</ul>
+</li>
+<li>Staged grids derive two equilibration regions from layer counts: <code>EQLNUM 1</code> for water/overburden and <code>EQLNUM 2</code> for reservoir layers.</li>
+<li>The two CIRRUS equilibration blocks share generated temperature and salt tables. The overburden datum uses WellClass hydrostatic pressure; the <code>CO2_column</code> datum and gas-water contact use the workbook fluid-contact pair.</li>
+<li>Ready-to-edit workbook examples are included for Wildcat and Smeaheia, including optional survey sheets:<ul>
+<li><code>test_data/examples/wildcat/wildcat_workbook.xlsx</code></li>
+<li><code>test_data/examples/smeaheia/smeaheia_workbook.xlsx</code></li>
+</ul>
+</li>
+<li>The single-reservoir workbook-to-CIRRUS-to-LGR path is complete for the current supported contract. It parameterizes the coarse GRDECL, preserves required CIRRUS assets, creates <code>.EGRID</code>/<code>.INIT</code>, generates the case LGR include (<code>&lt;case_stem&gt;_LGR.grdecl</code>), and prepares the same deck for the final run.</li>
+<li>Smeaheia validation completed on a CIRRUS-enabled Linux host, before case naming was introduced: the 10-year run used <code>FINAL_DATE 1 JAN 2035</code> and produced <code>.EGRID</code>, <code>.INIT</code>, and <code>TEMP_LGR.grdecl</code>. The generated deck used <code>DATUM_D = WGC_D = 1282.5 m</code> and <code>PRESSURE = 129.99 Bar</code>.</li>
+<li>Notebook 3 supports an optional generated-grid mode: it can consume a completed workbook-wrapper output directory while fixture mode remains deterministic for CI.</li>
+<li>The complete workbook wrapper has simulator-free dry-run coverage: a fake CIRRUS executable supplies a valid coarse <code>.EGRID</code>/<code>.INIT</code> pair, then the test verifies LGR creation, final-deck configuration, and both captured logs.</li>
+<li>A pure-Python coverage report compares a required <code>CoarseGridEnvelope</code> with explicit grid bounds, reports directional missing margins, and summarizes optional cell sizes:<ul>
+<li><code>src/WellClass/libs/grid_utils/coverage.py</code></li>
+<li><code>tests/gap/test_grid_coverage.py</code></li>
+</ul>
+</li>
+<li><code>CirrusBackend</code> makes executable availability, resolved commands, phase logs, exit codes, and initialization outputs explicit for the workbook wrapper:<ul>
+<li><code>src/GaP/libs/cirrus_backend.py</code></li>
+<li><code>tests/gap/test_cirrus_backend.py</code></li>
+</ul>
+</li>
+<li>The single-reservoir design-matrix workflow is now implemented:<ul>
+<li><code>--case-name</code> selects one named workbook scenario for a run.</li>
+<li><code>runscripts/run_workbook_scenarios_batch.py</code> executes all named scenarios in isolated output directories.</li>
+<li>Workbook generators create named multi-scenario inputs and updated Wildcat/Smeaheia examples.</li>
+<li>Each result records the selected assumptions in <code>scenario.json</code> beside the shared <code>well_input.json</code>.</li>
+<li><code>--plot</code> optionally saves a WellClass sketch and pressure QC image as <code>qc_plot.png</code>.</li>
+<li><code>GridPolicy</code> exposes explicit <code>reservoir_permx</code> and <code>overburden_permx</code> values in mD, with backward-compatible defaults for older workbooks.</li>
+<li><code>runscripts/validate_scenario_outputs.py</code> checks required outputs, logs, file sizes, and checksums.</li>
+</ul>
+</li>
+<li>Optional result inspection is implemented and intentionally kept downstream of GaP:<ul>
+<li><code>runscripts/export_wellviz_xz.py</code> provides a standalone Plotly XZ export.</li>
+<li><code>runscripts/export_wellviz_indexed.py</code> creates a compact Parquet-backed package with source, property, timestep, and J-column selection.</li>
+<li><code>runscripts/serve_wellviz_parquet.py</code> serves filtered slices locally.</li>
+<li>The historical <code>src/WellViz/</code> Dash application is retained only as reference; it is not a supported entry point.</li>
+</ul>
+</li>
+</ul>
+<p>These helpers do not create native <code>.EGRID</code>/<code>.INIT</code> files unless an external simulator command is explicitly supplied.</p>
+<h2 id="next">Next</h2>
+<p>Each item starts with its status and an <strong>In practice</strong> note: what changes for
+someone running the workflow, in terms of what they can do or what goes wrong
+less often. The technical detail follows for whoever picks the item up.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Compare scenario outputs automatically</td>
+<td>Done; verified on a real CIRRUS batch (item 7)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Make the input contract explicit</td>
+<td>Done</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Strengthen pure GaP regression coverage</td>
+<td>Done for current Wildcat and Smeaheia regression cases</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Share scalar salinity between pressure and CIRRUS</td>
+<td>Done</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Generalize the workbook into a design matrix</td>
+<td>Case-wide and per-interval permeability overrides done</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Give generated cases unique, navigable names</td>
+<td>Done; verified on a real CIRRUS host (item 7)</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Confirm recent changes on a CIRRUS host</td>
+<td>Done for current case/LGR naming</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Give user-facing names a clear meaning</td>
+<td>Open</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1-compare-scenario-outputs-automatically">1. Compare scenario outputs automatically</h3>
+<p><strong>Status: done</strong> in <code>runscripts/compare_scenario_outputs.py</code>. Tested with
+synthetic simulator data and verified on a real CIRRUS batch (see item 7).</p>
+<p><strong>In practice:</strong> after a batch run, one command tells you, for every case
+against a baseline case, what was changed in the inputs and what changed in the
+results:</p>
+<pre class="highlight"><code class="language-bash">uv run python runscripts/compare_scenario_outputs.py --output-root work/results</code></pre>
+<p>It catches two mistakes that are easy to miss by eye:</p>
+<ul>
+<li>a sensitivity that silently had no effect (the input changed, but pressure
+    and saturation came out identical); and</li>
+<li>a "physics" sensitivity that accidentally changed the grid, so the cases can
+    no longer be compared cell by cell.</li>
+</ul>
+<p><strong>Details:</strong> the report lists changed <code>scenario.json</code> and <code>grid_policy.json</code>
+fields, checks grid dimensions, cell corners and LGR geometry for invariance,
+compares static <code>INIT</code> properties (such as <code>PERMX</code>, <code>PORO</code>, <code>EQLNUM</code>), and
+compares <code>UNRST</code> pressure and saturation per timestep. Changes to
+geometry-affecting <code>GridPolicy</code> fields are flagged as a separate grid
+sensitivity study. Output is a JSON report plus a short CLI summary.</p>
+<h3 id="2-make-the-input-contract-explicit">2. Make the input contract explicit</h3>
+<p><strong>Status: done.</strong></p>
+<p><strong>In practice:</strong> unit and value mistakes in the workbook stop the run when the
+workbook is read, with a clear message, instead of producing a CIRRUS case with
+wrong numbers. Examples: <code>depth_unit=ft</code>, <code>permeability_unit=D</code>, a zero target
+layer thickness, a negative permeability, or a missing permeability for a
+cement interval. The accepted field names, units and defaults are listed in the
+<a href="../gap/">workflow guide</a>.</p>
+<p><strong>Details:</strong> <code>GridPolicy</code> (<code>src/WellClass/libs/utils/xlsx_parser.py</code>) and
+<code>SimulationScenario</code> (<code>src/GaP/libs/models/simulation_scenario.py</code>) are typed
+models with declared units (depths in m TVDMSL, pressures in bar, permeabilities
+in mD, salinity as mass fraction). <code>WellDataFrame</code> rejects non-mD, missing,
+negative or non-finite permeabilities before LGR generation. Older workbooks
+without unit fields default to these units.</p>
+<h3 id="3-strengthen-pure-gap-regression-coverage">3. Strengthen pure GaP regression coverage</h3>
+<p><strong>Status: done for the current Wildcat and Smeaheia regression cases.</strong> Coverage
+uses existing committed <code>.EGRID</code>/<code>.INIT</code> fixtures; no duplicate grid fixtures
+were added.</p>
+<p><strong>In practice:</strong> a change that moves a refined boundary, changes the CARFIN
+output, or alters which material is assigned to a cell now fails in a regular
+Python-only test run. The failure points to a small reviewable reference file,
+without requiring CIRRUS or PFLOTRAN.</p>
+<p><strong>Coverage:</strong> <code>tests/well_class/test_json_to_lgr.py</code> checks coarse/refined
+dimensions, exact CARFIN bounds, non-negative finite permeability, and
+<code>ENDFIN</code>. It compares the complete Wildcat LGR against
+<code>tests/gap/fixtures/wildcat_TEMP-0_LGR.grdecl</code> (8.4 KB), and checks the exact
+permeability ranges of both plug intervals in the two Smeaheia grid variants.
+<code>tests/gap/test_grid_materials.py</code> checks that a plug replaces open-hole
+material at its depth while adjacent casing-cement cells keep cement material,
+and that every synthetic refined cell has the expected finite properties.</p>
+<h3 id="4-share-scalar-salinity-between-pressure-and-cirrus">4. Share scalar salinity between pressure and CIRRUS</h3>
+<p><strong>Status: complete for scalar salinity.</strong></p>
+<p><strong>In practice:</strong> the brine density behind the SCREEN pressure plots and the
+salt concentration written into the CIRRUS deck now come from the same workbook
+value, so the pressure QC plot and the simulation can no longer silently assume
+different brines.</p>
+<p><strong>Details:</strong> the canonical input is a NaCl mass
+fraction of total solution mass, default <code>0.032</code>. <code>PressureTable</code> accepts either
+that salinity or an explicit <code>rho_brine</code>; supplying both is rejected. The PVT
+model derives reference brine density from the selected salinity, and generated
+CIRRUS salt tables use <code>CONCENTRATION_UNITS MASS</code> with the same value over the
+generated depth interval. The old template's <code>MOLE</code> label is not a conversion
+contract; the canonical value is interpreted directly as mass fraction.</p>
+<p>Regression tests cover density-only and salinity-driven pressure, invalid
+inputs, and an end-to-end non-default scalar shared by pressure and deck output.
+Depth-varying salinity profiles are not currently supported and are deferred
+until a concrete modeling use case requires them.</p>
+<h3 id="5-generalize-the-workbook-into-a-design-matrix">5. Generalize the workbook into a design matrix</h3>
+<p><strong>Status: case-wide and per-interval permeability overrides are implemented;
+per-interval overrides verified on CIRRUS.</strong></p>
+<p><strong>In practice:</strong> one workbook can define several cases on the same well, each
+with its own reservoir or overburden permeability and its own cement or plug
+permeability, and the batch runs them all. <code>cb_perm</code> and <code>barrier_perm</code> can
+apply case-wide or target one named interval using <code>cb_perm_interval</code> or
+<code>barrier_perm_interval</code>. <code>ALL</code> keeps the case-wide behavior.</p>
+<p><strong>Details:</strong> new workbooks
+use <code>DesignMatrix</code>; legacy <code>SubsurfaceAssumptions</code> sheets remain readable. Each
+row defines a named case sharing the same physical well. Rows can override
+<code>reservoir_permx</code> and <code>overburden_permx</code> in mD, plus <code>cb_perm</code> and <code>barrier_perm</code>
+values. The companion interval columns select by the <code>name</code> in the
+<code>HoleCasings</code> or <code>Plugs</code> sheet; <code>ALL</code> applies the value to every interval of
+that type. For a named target, only that interval changes. Other intervals
+retain their workbook permeability where present, then use CLI defaults.
+Effective permeability values and interval targets are saved with case
+metadata. Open-hole permeability remains a fixed high-permeability default and
+is deliberately not a scenario sensitivity.</p>
+<p><strong>Per-interval overrides:</strong> <code>cb_perm_interval</code> and <code>barrier_perm_interval</code>
+select an interval by its <code>name</code> in the <code>HoleCasings</code> or <code>Plugs</code> sheet;
+<code>ALL</code> preserves the case-wide behavior. Tests verify that targeted permeability
+changes affect only the selected interval and leave geometry and other
+intervals unchanged. Clearer names for the override fields (such as <code>cb_perm</code>)
+are covered by item 8.</p>
+<p><strong>CIRRUS verification (results reported October 9, 2026):</strong> a Wildcat workbook
+contained an unchanged <code>baseline</code> and an otherwise identical
+<code>interval_override_check</code> case targeting <code>Cement 20 in</code> at <code>0.2 mD</code> and
+<code>cplug3</code> at <code>0.3 mD</code>. Outputs were written under
+<code>work/cirrus_interval_override_check</code>.</p>
+<ul>
+<li><code>validate_scenario_outputs.py</code> reported <code>OK</code> for both <code>wildcat_baseline</code>
+  and <code>wildcat_interval_override_check</code>.</li>
+<li><code>compare_scenario_outputs.py</code> reported
+  <code>OK: wildcat_interval_override_check vs wildcat_baseline</code>. Grid dimensions,
+  cell corners, and LGR geometry matched, and at least one compared dynamic
+  pressure/saturation output differed.</li>
+<li>Changed scenario fields were <code>barrier_perm</code>, <code>barrier_perm_interval</code>,
+  <code>cb_perm</code>, <code>cb_perm_interval</code>, and <code>effective_permeability_mD</code>. No
+  <code>GridPolicy</code> fields or compared <code>INIT</code> properties changed.</li>
+</ul>
+<p>This confirms simulator acceptance and a changed simulation response without
+changing geometry. Isolation of non-target interval permeabilities is covered
+by regression tests, not independently established by this comparison summary.</p>
+<h3 id="6-give-generated-cases-unique-navigable-names">6. Give generated cases unique, navigable names</h3>
+<p><strong>Status: done</strong> (PR #134), including confirmation on a real CIRRUS host
+(item 7).</p>
+<p><strong>In practice:</strong> generated cases are no longer all called <code>TEMP-0</code>. A deck,
+grid include, result file or log found on disk is named after its well and case
+(for example <code>model/wildcat_hot_case.in</code>), and its first line says which
+workbook row and template it came from. Batch results go into one directory per
+case, and <code>batch_manifest.json</code> maps every <code>DesignMatrix</code> row to its directory
+and whether it succeeded. Rerunning the same workbook gives the same names, so
+new results replace the matching old ones instead of landing somewhere else.</p>
+<p><strong>Details:</strong> the case stem is <code>&lt;well&gt;_&lt;case_name&gt;</code>, from the workbook
+<code>Metadata</code> name (or wellbore identifier) and the <code>DesignMatrix</code> case name,
+sanitized to letters, digits and <code>_</code>. Duplicate <code>case_name</code> values are
+rejected; names that only collide after sanitizing or by letter case get the
+1-based row index appended. The stem names the case directory, deck,
+coarse-grid and LGR includes, simulator outputs and logs, and the deck starts
+with a <code># SCREEN case:</code> comment. <code>scenario.json</code> records the stem, row index,
+workbook and template provenance under <code>case_metadata</code>. Validation, comparison
+and WellViz export find case files through <code>scenario.json</code>, falling back to
+<code>TEMP-*</code> names for older outputs. <code>TEMP-*</code> is now reserved for the canonical
+template assets. The rules live in <code>src/GaP/libs/case_naming.py</code>.</p>
+<p><strong>Remaining:</strong> the LGR name written inside generated LGR files remains
+<code>TEMP_LGR</code> (<code>--lgr-name</code>). A 15-character alternative (<code>SCREEN_TEST_LGR</code>) was
+accepted by CIRRUS; the maximum supported CARFIN name length is unknown and
+does not need to be established unless the production default is to be renamed.</p>
+<h3 id="7-confirm-recent-changes-on-a-cirrus-host">7. Confirm recent changes on a CIRRUS host</h3>
+<p><strong>Status: done for current case and LGR naming.</strong> CIRRUS version recorded;
+<code>SCREEN_TEST_LGR</code> (15 characters) passed. The maximum identifier length remains
+unknown and is not needed while the production default remains <code>TEMP_LGR</code>.</p>
+<p><strong>In practice:</strong> a real two-case Wildcat batch completed through the LSF
+<code>bigmem</code> queue. CIRRUS accepted the case-stem deck names, generated the expected
+case-named files, and the final runs produced results that SCREEN could
+validate and compare. The LSF wait in <code>CirrusBackend</code> was exercised by this run.</p>
+<p><code>CirrusBackend</code> polls <code>bjobs -a -noheader -o stat &lt;job_id&gt;</code> every 15 seconds by
+default and allows up to 24 hours. Override those limits with
+<code>--queue-poll-interval</code> and <code>--queue-timeout</code> (seconds) on the single-case or
+batch command. Non-LSF commands that block until completion are unchanged.</p>
+<p>The verified command was:</p>
+<pre class="highlight"><code class="language-bash">uv run python runscripts/run_workbook_scenarios_batch.py \
+    --xlsx test_data/examples/wildcat/wildcat_workbook.xlsx \
+    --output-root work/cirrus_check_lsfwait \
+    --sim-command "runcirrus -q bigmem8 -nm 5 -nn 2 {deck}" \
+    --simulation-years 1 --run-final --queue-poll-interval 15 \
+    --queue-timeout 86400 --jobs 2
+uv run python runscripts/validate_scenario_outputs.py \
+    --output-root work/cirrus_check_lsfwait
+uv run python runscripts/compare_scenario_outputs.py \
+    --output-root work/cirrus_check_lsfwait \
+    --baseline wildcat_baseline \
+    --report work/cirrus_check_lsfwait/comparison.json</code></pre>
+<p>Observed results:</p>
+<ul>
+<li>LSF jobs completed successfully; the sample <code>bjobs -l</code> output showed status
+    <code>DONE</code>.</li>
+<li><code>validate_scenario_outputs.py</code> reported <code>OK</code> for <code>wildcat_baseline</code> and
+    <code>wildcat_hot_case</code>.</li>
+<li><code>compare_scenario_outputs.py</code> reported <code>OK: wildcat_hot_case vs
+    wildcat_baseline</code>: grid geometry matched, no <code>GridPolicy</code> fields or <code>INIT</code>
+    properties changed, and pressure/saturation outputs differed for the
+    changed scenario inputs.</li>
+<li>Case-named <code>.EGRID</code>, <code>.INIT</code>, and <code>.UNRST</code> files were produced for both cases.</li>
+</ul>
+<p>The LSF output identified submit host <code>st-lintgx0003</code> and execution hosts
+<code>st-rsv15-15-09</code> and <code>st-rsv15-15-02</code>. CIRRUS reported <code>Cirrus SV3 2.0.7</code>,
+compiled August 4, 2026; the <code>runcirrus</code> wrapper resolved to <code>/global/bin/runcirrus</code>.</p>
+<p>An additional final run used <code>--lgr-name SCREEN_TEST_LGR</code> (15 characters).
+LSF job <code>366202</code> finished <code>DONE</code>, the final log recorded the same status, and
+<code>model/wildcat_baseline.UNRST</code> was written at 13:04 on 2026-10-06 (42,315,536
+bytes). This confirms CIRRUS accepted that longer CARFIN identifier.</p>
+<p>The maximum supported CARFIN name length was not tested. Revisit this only if
+the simulator-visible default <code>TEMP_LGR</code> is to be renamed.</p>
+<h3 id="8-give-user-facing-names-a-clear-meaning">8. Give user-facing names a clear meaning</h3>
+<p><strong>Status: open.</strong></p>
+<p><strong>In practice:</strong> someone new to SCREEN, or returning after a break, should be
+able to fill in a workbook or run a script without decoding abbreviations.
+Today names such as <code>cb_perm</code> (casing-cement permeability), <code>oh_perm</code> (open-hole
+permeability), <code>z_resrv</code>/<code>p_resrv</code> (reservoir depth and pressure) or
+<code>--ali-way</code> (a legacy refinement mode named after a person) only make sense if
+you already know the code. Clear names also make <code>scenario.json</code> and the
+comparison reports readable on their own.</p>
+<p>Work in order of how often people see the name:</p>
+<ol>
+<li><strong>Workbook fields and command-line flags.</strong> These are what users type. Give
+    each a name that states the material, property and unit, for example
+    <code>cb_perm</code> -&gt; <code>casing_cement_permeability_mD</code>, and describe what a flag does
+    rather than who wrote it. Keep the old names working as aliases with a
+    deprecation warning, so existing workbooks and scripts do not break.</li>
+<li><strong>Output files</strong> (<code>scenario.json</code>, <code>grid_policy.json</code>, reports), which people
+    read when checking results. Older outputs must still be readable by the
+    validation and comparison scripts.</li>
+<li><strong>Internal code</strong> (for example <code>pt_df</code>, <code>hs_p</code>, <code>sf_depth_msl</code>,
+    <code>LGR_NAME</code>). Rename only when that code is being changed anyway, since these
+    renames carry the most risk for the least benefit to users.</li>
+</ol>
+<h4 id="name-proposal-for-review">Name Proposal for Review</h4>
+<p>These are proposals, not adopted API names. Please agree on the vocabulary
+before implementation. Workbook aliases would keep existing workbooks working;
+CLI aliases would keep existing scripts working. Units are written in the
+proposed name where they help distinguish otherwise ambiguous values.</p>
+<table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>Current name</th>
+<th>Proposed name</th>
+<th>Meaning</th>
+<th>Unit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DesignMatrix</td>
+<td><code>case_name</code></td>
+<td><code>scenario_name</code></td>
+<td>Human-readable name for one assumptions row</td>
+<td>none</td>
+</tr>
+<tr>
+<td>DesignMatrix</td>
+<td><code>temperature_gradient</code></td>
+<td><code>geothermal_gradient_degC_per_km</code></td>
+<td>Temperature increase with depth</td>
+<td>degC/km</td>
+</tr>
+<tr>
+<td>DesignMatrix</td>
+<td><code>ground_temperature</code></td>
+<td><code>ground_temperature_degC</code></td>
+<td>Temperature at ground/seafloor</td>
+<td>degC</td>
+</tr>
+<tr>
+<td>DesignMatrix</td>
+<td><code>z_fluid_contact</code></td>
+<td><code>fluid_contact_depth_mTVDMSL</code></td>
+<td>Fluid-contact depth</td>
+<td>m TVDMSL</td>
+</tr>
+<tr>
+<td>DesignMatrix</td>
+<td><code>p_fluid_contact</code></td>
+<td><code>fluid_contact_pressure_bar</code></td>
+<td>Pressure at fluid-contact depth</td>
+<td>bar</td>
+</tr>
+<tr>
+<td>DesignMatrix</td>
+<td><code>z_resrv</code></td>
+<td><code>reservoir_depth_mTVDMSL</code></td>
+<td>Reservoir reference depth; legacy alias</td>
+<td>m TVDMSL</td>
+</tr>
+<tr>
+<td>DesignMatrix</td>
+<td><code>p_resrv</code></td>
+<td><code>reservoir_pressure_bar</code></td>
+<td>Pressure at reservoir reference depth; legacy alias</td>
+<td>bar</td>
+</tr>
+<tr>
+<td>DesignMatrix</td>
+<td><code>overburden_datum_depth</code></td>
+<td><code>overburden_datum_mTVDMSL</code></td>
+<td>Depth where overburden pressure is specified</td>
+<td>m TVDMSL</td>
+</tr>
+<tr>
+<td>DesignMatrix</td>
+<td><code>salinity</code></td>
+<td><code>salinity_mass_fraction</code></td>
+<td>NaCl mass divided by total solution mass</td>
+<td>kg/kg (dimensionless)</td>
+</tr>
+<tr>
+<td>GridPolicy</td>
+<td><code>reservoir_permx</code></td>
+<td><code>reservoir_permeability_mD</code></td>
+<td>Reservoir horizontal permeability</td>
+<td>mD</td>
+</tr>
+<tr>
+<td>GridPolicy</td>
+<td><code>overburden_permx</code></td>
+<td><code>overburden_permeability_mD</code></td>
+<td>Overburden horizontal permeability</td>
+<td>mD</td>
+</tr>
+<tr>
+<td>GridPolicy</td>
+<td><code>aquifer_permx</code></td>
+<td><code>aquifer_permeability_mD</code></td>
+<td>Aquifer horizontal permeability</td>
+<td>mD</td>
+</tr>
+<tr>
+<td>GridPolicy</td>
+<td><code>target_dz_water</code></td>
+<td><code>target_cell_dz_water_m</code></td>
+<td>Target vertical cell thickness in water</td>
+<td>m</td>
+</tr>
+<tr>
+<td>GridPolicy</td>
+<td><code>target_dz_overburden</code></td>
+<td><code>target_cell_dz_overburden_m</code></td>
+<td>Target vertical cell thickness in overburden</td>
+<td>m</td>
+</tr>
+<tr>
+<td>GridPolicy</td>
+<td><code>target_dz_reservoir</code></td>
+<td><code>target_cell_dz_reservoir_m</code></td>
+<td>Target vertical cell thickness in reservoir</td>
+<td>m</td>
+</tr>
+<tr>
+<td>DesignMatrix</td>
+<td><code>cb_perm</code></td>
+<td><code>cement_sheeth_permeability_mD</code></td>
+<td>Case-wide casing-cement permeability override</td>
+<td>mD</td>
+</tr>
+<tr>
+<td>DesignMatrix</td>
+<td><code>barrier_perm</code></td>
+<td><code>cement_plug_permeability_mD</code></td>
+<td>Case-wide plug/barrier permeability override</td>
+<td>mD</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td><code>--sim-command</code></td>
+<td><code>--cirrus-command</code></td>
+<td>Command template containing <code>{deck}</code></td>
+<td>none</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td><code>--case-name</code></td>
+<td><code>--scenario-name</code></td>
+<td>Select the workbook assumptions row to run</td>
+<td>none</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td><code>--oh-perm</code></td>
+<td><code>--open-hole-permeability-md</code></td>
+<td>Default permeability assigned to open-hole cells</td>
+<td>mD</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td><code>--cb-perm</code></td>
+<td><code>--cement-sheeth-permeability-md</code></td>
+<td>Default permeability assigned to casing-cement cells</td>
+<td>mD</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td><code>--barrier-perm</code></td>
+<td><code>--cement-plug-permeability-md</code></td>
+<td>Default permeability assigned to plug/barrier cells</td>
+<td>mD</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td><code>--ali-way</code></td>
+<td><code>--legacy-depth-refinement</code></td>
+<td>Alternate refinement: uses coarse-grid reference depth, alternative lateral sizing, and a fixed 0.05 m minimum cell size</td>
+<td>none</td>
+</tr>
+</tbody>
+</table>
+<p>Potentially overlapping depth/pressure pairs (<code>fluid_contact_*</code> and
+<code>reservoir_*</code>) should stay separate: the former defines the fluid-contact
+boundary, while the latter is a compatibility input used when no fluid-contact
+pair is supplied. This distinction needs to remain explicit in any rename.</p>
+<p>Done when the names are agreed, steps 1 and 2 are implemented, workbook
+documentation uses the new names, and tests show that a workbook using the old
+names still produces the same case.</p>
+<h2 id="later">Later</h2>
+<p>These are intentionally lower priority than the Next items:</p>
+<ol>
+<li><strong>LWRES-inspired low-resolution LGR mode.</strong> <em>In practice:</em> a coarser,
+   faster refinement option for quick screening or large batches, trading
+   detail near the well for run time. Add a named refinement policy
+   using current WellClass geometry and CARFIN writers. Validate parent-cell DZ
+   conservation, material precedence, simulator index conversion, and unchanged
+   output from standard mode before supporting it.</li>
+<li><strong>Multi-reservoir design policy.</strong> <em>In practice:</em> model a well that crosses
+   two storage or pressure units (for example a reservoir plus a deeper
+   aquifer) with separate pressure regions; today a workbook supports one
+   reservoir. Define interval selection, layer counts,
+   equilibration regions, and permeability precedence before changing the
+   single-reservoir contract. Done when one workbook can produce two explicitly
+   separated reservoir regions with deterministic tests.</li>
+<li><strong>GaP module relocation.</strong> <em>In practice:</em> no change in results; the grid and
+   LGR code moves from the WellClass package to the GaP package, so it is
+   obvious which package owns what. Old imports keep working for a while.
+   Move GaP-owned grid/LGR modules out of the
+   WellClass namespace while retaining temporary re-exports. Done when imports,
+   notebooks, and tests use the new location and the compatibility layer is
+   documented.</li>
+<li><strong>Wellbore-defect scenarios.</strong> <em>In practice:</em> describe a specific failure,
+   such as a casing hole at a given depth or a channel through the cement,
+   instead of only lowering the permeability of whole cement intervals.
+   Specify casing holes, cement channels,
+   microannuli, and fractures as separate scenario inputs; implement one
+   representation and validate it against simulator transmissibility behavior
+   before adding more defect types.</li>
+<li><strong>Richer result viewing.</strong> <em>In practice:</em> animate results over time or
+   browse them in a hosted dashboard. The local Parquet viewer covers the
+   current cross-section inspection; timestep animation, richer hover
+   metadata, and hosted Webviz/FMU integration stay parked until a concrete
+   analysis need appears.</li>
+</ol>
+<h2 id="boundaries">Boundaries</h2>
+<p>These are implementation rules with concrete checks:</p>
+<ul>
+<li><code>LGRBuilder</code> receives a validated coarse grid; test that it does not create
+    <code>.EGRID</code>/<code>.INIT</code> files.</li>
+<li><code>prepare_init_case</code> may write <code>TOPS</code>/<code>DZ</code> and GRDECL text, but only an
+    explicit simulator command may create native <code>.EGRID</code>/<code>.INIT</code> files.</li>
+<li>Every depth, pressure, and permeability input has a declared unit and
+    coordinate system; reject ambiguous workbook values before execution.</li>
+<li>Scenario output is isolated under <code>&lt;output-root&gt;/&lt;case_stem&gt;/</code>; batch tests
+    must verify no case writes into another case's directory.</li>
+<li>The existing pre-existing-grid JSON-to-LGR path remains a regression test
+    while coarse-grid preparation evolves.</li>
+<li>Legacy scripts under <code>experiments/legacy/</code> and <code>originals/</code> may inform
+    behavior but cannot become supported entry points without tests and an
+    explicit ownership decision.</li>
+</ul>
+<p>The scripts in <code>experiments/legacy/</code> contain historical examples of tops generation, template handling, pressure initialization, and simulator orchestration. They are references for future work, not new implementation boundaries.</p>
+<p>Legacy CSV-oriented recipes are kept for compatibility and migration only; new projects should prefer canonical JSON inputs or the workbook adapter path.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["search.suggest", "search.highlight", "content.tabs.link", "navigation.indexes", "content.tooltips", "navigation.path", "content.code.annotate", "content.code.copy", "content.code.select"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10.9.0/dist/mermaid.min.js"></script>
+      
+    
+  </body>
+</html>
