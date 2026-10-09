@@ -399,8 +399,10 @@ The implemented fields are `casing_hole_casing`,
 one hole per scenario. The standalone builder accepts matching flags. Resolved
 faces/areas are saved beside the include and in workbook case metadata.
 Depth lookup uses absolute EGRID corners, not the internal cumulative-Z origin.
-The current implementation uses only `MULTX` on +X, nearest faces first along
-Y, and rejects coincident casing interfaces and unsupported grid geometry.
+The current implementation uses only `MULTX` on +X, distributes circular area
+proportionally to face overlaps with a centered diameter-wide Y span, and
+rejects coincident casing interfaces and unsupported grid geometry. This
+replaces the earlier experimental nearest-face filling rule.
 See the [workflow guide](gap.md#experimental-localized-casing-hole) for the
 controlled sealed/partial/full-open CIRRUS acceptance check.
 
@@ -413,11 +415,14 @@ controlled sealed/partial/full-open CIRRUS acceptance check.
   face use `A_face = DY * DZ`; for a Y-normal face use `DX * DZ`, not
   `DX * DY`. A partially opened face receives `MULTX` or `MULTY` equal to
   its allocated opening area divided by its face area.
-- Start at the side midpoint. If the area exceeds one face, allocate the
-  remainder deterministically to neighboring faces along the same casing
-  side and at the same K layer: along Y for an X-normal face, or along X
-  for a Y-normal face. Do not spread in Z, cross into another casing, or
-  rebuild the grid. Reject an opening larger than the available side area.
+- Center a lateral span equal to the diameter at the side midpoint.
+  Allocate circular area proportionally to each face's positive span overlap,
+  even when a single tall, narrow face has enough area to hold the hole.
+  A midpoint at a face boundary shares the opening; output uses increasing J.
+  Keep all faces on the same +X casing side and K layer. Do not spread in Z,
+  cross into another casing, or rebuild the grid. Reject a span extending
+  beyond the side, excessive total area, or any per-face allocation above
+  capacity rather than clipping or moving area outside the span.
 - Keep each multiplier in `[0, 1]` and conserve total allocated area:
   `sum(multiplier * face_area) = A` within a declared numerical tolerance.
   Leave all other casing faces sealed and existing material properties

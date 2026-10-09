@@ -108,14 +108,20 @@ casing fail before CIRRUS initialization. Geometry-dependent checks run after
 initialization, before writing the LGR.
 
 Without measured XY/azimuth, placement is fixed at the **+X side midpoint**,
-choosing the lower J for a tie. The resolver uses absolute EGRID layer corners
+with a centered Y span equal to the hole diameter. The resolver uses absolute EGRID layer corners
 (including the grid's depth origin), the final sealed casing bounds, and the
 rounded CARFIN `HYFIN` ratios. It allocates `pi * (diameter / 2)^2` to lateral
-faces with area `DY * DZ`, writing `MULTX = allocated_area / face_area` after
-the ordinary seals. Larger holes fill nearest neighboring faces along Y, at
-the **same K**, without refining or changing the geometry. Multipliers stay
+faces with area `DY * DZ`, weighted by each face's overlap with the diameter
+span: `allocated_area = circular_area * overlap / diameter`. It writes
+`MULTX = allocated_area / face_area` after the ordinary seals. Every face with
+positive overlap participates, even if one tall, narrow face could hold the
+whole area. A midpoint on a cell boundary shares the opening between both
+cells; output faces are ordered by increasing J.
+All faces remain at the **same K**, without refining or changing geometry. Multipliers stay
 within `[0, 1]`; allocated area is conserved to relative tolerance `1e-12`.
-An opening larger than the available side area is rejected, not spread in Z.
+Reject a diameter extending beyond the casing side, an opening larger than
+the available side area, or an overlap-weighted allocation exceeding any
+face's area. Do not clip, reallocate outside the span, or spread in Z.
 Shared/ambiguous casing interfaces, absent lateral neighbors, non-Cartesian
 grids, non-flat layers, or inconsistent physical/material layer thicknesses
 are rejected. The thickness check allows roundoff from single-precision EGRID
@@ -134,6 +140,9 @@ The standalone builder accepts the same inputs via `--casing-hole-casing`,
 assumption, one-based face indices, face/opening areas, and multipliers. The
 workbook wrapper also records this under `resolved_casing_hole` in
 `scenario.json`. Omitting the inputs preserves the existing GRDECL output.
+The report includes `lateral_overlap_m` for each face and identifies the
+overlap-weighted allocation rule. Earlier experimental reports using nearest-face
+filling are not equivalent; regenerate hole includes/reports before comparison.
 
 **CIRRUS connectivity is not yet verified.** Before using this for decisions,
 run a controlled sealed/partial/full-open face check on the CIRRUS host:
@@ -141,9 +150,11 @@ run a controlled sealed/partial/full-open face check on the CIRRUS host:
 1. Keep the grid, materials, fluid properties and pressure gradient identical
    across the three cases. Use one interior casing face with conductive cells
    on both sides; do not rely on leakage through other cement/casings.
-2. Choose the partial and full diameters from the resolved face area:
-   `diameter = sqrt(4 * fraction * face_area / pi)`, for fractions `0.5` and
-   `1`. Confirm both resolve to the same recorded face.
+2. For an isolated keyword/indexing check, use test-only final `EQUALS MULTX`
+   overrides of `0.5` and `1` on the same interior face, with the sealed case
+   left unchanged. These are connectivity controls, not physical hole inputs.
+   Do not derive a single-face multiplier from diameter alone: changing the
+   diameter changes the lateral footprint and may exceed the casing-side width.
 3. Read the **LGR**, not parent-grid, `MULTX` and `TRANX` in final INIT outputs.
    The recorded positive-X face must have multipliers `0`, `0.5`, and `1`.
    Effective transmissibility must be zero for the seal, positive for the
@@ -154,6 +165,10 @@ run a controlled sealed/partial/full-open face check on the CIRRUS host:
    required LGR properties or fluxes are not exported, obtain simulator
    diagnostics; completion or a global pressure/saturation change alone is
    insufficient evidence of correct indexing and zero-multiplier replacement.
+5. Separately run the actual diameter-span hole include and compare every
+   recorded face's multiplier with the final LGR output. Confirm the adjacent
+   non-overlapping faces remain sealed and the area-weighted opening matches
+   the report. Earlier single-face half/full diameter examples are superseded.
 
 After `.EGRID` and `.INIT` have been produced, build the LGR/CARFIN include:
 

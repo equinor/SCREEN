@@ -70,33 +70,37 @@ def test_invalid_scenario_hole_fields(fields):
 
 @pytest.mark.parametrize("depth,expected_k", [(10, 1), (11.999, 1), (12, 2), (15.999, 3)])
 def test_single_face_and_boundary_depth_ownership(depth, expected_k):
-    faces = _resolve(_hole(depth=depth))
+    faces = _resolve(_hole(area=pi * 0.2**2, depth=depth))
     assert len(faces) == 1
     face = faces[0]
     assert (face.i, face.j, face.k) == (4, 3, expected_k)
     assert face.face_area_m2 == 1
-    assert face.multiplier == pytest.approx(0.5)
-    assert face.opening_area_m2 == pytest.approx(pi * (_hole().diameter_m / 2) ** 2)
+    assert face.multiplier == pytest.approx(pi * 0.2**2)
+    assert face.opening_area_m2 == pytest.approx(pi * 0.2**2)
+    assert face.lateral_overlap_m == pytest.approx(0.4)
 
 
 def test_large_hole_spreads_only_along_y_in_same_layer():
-    exact_face = _resolve(_hole(area=1))
-    assert len(exact_face) == 1
-    assert exact_face[0].multiplier == pytest.approx(1)
-    faces = _resolve(_hole(area=2.5))
-    assert [(face.i, face.j, face.k) for face in faces] == [(4, 3, 2), (4, 2, 2), (4, 4, 2)]
-    assert [face.multiplier for face in faces] == pytest.approx([1, 1, 0.5])
-    assert sum(face.opening_area_m2 for face in faces) == pytest.approx(2.5, rel=1e-12)
+    diameter = 1.2
+    faces = _resolve(CasingHole(casing="target", depth_mTVDMSL=12, diameter_m=diameter))
+    assert [(face.i, face.j, face.k) for face in faces] == [(4, 2, 2), (4, 3, 2), (4, 4, 2)]
+    assert [face.lateral_overlap_m for face in faces] == pytest.approx([0.35, 0.5, 0.35])
+    area = pi * (diameter / 2)**2
+    assert [face.multiplier for face in faces] == pytest.approx(area * np.array([0.35, 0.5, 0.35]) / diameter)
+    assert sum(face.opening_area_m2 for face in faces) == pytest.approx(area, rel=1e-12)
     assert all(0 < face.multiplier <= 1 for face in faces)
-    assert len(_resolve(_hole(area=3))) == 3
-    with pytest.raises(ValueError, match="exceeds"):
+    with pytest.raises(ValueError, match="side width"):
+        _resolve(_hole(area=2))
+    with pytest.raises(ValueError, match="side area"):
         _resolve(_hole(area=3.1))
 
 
-def test_even_side_uses_lower_j_midpoint_face_first():
+def test_even_side_shares_small_hole_across_midpoint_boundary():
     casings = _casings()
     casings["ij_max"] = 2
-    assert _resolve(_hole(), casings)[0].j == 2
+    faces = _resolve(_hole(area=0.01), casings)
+    assert [face.j for face in faces] == [2, 3]
+    assert [face.opening_area_m2 for face in faces] == pytest.approx([0.005, 0.005])
 
 
 def test_nonuniform_side_uses_physical_midpoint_and_each_face_area():
@@ -104,10 +108,57 @@ def test_nonuniform_side_uses_physical_midpoint_and_each_face_area():
     faces = resolve_casing_hole(
         _hole(area=5), _casings(), np.array([10.0, 12.0, 14.0, 16.0]), widths, 5,
     )
-    assert [face.j for face in faces] == [4, 3]
-    assert [face.face_area_m2 for face in faces] == [4, 2]
-    assert [face.multiplier for face in faces] == pytest.approx([1, 0.5])
+    assert [face.j for face in faces] == [3, 4]
+    assert [face.face_area_m2 for face in faces] == [2, 4]
+    diameter = sqrt(20 / pi)
+    assert [face.lateral_overlap_m for face in faces] == pytest.approx([diameter / 2 - 0.375, diameter / 2 + 0.375])
+    assert [face.multiplier for face in faces] == pytest.approx(
+        [5 * (diameter / 2 - 0.375) / diameter / 2, 5 * (diameter / 2 + 0.375) / diameter / 4]
+    )
     assert sum(face.opening_area_m2 for face in faces) == pytest.approx(5)
+
+
+@pytest.mark.parametrize("side_cells,expected_overlaps", [(2, [5, 5]), (3, [2.5, 5, 2.5])])
+def test_tall_narrow_cells_respect_diameter_even_when_one_face_has_capacity(side_cells, expected_overlaps):
+    casings = _casings().assign(ij_max=side_cells, k_min=0, k_max=0)
+    faces = resolve_casing_hole(
+        CasingHole(casing="target", depth_mTVDMSL=12, diameter_m=10),
+        casings, np.array([10., 110.]), np.full(5, 5.), 5,
+    )
+    area = pi * 5**2
+    assert area < faces[0].face_area_m2
+    assert len(faces) == side_cells
+    assert [face.lateral_overlap_m for face in faces] == pytest.approx(expected_overlaps)
+    assert [face.opening_area_m2 for face in faces] == pytest.approx(area * np.array(expected_overlaps) / 10)
+    assert sum(face.opening_area_m2 for face in faces) == pytest.approx(area, rel=1e-12)
+    assert {(face.i, face.k) for face in faces} == {(side_cells + 1, 1)}
+
+
+def test_exact_span_boundaries_do_not_open_nonoverlapping_neighbors():
+    faces = _resolve(CasingHole(casing="target", depth_mTVDMSL=12, diameter_m=0.5))
+    assert [face.j for face in faces] == [3]
+    assert faces[0].lateral_overlap_m == pytest.approx(0.5)
+
+
+def test_per_face_overallocation_is_rejected_even_when_total_side_area_fits():
+    casings = _casings().assign(k_min=0, k_max=0)
+    # Total side capacity is 1.2 m2, but the central face cannot hold its assigned share.
+    with pytest.raises(ValueError, match="overlap allocation exceeds"):
+        resolve_casing_hole(
+            CasingHole(casing="target", depth_mTVDMSL=10, diameter_m=1.2),
+            casings, np.array([10., 10.8]), np.full(5, 0.5), 5,
+        )
+
+
+def test_exact_full_face_multiplier_is_supported_without_overflow():
+    diameter = 0.5
+    dz = pi * diameter / 4
+    faces = resolve_casing_hole(
+        CasingHole(casing="target", depth_mTVDMSL=10, diameter_m=diameter),
+        _casings(), np.array([10., 10 + dz]), np.full(5, 0.5), 5,
+    )
+    assert len(faces) == 1
+    assert faces[0].multiplier == pytest.approx(1)
 
 
 @pytest.mark.parametrize("depth", [9.999, 16, 17])
@@ -218,10 +269,12 @@ def test_builder_changes_only_selected_multiplier_records(tmp_path):
     lines = outputs[1].splitlines()
     seal_lines = [index for index, line in enumerate(lines) if line.startswith("MULTX") and float(line.split()[1]) == 0]
     assert lines.index(override.splitlines()[0]) > max(seal_lines)
+    assert [(face.i, face.j, face.k) for face in builder.casing_hole_faces] == [(15, 11, 17), (15, 12, 17)]
     face = builder.casing_hole_faces[0]
     assert (face.i, face.j, face.k) == (15, 11, 17)
     assert face.face_area_m2 == pytest.approx(face.opening_area_m2 / face.multiplier)
-    assert face.opening_area_m2 == pytest.approx(pi * 0.05**2)
+    assert face.opening_area_m2 == pytest.approx(pi * 0.05**2 / 2)
+    assert sum(face.opening_area_m2 for face in builder.casing_hole_faces) == pytest.approx(pi * 0.05**2, rel=1e-12)
     hyfin = np.asarray([float(value) for value in outputs[1].split("HYFIN\n")[1].split("/")[0].split()])
     assert face.face_area_m2 == pytest.approx(hyfin[face.j - 1] / hyfin.sum() * 200 * 14.3)
     sealed_faces = [lines[index].split() for index in seal_lines]

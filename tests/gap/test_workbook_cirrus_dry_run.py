@@ -266,10 +266,13 @@ def test_workbook_hole_reaches_lgr_and_resolved_metadata(tmp_path):
     assert report["input"] == {"casing": "Casing 20 in", "depth_mTVDMSL": 200, "diameter_m": 0.1}
     assert report["side"] == "+X"
     assert report["allocated_area_m2"] == pytest.approx(np.pi * 0.05**2, rel=1e-12)
-    assert len(report["faces"]) == 1
-    face = report["faces"][0]
-    assert (face["i"], face["j"], face["k"]) == (15, 11, 17)
-    assert f"MULTX {face['multiplier']:.17g} 15 15 11 11 17 17 /" in lgr_path.read_text()
+    assert report["allocation"] == "circular area weighted by lateral span overlap"
+    assert [(face["i"], face["j"], face["k"]) for face in report["faces"]] == [(15, 11, 17), (15, 12, 17)]
+    assert [face["lateral_overlap_m"] for face in report["faces"]] == pytest.approx([0.05, 0.05])
+    assert [face["opening_area_m2"] for face in report["faces"]] == pytest.approx([np.pi * 0.05**2 / 2] * 2)
+    for face in report["faces"]:
+        j = face["j"]
+        assert f"MULTX {face['multiplier']:.17g} 15 15 {j} {j} 17 17 /" in lgr_path.read_text()
 
 
 def test_older_workbook_without_hole_columns_remains_valid(tmp_path):

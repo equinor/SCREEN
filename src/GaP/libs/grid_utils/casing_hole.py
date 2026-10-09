@@ -19,6 +19,7 @@ class HoleFace:
     face_area_m2: float
     opening_area_m2: float
     multiplier: float
+    lateral_overlap_m: float
 
 
 def refined_depth_edges(grid: Grid, i: int, j: int, subdivisions: np.ndarray, first_k: int = 0) -> np.ndarray:
@@ -86,7 +87,7 @@ def resolve_casing_hole(
     widths_y: np.ndarray,
     nx: int,
 ) -> tuple[HoleFace, ...]:
-    """Allocate circular area center-out on one +X interface, without changing K."""
+    """Distribute circular area across a centered diameter span on one +X side."""
     hole.validate_casing(
         (row["name"], float(row["top_msl"]), float(row["bottom_msl"]))
         for _, row in casings.iterrows()
@@ -130,21 +131,27 @@ def resolve_casing_hole(
     if not isfinite(area) or area <= 0 or (area > available and not isclose(area, available, rel_tol=1e-12)):
         raise ValueError("casing hole area exceeds the available +X casing side area in this layer")
 
-    edges_y = np.concatenate(([0.0], np.cumsum(widths_y)))
-    midpoint = (edges_y[j_min] + edges_y[j_max + 1]) / 2
-    order = sorted(
-        range(j_min, j_max + 1),
-        key=lambda j: (round(abs((edges_y[j] + edges_y[j + 1]) / 2 - midpoint), 12), j),
-    )
+    side_widths = widths_y[j_min : j_max + 1]
+    side_width = fsum(float(value) for value in side_widths)
+    if hole.diameter_m > side_width and not isclose(hole.diameter_m, side_width, rel_tol=1e-12, abs_tol=0):
+        raise ValueError("casing hole diameter exceeds the available +X casing side width")
+    edges_y = np.concatenate(([0.0], np.cumsum(side_widths))) - side_width / 2
+    overlaps = np.maximum(0.0, np.minimum(edges_y[1:], radius) - np.maximum(edges_y[:-1], -radius))
+    if not isclose(fsum(float(value) for value in overlaps), hole.diameter_m, rel_tol=1e-12, abs_tol=0):
+        raise ValueError("casing hole span failed to conserve lateral diameter")
     faces = []
-    remaining = area
-    for j in order:
-        if remaining <= 0:
-            break
+    for offset, overlap in enumerate(overlaps):
+        if overlap <= 0:
+            continue
+        j = j_min + offset
         face_area = float(widths_y[j] * dz)
-        allocated = min(remaining, face_area)
-        faces.append(HoleFace(i + 1, j + 1, k + 1, face_area, allocated, allocated / face_area))
-        remaining -= allocated
+        allocated = area * float(overlap / hole.diameter_m)
+        if allocated > face_area and not isclose(allocated, face_area, rel_tol=1e-12, abs_tol=0):
+            raise ValueError("casing hole overlap allocation exceeds a face's area in this layer")
+        allocated = min(allocated, face_area)
+        if allocated <= 0:
+            raise ValueError("casing hole overlap allocation is too small to represent")
+        faces.append(HoleFace(i + 1, j + 1, k + 1, face_area, allocated, allocated / face_area, float(overlap)))
     if not isclose(fsum(face.opening_area_m2 for face in faces), area, rel_tol=1e-12, abs_tol=0):
         raise ValueError("casing hole allocation failed to conserve opening area")
     return tuple(faces)
