@@ -117,11 +117,9 @@ def plot_pt(my_pressure: Pressure,
     #iterate over scenarios
     counter = 0
     for idx, p_sc in scenarios.iterrows():
-        sc_type    = p_sc['type']
         sc_name    = p_sc['name']
         sc_msad_p  = p_sc['p_MSAD']
         sc_msad_z  = p_sc['z_MSAD']
-        sc_delta_p = p_sc['p_delta']
 
         sc_msad_temp = np.interp(float(sc_msad_z), pt_df[('init','depth_msl')], pt_df[('init','temp')])
 

@@ -33,17 +33,5 @@ jobs:
       - name: Install uv
         run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
-      # Create env from your pyproject; install ruff via dependencies or group
-      - name: Sync dependencies (lint group if you use it)
-        run: |
-          # If you keep dev/lint deps under an optional group:
-          #   uv sync --group lint
-          # Otherwise, just:
-          uv sync
-          # Ensure ruff is present if you haven’t added it in pyproject:
-          uv add --dev ruff
-
-      # Run Ruff with GitHub-friendly output
       - name: Lint with Ruff
-        run: uv run ruff check --output-format=github .
-        continue-on-error: true
+        run: uv run --only-group test ruff check --output-format=github .
