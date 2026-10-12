@@ -84,7 +84,7 @@ less often. The technical detail follows for whoever picks the item up.
 | 6 | Give generated cases unique, navigable names | Done; verified on a real CIRRUS host (item 7) |
 | 7 | Confirm recent changes on a CIRRUS host | Done for current case/LGR naming |
 | 8 | Give user-facing names a clear meaning | Open |
-| 9 | Represent a localized casing hole | Static CIRRUS opening/isolation verified; pressure-driven flow check pending |
+| 9 | Represent a localized casing hole | Experimental; static opening/isolation and one-year pressure-driven transfer verified |
 
 ### 1. Compare scenario outputs automatically
 
@@ -381,7 +381,7 @@ names still produces the same case.
 ### 9. Represent a localized casing hole
 
 **Status: experimental implementation; static CIRRUS opening and isolation
-verified; pressure-driven flow verification pending.** First defect slice for
+verified; one-year pressure-driven transfer verified on Smeaheia.** First defect slice for
 a concrete well; no general defect framework is required.
 
 **In practice:** describe one hole using the affected casing's stable `name`
@@ -431,7 +431,41 @@ controlled sealed/partial/full-open CIRRUS acceptance check.
 
 These checks establish static opening and isolation for this case, not
 pressure-driven leakage, a calibrated hole-flow law, or arbitrary grids.
-The dynamic cross-face flow check remains pending.
+
+**Smeaheia dynamic evidence (runs reported 2026-10-10; plots verified
+2026-10-12, CIRRUS 1.9):**
+
+- Both sealed and hole cases completed 365 days. Both removed mechanical
+  plug `mplug2`, retained cement plug `cplug9`, and used 10 mD for
+  `Cement 13 3/8 in`. The hole case opened `Casing 13 3/8 in` at
+  650 m TVDMSL with diameter 0.1 m.
+- The `22 x 22 x 270` LGR opening comprises positive-X faces
+  `(14, 11, 130)` and `(14, 12, 130)`, each with multiplier
+  `0.013923971426024894`. Test-only FIPHOL assigns their inner cells to
+  region 1, outer cells to region 2, and the remaining LGR to region 3.
+  The same zonation was applied to both cases.
+- At both faces, initial inner/outer pressures were identical between
+  cases: `78.24778747558594` / `66.01054382324219`, with gas saturations
+  1 / 0. CO2 was already initialized at the hole; this test does not
+  establish reservoir-to-hole migration.
+- Hole `RGFR_HOL:1-2` at day 365 was `3.082140446 m3/day`; its peak
+  reported magnitude was `7.547787189 m3/day`. `RGFT_HOL:1-2` reached
+  `1166.561401 m3`. At gas surface density `1.871 kg/m3`, these correspond
+  to about `5.76668 kg/day` final rate, `14.12191 kg/day` peak, and
+  `2182.63638 kg` cumulative direct transfer.
+- The sealed case omitted the 1-2 pair but exported 1-3 and 2-3.
+  CIRRUS 1.9 source revision `00028b774` registers pair summaries from its
+  connection map, not from nonzero flow: connected zero-flow pairs remain
+  exported. The sealed 1-2 curve is therefore labelled inferred zero, not
+  an exported measurement.
+- User-supplied rate and total plots verified the mass-unit labels and
+  dashed inferred-zero sealed curve. The FIPLEG 1-6 ocean gas-rate plot
+  showed no visible transfer for either case over the year; exact numerical
+  ocean-rate values were not supplied.
+
+These results support dynamic direct hole connectivity for this setup, not
+ocean arrival or a calibrated physical hole-flow law. FIPHOL remains a
+test-only reporting zonation, not a generated production feature.
 
 **Area-equivalent opening:**
 

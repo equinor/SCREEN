@@ -149,12 +149,19 @@ overlap-weighted allocation rule. Earlier experimental reports using nearest-fac
 filling are not equivalent; regenerate hole includes/reports before comparison.
 
 **Static CIRRUS opening/isolation was verified on the generated Wildcat grid
-(2026-10-09); pressure-driven flow remains unverified.** The controls confirmed
+(2026-10-09); one-year pressure-driven hole transfer was verified on Smeaheia
+(runs 2026-10-10, plots 2026-10-12).** The controls confirmed
 zero/half/full transmissibility scaling, and the diameter-span case changed
 only its two recorded faces while preserving geometry and checked LGR
 properties. See [roadmap evidence](gap_roadmap.md#9-represent-a-localized-casing-hole).
-The model remains experimental. Before using it for decisions, complete the
-pressure-driven check and repeat the relevant controls for the intended setup:
+The Smeaheia hole transferred about 2182.64 kg through FIPHOL 1-2 over
+365 days, with a final rate about 5.77 kg/day; the sealed comparison uses an
+explicitly labelled inferred-zero curve under CIRRUS 1.9 reporting rules.
+CO2 was initialized at the hole, so reservoir-to-hole migration was not tested.
+The ocean-transfer plot showed no visible gas transfer during the year;
+ocean arrival and a calibrated hole-flow law remain unverified.
+The model remains experimental. Before using it for decisions, repeat the
+relevant controls for the intended setup:
 
 1. Keep the grid, materials, fluid properties and pressure gradient identical
    across the three cases. Use one interior casing face with conductive cells
