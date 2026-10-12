@@ -85,6 +85,9 @@ less often. The technical detail follows for whoever picks the item up.
 | 7 | Confirm recent changes on a CIRRUS host | Done for current case/LGR naming |
 | 8 | Give user-facing names a clear meaning | Open |
 | 9 | Represent a localized casing hole | Experimental; static opening/isolation and one-year pressure-driven transfer verified |
+| 10 | Generate hole-transfer reporting from the workbook | Open; FIPHOL currently added manually |
+| 11 | Align FIPLEG aquifer reporting with the current coarse-grid boundaries | Open; region 5 definition needs review |
+| 12 | Run only new or unfinished workbook cases | Open; batch reruns every case and rewrites the manifest |
 
 ### 1. Compare scenario outputs automatically
 
@@ -498,6 +501,95 @@ rather than being multiplied by zero or overwritten later. A real CIRRUS
 baseline/defect run must confirm unchanged geometry and intended connectivity;
 the area ratio is a screening approximation, not a calibrated orifice-flow
 law.
+
+### 10. Generate hole-transfer reporting from the workbook
+
+**Status: open.** Item 9 generates casing openings and the plotting script
+reads existing FIPHOL outputs, but neither automatically creates FIPHOL.
+Current verification runs insert that zonation manually into generated
+includes; regeneration removes it.
+
+**In practice:** prepare and queue a complete scenario batch from one workbook,
+including hole-transfer reporting, without editing the generated decks.
+
+- Define explicit reporting-location inputs independent of whether a casing
+  opening is enabled. Sealed controls must be able to use the same reporting
+  cells as hole cases; do not infer pairings from scenario names.
+- Reuse resolved interface geometry to label the inner adjacent cells as
+  FIPHOL 1, outer adjacent cells as 2, and remaining LGR cells as 3. Include
+  every face in the diameter span, not only its midpoint.
+- Generate the zonation inside CARFIN before ENDFIN, before a final local or
+  queued run. Wire workbook, standalone, and batch workflows consistently.
+- Preserve FIPLEG and other partitions, grid geometry, properties, and casing
+  multipliers. Reporting must not itself create an opening.
+- Record reporting regions and resolved cells in case metadata, validate
+  partition limits supported by CIRRUS, and leave no-reporting output unchanged.
+
+**Done when:** a workbook-only paired batch produces matching FIPHOL cells
+in sealed/open cases, survives regeneration, and exports usable region-pair
+summaries on CIRRUS. Tests cover multi-face openings, explicit sealed reporting,
+invalid locations, and unchanged cases without reporting.
+
+### 11. Align FIPLEG aquifer reporting with the current coarse-grid boundaries
+
+**Status: open; outdated definition reported by the user (2026-10-12).**
+FIPLEG 5 was intended to identify aquifer cells with multiplied pore volume.
+The aquifer representation has since moved to the outer edges of the coarse
+grid; its reporting zonation needs to be checked against that current placement.
+
+**In practice:** regional inventories and transfers labelled as aquifer
+quantities should refer to the actual boundary-aquifer cells, not their former
+location.
+
+- Trace current boundary-aquifer placement and pore-volume multipliers, then
+  compare them with FIPLEG 5 assignments in generated parent and LGR outputs.
+- Define region 5 ownership at coarse-grid edges and parent/LGR interfaces,
+  including precedence against reservoir, overburden, and ocean labels.
+- Update generation and directly related region descriptions together.
+  Preserve physical aquifer properties and boundary behavior; this is a
+  reporting correction, not an aquifer-model redesign.
+- Preserve other region identifiers where possible and explicitly document
+  changed memberships so old and regenerated summary results are not silently
+  treated as equivalent.
+
+**Done when:** regression checks establish that region 5 identifies the
+intended current aquifer cells, with no unintended changes to other regions
+or physical properties, and CIRRUS INIT/summary checks confirm the corrected
+zonation and aquifer-related transfer interpretation.
+
+### 12. Run only new or unfinished workbook cases
+
+**Status: open; requested by the user (2026-10-12).** The batch runner
+processes every workbook scenario and rewrites `batch_manifest.json` with only
+a succeeded/failed status. After adding cases to a workbook, there is no safe
+way to start only the new ones: rerunning regenerates existing cases, can
+overwrite manual edits, and may resubmit jobs already queued or running.
+
+**In practice:** add rows to a workbook, ask which cases are new, changed,
+queued, running, finished, or failed, then prepare and submit only the cases
+that need it.
+
+- Add a status/dry-run mode that compares workbook scenarios with the output
+  root and prints the planned action per case without changing files.
+- Derive state from evidence, not directory existence: generated inputs,
+  initialization output, LGR include, queue submission record/job ID, final
+  summary/restart files, and whether the final run reached the requested end
+  date.
+- Store a fingerprint of each case's resolved inputs (workbook values, template,
+  simulation years, casing hole, and reporting options). A case whose inputs
+  changed is reported as stale and is not silently skipped or overwritten.
+- Add an incremental mode that runs missing cases and, when explicitly
+  requested, failed or stale ones. Never resubmit a queued or running job, and
+  never delete existing output; changed cases need explicit confirmation or a
+  new output root.
+- Merge per-case records into the manifest instead of replacing earlier
+  results, including failure messages, submission time, queue, CPU count, and
+  job ID. Report cases removed from the workbook as orphaned, not deleted.
+
+**Done when:** after adding cases to a completed batch, a dry run lists only
+the new cases as pending; the incremental run prepares and queues only those
+cases; and tests cover new, finished, failed, queued/running, stale, orphaned,
+and partially generated cases without overwriting existing output.
 
 ## Later
 
