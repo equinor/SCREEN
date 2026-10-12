@@ -227,6 +227,68 @@ variation. The baseline defaults to the first case in sorted order when
 `--baseline` is omitted. This comparison requires completed simulator output
 and does not rerun CIRRUS.
 
+### Plot region-to-region fluxes after simulation
+
+Use `runscripts/plot_region_fluxes.py` on completed outputs; it does not run
+CIRRUS. Install the plotting extra with `uv sync --extra visualization`.
+Start by choosing a zonation and listing its exported pair vectors:
+
+```bash
+uv run --extra visualization python runscripts/plot_region_fluxes.py \
+	--output-root cases --zonation FIPLEG --list-vectors
+```
+
+The list reports the exact keys and the cases exporting each one. If `1-6`
+exists but `6-1` does not, only `1-6` is selectable; reversing a pair is not
+inferred. Select a pair with `--vector`, repeat it for multiple panels, or
+use `--all` for every exported pair of the chosen zonation and quantity.
+For a well whose `FIPLEG` regions 1 and 6 represent the leakage pathway to
+the ocean, using the chosen leakage sign convention:
+
+```bash
+uv run --extra visualization python runscripts/plot_region_fluxes.py \
+	--output-root cases \
+	--zonation FIPLEG --vector 1-6 --sign -1 \
+	--output cases/ocean_gas_flux.png
+```
+
+For the test-only `FIPHOL` zonation, regions 1 and 2 are the inner and outer
+cells adjacent to the casing hole:
+
+```bash
+uv run --extra visualization python runscripts/plot_region_fluxes.py \
+	--output-root work/smeaheia_hole_dynamic \
+	--zonation FIPHOL --vector 1-2 \
+	--output work/smeaheia_hole_dynamic/hole_gas_transfer.png
+```
+
+`--quantity` defaults to gas rate (`RGFR`); choose water rate (`RWFR`),
+gas total (`RGFT`), or water total (`RWFT`) instead. For example,
+`--zonation FIPHOL --quantity RGFT --all` plots all exported gas-transfer
+totals in separate panels. `--vector` accepts a pair or a matching full key,
+e.g. `--zonation FIPLEG --quantity RWFR --vector RWFR_LEG:9-1`.
+The default `--sign 1` preserves the
+exported sign; `--sign -1` reverses it explicitly. Dates and units come from
+the summary, without assuming a gas-volume basis or interpolating cases
+onto identical timesteps. Region meanings and the physical direction of
+positive flow must be checked for the intended well.
+
+The script pairs SMSPEC/UNSMRY/INIT by the case stem from `scenario.json`,
+or uses the sole SMSPEC in a legacy case's `model` directory. It never zips
+independent file lists. Use `--summary-stem` when legacy cases have multiple
+outputs. `--case-pattern` filters case directories; `--show` also opens the
+saved plot interactively.
+
+Before plotting, it checks the requested FIP partition and positive region
+IDs in all exported INIT occurrences, including LGRs. Missing zonations
+and invalid requested regions produce explicit errors. A requested pair
+absent from every selected case is rejected with the available keys.
+When a pair exists in some cases but not others, missing curves are omitted
+with explicit warnings, never replaced by zero. Thus the sealed test, which
+does not export `RGFR_HOL:1-2`, is omitted from that panel rather than drawn
+as a measured zero curve. Reader failures, missing output files,
+invalid values, and inconsistent units across cases also stop the command.
+
 ## Grid Build Pipeline (Canonical)
 
 The supported simulator-facing workflow is intentionally explicit:
