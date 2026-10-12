@@ -25,7 +25,7 @@ markdown-callouts
 jupyter-server>=2.20.0 # not directly required, pinned by Snyk to avoid a vulnerability
 pillow>=12.3.0 # not directly required, pinned by Snyk to avoid a vulnerability
 tornado>=6.5.8 # not directly required, pinned by Snyk to avoid a vulnerability
-werkzeug>=3.1.6 # not directly required, pinned by Snyk to avoid a vulnerability
+werkzeug>=3.1.9 # not directly required, pinned by Snyk to avoid a vulnerability
 requests>=2.33.0 # not directly required, pinned by Snyk to avoid a vulnerability
 anyio>=4.14.2 # not directly required, pinned by Snyk to avoid a vulnerability
 ipython>=8.10.0 # not directly required, pinned by Snyk to avoid a vulnerability
