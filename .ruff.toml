@@ -1,18 +1,23 @@
-select = ["E", "F"]
-ignore = ["E501"]
+line-length = 150
 exclude = [
     "build",
     "dist",
     "site",
     "venv_screen",
+    "work",
     "originals",
+    "src/_originals",
+    "experiments/legacy",
     "test_data",
     "tests",
     "GaP_HIRES.py",
     "GaP_HIRES_15112022.py",
     "__init__.py"
 ]
-line-length = 150
 
-[per-file-ignores]
+[lint]
+select = ["E", "F"]
+ignore = ["E501"]
+
+[lint.per-file-ignores]
 "tools/ignore.py" = ["F401"]

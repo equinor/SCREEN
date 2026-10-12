@@ -34,6 +34,10 @@ dev = [
 docs = ["mkdocs==1.6.1", "mkdocs-material==9.7.7"]
 test = ["pytest==9.0.3", "pytest-cov==4.1.0", "ruff==0.5.3"]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = ["work", "site", "build", "dist", ".venv"]
+
 [tool.uv]
 constraint-dependencies = [
     "anyio>=4.14.2",
