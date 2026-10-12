@@ -21,6 +21,7 @@ def write_case(root, name="hole", unit="M^3/D", partition="FIPHOL", pair=True, q
     model = case / "model"
     model.mkdir(parents=True)
     prefix = model / f"well_{name}"
+    Path(f"{prefix}.in").write_text("EOS WATER\n SURFACE_DENSITY 1050 kg/m^3\nEND\nEOS GAS\n SURFACE_DENSITY 1.871 kg/m^3\nEND\n")
     (case / "scenario.json").write_text(json.dumps({"case_metadata": {"case_stem": prefix.name}}))
     summary = Summary.writer(str(prefix), datetime(2025, 1, 1), 1, 1, 1)
     summary.add_variable(f"{quantity}_HOL", num=393217 if pair else 425985, unit=unit)
@@ -72,7 +73,7 @@ def test_plot_real_summary_with_labelled_zero(tmp_path, monkeypatch, caplog, sel
     assert output.read_bytes().startswith(b"\x89PNG\r\n\x1a\n")
     if selection[0] == "--vector":
         dates, values, style = curves["hole"]
-        np.testing.assert_allclose(values, [0, -3.082], rtol=1e-6)
+        np.testing.assert_allclose(values, [0, -3.082 * 1.871], rtol=1e-6)
         assert dates[-1] == np.datetime64("2026-01-01")
         assert style == "-"
         _, values, style = curves["sealed (inferred zero)"]
@@ -144,3 +145,72 @@ def test_other_quantities(tmp_path, quantity, unit):
     cases = plot.load_cases(tmp_path, "FIPHOL", quantity, "*", None)
     assert plot.select_vectors(cases, "FIPHOL", quantity, None) == [f"{quantity}_HOL:1-2"]
     assert cases[0].unit == unit
+
+
+@pytest.mark.parametrize(("quantity", "input_unit", "output_unit"), [("RGFR", "M^3/D", "kg/day"), ("RGFT", "M^3", "kg")])
+def test_each_case_uses_its_gas_density(tmp_path, quantity, input_unit, output_unit):
+    write_case(tmp_path, quantity=quantity, unit=input_unit)
+    _, prefix = write_case(tmp_path, name="other", quantity=quantity, unit=input_unit)
+    Path(f"{prefix}.in").write_text("EOS GAS\nSURFACE_DENSITY 2.0D+0 kg/m^3 ! test\nEND\n")
+    cases = plot.load_cases(tmp_path, "FIPHOL", quantity, "*", None, mass=True)
+    assert [case.scale for case in cases] == [1.871, 2.0]
+    assert [case.unit for case in cases] == [output_unit, output_unit]
+
+
+@pytest.mark.parametrize(("quantity", "unit", "label"), [("RGFR", "M^3/D", "kg/day"), ("RGFT", "M^3", "kg")])
+def test_mass_plot_values_and_axis_units(tmp_path, monkeypatch, quantity, unit, label):
+    from matplotlib.figure import Figure
+
+    write_case(tmp_path, quantity=quantity, unit=unit)
+    cases = plot.load_cases(tmp_path, "FIPHOL", quantity, "*", None, mass=True)
+
+    def verify(figure, *_args, **_kwargs):
+        assert figure.axes[0].get_ylabel() == label
+        np.testing.assert_allclose(figure.axes[0].lines[0].get_ydata(), [0, 3.082 * 1.871], rtol=1e-6)
+
+    monkeypatch.setattr(Figure, "savefig", verify)
+    plot.plot_fluxes(cases, [f"{quantity}_HOL:1-2"], "FIPHOL", 1, tmp_path / "mass.png", False)
+
+
+def test_mass_conversion_rejects_unsupported_volume_units(tmp_path):
+    write_case(tmp_path, unit="FT3/D")
+    with pytest.raises(ValueError, match="gas mass conversion requires M"):
+        plot.load_cases(tmp_path, "FIPHOL", "RGFR", "*", None, mass=True)
+
+
+@pytest.mark.parametrize(
+    ("text", "message"),
+    [
+        ("EOS WATER\nSURFACE_DENSITY 1050 kg/m^3\nEND\n", "found 0"),
+        ("EOS GAS\nSURFACE_DENSITY 1 g/cm^3\nEND\n", "must use kg/m"),
+        ("EOS GAS\nSURFACE_DENSITY -1 kg/m^3\nEND\n", "finite and positive"),
+        ("EOS GAS\nSURFACE_DENSITY nan kg/m^3\nEND\n", "finite and positive"),
+        ("EOS GAS\nSURFACE_DENSITY abc kg/m^3\nEND\n", "invalid"),
+        ("EOS GAS\nSURFACE_DENSITY 1 kg/m^3\nSURFACE_DENSITY 2 kg/m^3\nEND\n", "found 2"),
+    ],
+)
+def test_invalid_gas_density(tmp_path, text, message):
+    deck = tmp_path / "case.in"
+    deck.write_text(text)
+    with pytest.raises(ValueError, match=message):
+        plot.gas_surface_density(deck)
+
+
+def test_volume_option_needs_no_deck(tmp_path, monkeypatch):
+    _, prefix = write_case(tmp_path)
+    Path(f"{prefix}.in").unlink()
+    captured = []
+    monkeypatch.setattr(plot, "plot_fluxes", lambda cases, *_args: captured.extend(cases))
+    run_cli(monkeypatch, tmp_path, "--all", "--volume", "--output", str(tmp_path / "flux.png"))
+    assert captured[0].scale == 1.0
+    assert captured[0].unit == "M^3/D"
+    with pytest.raises(OSError):
+        plot.load_cases(tmp_path, "FIPHOL", "RGFR", "*", None, mass=True)
+
+
+def test_water_is_not_converted_with_co2_density(tmp_path):
+    _, prefix = write_case(tmp_path, quantity="RWFR")
+    Path(f"{prefix}.in").unlink()
+    case = plot.load_cases(tmp_path, "FIPHOL", "RWFR", "*", None, mass=True)[0]
+    assert case.scale == 1.0
+    assert case.unit == "M^3/D"

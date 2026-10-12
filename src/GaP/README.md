@@ -267,9 +267,18 @@ gas total (`RGFT`), or water total (`RWFT`) instead. For example,
 `--zonation FIPHOL --quantity RGFT --all` plots all exported gas-transfer
 totals in separate panels. `--vector` accepts a pair or a matching full key,
 e.g. `--zonation FIPLEG --quantity RWFR --vector RWFR_LEG:9-1`.
-The default `--sign 1` preserves the
-exported sign; `--sign -1` reverses it explicitly. Dates and units come from
-the summary, without assuming a gas-volume basis or interpolating cases
+Gas plots default to **kg/day** (`RGFR`) or **kg** (`RGFT`), multiplying the
+exported standard-condition volume by `SURFACE_DENSITY` in the `EOS GAS`
+block of each corresponding `model/<case_stem>.in`. For example,
+`1 m3/day * 1.871 kg/m3 = 1.871 kg/day`. Water density is not used for this
+conversion. The density must be unique, finite, positive, and in `kg/m^3`;
+a missing deck/density or unsupported summary unit stops mass plotting.
+Use `--volume` to retain exported gas volumes without requiring the deck.
+Water plots retain their exported volumetric units. Listing vectors does
+not require density data.
+
+The default `--sign 1` preserves the exported sign; `--sign -1` reverses it
+explicitly. Dates come from each summary without interpolating cases
 onto identical timesteps. Region meanings and the physical direction of
 positive flow must be checked for the intended well.
 

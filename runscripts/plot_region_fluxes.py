@@ -24,6 +24,34 @@ class Case(NamedTuple):
     regions: set[int]
     keys: set[str]
     unit: str
+    scale: float = 1.0
+
+
+def gas_surface_density(deck: Path) -> float:
+    in_gas = False
+    densities = []
+    for line in deck.read_text(encoding="utf-8").splitlines():
+        tokens = re.split(r"[!#]", line, maxsplit=1)[0].split()
+        if not tokens:
+            continue
+        upper = [token.upper() for token in tokens]
+        if upper[0] == "EOS":
+            in_gas = upper == ["EOS", "GAS"]
+        elif upper[0] == "END":
+            in_gas = False
+        elif in_gas and upper[0] == "SURFACE_DENSITY":
+            if len(tokens) != 3 or upper[2] != "KG/M^3":
+                raise ValueError(f"{deck}: EOS GAS SURFACE_DENSITY must use kg/m^3")
+            try:
+                density = float(upper[1].replace("D", "E"))
+            except ValueError as exc:
+                raise ValueError(f"{deck}: invalid EOS GAS SURFACE_DENSITY value") from exc
+            if not np.isfinite(density) or density <= 0:
+                raise ValueError(f"{deck}: EOS GAS SURFACE_DENSITY must be finite and positive")
+            densities.append(density)
+    if len(densities) != 1:
+        raise ValueError(f"{deck}: expected one EOS GAS SURFACE_DENSITY, found {len(densities)}")
+    return densities[0]
 
 
 def check_regions(case_name: str, regions: set[int], zonation: str, key: str) -> None:
@@ -32,7 +60,7 @@ def check_regions(case_name: str, regions: set[int], zonation: str, key: str) ->
             raise ValueError(f"{case_name}: region {region} does not exist in {zonation}; available regions: {sorted(regions)}")
 
 
-def load_cases(root: Path, zonation: str, quantity: str, pattern: str, stem: str | None) -> list[Case]:
+def load_cases(root: Path, zonation: str, quantity: str, pattern: str, stem: str | None, mass: bool = False) -> list[Case]:
     keyword = f"{quantity}_{zonation[3:]}"
     pair_pattern = re.compile(rf"{keyword}:([1-9][0-9]*)-([1-9][0-9]*)")
     cases = []
@@ -72,12 +100,19 @@ def load_cases(root: Path, zonation: str, quantity: str, pattern: str, stem: str
         if len(units) != 1 or not next(iter(units)):
             raise ValueError(f"{directory.name}: inconsistent or missing units for {keyword}")
         unit = units.pop()
+        scale = 1.0
+        if mass and quantity in ("RGFR", "RGFT"):
+            expected = "M^3/D" if quantity == "RGFR" else "M^3"
+            if unit.upper() != expected:
+                raise ValueError(f"{directory.name}: gas mass conversion requires {expected}, found {unit!r}")
+            scale = gas_surface_density(Path(f"{prefix}.in"))
+            unit = "kg/day" if quantity == "RGFR" else "kg"
         if cases and unit != cases[0].unit:
             raise ValueError(f"{directory.name}: unit {unit!r} differs from {cases[0].unit!r}")
         dates = summary.numpy_dates
         if dates.size == 0 or np.isnat(dates).any() or np.any(dates[1:] < dates[:-1]):
             raise ValueError(f"{directory.name}: summary dates are empty, invalid, or decreasing")
-        cases.append(Case(directory.name, summary, regions, keys, unit))
+        cases.append(Case(directory.name, summary, regions, keys, unit, scale))
     if not cases:
         raise ValueError(f"No case directories with a model directory match {pattern!r} under {root}")
     return cases
@@ -116,7 +151,7 @@ def plot_fluxes(cases: list[Case], keys: list[str], zonation: str, sign: int, ou
             check_regions(case.name, case.regions, zonation, key)
             dates = case.summary.numpy_dates
             missing = key not in case.keys
-            values = np.zeros(dates.shape) if missing else np.asarray(case.summary.numpy_vector(key), dtype=float) * sign
+            values = np.zeros(dates.shape) if missing else np.asarray(case.summary.numpy_vector(key), dtype=float) * sign * case.scale
             if values.shape != dates.shape or not np.isfinite(values).all():
                 raise ValueError(f"{case.name}: {key} has invalid values or a date/vector length mismatch")
             if missing:
@@ -157,13 +192,17 @@ def main() -> None:
     parser.add_argument("--sign", type=int, choices=(-1, 1), default=1)
     parser.add_argument("--output", type=Path, help="Plot filename; required when plotting")
     parser.add_argument("--show", action="store_true")
+    parser.add_argument("--volume", action="store_true", help="Keep gas volumes; default converts gas rates/totals to kg/day or kg")
     args = parser.parse_args()
     try:
         if re.fullmatch(r"FIP[A-Z0-9]{1,3}", args.zonation) is None:
             raise ValueError("Zonation must be an exported FIP partition, e.g. FIPLEG or FIPHOL")
         if not args.list_vectors and args.output is None:
             raise ValueError("--output is required when plotting")
-        cases = load_cases(args.output_root, args.zonation, args.quantity, args.case_pattern, args.summary_stem)
+        cases = load_cases(
+            args.output_root, args.zonation, args.quantity, args.case_pattern, args.summary_stem,
+            mass=not args.volume and not args.list_vectors,
+        )
         keys = select_vectors(cases, args.zonation, args.quantity, args.vector)
         if args.list_vectors:
             for key in keys:
