@@ -151,6 +151,13 @@ def run_workflow(args: argparse.Namespace) -> Path:
     except ValueError as exc:
         raise ValueError(f"Invalid case-name '{args.case_name}': {exc}") from None
     validate_scenario_interval_targets(model, scenario)
+    if scenario.casing_hole is not None:
+        processed_well = WellProcessed.from_pydantic(model)
+        scenario.casing_hole.validate_casing(
+            (record["name"], float(record["tvd_msl_top"]), float(record["tvd_msl_bottom"]))
+            for record in processed_well.hole_casings or []
+            if record["type"] == "casing"
+        )
     resolve_case_identity(args, model, design, scenario)
     case_files = CaseFiles.for_stem(args.case_stem)
     policy = dict(policy)
@@ -244,8 +251,16 @@ def run_workflow(args: argparse.Namespace) -> Path:
             if target != "ALL" and value is not None
         },
         ali_way=args.ali_way,
+        casing_hole_casing=scenario.casing_hole_casing,
+        casing_hole_depth_mTVDMSL=scenario.casing_hole_depth_mTVDMSL,
+        casing_hole_diameter_m=scenario.casing_hole_diameter_m,
     )
     lgr_path = build_lgr(lgr_args)
+    if scenario.casing_hole is not None:
+        scenario_record["resolved_casing_hole"] = json.loads(
+            lgr_path.with_suffix(".casing_hole.json").read_text(encoding="utf-8")
+        )
+        scenario_json.write_text(json.dumps(scenario_record, indent=2) + "\n", encoding="utf-8")
 
     args.final_run = True
     parameterize_staged_deck(args, policy, model.spec.well_header, scenario)

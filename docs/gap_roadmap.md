@@ -84,6 +84,7 @@ less often. The technical detail follows for whoever picks the item up.
 | 6 | Give generated cases unique, navigable names | Done; verified on a real CIRRUS host (item 7) |
 | 7 | Confirm recent changes on a CIRRUS host | Done for current case/LGR naming |
 | 8 | Give user-facing names a clear meaning | Open |
+| 9 | Represent a localized casing hole | Experimental; static opening/isolation and one-year pressure-driven transfer verified |
 
 ### 1. Compare scenario outputs automatically
 
@@ -377,6 +378,127 @@ Done when the names are agreed, steps 1 and 2 are implemented, workbook
 documentation uses the new names, and tests show that a workbook using the old
 names still produces the same case.
 
+### 9. Represent a localized casing hole
+
+**Status: experimental implementation; static CIRRUS opening and isolation
+verified; one-year pressure-driven transfer verified on Smeaheia.** First defect slice for
+a concrete well; no general defect framework is required.
+
+**In practice:** describe one hole using the affected casing's stable `name`
+from `HoleCasings`, depth in m TVDMSL, and hole diameter in m. Preserve the
+well geometry and open only the selected casing interface after generating
+the standard LGR and material assignments.
+
+**Placement assumption:** without an XY position or azimuth, use the midpoint
+of the casing's `+X` side. Record this deterministic assumption with the
+resolved casing, layer, affected faces, and multipliers in case metadata.
+It is a modeling convention, not a measured hole location.
+
+The implemented fields are `casing_hole_casing`,
+`casing_hole_depth_mTVDMSL`, and `casing_hole_diameter_m`: all three or none,
+one hole per scenario. The standalone builder accepts matching flags. Resolved
+faces/areas are saved beside the include and in workbook case metadata.
+Depth lookup uses absolute EGRID corners, not the internal cumulative-Z origin.
+The current implementation uses only `MULTX` on +X, distributes circular area
+proportionally to face overlaps with a centered diameter-wide Y span, and
+rejects coincident casing interfaces and unsupported grid geometry. This
+replaces the earlier experimental nearest-face filling rule.
+See the [workflow guide](gap.md#experimental-localized-casing-hole) for the
+controlled sealed/partial/full-open CIRRUS acceptance check.
+
+**Real CIRRUS evidence (2026-10-09, user-reported local runs):**
+
+- Generated Wildcat parent grid: `20 x 20 x 79`; `TEMP_LGR`:
+  `22 x 22 x 430`. Zero-duration controls used explicit final `MULTX`
+  assignments at one-based face `(15, 11, 47)`.
+- Sealed/half/full controls exported `MULTX` values `0`, `0.5`, and `1`,
+  with `TRANX` values `0`, `0.0025261160917580128`, and
+  `0.0050522321835160255`. The half/full ratio was exactly `0.5`;
+  only that entry changed in `MULTX` and `TRANX`, and `PERMX` was unchanged.
+  This confirms positive-X indexing and replacement of the existing zero
+  multiplier for this control, with exported transmissibility scaling.
+- The actual `Casing 20 in` hole at `200 m TVDMSL`, diameter `0.1 m`,
+  opened exactly faces `(15, 11, 47)` and `(15, 12, 47)`. Each exported
+  `MULTX` was `0.012651538476347923` and `TRANX` was
+  `6.391850911313668e-05`; no other LGR `MULTX` or `TRANX` entries changed.
+- Parent and LGR dimensions, index frames, and cell corners were identical
+  to the sealed case. Exported LGR `MULTY`, `MULTZ`, `PERMX`, `PERMY`,
+  `PERMZ`, `PORO`, and `EQLNUM` were unchanged.
+- Area reconstructed from exported multipliers was
+  `0.007853981766232154 m2`, versus requested
+  `0.007853981633974483 m2`, within the `1e-6` relative export tolerance.
+  Builder allocation retains its `1e-12` relative tolerance.
+
+These checks establish static opening and isolation for this case, not
+pressure-driven leakage, a calibrated hole-flow law, or arbitrary grids.
+
+**Smeaheia dynamic evidence (runs reported 2026-10-10; plots verified
+2026-10-12, CIRRUS 1.9):**
+
+- Both sealed and hole cases completed 365 days. Both removed mechanical
+  plug `mplug2`, retained cement plug `cplug9`, and used 10 mD for
+  `Cement 13 3/8 in`. The hole case opened `Casing 13 3/8 in` at
+  650 m TVDMSL with diameter 0.1 m.
+- The `22 x 22 x 270` LGR opening comprises positive-X faces
+  `(14, 11, 130)` and `(14, 12, 130)`, each with multiplier
+  `0.013923971426024894`. Test-only FIPHOL assigns their inner cells to
+  region 1, outer cells to region 2, and the remaining LGR to region 3.
+  The same zonation was applied to both cases.
+- At both faces, initial inner/outer pressures were identical between
+  cases: `78.24778747558594` / `66.01054382324219`, with gas saturations
+  1 / 0. CO2 was already initialized at the hole; this test does not
+  establish reservoir-to-hole migration.
+- Hole `RGFR_HOL:1-2` at day 365 was `3.082140446 m3/day`; its peak
+  reported magnitude was `7.547787189 m3/day`. `RGFT_HOL:1-2` reached
+  `1166.561401 m3`. At gas surface density `1.871 kg/m3`, these correspond
+  to about `5.76668 kg/day` final rate, `14.12191 kg/day` peak, and
+  `2182.63638 kg` cumulative direct transfer.
+- The sealed case omitted the 1-2 pair but exported 1-3 and 2-3.
+  CIRRUS 1.9 source revision `00028b774` registers pair summaries from its
+  connection map, not from nonzero flow: connected zero-flow pairs remain
+  exported. The sealed 1-2 curve is therefore labelled inferred zero, not
+  an exported measurement.
+- User-supplied rate and total plots verified the mass-unit labels and
+  dashed inferred-zero sealed curve. The FIPLEG 1-6 ocean gas-rate plot
+  showed no visible transfer for either case over the year; exact numerical
+  ocean-rate values were not supplied.
+
+These results support dynamic direct hole connectivity for this setup, not
+ocean arrival or a calibrated physical hole-flow law. FIPHOL remains a
+test-only reporting zonation, not a generated production feature.
+
+**Area-equivalent opening:**
+
+- Locate the depth layer and the selected casing's sealed interface. Define
+  deterministic ownership at layer boundaries; reject depths outside that
+  casing and non-positive or non-finite diameters.
+- The circular opening area is `A = pi * (diameter / 2)^2`. For an X-normal
+  face use `A_face = DY * DZ`; for a Y-normal face use `DX * DZ`, not
+  `DX * DY`. A partially opened face receives `MULTX` or `MULTY` equal to
+  its allocated opening area divided by its face area.
+- Center a lateral span equal to the diameter at the side midpoint.
+  Allocate circular area proportionally to each face's positive span overlap,
+  even when a single tall, narrow face has enough area to hold the hole.
+  A midpoint at a face boundary shares the opening; output uses increasing J.
+  Keep all faces on the same +X casing side and K layer. Do not spread in Z,
+  cross into another casing, or rebuild the grid. Reject a span extending
+  beyond the side, excessive total area, or any per-face allocation above
+  capacity rather than clipping or moving area outside the span.
+- Keep each multiplier in `[0, 1]` and conserve total allocated area:
+  `sum(multiplier * face_area) = A` within a declared numerical tolerance.
+  Leave all other casing faces sealed and existing material properties
+  unchanged. This represents equivalent open area, not a resolved circular
+  hole shape when multiple faces are used.
+
+**Done when:** reuse the existing LGR/CARFIN writers with a small final
+face-override step; tests cover sub-face, exact-face, multi-face, invalid
+input, and unchanged no-defect output. Verify CIRRUS face indexing and
+keyword ordering so the opening replaces the existing zero casing multiplier
+rather than being multiplied by zero or overwritten later. A real CIRRUS
+baseline/defect run must confirm unchanged geometry and intended connectivity;
+the area ratio is a screening approximation, not a calibrated orifice-flow
+law.
+
 ## Later
 
 These are intentionally lower priority than the Next items:
@@ -401,13 +523,10 @@ These are intentionally lower priority than the Next items:
    WellClass namespace while retaining temporary re-exports. Done when imports,
    notebooks, and tests use the new location and the compatibility layer is
    documented.
-4. **Wellbore-defect scenarios.** *In practice:* describe a specific failure,
-   such as a casing hole at a given depth or a channel through the cement,
-   instead of only lowering the permeability of whole cement intervals.
-   Specify casing holes, cement channels,
-   microannuli, and fractures as separate scenario inputs; implement one
-   representation and validate it against simulator transmissibility behavior
-   before adding more defect types.
+4. **Additional wellbore-defect scenarios.** Casing holes are the first
+   concrete slice (Next item 9). Cement channels, microannuli, and fractures
+   remain deferred; choose a concrete use case and validate its representation
+   against simulator transmissibility behavior before adding another type.
 5. **Richer result viewing.** *In practice:* animate results over time or
    browse them in a hosted dashboard. The local Parquet viewer covers the
    current cross-section inspection; timestep animation, richer hover

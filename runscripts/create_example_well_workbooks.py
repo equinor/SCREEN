@@ -112,6 +112,7 @@ def create_workbook(example: dict) -> Path:
                 "z_fluid_contact and p_fluid_contact define the GAS_WATER datum and WGC depth in CIRRUS.",
                 "Multiple rows in DesignMatrix define cases that can be run with --case-name selection.",
                 "cb_perm_interval and barrier_perm_interval select a HoleCasings or Plugs name; ALL applies the permeability to every interval of that type.",
+                "Experimental casing hole: supply casing_hole_casing, casing_hole_depth_mTVDMSL, and casing_hole_diameter_m together, or leave all blank. Placement is fixed on the +X side.",
             ]
         }
     )
@@ -133,6 +134,8 @@ def create_workbook(example: dict) -> Path:
             scenarios[field] = None
         scenarios["cb_perm_interval"] = "ALL"
         scenarios["barrier_perm_interval"] = "ALL"
+        for field in ("casing_hole_casing", "casing_hole_depth_mTVDMSL", "casing_hole_diameter_m"):
+            scenarios[field] = None
         scenarios.to_excel(writer, sheet_name="DesignMatrix", index=False)
         notes.to_excel(writer, sheet_name="Notes", index=False)
     return output

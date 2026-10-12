@@ -21,7 +21,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-visualization = ["plotly>=6.0.0", "pyarrow>=18.0.0"]
+visualization = ["matplotlib>=3.10.0", "plotly>=6.0.0", "pyarrow>=18.0.0"]
 
 [dependency-groups]
 dev = [

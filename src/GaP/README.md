@@ -90,6 +90,102 @@ high-permeability workflow default, not a DesignMatrix sensitivity variable.
 Effective values and targeted overrides are recorded in `scenario.json`, and
 the resolved grid policy is saved in `grid_policy.json`.
 
+### Experimental localized casing hole
+
+One optional hole per `DesignMatrix` row is supported. Supply all three fields
+or leave all three blank:
+
+| Field | Meaning |
+| --- | --- |
+| `casing_hole_casing` | Exact unique `HoleCasings.name` with `type=casing`, not casing cement |
+| `casing_hole_depth_mTVDMSL` | Hole depth in metres TVDMSL |
+| `casing_hole_diameter_m` | Finite positive circular opening diameter in metres |
+
+For example: `Casing 20 in`, `200`, `0.1` in the Wildcat example. Depth intervals
+are top-inclusive and bottom-exclusive, both for the casing and refined layer.
+Unknown or duplicate casing names, incomplete inputs, and depths outside the
+casing fail before CIRRUS initialization. Geometry-dependent checks run after
+initialization, before writing the LGR.
+
+Without measured XY/azimuth, placement is fixed at the **+X side midpoint**,
+with a centered Y span equal to the hole diameter. The resolver uses absolute EGRID layer corners
+(including the grid's depth origin), the final sealed casing bounds, and the
+rounded CARFIN `HYFIN` ratios. It allocates `pi * (diameter / 2)^2` to lateral
+faces with area `DY * DZ`, weighted by each face's overlap with the diameter
+span: `allocated_area = circular_area * overlap / diameter`. It writes
+`MULTX = allocated_area / face_area` after the ordinary seals. Every face with
+positive overlap participates, even if one tall, narrow face could hold the
+whole area. A midpoint on a cell boundary shares the opening between both
+cells; output faces are ordered by increasing J.
+Span endpoints coincident with cell edges are snapped within a
+double-precision cumulative-coordinate roundoff bound, preventing spurious
+near-zero openings on neighboring faces. Diameters below that coordinate
+resolution are rejected explicitly.
+All faces remain at the **same K**, without refining or changing geometry. Multipliers stay
+within `[0, 1]`; allocated area is conserved to relative tolerance `1e-12`.
+Reject a diameter extending beyond the casing side, an opening larger than
+the available side area, or an overlap-weighted allocation exceeding any
+face's area. Do not clip, reallocate outside the span, or spread in Z.
+Shared/ambiguous casing interfaces, absent lateral neighbors, non-Cartesian
+grids, non-flat layers, or inconsistent physical/material layer thicknesses
+are rejected. The thickness check allows roundoff from single-precision EGRID
+depth coordinates and INIT cell sizes, with a depth- and subdivision-dependent
+bound; opening areas still use EGRID geometry, not the rounded INIT sizes.
+
+Only the selected casing's multiplier changes. Other casings, cement, plugs,
+material permeabilities and grid geometry remain unchanged, so a casing hole
+does **not** necessarily establish a whole-well leakage path. This is an
+area-equivalent screening aperture, not a resolved circular shape or calibrated
+orifice-flow model.
+
+The standalone builder accepts the same inputs via `--casing-hole-casing`,
+`--casing-hole-depth-mTVDMSL`, and `--casing-hole-diameter-m`. It writes
+`<lgr-file-stem>.casing_hole.json` beside the include, with the input, placement
+assumption, one-based face indices, face/opening areas, and multipliers. The
+workbook wrapper also records this under `resolved_casing_hole` in
+`scenario.json`. Omitting the inputs preserves the existing GRDECL output.
+The report includes `lateral_overlap_m` for each face and identifies the
+overlap-weighted allocation rule. Earlier experimental reports using nearest-face
+filling are not equivalent; regenerate hole includes/reports before comparison.
+
+**Static CIRRUS opening/isolation was verified on the generated Wildcat grid
+(2026-10-09); one-year pressure-driven hole transfer was verified on Smeaheia
+(runs 2026-10-10, plots 2026-10-12).** The controls confirmed
+zero/half/full transmissibility scaling, and the diameter-span case changed
+only its two recorded faces while preserving geometry and checked LGR
+properties. See [roadmap evidence](gap_roadmap.md#9-represent-a-localized-casing-hole).
+The Smeaheia hole transferred about 2182.64 kg through FIPHOL 1-2 over
+365 days, with a final rate about 5.77 kg/day; the sealed comparison uses an
+explicitly labelled inferred-zero curve under CIRRUS 1.9 reporting rules.
+CO2 was initialized at the hole, so reservoir-to-hole migration was not tested.
+The ocean-transfer plot showed no visible gas transfer during the year;
+ocean arrival and a calibrated hole-flow law remain unverified.
+The model remains experimental. Before using it for decisions, repeat the
+relevant controls for the intended setup:
+
+1. Keep the grid, materials, fluid properties and pressure gradient identical
+   across the three cases. Use one interior casing face with conductive cells
+   on both sides; do not rely on leakage through other cement/casings.
+2. For an isolated keyword/indexing check, use test-only final `EQUALS MULTX`
+   overrides of `0.5` and `1` on the same interior face, with the sealed case
+   left unchanged. These are connectivity controls, not physical hole inputs.
+   Do not derive a single-face multiplier from diameter alone: changing the
+   diameter changes the lateral footprint and may exceed the casing-side width.
+3. Read the **LGR**, not parent-grid, `MULTX` and `TRANX` in final INIT outputs.
+   The recorded positive-X face must have multipliers `0`, `0.5`, and `1`.
+   Effective transmissibility must be zero for the seal, positive for the
+   openings, and approximately half the full-open value for the partial case.
+   Check unchanged geometry and unchanged non-target multipliers/properties.
+4. Under a controlled cross-face pressure gradient, verify zero flow when
+   sealed and nonzero flow through the intended face when opened. If the
+   required LGR properties or fluxes are not exported, obtain simulator
+   diagnostics; completion or a global pressure/saturation change alone is
+   insufficient evidence of correct indexing and zero-multiplier replacement.
+5. Separately run the actual diameter-span hole include and compare every
+   recorded face's multiplier with the final LGR output. Confirm the adjacent
+   non-overlapping faces remain sealed and the area-weighted opening matches
+   the report. Earlier single-face half/full diameter examples are superseded.
+
 After `.EGRID` and `.INIT` have been produced, build the LGR/CARFIN include:
 
 ```bash
@@ -137,6 +233,87 @@ separate grid sensitivity study rather than treated as an ordinary batch
 variation. The baseline defaults to the first case in sorted order when
 `--baseline` is omitted. This comparison requires completed simulator output
 and does not rerun CIRRUS.
+
+### Plot region-to-region fluxes after simulation
+
+Use `runscripts/plot_region_fluxes.py` on completed CIRRUS 1.9 outputs; it
+does not run CIRRUS. Install the plotting extra with `uv sync --extra visualization`.
+Start by choosing a zonation and listing its exported pair vectors:
+
+```bash
+uv run --extra visualization python runscripts/plot_region_fluxes.py \
+	--output-root cases --zonation FIPLEG --list-vectors
+```
+
+The list reports the exact keys and the cases exporting each one. If `1-6`
+exists but `6-1` does not, only `1-6` is selectable; reversing a pair is not
+inferred. Select a pair with `--vector`, repeat it for multiple panels, or
+use `--all` for every exported pair of the chosen zonation and quantity.
+For a well whose `FIPLEG` regions 1 and 6 represent the leakage pathway to
+the ocean, using the chosen leakage sign convention:
+
+```bash
+uv run --extra visualization python runscripts/plot_region_fluxes.py \
+	--output-root cases \
+	--zonation FIPLEG --vector 1-6 --sign -1 \
+	--output cases/ocean_gas_flux.png
+```
+
+For the test-only `FIPHOL` zonation, regions 1 and 2 are the inner and outer
+cells adjacent to the casing hole:
+
+```bash
+uv run --extra visualization python runscripts/plot_region_fluxes.py \
+	--output-root work/smeaheia_hole_dynamic \
+	--zonation FIPHOL --vector 1-2 \
+	--output work/smeaheia_hole_dynamic/hole_gas_transfer.png
+```
+
+`--quantity` defaults to gas rate (`RGFR`); choose water rate (`RWFR`),
+gas total (`RGFT`), or water total (`RWFT`) instead. For example,
+`--zonation FIPHOL --quantity RGFT --all` plots all exported gas-transfer
+totals in separate panels. `--vector` accepts a pair or a matching full key,
+e.g. `--zonation FIPLEG --quantity RWFR --vector RWFR_LEG:9-1`.
+Gas plots default to **kg/day** (`RGFR`) or **kg** (`RGFT`), multiplying the
+exported standard-condition volume by `SURFACE_DENSITY` in the `EOS GAS`
+block of each corresponding `model/<case_stem>.in`. For example,
+`1 m3/day * 1.871 kg/m3 = 1.871 kg/day`. Water density is not used for this
+conversion. The density must be unique, finite, positive, and in `kg/m^3`;
+a missing deck/density or unsupported summary unit stops mass plotting.
+Use `--volume` to retain exported gas volumes without requiring the deck.
+Water plots retain their exported volumetric units. Listing vectors does
+not require density data.
+
+The default `--sign 1` preserves the exported sign; `--sign -1` reverses it
+explicitly. Dates come from each summary without interpolating cases
+onto identical timesteps. Region meanings and the physical direction of
+positive flow must be checked for the intended well.
+
+The script pairs SMSPEC/UNSMRY/INIT by the case stem from `scenario.json`,
+or uses the sole SMSPEC in a legacy case's `model` directory. It never zips
+independent file lists. Use `--summary-stem` when legacy cases have multiple
+outputs. `--case-pattern` filters case directories; `--show` also opens the
+saved plot interactively.
+
+Before plotting, it checks the requested FIP partition and positive region
+IDs in all exported INIT occurrences, including LGRs. Missing zonations
+and invalid requested regions produce explicit errors. A requested pair
+absent from every selected case is rejected with the available keys.
+When a selected pair is omitted from one case, the script draws a dashed
+curve labelled "inferred zero" and logs a warning. Both regions must exist
+in that case's INIT, and other pair vectors must confirm reporting of the
+same partition and quantity. Missing reporting, invalid values, reader
+failures, and missing or inconsistent units stop the command. Selection
+still uses exact keys exported in at least one case; reverse keys and pairs
+absent from the whole batch are not invented.
+
+This behavior follows CIRRUS 1.9 source revision `00028b774`:
+`BuildFIPNUMConnectionMap` constructs connectivity from cell connections;
+the summary header/value writers use `GetFipaCon`, not a nonzero-flow test.
+A connected pair with zero flow remains exported; an unconnected pair is
+omitted. This establishes zero **direct** transfer, not absence of indirect
+paths through other regions. This script targets CIRRUS 1.9; it does not
+automatically identify the executable version from output files.
 
 ## Grid Build Pipeline (Canonical)
 
@@ -220,7 +397,7 @@ The SCREEN workflow with CIRRUS provides a valuable approach for simulating well
 
 - **Vertical Wells**: The method is currently applicable only to vertical wells and does not support deviated or horizontal well trajectories.
 
-- **Leakage Pathways**: Leakage pathways such as holes in the casing are not automatically handled and must be manually added to the GRDECL file produced by the scripts.
+- **Leakage Pathways**: One experimental localized casing hole can be specified per scenario as described above. More general defects still require manual modeling, and the hole's CIRRUS connectivity must be verified before relying on results.
 
 - **CO2 Column Initialization**: The simulation is initialized with a CO2 column, which allows for the focus on long-term leakage but does not consider short-term dynamics.
 
