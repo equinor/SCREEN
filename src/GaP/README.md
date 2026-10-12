@@ -229,8 +229,8 @@ and does not rerun CIRRUS.
 
 ### Plot region-to-region fluxes after simulation
 
-Use `runscripts/plot_region_fluxes.py` on completed outputs; it does not run
-CIRRUS. Install the plotting extra with `uv sync --extra visualization`.
+Use `runscripts/plot_region_fluxes.py` on completed CIRRUS 1.9 outputs; it
+does not run CIRRUS. Install the plotting extra with `uv sync --extra visualization`.
 Start by choosing a zonation and listing its exported pair vectors:
 
 ```bash
@@ -283,11 +283,21 @@ Before plotting, it checks the requested FIP partition and positive region
 IDs in all exported INIT occurrences, including LGRs. Missing zonations
 and invalid requested regions produce explicit errors. A requested pair
 absent from every selected case is rejected with the available keys.
-When a pair exists in some cases but not others, missing curves are omitted
-with explicit warnings, never replaced by zero. Thus the sealed test, which
-does not export `RGFR_HOL:1-2`, is omitted from that panel rather than drawn
-as a measured zero curve. Reader failures, missing output files,
-invalid values, and inconsistent units across cases also stop the command.
+When a selected pair is omitted from one case, the script draws a dashed
+curve labelled "inferred zero" and logs a warning. Both regions must exist
+in that case's INIT, and other pair vectors must confirm reporting of the
+same partition and quantity. Missing reporting, invalid values, reader
+failures, and missing or inconsistent units stop the command. Selection
+still uses exact keys exported in at least one case; reverse keys and pairs
+absent from the whole batch are not invented.
+
+This behavior follows CIRRUS 1.9 source revision `00028b774`:
+`BuildFIPNUMConnectionMap` constructs connectivity from cell connections;
+the summary header/value writers use `GetFipaCon`, not a nonzero-flow test.
+A connected pair with zero flow remains exported; an unconnected pair is
+omitted. This establishes zero **direct** transfer, not absence of indirect
+paths through other regions. This script targets CIRRUS 1.9; it does not
+automatically identify the executable version from output files.
 
 ## Grid Build Pipeline (Canonical)
 

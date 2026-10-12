@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Plot exported region-to-region gas/water rates or totals from completed cases."""
+"""List and plot region-pair rates/totals from completed CIRRUS 1.9 cases."""
 
 from __future__ import annotations
 
@@ -12,173 +12,124 @@ from pathlib import Path
 from typing import NamedTuple
 
 import numpy as np
-from numpy.typing import NDArray
 from resdata.resfile import ResdataFile
 from resdata.summary import Summary
 
-VECTOR_PATTERN = re.compile(r"R[GW]F[RT]_([A-Z0-9]{1,3}):([1-9][0-9]*)-([1-9][0-9]*)")
 LOGGER = logging.getLogger(__name__)
 
 
-class RegionVector(NamedTuple):
-    key: str
-    partition: str
-    source: int
-    target: int
-
-
-class Curve(NamedTuple):
-    case_name: str
-    vector: str
+class Case(NamedTuple):
+    name: str
+    summary: Summary
+    regions: set[int]
+    keys: set[str]
     unit: str
-    dates: NDArray[np.datetime64]
-    values: NDArray[np.float64]
 
 
-def parse_vector(value: str) -> RegionVector:
-    key = value.upper()
-    match = VECTOR_PATTERN.fullmatch(key)
-    if match is None:
-        raise ValueError(f"Invalid region vector {value!r}; expected e.g. RGFR_LEG:1-6 or RGFT_HOL:1-2")
-    suffix, source, target = match.groups()
-    if source == target:
-        raise ValueError(f"{key}: source and target regions must differ")
-    return RegionVector(key, f"FIP{suffix}", int(source), int(target))
-
-
-def discover_prefixes(root: Path, case_pattern: str, summary_stem: str | None) -> list[tuple[str, Path]]:
-    if not root.is_dir():
-        raise ValueError(f"Output root does not exist or is not a directory: {root}")
-    cases = sorted(path for path in root.glob(case_pattern) if path.is_dir() and (path / "model").is_dir())
-    if not cases:
-        raise ValueError(f"No case directories with a model directory match {case_pattern!r} under {root}")
-    prefixes = []
-    for case in cases:
-        stem = summary_stem
-        metadata_path = case / "scenario.json"
-        if stem is None and metadata_path.is_file():
-            stem = json.loads(metadata_path.read_text(encoding="utf-8")).get("case_metadata", {}).get("case_stem")
-        if stem is None:
-            candidates = sorted((case / "model").glob("*.SMSPEC"))
-            if len(candidates) != 1:
-                raise ValueError(
-                    f"{case.name}: expected one SMSPEC without case_metadata.case_stem, found {len(candidates)}; "
-                    "select --summary-stem explicitly"
-                )
-            stem = candidates[0].stem
-        if not isinstance(stem, str) or not stem or Path(stem).name != stem:
-            raise ValueError(f"{case.name}: summary stem must be a file stem, not a path")
-        prefix = case / "model" / stem
-        for suffix in (".SMSPEC", ".UNSMRY", ".INIT"):
-            path = Path(f"{prefix}{suffix}")
-            if not path.is_file():
-                raise ValueError(f"{case.name}: required output file not found: {path}")
-        prefixes.append((case.name, prefix))
-    return prefixes
-
-
-def validate_regions(init: ResdataFile, vector: RegionVector, case_name: str) -> None:
-    if vector.partition not in init:
-        raise ValueError(f"{case_name}: {vector.partition} zonation was not found in INIT")
-    # Include every occurrence, covering parent-grid and LGR zonations.
-    regions: set[int] = set()
-    for keyword in init[vector.partition]:
-        regions.update(int(value) for value in keyword if value > 0)
-    for region in (vector.source, vector.target):
+def check_regions(case_name: str, regions: set[int], zonation: str, key: str) -> None:
+    for region in map(int, key.split(":")[1].split("-")):
         if region not in regions:
-            raise ValueError(
-                f"{case_name}: region {region} does not exist in {vector.partition}; "
-                f"available regions: {sorted(regions)}"
-            )
+            raise ValueError(f"{case_name}: region {region} does not exist in {zonation}; available regions: {sorted(regions)}")
 
 
-def available_vectors(
-    prefixes: list[tuple[str, Path]], partition: str, quantity: str
-) -> tuple[dict[str, Summary], dict[str, list[str]]]:
-    summaries = {}
-    availability: dict[str, list[str]] = {}
-    keyword = f"{quantity}_{partition[3:]}"
-    for case_name, prefix in prefixes:
+def load_cases(root: Path, zonation: str, quantity: str, pattern: str, stem: str | None) -> list[Case]:
+    keyword = f"{quantity}_{zonation[3:]}"
+    pair_pattern = re.compile(rf"{keyword}:([1-9][0-9]*)-([1-9][0-9]*)")
+    cases = []
+    for directory in sorted(root.glob(pattern)):
+        model = directory / "model"
+        if not model.is_dir():
+            continue
+        case_stem = stem
+        metadata = directory / "scenario.json"
+        if case_stem is None and metadata.is_file():
+            case_stem = json.loads(metadata.read_text(encoding="utf-8")).get("case_metadata", {}).get("case_stem")
+        if case_stem is None:
+            candidates = sorted(model.glob("*.SMSPEC"))
+            if len(candidates) != 1:
+                raise ValueError(f"{directory.name}: expected one SMSPEC, found {len(candidates)}; use --summary-stem")
+            case_stem = candidates[0].stem
+        if not isinstance(case_stem, str) or not case_stem or Path(case_stem).name != case_stem:
+            raise ValueError(f"{directory.name}: summary stem must be a file stem, not a path")
+        prefix = model / case_stem
+        for suffix in (".SMSPEC", ".UNSMRY", ".INIT"):
+            if not Path(f"{prefix}{suffix}").is_file():
+                raise ValueError(f"{directory.name}: required output file not found: {prefix}{suffix}")
         with closing(ResdataFile(f"{prefix}.INIT")) as init:
-            if partition not in init:
-                raise ValueError(f"{case_name}: {partition} zonation was not found in INIT")
-            summary = read_summary(case_name, prefix)
-            summaries[case_name] = summary
-            for key in sorted(str(key) for key in summary.keys()):
-                match = VECTOR_PATTERN.fullmatch(key)
-                if match is None or key.split(":")[0] != keyword:
-                    continue
-                vector = parse_vector(key)
-                validate_regions(init, vector, case_name)
-                availability.setdefault(key, []).append(case_name)
-    if not availability:
-        raise ValueError(f"{partition} exists, but no {keyword} region-pair vectors were exported in the selected cases")
-    return summaries, availability
-
-
-def read_summary(case_name: str, prefix: Path) -> Summary:
-    try:
-        return Summary.load(smspec_file=f"{prefix}.SMSPEC", unsmry_file=f"{prefix}.UNSMRY")
-    except OSError as exc:
-        raise OSError(f"{case_name}: cannot load summary {prefix}: {exc}") from exc
-
-
-def load_curves(
-    prefixes: list[tuple[str, Path]],
-    vectors: list[RegionVector],
-    sign: int,
-    summaries: dict[str, Summary] | None = None,
-) -> list[Curve]:
-    if sign not in (-1, 1):
-        raise ValueError("Sign must be +1 or -1")
-    curves = []
-    units: dict[str, str] = {}
-    for case_name, prefix in prefixes:
-        with closing(ResdataFile(f"{prefix}.INIT")) as init:
-            for vector in vectors:
-                validate_regions(init, vector, case_name)
-        summary = summaries[case_name] if summaries is not None else read_summary(case_name, prefix)
+            if zonation not in init:
+                raise ValueError(f"{directory.name}: {zonation} zonation was not found in INIT")
+            regions = {int(value) for array in init[zonation] for value in array if value > 0}
+        try:
+            summary = Summary.load(smspec_file=f"{prefix}.SMSPEC", unsmry_file=f"{prefix}.UNSMRY")
+        except OSError as exc:
+            raise OSError(f"{directory.name}: cannot load summary {prefix}: {exc}") from exc
+        keys = {str(key) for key in summary.keys() if pair_pattern.fullmatch(str(key))}
+        if not keys:
+            raise ValueError(f"{directory.name}: {zonation} exists, but no {keyword} pair vectors confirm reporting")
+        for key in keys:
+            check_regions(directory.name, regions, zonation, key)
+        units = {summary.unit(key).strip() for key in keys}
+        if len(units) != 1 or not next(iter(units)):
+            raise ValueError(f"{directory.name}: inconsistent or missing units for {keyword}")
+        unit = units.pop()
+        if cases and unit != cases[0].unit:
+            raise ValueError(f"{directory.name}: unit {unit!r} differs from {cases[0].unit!r}")
         dates = summary.numpy_dates
         if dates.size == 0 or np.isnat(dates).any() or np.any(dates[1:] < dates[:-1]):
-            raise ValueError(f"{case_name}: summary dates are empty, invalid, or decreasing")
-        for vector in vectors:
-            if vector.key not in summary:
-                raise ValueError(
-                    f"{case_name}: {vector.partition} and regions {vector.source}, {vector.target} exist, "
-                    f"but {vector.key} was not exported in the summary; no zero flow is assumed"
-                )
-            values = np.asarray(summary.numpy_vector(vector.key), dtype=np.float64) * sign
-            if values.shape != dates.shape or not np.isfinite(values).all():
-                raise ValueError(f"{case_name}: {vector.key} has invalid values or a date/vector length mismatch")
-            unit = summary.unit(vector.key).strip()
-            if not unit:
-                raise ValueError(f"{case_name}: {vector.key} has no exported unit")
-            if vector.key in units and unit != units[vector.key]:
-                raise ValueError(f"{case_name}: {vector.key} unit {unit!r} differs from {units[vector.key]!r}")
-            units[vector.key] = unit
-            curves.append(Curve(case_name, vector.key, unit, dates.copy(), values))
-    return curves
+            raise ValueError(f"{directory.name}: summary dates are empty, invalid, or decreasing")
+        cases.append(Case(directory.name, summary, regions, keys, unit))
+    if not cases:
+        raise ValueError(f"No case directories with a model directory match {pattern!r} under {root}")
+    return cases
 
 
-def plot_curves(curves: list[Curve], output: Path, sign: int, show: bool = False) -> None:
+def select_vectors(cases: list[Case], zonation: str, quantity: str, requested: list[str] | None) -> list[str]:
+    available = set().union(*(case.keys for case in cases))
+    if requested is None:
+        return sorted(available)
+    keyword = f"{quantity}_{zonation[3:]}"
+    selected = []
+    for value in requested:
+        key = value.upper() if ":" in value else f"{keyword}:{value}"
+        match = re.fullmatch(rf"{keyword}:([1-9][0-9]*)-([1-9][0-9]*)", key)
+        if match is None or match[1] == match[2]:
+            raise ValueError(f"Invalid pair {value!r}; expected e.g. 1-2 or {keyword}:1-2")
+        for case in cases:
+            check_regions(case.name, case.regions, zonation, key)
+        if key not in available:
+            raise ValueError(f"{key} was not exported; available vectors: {', '.join(sorted(available))}")
+        if key not in selected:
+            selected.append(key)
+    return selected
+
+
+def plot_fluxes(cases: list[Case], keys: list[str], zonation: str, sign: int, output: Path, show: bool) -> None:
     import matplotlib
 
     if not show:
         matplotlib.use("Agg")
     from matplotlib import pyplot as plt
 
-    keys = list(dict.fromkeys(curve.vector for curve in curves))
-    if not keys:
-        raise ValueError("No curves to plot")
+    curves = []
+    for key in keys:
+        for case in cases:
+            check_regions(case.name, case.regions, zonation, key)
+            dates = case.summary.numpy_dates
+            missing = key not in case.keys
+            values = np.zeros(dates.shape) if missing else np.asarray(case.summary.numpy_vector(key), dtype=float) * sign
+            if values.shape != dates.shape or not np.isfinite(values).all():
+                raise ValueError(f"{case.name}: {key} has invalid values or a date/vector length mismatch")
+            if missing:
+                LOGGER.warning("%s: %s omitted by CIRRUS 1.9; zero direct transfer inferred", case.name, key)
+            curves.append((key, case, dates, values, missing))
     fig, axes = plt.subplots(len(keys), 1, squeeze=False, figsize=(10, 4 * len(keys)), sharex=True)
     try:
         for key, ax in zip(keys, axes[:, 0]):
-            for curve in curves:
-                if curve.vector == key:
-                    ax.plot(curve.dates, curve.values, label=curve.case_name)
-                    ax.set_ylabel(curve.unit)
-            ax.set_title(f"{key} (exported values x {sign:+d})")
-            ax.axhline(0, color="grey", linewidth=0.5)
+            for curve_key, case, dates, values, missing in curves:
+                if curve_key == key:
+                    label = f"{case.name} (inferred zero)" if missing else case.name
+                    ax.plot(dates, values, label=label, linestyle="--" if missing else "-")
+            ax.set(title=f"{key} (sign multiplier {sign:+d})", ylabel=cases[0].unit)
             ax.grid(True, alpha=0.3)
             ax.legend()
         axes[-1, 0].set_xlabel("Simulation date")
@@ -195,60 +146,33 @@ def plot_curves(curves: list[Curve], output: Path, sign: int, show: bool = False
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-root", type=Path, required=True)
-    parser.add_argument("--zonation", required=True, help="Exported FIP partition, e.g. FIPLEG or FIPHOL")
+    parser.add_argument("--zonation", type=str.upper, required=True, help="FIPLEG, FIPHOL, or another exported FIP partition")
     parser.add_argument("--quantity", choices=("RGFR", "RWFR", "RGFT", "RWFT"), default="RGFR")
     selection = parser.add_mutually_exclusive_group(required=True)
-    selection.add_argument("--list-vectors", action="store_true", help="List exported pair keys and case availability")
-    selection.add_argument("--all", action="store_true", help="Plot all exported pairs for this zonation/quantity")
-    selection.add_argument("--vector", action="append", help="Existing pair (1-2) or full key; repeat for multiple panels")
-    parser.add_argument("--case-pattern", default="*", help="Case-directory glob, e.g. '*sheet*'")
-    parser.add_argument("--summary-stem", help="Override the metadata stem; required for ambiguous legacy cases")
-    parser.add_argument("--sign", type=int, choices=(-1, 1), default=1, help="Explicit sign multiplier; default preserves exported sign")
-    parser.add_argument("--output", type=Path, help="Required when plotting, e.g. region_fluxes.png")
-    parser.add_argument("--show", action="store_true", help="Also display the figure interactively")
+    selection.add_argument("--list-vectors", action="store_true")
+    selection.add_argument("--all", action="store_true")
+    selection.add_argument("--vector", action="append", help="Existing pair or full key; repeat for multiple panels")
+    parser.add_argument("--case-pattern", default="*", help="Case-directory glob")
+    parser.add_argument("--summary-stem", help="Override the metadata stem for ambiguous legacy cases")
+    parser.add_argument("--sign", type=int, choices=(-1, 1), default=1)
+    parser.add_argument("--output", type=Path, help="Plot filename; required when plotting")
+    parser.add_argument("--show", action="store_true")
     args = parser.parse_args()
     try:
-        partition = args.zonation.upper()
-        if re.fullmatch(r"FIP[A-Z0-9]{1,3}", partition) is None:
+        if re.fullmatch(r"FIP[A-Z0-9]{1,3}", args.zonation) is None:
             raise ValueError("Zonation must be an exported FIP partition, e.g. FIPLEG or FIPHOL")
         if not args.list_vectors and args.output is None:
             raise ValueError("--output is required when plotting")
-        prefixes = discover_prefixes(args.output_root, args.case_pattern, args.summary_stem)
-        summaries, availability = available_vectors(prefixes, partition, args.quantity)
+        cases = load_cases(args.output_root, args.zonation, args.quantity, args.case_pattern, args.summary_stem)
+        keys = select_vectors(cases, args.zonation, args.quantity, args.vector)
         if args.list_vectors:
-            print(f"{partition} / {args.quantity}: exported vectors (direction as stored)")
-            for key, cases in sorted(availability.items()):
-                print(f"{key} | cases: {', '.join(cases)}")
-            return
-        selected = sorted(availability) if args.all else args.vector
-        vectors = []
-        for value in selected:
-            key = value.upper() if ":" in value else f"{args.quantity}_{partition[3:]}:{value}"
-            vector = parse_vector(key)
-            if vector.partition != partition or key.split(":")[0] != f"{args.quantity}_{partition[3:]}":
-                raise ValueError(f"{key} does not match --zonation {partition} and --quantity {args.quantity}")
-            if key not in availability:
-                for case_name, prefix in prefixes:
-                    with closing(ResdataFile(f"{prefix}.INIT")) as init:
-                        validate_regions(init, vector, case_name)
-                raise ValueError(f"{key} was not exported; available vectors: {', '.join(sorted(availability))}")
-            if vector not in vectors:
-                vectors.append(vector)
-        # --all uses each case's own exported pairs; missing pairs are not zero curves.
-        curves = []
-        for vector in vectors:
-            exporting_cases = set(availability[vector.key])
-            selected_prefixes = []
-            for case_name, prefix in prefixes:
-                if case_name in exporting_cases:
-                    selected_prefixes.append((case_name, prefix))
-                else:
-                    LOGGER.warning("%s: %s was not exported; curve omitted (not assumed zero)", case_name, vector.key)
-            curves.extend(load_curves(selected_prefixes, [vector], args.sign, summaries=summaries))
-        plot_curves(curves, args.output, args.sign, args.show)
+            for key in keys:
+                print(f"{key} | cases: {', '.join(case.name for case in cases if key in case.keys)}")
+        else:
+            plot_fluxes(cases, keys, args.zonation, args.sign, args.output, args.show)
+            print(f"Saved {args.output} ({len(cases)} cases, {len(keys)} vectors)")
     except (ValueError, OSError, KeyError) as exc:
         parser.error(str(exc))
-    print(f"Saved {args.output} ({len(prefixes)} cases, {len(vectors)} vectors)")
 
 
 if __name__ == "__main__":
