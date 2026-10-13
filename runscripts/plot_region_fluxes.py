@@ -7,6 +7,7 @@ import argparse
 import json
 import logging
 import re
+import warnings
 from contextlib import closing
 from pathlib import Path
 from typing import NamedTuple
@@ -88,7 +89,10 @@ def load_cases(root: Path, zonation: str, quantity: str, pattern: str, stem: str
                 raise ValueError(f"{directory.name}: {zonation} zonation was not found in INIT")
             regions = {int(value) for array in init[zonation] for value in array if value > 0}
         try:
-            summary = Summary.load(smspec_file=f"{prefix}.SMSPEC", unsmry_file=f"{prefix}.UNSMRY")
+            # resdata 6.3 Summary.load emits an internal StringList DeprecationWarning.
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", message="The StringList class is deprecated", category=DeprecationWarning)
+                summary = Summary.load(smspec_file=f"{prefix}.SMSPEC", unsmry_file=f"{prefix}.UNSMRY")
         except OSError as exc:
             raise OSError(f"{directory.name}: cannot load summary {prefix}: {exc}") from exc
         keys = {str(key) for key in summary.keys() if pair_pattern.fullmatch(str(key))}
