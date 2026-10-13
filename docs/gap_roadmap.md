@@ -88,6 +88,7 @@ less often. The technical detail follows for whoever picks the item up.
 | 10 | Generate hole-transfer reporting from the workbook | Open; FIPHOL currently added manually |
 | 11 | Align FIPLEG aquifer reporting with the current coarse-grid boundaries | Open; region 5 definition needs review |
 | 12 | Run only new or unfinished workbook cases | Open; batch reruns every case and rewrites the manifest |
+| 13 | Clean up the CIRRUS template deck | Open; global `BRINE` disagrees with the generated salt tables |
 
 ### 1. Compare scenario outputs automatically
 
@@ -590,6 +591,58 @@ that need it.
 the new cases as pending; the incremental run prepares and queues only those
 cases; and tests cover new, finished, failed, queued/running, stale, orphaned,
 and partially generated cases without overwriting existing output.
+
+### 13. Clean up the CIRRUS template deck
+
+**Status: open; reviewed against the CIRRUS 1.9 source (2026-10-13).** The
+workflows default to `test_data/examples/wildcat-pflotran/model/TEMP-0.in`.
+`parameterize_cirrus_deck` rewrites dates, both equilibration datums, the
+`RTEMPVD` and `SALTVD` tables, and removes the commented wells section.
+Everything else is copied unchanged. That untouched remainder includes one
+inconsistent setting, legacy keywords, and stale comments that make it hard
+to tell which values matter.
+
+**In practice:** a user reading a generated deck can tell which values come
+from the workbook and which are fixed template choices, and both salinity
+settings in the deck agree.
+
+- **Salinity mismatch (fix first).** CIRRUS requires a global `BRINE` whenever
+  `SALTVD` is used; cell salinity comes from the salt tables, while `BRINE`
+  converts water to surface volumes and is used by wells and analytical
+  aquifers. The workflow writes the workbook salinity to the salt tables as a
+  mass fraction but leaves `BRINE 0.032 MOLE` unchanged: 0.032 mass fraction
+  is 0.57 mol/kg, 0.032 mole fraction is 1.84 mol/kg. Generate `BRINE` from the
+  same workbook value and unit, then measure the effect on water summary
+  volumes in an existing case.
+- **Redundant or legacy keywords.** `RESERVOIR_DEFAULTS` is already the default
+  for the `GAS_WATER` mode and CIRRUS logs it as a legacy keyword.
+  `WRITE_MASS_RATES` appears in both output blocks; confirm whether each is
+  needed. `SUMMARY_D` is empty, and `NEWTON_SOLVER` sets `RTOL`/`ITOL` to
+  `1.0D-20`, which effectively disables them; keep them only with a comment
+  that says so.
+- **Isothermal inputs.** The run is `ISOTHERMAL`, so the energy equation is
+  off. Confirm in the source whether `SPECIFIC_HEAT` and the thermal
+  conductivities have any effect, then remove or label them.
+- **Stale comments.** Remove the "symmetrical cold injection" title, the old
+  pressure-datum notes, the incorrect `BRINE ... PPM` comment, and the
+  "Perm region 1 / SATNUM 1" labels on `ch2`. Keep `ch2`: the generated LGR
+  assigns `SATNUM 2` to pipe and open-hole cells for linear relative
+  permeability; label it as such.
+- **Template sprawl.** Four `TEMP-0.in` variants have drifted (inline vs
+  external temperature table, active injector, `FINAL_DATE 2525`), and the
+  default folder is named `wildcat-pflotran` but holds the CIRRUS template.
+  It also carries `ALPHA.in`, `.backup`, `.copy`, `.preview.inc`,
+  `temperature_gradient.inc`, and a ResInsight project that staging never
+  copies. Choose one canonical template, rename it, and remove or document
+  the leftovers.
+- Mark the workflow-owned values in the template (for example
+  `! generated from workbook`) so users don't edit lines that get overwritten.
+
+**Done when:** a generated deck has matching `BRINE` and salt-table salinity;
+every remaining keyword is either generated, deliberately fixed and
+commented, or removed; the template asset hashes in
+`tests/gap/test_template_assets.py` are updated; and a cleaned deck
+reproduces an existing CIRRUS run, apart from documented `BRINE` effects.
 
 ## Later
 
