@@ -117,6 +117,7 @@ def test_prepare_init_case_from_xlsx_stages_files(tmp_path):
     assert "16000*10" in recipe
     deck_text = deck.read_text(encoding="utf-8")
     assert "DATABASE ../include/co2_db_new.dat" in deck_text
+    assert "\n BRINE  0.032 MASS\n" in deck_text
     assert "TYPE grdecl ../include/xlsx_test_default_GRD.grdecl" in deck_text
     assert deck_text.startswith("# SCREEN case: xlsx_test_default | scenario 'default' (DesignMatrix row 1) | template ")
     assert "_LGR.grdecl" not in grdecl.read_text(encoding="utf-8")
@@ -183,7 +184,7 @@ def test_prepare_init_case_from_xlsx_configures_final_run(tmp_path):
     assert "     105    4" in deck
     assert "     2400    75.145" in deck
     assert deck.count("     2400    75.145") == 2
-    assert deck.count("CONCENTRATION_UNITS MASS") == 2
+    assert "\n BRINE  0.04 MASS\n" in deck
     assert deck.count("CONCENTRATION_UNITS MASS") == 2
     assert deck.count("SALTVD\n     4 0.04\n     2400 0.04") == 2
     assert "WELL_DATA INJ_01" not in deck

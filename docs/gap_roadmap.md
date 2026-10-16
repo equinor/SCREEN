@@ -88,7 +88,7 @@ less often. The technical detail follows for whoever picks the item up.
 | 10 | Generate hole-transfer reporting from the workbook | Open; FIPHOL currently added manually |
 | 11 | Align FIPLEG aquifer reporting with the current coarse-grid boundaries | Open; region 5 definition needs review |
 | 12 | Run only new or unfinished workbook cases | Open; batch reruns every case and rewrites the manifest |
-| 13 | Clean up the CIRRUS template deck | Open; global `BRINE` disagrees with the generated salt tables |
+| 13 | Clean up the CIRRUS template deck | Partial; generated `BRINE` now matches salt tables; CIRRUS comparison and cleanup pending |
 
 ### 1. Compare scenario outputs automatically
 
@@ -594,26 +594,31 @@ and partially generated cases without overwriting existing output.
 
 ### 13. Clean up the CIRRUS template deck
 
-**Status: open; reviewed against the CIRRUS 1.9 source (2026-10-13).** The
-workflows default to `test_data/examples/wildcat-pflotran/model/TEMP-0.in`.
+**Status: partial; salinity generation corrected (2026-10-16); broader cleanup
+and CIRRUS comparison pending.** Reviewed against the CIRRUS 1.9 source
+(2026-10-13). The workflows default to
+`test_data/examples/wildcat-pflotran/model/TEMP-0.in`.
 `parameterize_cirrus_deck` rewrites dates, both equilibration datums, the
-`RTEMPVD` and `SALTVD` tables, and removes the commented wells section.
-Everything else is copied unchanged. That untouched remainder includes one
-inconsistent setting, legacy keywords, and stale comments that make it hard
-to tell which values matter.
+`RTEMPVD` and `SALTVD` tables, global `BRINE`, and removes the commented wells
+section. Everything else is copied unchanged. That untouched remainder
+includes legacy keywords and stale comments that make it hard to tell which
+values matter.
 
 **In practice:** a user reading a generated deck can tell which values come
 from the workbook and which are fixed template choices, and both salinity
 settings in the deck agree.
 
-- **Salinity mismatch (fix first).** CIRRUS requires a global `BRINE` whenever
+- **Salinity mismatch (generation fixed; CIRRUS comparison pending).** CIRRUS requires a global `BRINE` whenever
   `SALTVD` is used; cell salinity comes from the salt tables, while `BRINE`
   converts water to surface volumes and is used by wells and analytical
   aquifers. The workflow writes the workbook salinity to the salt tables as a
-  mass fraction but leaves `BRINE 0.032 MOLE` unchanged: 0.032 mass fraction
-  is 0.57 mol/kg, 0.032 mole fraction is 1.84 mol/kg. Generate `BRINE` from the
-  same workbook value and unit, then measure the effect on water summary
-  volumes in an existing case.
+  mass fraction but previously left `BRINE 0.032 MOLE` unchanged: 0.032 mass
+  fraction is 0.57 mol/kg, 0.032 mole fraction is 1.84 mol/kg. The shared deck
+  writer now generates `BRINE <salinity> MASS` from the same workbook value
+  for initialization and final runs, and rejects missing or duplicate global
+  declarations. Regression tests cover matching tables, fresh water,
+  non-default salinities, and repeated configuration. Measure the effect on
+  water summary volumes in a separate run; existing cases stay unchanged.
 - **Redundant or legacy keywords.** `RESERVOIR_DEFAULTS` is already the default
   for the `GAS_WATER` mode and CIRRUS logs it as a legacy keyword.
   `WRITE_MASS_RATES` appears in both output blocks; confirm whether each is
@@ -633,8 +638,12 @@ settings in the deck agree.
   default folder is named `wildcat-pflotran` but holds the CIRRUS template.
   It also carries `ALPHA.in`, `.backup`, `.copy`, `.preview.inc`,
   `temperature_gradient.inc`, and a ResInsight project that staging never
-  copies. Choose one canonical template, rename it, and remove or document
-  the leftovers.
+  copies. Establish one clearly named canonical template folder separate
+  from example/reference cases, and point all preparation, single-case, and
+  batch workflow defaults to it. Keep reference decks with their associated
+  simulation outputs, explicitly labelled as fixtures rather than maintained
+  templates. Check references before removing genuinely unused copies, and
+  preserve `--template-root` for intentional custom templates.
 - Mark the workflow-owned values in the template (for example
   `! generated from workbook`) so users don't edit lines that get overwritten.
 

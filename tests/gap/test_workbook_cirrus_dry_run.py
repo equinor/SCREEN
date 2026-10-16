@@ -93,6 +93,7 @@ def test_workbook_wrapper_runs_full_dry_run_without_cirrus(tmp_path):
     assert (output_root / "logs/wildcat_baseline_final.log").read_text(encoding="utf-8") == "fake CIRRUS completed\n"
     deck = (output_root / "model/wildcat_baseline.in").read_text(encoding="utf-8")
     assert "FINAL_DATE  1 JAN 2025" in deck
+    assert f"\n BRINE  {scenario['salinity']:g} MASS\n" in deck
     assert deck.count("# SCREEN case: wildcat_baseline | scenario 'baseline' (DesignMatrix row 1)") == 1
     assert "external_file ../include/wildcat_baseline_LGR.grdecl /" in (
         output_root / "include/wildcat_baseline_GRD.grdecl"
