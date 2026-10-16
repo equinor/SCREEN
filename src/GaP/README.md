@@ -72,8 +72,18 @@ fraction for the Laliberté brine-density correction. `PressureTable` evaluates
 the corresponding reference density at ground temperature and 1.01325 bar, then
 uses its existing constant-density hydrostatic approximation. Generated CIRRUS
 `SALT_TABLE` blocks use `CONCENTRATION_UNITS MASS` and the same mass fraction at
-both ends of the generated `SALTVD` interval. This keeps pressure and deck inputs
-consistent; it does not yet support a depth-varying salinity profile.
+both ends of the generated `SALTVD` interval. The global `BRINE <salinity> MASS`
+uses that same value for CIRRUS surface-volume conversion and well/aquifer
+calculations. Templates must contain exactly one active global `BRINE` line
+(`BRIN` is also accepted). This keeps pressure and deck inputs consistent; it
+does not yet support a depth-varying salinity profile.
+
+Previously, generated decks retained the template's `BRINE 0.032 MOLE` even
+when their salt tables used mass fractions. Newly generated initialization
+and final decks correct this mismatch; existing decks and results are not
+modified. Compare corrected runs in a separate output directory, especially
+when interpreting water surface volumes. The simulator-level effect still
+requires paired validation on a CIRRUS host.
 
 Each `DesignMatrix` row is one case sharing the same physical well. Optional
 `reservoir_permx` and `overburden_permx` values override the corresponding

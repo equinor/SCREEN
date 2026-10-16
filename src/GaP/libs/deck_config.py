@@ -193,6 +193,13 @@ def parameterize_cirrus_deck(
         bottom_depth=max(parameters.bottom_depth, parameters.fluid_contact_depth),
         salinity_mass_fraction=parameters.salinity_mass_fraction,
     )
+    text, count = re.subn(
+        r"(?mi)^[ \t]*BRIN(?:E)?[ \t]+[^\n]*",
+        f" BRINE  {parameters.salinity_mass_fraction:g} MASS",
+        text,
+    )
+    if count != 1:
+        raise ValueError(f"deck must define exactly one global BRINE line, found {count}")
     text = _remove_unused_wells_section(text)
     deck_path.write_text(text, encoding="utf-8")
 
