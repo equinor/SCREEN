@@ -33,6 +33,7 @@ class SimulationScenario(BaseModel):
     casing_hole_casing: Optional[str] = None
     casing_hole_depth_mTVDMSL: Optional[float] = Field(default=None, allow_inf_nan=False)
     casing_hole_diameter_m: Optional[float] = Field(default=None, gt=0, allow_inf_nan=False)
+    casing_hole_open: bool = Field(default=True, description="False reports the hole location (FIPHOL) but keeps it sealed")
 
     @property
     def casing_hole(self) -> CasingHole | None:
@@ -49,7 +50,8 @@ class SimulationScenario(BaseModel):
 
     @model_validator(mode="after")
     def validate_casing_hole(self) -> SimulationScenario:
-        self.casing_hole
+        if self.casing_hole is None and not self.casing_hole_open:
+            raise ValueError("casing_hole_open=False requires a casing hole location")
         return self
 
     @field_validator("case_name")

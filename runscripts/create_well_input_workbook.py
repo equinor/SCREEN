@@ -70,6 +70,7 @@ def _generate_scenario_variations(
                 "casing_hole_casing": None,
                 "casing_hole_depth_mTVDMSL": None,
                 "casing_hole_diameter_m": None,
+                "casing_hole_open": None,
             }
         )
     return pd.DataFrame(scenarios)

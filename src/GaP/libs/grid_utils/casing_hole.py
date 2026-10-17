@@ -172,3 +172,14 @@ def write_casing_hole(faces: tuple[HoleFace, ...], stream: TextIO) -> None:
             f"MULTX {face.multiplier:.17g} {face.i} {face.i} {face.j} {face.j} {face.k} {face.k} /\n"
         )
     stream.write("/\n")
+
+
+def write_hole_reporting(faces: tuple[HoleFace, ...], nx: int, ny: int, nz: int, stream: TextIO) -> None:
+    """FIPHOL: 1 = cells inside each opening face, 2 = cells outside it, 3 = rest of the LGR."""
+    if not faces:
+        return
+    stream.write(f"-- SCREEN casing hole reporting\nEQUALS\nFIPHOL 3 1 {nx} 1 {ny} 1 {nz} /\n")
+    for face in faces:
+        stream.write(f"FIPHOL 1 {face.i} {face.i} {face.j} {face.j} {face.k} {face.k} /\n")
+        stream.write(f"FIPHOL 2 {face.i + 1} {face.i + 1} {face.j} {face.j} {face.k} {face.k} /\n")
+    stream.write("/\n")

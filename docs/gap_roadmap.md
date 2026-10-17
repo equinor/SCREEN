@@ -85,7 +85,7 @@ less often. The technical detail follows for whoever picks the item up.
 | 7 | Confirm recent changes on a CIRRUS host | Done for current case/LGR naming |
 | 8 | Give user-facing names a clear meaning | Open |
 | 9 | Represent a localized casing hole | Experimental; static opening/isolation and one-year pressure-driven transfer verified |
-| 10 | Generate hole-transfer reporting from the workbook | Open; FIPHOL currently added manually |
+| 10 | Generate hole-transfer reporting from the workbook | Implemented; CIRRUS paired-batch check pending |
 | 11 | Align FIPLEG aquifer reporting with the current coarse-grid boundaries | Open; region 5 definition needs review |
 | 12 | Run only new or unfinished workbook cases | Open; batch reruns every case and rewrites the manifest |
 | 13 | Clean up the CIRRUS template deck | Partial; generated `BRINE` now matches salt tables; CIRRUS comparison and cleanup pending |
@@ -505,10 +505,14 @@ law.
 
 ### 10. Generate hole-transfer reporting from the workbook
 
-**Status: open.** Item 9 generates casing openings and the plotting script
-reads existing FIPHOL outputs, but neither automatically creates FIPHOL.
-Current verification runs insert that zonation manually into generated
-includes; regeneration removes it.
+**Status: implemented; real CIRRUS paired-batch check pending.** Any casing-hole
+location now also generates `FIPHOL` inside the LGR (`write_hole_reporting`).
+`casing_hole_open=FALSE` (CLI `--casing-hole-report-only`) gives a sealed
+control with the same location and reporting cells but no opening. Resolved
+cells and an `opened` flag are saved in `resolved_casing_hole`. Because the
+zonation is generated, regeneration keeps it. Not yet done: confirmation on a
+CIRRUS host that a sealed/open workbook batch exports the `HOL` region pairs,
+and a check against CIRRUS partition-count limits (three regions are used).
 
 **In practice:** prepare and queue a complete scenario batch from one workbook,
 including hole-transfer reporting, without editing the generated decks.
