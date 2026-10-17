@@ -85,7 +85,7 @@ less often. The technical detail follows for whoever picks the item up.
 | 7 | Confirm recent changes on a CIRRUS host | Done for current case/LGR naming |
 | 8 | Give user-facing names a clear meaning | Open |
 | 9 | Represent a localized casing hole | Experimental; static opening/isolation and one-year pressure-driven transfer verified |
-| 10 | Generate hole-transfer reporting from the workbook | Implemented; CIRRUS paired-batch check pending |
+| 10 | Generate hole-transfer reporting from the workbook | Done; verified on CIRRUS (Smeaheia, one year) |
 | 11 | Align FIPLEG aquifer reporting with the current coarse-grid boundaries | Open; region 5 definition needs review |
 | 12 | Run only new or unfinished workbook cases | Open; batch reruns every case and rewrites the manifest |
 | 13 | Clean up the CIRRUS template deck | Partial; generated `BRINE` now matches salt tables; CIRRUS comparison and cleanup pending |
@@ -468,8 +468,8 @@ pressure-driven leakage, a calibrated hole-flow law, or arbitrary grids.
   ocean-rate values were not supplied.
 
 These results support dynamic direct hole connectivity for this setup, not
-ocean arrival or a calibrated physical hole-flow law. FIPHOL remains a
-test-only reporting zonation, not a generated production feature.
+ocean arrival or a calibrated physical hole-flow law. FIPHOL is now generated
+from the workbook (item 10).
 
 **Area-equivalent opening:**
 
@@ -505,14 +505,37 @@ law.
 
 ### 10. Generate hole-transfer reporting from the workbook
 
-**Status: implemented; real CIRRUS paired-batch check pending.** Any casing-hole
+**Status: done; verified on a CIRRUS host (2026-10-17).** Any casing-hole
 location now also generates `FIPHOL` inside the LGR (`write_hole_reporting`).
 `casing_hole_open=FALSE` (CLI `--casing-hole-report-only`) gives a sealed
 control with the same location and reporting cells but no opening. Resolved
 cells and an `opened` flag are saved in `resolved_casing_hole`. Because the
-zonation is generated, regeneration keeps it. Not yet done: confirmation on a
-CIRRUS host that a sealed/open workbook batch exports the `HOL` region pairs,
-and a check against CIRRUS partition-count limits (three regions are used).
+zonation is generated, regeneration keeps it. Rows without a hole location
+produce no `FIPHOL`.
+
+**CIRRUS evidence (Smeaheia, one-year runs, user-reported):**
+
+- A workbook-only batch of `nohole`, an open 0.2 m hole and a sealed 0.2 m
+  hole (Casing 13 3/8 in, 650 m TVDMSL) succeeded. `nohole` has no `FIPHOL`;
+  the open and sealed LGRs have identical `FIPHOL` lines (9: one background
+  line plus two per face; four faces at `i=14`, `k=130`, `j=10-13`, 0.05 m
+  overlap each). Only the open LGR contains the opening; its allocated area
+  matches the requested `pi * 0.1^2`.
+- Open cases export `RGFT_HOL:1-2`, `1-3` and `2-3`. The sealed case exports no
+  `1-2` pair and its `2-3` total is zero, as in the earlier CIRRUS 1.9
+  behaviour. Region 1-2 and 2-3 totals agree within 0.4%.
+- At 365 days, `RGFT_HOL:1-2` was 752.4 m3 (0.1 m hole, 100 mD cement), 750.4 m3
+  (0.2 m hole, same cement), 27.9 m3 (0.1 m, 10 mD cement) and 1226.0 m3
+  (0.1 m, 10 mD cement, permeable overburden). The last is about 5% above the
+  earlier manual-FIPHOL Smeaheia result (1166.56 m3); that run's overburden
+  and other settings were not re-checked, so this is agreement, not
+  reproduction.
+- Hole area was not the limiting factor in these setups: doubling the
+  diameter changed the transfer by 0.3%, while cement and overburden
+  permeability changed it by factors of 27 and 44. Do not read a hole-size
+  sensitivity from the tight-overburden cases.
+
+Not checked: CIRRUS partition-count limits beyond the three regions used.
 
 **In practice:** prepare and queue a complete scenario batch from one workbook,
 including hole-transfer reporting, without editing the generated decks.
