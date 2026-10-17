@@ -216,7 +216,7 @@ def test_workbook_interval_permeability_overrides_are_isolated(tmp_path):
     assert scenario["effective_permeability_mD"]["barrier_perm_interval_overrides"] == {"cplug9": 0.75}
 
 
-def _hole_workbook(tmp_path, casing):
+def _hole_workbook(tmp_path, casing, **extra):
     root = Path(__file__).parents[2]
     workbook = tmp_path / "hole.xlsx"
     shutil.copyfile(root / "test_data/examples/wildcat/wildcat_workbook.xlsx", workbook)
@@ -224,7 +224,7 @@ def _hole_workbook(tmp_path, casing):
     sheet = excel["DesignMatrix"]
     columns = {sheet.cell(1, column).value: column for column in range(1, sheet.max_column + 1)}
     for field, value in {
-        "casing_hole_casing": casing, "casing_hole_depth_mTVDMSL": 200, "casing_hole_diameter_m": 0.1,
+        "casing_hole_casing": casing, "casing_hole_depth_mTVDMSL": 200, "casing_hole_diameter_m": 0.1, **extra,
     }.items():
         if field not in columns:
             columns[field] = sheet.max_column + 1
@@ -274,6 +274,33 @@ def test_workbook_hole_reaches_lgr_and_resolved_metadata(tmp_path):
     for face in report["faces"]:
         j = face["j"]
         assert f"MULTX {face['multiplier']:.17g} 15 15 {j} {j} 17 17 /" in lgr_path.read_text()
+
+
+def test_workbook_report_only_hole_keeps_fiphol_and_stays_sealed(tmp_path):
+    root = Path(__file__).parents[2]
+    runner = _fake_cirrus(tmp_path, root / "test_data/examples/wildcat/model/TEMP-0")
+    lgrs = {}
+    for name, extra in {"open": {}, "sealed": {"casing_hole_open": False}}.items():
+        (tmp_path / name).mkdir()
+        workbook = _hole_workbook(tmp_path / name, "Casing 20 in", **extra)
+        output_root = tmp_path / f"{name}_case"
+        subprocess.run(
+            [
+                sys.executable, "runscripts/run_workbook_to_cirrus_lgr.py",
+                "--xlsx", str(workbook), "--output-root", str(output_root),
+                "--sim-command", f"{runner} {{deck}}", "--case-name", "baseline",
+            ],
+            cwd=root, check=True, capture_output=True, text=True,
+        )
+        lgrs[name] = (output_root / "include/wildcat_baseline_LGR.grdecl").read_text()
+        report = json.loads((output_root / "scenario.json").read_text())["resolved_casing_hole"]
+        assert report["opened"] is (name == "open")
+        assert report["allocated_area_m2"] == (pytest.approx(np.pi * 0.05**2) if name == "open" else 0.0)
+    fiphol = [line for line in lgrs["open"].splitlines() if line.startswith("FIPHOL")]
+    assert len(fiphol) == 5
+    assert fiphol == [line for line in lgrs["sealed"].splitlines() if line.startswith("FIPHOL")]
+    assert "SCREEN experimental casing hole" in lgrs["open"]
+    assert "SCREEN experimental casing hole" not in lgrs["sealed"]
 
 
 def test_older_workbook_without_hole_columns_remains_valid(tmp_path):

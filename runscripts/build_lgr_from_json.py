@@ -34,15 +34,23 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--casing-hole-casing", help="Experimental hole: exact casing name (not casing cement).")
     parser.add_argument("--casing-hole-depth-mTVDMSL", type=float, help="Experimental hole depth in m TVDMSL.")
     parser.add_argument("--casing-hole-diameter-m", type=float, help="Experimental circular hole diameter in m.")
+    parser.add_argument(
+        "--casing-hole-report-only",
+        dest="casing_hole_open",
+        action="store_false",
+        help="Keep the casing-hole location sealed and only add FIPHOL reporting (sealed control).",
+    )
     return parser.parse_args()
 
 
 def build_lgr(args: argparse.Namespace) -> Path:
-    hole = SimulationScenario(
+    scenario = SimulationScenario(
         casing_hole_casing=getattr(args, "casing_hole_casing", None),
         casing_hole_depth_mTVDMSL=getattr(args, "casing_hole_depth_mTVDMSL", None),
         casing_hole_diameter_m=getattr(args, "casing_hole_diameter_m", None),
-    ).casing_hole
+        casing_hole_open=getattr(args, "casing_hole_open", True),
+    )
+    hole = scenario.casing_hole
     processed_well = WellProcessed.from_json(args.well_json)
     if hole is not None:
         hole.validate_casing(
@@ -66,6 +74,7 @@ def build_lgr(args: argparse.Namespace) -> Path:
         well_frames.casings_df,
         well_frames.barrier_regions_df,
         casing_hole=hole,
+        open_casing_hole=scenario.casing_hole_open,
     )
     lgr_path = args.output_folder / f"{args.lgr_name}.grdecl"
     lgr_file_stem = getattr(args, "lgr_file_stem", None)
@@ -88,7 +97,9 @@ def build_lgr(args: argparse.Namespace) -> Path:
             "allocation": "circular area weighted by lateral span overlap",
             "indexing": "one-based LGR cells; MULTX is the positive-X face",
             "requested_area_m2": pi * (hole.diameter_m / 2) ** 2,
-            "allocated_area_m2": sum(face.opening_area_m2 for face in builder.casing_hole_faces),
+            "opened": scenario.casing_hole_open,
+            "allocated_area_m2": sum(face.opening_area_m2 for face in builder.casing_hole_faces) if scenario.casing_hole_open else 0.0,
+            "fiphol": "1 = cell (i, j, k) of each face, 2 = cell (i+1, j, k), 3 = rest of the LGR",
             "area_relative_tolerance": 1e-12,
             "faces": [asdict(face) for face in builder.casing_hole_faces],
         }

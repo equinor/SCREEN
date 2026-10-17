@@ -9,10 +9,12 @@ from pydantic import ValidationError
 from resdata.grid import Grid
 
 from src.GaP.libs.grid_utils.casing_hole import (
+    HoleFace,
     refined_depth_edges,
     resolve_casing_hole,
     validate_layer_thicknesses,
     write_casing_hole,
+    write_hole_reporting,
 )
 from src.GaP.libs.models.casing_hole import CasingHole
 from src.GaP.libs.models.simulation_scenario import SimulationScenario
@@ -276,28 +278,59 @@ def test_unsupported_grid_geometry_is_rejected(monkeypatch, distortion):
         refined_depth_edges(grid, 9, 9, np.array([10, 10]))
 
 
+def _build(tmp_path, hole, open_casing_hole=True):
+    fixture = Path(__file__).parents[2] / "test_data/examples/wildcat"
+    well = WellProcessed.from_json(fixture / "wildcat.json")
+    frame = WellDataFrame(well, oh_perm=10000.0, cb_perm=0.05, barrier_perm=0.05)
+    builder = LGRBuilder(str(fixture / "model/TEMP-0"), frame.annulus_df, frame.holes_df, False)
+    builder.build_grdecl(
+        str(tmp_path), "TEMP_LGR", frame.holes_df, frame.casings_df, frame.barrier_regions_df,
+        casing_hole=hole, open_casing_hole=open_casing_hole,
+    )
+    return builder, frame, (tmp_path / "TEMP_LGR.grdecl").read_text()
+
+
+def test_hole_reporting_writer_labels_inner_outer_and_remaining_cells():
+    faces = (HoleFace(15, 11, 17, 1.0, 0.5, 0.5, 0.05), HoleFace(15, 12, 17, 1.0, 0.5, 0.5, 0.05))
+    stream = StringIO()
+    write_hole_reporting(faces, 22, 22, 270, stream)
+    assert stream.getvalue().splitlines() == [
+        "-- SCREEN casing hole reporting",
+        "EQUALS",
+        "FIPHOL 3 1 22 1 22 1 270 /",
+        "FIPHOL 1 15 15 11 11 17 17 /",
+        "FIPHOL 2 16 16 11 11 17 17 /",
+        "FIPHOL 1 15 15 12 12 17 17 /",
+        "FIPHOL 2 16 16 12 12 17 17 /",
+        "/",
+    ]
+    stream = StringIO()
+    write_hole_reporting((), 22, 22, 270, stream)
+    assert stream.getvalue() == ""
+
+
 def test_builder_changes_only_selected_multiplier_records(tmp_path):
-    root = Path(__file__).parents[2]
-    fixture = root / "test_data/examples/wildcat"
-    outputs = []
-    meshes = []
-    frames = []
-    for hole in (None, CasingHole(casing="Casing 20 in", depth_mTVDMSL=200, diameter_m=0.1)):
-        well = WellProcessed.from_json(fixture / "wildcat.json")
-        frame = WellDataFrame(well, oh_perm=10000.0, cb_perm=0.05, barrier_perm=0.05)
-        builder = LGRBuilder(str(fixture / "model/TEMP-0"), frame.annulus_df, frame.holes_df, False)
-        builder.build_grdecl(
-            str(tmp_path), "TEMP_LGR", frame.holes_df, frame.casings_df, frame.barrier_regions_df, casing_hole=hole
-        )
-        outputs.append((tmp_path / "TEMP_LGR.grdecl").read_text())
-        meshes.append(builder.grid_refine.mesh_df.copy(deep=True))
-        frames.append(frame.casings_df.copy(deep=True))
-    pd.testing.assert_frame_equal(meshes[0], meshes[1])
-    pd.testing.assert_frame_equal(frames[0], frames[1])
+    (tmp_path / "base").mkdir()
+    (tmp_path / "hole").mkdir()
+    base_builder, base_frame, baseline = _build(tmp_path / "base", None)
+    builder, frame, opened = _build(tmp_path / "hole", CasingHole(casing="Casing 20 in", depth_mTVDMSL=200, diameter_m=0.1))
+    outputs = [baseline, opened]
+    pd.testing.assert_frame_equal(base_builder.grid_refine.mesh_df, builder.grid_refine.mesh_df)
+    pd.testing.assert_frame_equal(base_frame.casings_df, frame.casings_df)
     stream = StringIO()
     write_casing_hole(builder.casing_hole_faces, stream)
     override = stream.getvalue()
-    assert outputs[1].replace(override, "") == outputs[0]
+    reporting = StringIO()
+    write_hole_reporting(
+        builder.casing_hole_faces,
+        len(builder.lgr_info.LGR_sizes_x),
+        len(builder.lgr_info.LGR_sizes_x),
+        int(sum(builder.lgr_info.LGR_numb_z)),
+        reporting,
+    )
+    assert "FIPHOL" not in baseline
+    assert outputs[1].replace(override, "").replace(reporting.getvalue(), "") == outputs[0]
+    assert outputs[1].count(reporting.getvalue()) == 1
     assert outputs[1].count(override) == 1
     lines = outputs[1].splitlines()
     seal_lines = [index for index, line in enumerate(lines) if line.startswith("MULTX") and float(line.split()[1]) == 0]
@@ -317,3 +350,22 @@ def test_builder_changes_only_selected_multiplier_records(tmp_path):
         and int(record[6]) <= face.k <= int(record[7])
         for record in sealed_faces
     )
+
+
+def test_report_only_hole_matches_open_case_reporting_without_opening(tmp_path):
+    hole = CasingHole(casing="Casing 20 in", depth_mTVDMSL=200, diameter_m=0.1)
+    for name in ("open", "sealed"):
+        (tmp_path / name).mkdir()
+    _, _, opened = _build(tmp_path / "open", hole)
+    _, _, sealed = _build(tmp_path / "sealed", hole, open_casing_hole=False)
+    fiphol = [line for line in opened.splitlines() if line.startswith("FIPHOL")]
+    assert fiphol and fiphol == [line for line in sealed.splitlines() if line.startswith("FIPHOL")]
+    assert "SCREEN experimental casing hole" in opened
+    assert "SCREEN experimental casing hole" not in sealed
+    assert len(opened.splitlines()) - len(sealed.splitlines()) == 5  # comment, EQUALS, two MULTX records, terminator
+
+
+def test_report_only_requires_a_hole_location():
+    with pytest.raises(ValidationError, match="requires a casing hole location"):
+        SimulationScenario(casing_hole_open=False)
+    assert SimulationScenario().casing_hole_open is True

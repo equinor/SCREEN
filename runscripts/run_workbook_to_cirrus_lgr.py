@@ -254,6 +254,7 @@ def run_workflow(args: argparse.Namespace) -> Path:
         casing_hole_casing=scenario.casing_hole_casing,
         casing_hole_depth_mTVDMSL=scenario.casing_hole_depth_mTVDMSL,
         casing_hole_diameter_m=scenario.casing_hole_diameter_m,
+        casing_hole_open=scenario.casing_hole_open,
     )
     lgr_path = build_lgr(lgr_args)
     if scenario.casing_hole is not None:

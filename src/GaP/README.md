@@ -110,9 +110,18 @@ or leave all three blank:
 | `casing_hole_casing` | Exact unique `HoleCasings.name` with `type=casing`, not casing cement |
 | `casing_hole_depth_mTVDMSL` | Hole depth in metres TVDMSL |
 | `casing_hole_diameter_m` | Finite positive circular opening diameter in metres |
+| `casing_hole_open` | Optional; `FALSE` keeps the location sealed (default `TRUE` opens it) |
 
 For example: `Casing 20 in`, `200`, `0.1` in the Wildcat example. Depth intervals
 are top-inclusive and bottom-exclusive, both for the casing and refined layer.
+Every hole location also writes a `FIPHOL` partition inside the LGR, before
+`ENDFIN`: region 1 is the cell inside each opening face, 2 the cell across it
+(`i + 1`), and 3 the rest of the LGR. For a sealed control, repeat the hole
+columns of the open row and set `casing_hole_open` to `FALSE`: the LGR gets the
+same `FIPHOL` cells but no opening. Standalone: `--casing-hole-report-only`.
+The resolved cells are in `scenario.json` (`resolved_casing_hole`, with
+`opened`). Rows without a hole location are unchanged.
+
 Unknown or duplicate casing names, incomplete inputs, and depths outside the
 casing fail before CIRRUS initialization. Geometry-dependent checks run after
 initialization, before writing the LGR.
@@ -269,7 +278,7 @@ uv run --extra visualization python runscripts/plot_region_fluxes.py \
 	--output cases/ocean_gas_flux.png
 ```
 
-For the test-only `FIPHOL` zonation, regions 1 and 2 are the inner and outer
+For the generated `FIPHOL` zonation, regions 1 and 2 are the inner and outer
 cells adjacent to the casing hole:
 
 ```bash
