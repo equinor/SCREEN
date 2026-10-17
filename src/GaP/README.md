@@ -264,6 +264,14 @@ uv run --extra visualization python runscripts/plot_region_fluxes.py \
 	--output-root cases --zonation FIPLEG --list-vectors
 ```
 
+Generated coarse grids label `FIPLEG` as: 1 water, 2 overburden, 3 reservoir,
+5 aquifer boundary, and 6 the wellbore cells inside the LGR (pipe, open hole
+and casing-cement boxes; the rest of the LGR is not labelled 6). Region 5 is the four outer coarse-grid
+columns in the reservoir layers, the cells whose pore volume is multiplied
+(`porv_multiplier`); the water and overburden edge cells keep 1 and 2. Cases
+generated before this definition (region 5 on the bottom `aquifer_layers`) are
+not comparable region-for-region.
+
 The list reports the exact keys and the cases exporting each one. If `1-6`
 exists but `6-1` does not, only `1-6` is selectable; reversing a pair is not
 inferred. Select a pair with `--vector`, repeat it for multiple panels, or

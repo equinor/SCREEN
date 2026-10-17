@@ -86,7 +86,7 @@ less often. The technical detail follows for whoever picks the item up.
 | 8 | Give user-facing names a clear meaning | Open |
 | 9 | Represent a localized casing hole | Experimental; static opening/isolation and one-year pressure-driven transfer verified |
 | 10 | Generate hole-transfer reporting from the workbook | Done; verified on CIRRUS (Smeaheia, one year) |
-| 11 | Align FIPLEG aquifer reporting with the current coarse-grid boundaries | Open; region 5 definition needs review |
+| 11 | Align FIPLEG aquifer reporting with the current coarse-grid boundaries | Implemented; CIRRUS INIT check pending |
 | 12 | Run only new or unfinished workbook cases | Open; batch reruns every case and rewrites the manifest |
 | 13 | Clean up the CIRRUS template deck | Partial; generated `BRINE` now matches salt tables; CIRRUS comparison and cleanup pending |
 
@@ -560,10 +560,23 @@ invalid locations, and unchanged cases without reporting.
 
 ### 11. Align FIPLEG aquifer reporting with the current coarse-grid boundaries
 
-**Status: open; outdated definition reported by the user (2026-10-12).**
-FIPLEG 5 was intended to identify aquifer cells with multiplied pore volume.
-The aquifer representation has since moved to the outer edges of the coarse
-grid; its reporting zonation needs to be checked against that current placement.
+**Status: implemented; CIRRUS INIT check pending.** Outdated definition
+reported by the user (2026-10-12): FIPLEG 5 was intended to identify aquifer
+cells with multiplied pore volume. The aquifer representation moved to the
+outer edges of the coarse grid, but region 5 stayed on the bottom
+`aquifer_layers` of the reservoir.
+
+**Decision (2026-10-17):** region 5 is the four outer coarse-grid columns in the
+reservoir layers. Water and overburden edge cells keep regions 1 and 2, even
+though their pore volume is also multiplied, so ocean and overburden regions
+keep their identity. Region 3 is now the whole reservoir minus those edge
+columns, including the bottom `aquifer_layers`, which keep `aquifer_permx` but
+are no longer labelled 5. The edge boxes for `FIPLEG 5` and the `PORV`
+multiplier come from one shared list in `prepare_init_case.py`, so they cannot
+drift apart. The wellbore cells (region 6: pipe, open hole and casing-cement boxes) sit in
+a central parent cell (10, 10 in the default 20 x 20 grid), away from the edge
+columns; other grid sizes were not checked. Cases generated earlier are not
+comparable region-for-region.
 
 **In practice:** regional inventories and transfers labelled as aquifer
 quantities should refer to the actual boundary-aquifer cells, not their former

@@ -1,3 +1,4 @@
+import importlib.util
 from pathlib import Path
 import subprocess
 import sys
@@ -9,6 +10,12 @@ import pytest
 
 from src.WellClass.libs.utils.xlsx_parser import xlsx_grid_policy, xlsx_to_simulation_design, xlsx_to_well_model
 from src.WellClass.libs.well_pressure.pressure_table import PressureTable
+
+
+PREPARE_PATH = Path(__file__).parents[2] / "runscripts/prepare_init_case.py"
+PREPARE_SPEC = importlib.util.spec_from_file_location("prepare_init_case", PREPARE_PATH)
+prepare_init_case = importlib.util.module_from_spec(PREPARE_SPEC)
+PREPARE_SPEC.loader.exec_module(prepare_init_case)
 
 
 def _write_minimal_workbook(path: Path, *, salinity: float = 0.032) -> None:
@@ -127,11 +134,41 @@ def test_prepare_init_case_from_xlsx_stages_files(tmp_path):
     assert "PERMX 10000 1 20 1 20 1 3 /" in grdecl_text
     assert "PERMX 0.001 1 20 1 20 4 18 /" in grdecl_text
     assert "PORO 1 1 20 1 20 1 3 /" in grdecl_text
-    assert "FIPLEG 3 1 20 1 20 19 55 /" in grdecl_text
-    assert "FIPLEG 5 1 20 1 20 56 58 /" in grdecl_text
+    assert "FIPLEG 3 1 20 1 20 19 58 /" in grdecl_text
+    assert "FIPLEG 5 1 1 1 20 19 58 /" in grdecl_text
     assert "PERMX 1000 1 20 1 20 56 58 /" in grdecl_text
     assert "TRANZ 0 1 20 1 20 19 19 /" in grdecl_text
     assert "PERMZ 0.1 1 20 1 20 4 58 /" in grdecl_text
+
+
+def _boxes(text: str, keyword: str) -> list[tuple[str, ...]]:
+    return [tuple(line.split()[2:]) for line in text.splitlines() if line.startswith(f"{keyword} ")]
+
+
+@pytest.mark.parametrize("aquifer_layers", [0, 3])
+def test_fipleg_aquifer_marks_reservoir_edge_columns_with_multiplied_pore_volume(tmp_path, aquifer_layers):
+    root = Path(__file__).parents[2]
+    grdecl = tmp_path / "grid.grdecl"
+    grdecl.write_text((root / "test_data/examples/wildcat-pflotran/include/TEMP_GRD.grdecl").read_text(encoding="utf-8"))
+    prepare_init_case.parameterize_grdecl(
+        grdecl, water_layers=3, overburden_layers=15, reservoir_layers=40,
+        aquifer_layers=aquifer_layers, aquifer_permx=250.0,
+    )
+    text = grdecl.read_text(encoding="utf-8")
+    edges = [("1", "1", "1", "20"), ("20", "20", "1", "20"), ("2", "19", "1", "1"), ("2", "19", "20", "20")]
+    porv = _boxes(text, "PORV")
+    assert [box[:4] for box in porv] == edges
+    assert {box[4:] for box in porv} == {("1", "58", "/")}
+    fipleg5 = [tuple(line.split()[2:]) for line in text.splitlines() if line.startswith("FIPLEG 5 ")]
+    assert [box[:4] for box in fipleg5] == edges
+    assert {box[4:] for box in fipleg5} == {("19", "58", "/")}
+    # Water, overburden and the interior of the reservoir keep their own regions.
+    assert "FIPLEG 1 1 20 1 20 1 3 /" in text
+    assert "FIPLEG 2 1 20 1 20 4 18 /" in text
+    assert "FIPLEG 3 1 20 1 20 19 58 /" in text
+    assert text.index("FIPLEG 3 1 20 1 20 19 58 /") < text.index("FIPLEG 5 1 1 1 20 19 58 /")
+    # Physical aquifer properties are unchanged: the bottom layers keep aquifer_permx.
+    assert ("PERMX 250 1 20 1 20 56 58 /" in text) == bool(aquifer_layers)
 
 
 def test_workbook_keeps_simulation_assumptions_outside_well_model(tmp_path):
