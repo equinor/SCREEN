@@ -142,6 +142,12 @@ def parameterize_grdecl(
         formatted_value = f"{value:g}" if isinstance(value, (int, float)) else str(value)
         return f"{keyword} {formatted_value} 1 {nx} 1 {ny} {start} {end} /"
 
+    # Outer coarse-grid columns (i0 i1 j0 j1): the aquifer boundary used for both PORV and FIPLEG 5.
+    edge_columns = ((1, 1, 1, ny), (nx, nx, 1, ny), (2, nx - 1, 1, 1), (2, nx - 1, ny, ny))
+
+    def edge_region(keyword: str, value: object, start: int, end: int) -> list[str]:
+        return [f"{keyword} {value:g} {i0} {i1} {j0} {j1} {start} {end} /" for i0, i1, j0, j1 in edge_columns]
+
     lines = [
         "EQUALS",
         "FIPLEG 4  /",
@@ -163,14 +169,15 @@ def parameterize_grdecl(
         "",
         "-- Reservoir and aquifer properties",
     ]
+    lines.append(region("FIPLEG", 3, reservoir_start, reservoir_end))
     if aquifer_start is None:
-        lines.extend([region("PERMX", reservoir_permx, reservoir_start, reservoir_end), region("FIPLEG", 3, reservoir_start, reservoir_end)])
+        lines.append(region("PERMX", reservoir_permx, reservoir_start, reservoir_end))
     else:
         if aquifer_start > reservoir_start:
-            lines.extend(
-                [region("PERMX", reservoir_permx, reservoir_start, aquifer_start - 1), region("FIPLEG", 3, reservoir_start, aquifer_start - 1)]
-            )
-        lines.extend([region("PERMX", aquifer_permx, aquifer_start, reservoir_end), region("FIPLEG", 5, aquifer_start, reservoir_end)])
+            lines.append(region("PERMX", reservoir_permx, reservoir_start, aquifer_start - 1))
+        lines.append(region("PERMX", aquifer_permx, aquifer_start, reservoir_end))
+    lines.append("-- FIPLEG 5: aquifer boundary, the outer coarse-grid columns in reservoir layers")
+    lines.extend(edge_region("FIPLEG", 5, reservoir_start, reservoir_end))
     lines.extend(
         [
             "",
@@ -187,10 +194,7 @@ def parameterize_grdecl(
             "",
             "MULTIPLY",
             "-- Multiply pore volume on the four outer coarse-grid sides",
-            f"PORV {porv_multiplier:g} 1 1 1 {ny} 1 {nz} /",
-            f"PORV {porv_multiplier:g} {nx} {nx} 1 {ny} 1 {nz} /",
-            f"PORV {porv_multiplier:g} 2 {nx - 1} 1 1 1 {nz} /",
-            f"PORV {porv_multiplier:g} 2 {nx - 1} {ny} {ny} 1 {nz} /",
+            *edge_region("PORV", porv_multiplier, 1, nz),
             "",
             "-- Do not reduce permeability in the water layer",
             f"PERMZ {permz_multiplier:g} 1 {nx} 1 {ny} {water_end + 1} {nz} /",
