@@ -86,7 +86,7 @@ less often. The technical detail follows for whoever picks the item up.
 | 8 | Give user-facing names a clear meaning | Open |
 | 9 | Represent a localized casing hole | Experimental; static opening/isolation and one-year pressure-driven transfer verified |
 | 10 | Generate hole-transfer reporting from the workbook | Done; verified on CIRRUS (Smeaheia, one year) |
-| 11 | Align FIPLEG aquifer reporting with the current coarse-grid boundaries | Implemented; CIRRUS INIT check pending |
+| 11 | Align FIPLEG aquifer reporting with the current coarse-grid boundaries | Done; global-grid `.INIT` verified on CIRRUS; LGR and transfer interpretation not checked |
 | 12 | Run only new or unfinished workbook cases | Basic version done (run only new cases, flag unverified, dry run); fingerprints, retry of killed runs, orphans open |
 | 13 | Clean up the CIRRUS template deck | Partial; generated `BRINE` now matches salt tables; CIRRUS comparison and cleanup pending |
 
@@ -595,7 +595,8 @@ invalid locations, and unchanged cases without reporting.
 
 ### 11. Align FIPLEG aquifer reporting with the current coarse-grid boundaries
 
-**Status: implemented; CIRRUS INIT check pending.** Outdated definition
+**Status: implemented; global-grid `.INIT` verified on CIRRUS (2026-10-20); LGR
+array and aquifer transfer interpretation not checked.** Outdated definition
 reported by the user (2026-10-12): FIPLEG 5 was intended to identify aquifer
 cells with multiplied pore volume. The aquifer representation moved to the
 outer edges of the coarse grid, but region 5 stayed on the bottom
@@ -632,6 +633,16 @@ location.
 intended current aquifer cells, with no unintended changes to other regions
 or physical properties, and CIRRUS INIT/summary checks confirm the corrected
 zonation and aquifer-related transfer interpretation.
+
+**CIRRUS evidence (user-reported, 2026-10-20):** the global `FIPLEG` array of a
+case generated after the change, read from its `.INIT`, on a `20 x 20 x 63` grid
+(7 water, 16 overburden, 40 reservoir layers): region 1 had 2800 cells
+(`k 1-7`), region 2 had 6400 (`k 8-23`), region 3 had 12960 (`i, j 2-19`,
+`k 24-63`) and region 5 had 3040. Region 5 was exactly the 76 outer columns of
+the grid in layers 24-63, and the four regions add up to all 25200 cells with no
+overlap and no remaining region 4. Not checked: the second (LGR) `FIPLEG` array
+in the same `.INIT`, other grid sizes, and any summary or transfer vector that
+uses region 5.
 
 ### 12. Run only new or unfinished workbook cases
 
