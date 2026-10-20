@@ -27,7 +27,7 @@ def _hole_labels(ax):
 def test_sketch_marks_casing_hole(well):
     fig, ax = plt.subplots()
     plot_sketch(well, ax=ax, casing_hole=HOLE)
-    assert _hole_labels(ax) == ["Casing hole, Casing 13 3/8 in\n650 m TVDMSL, \u00d8 20 cm"]
+    assert _hole_labels(ax) == ["Casing hole\nCasing 13 3/8 in\n650 m TVDMSL, \u00d8 20 cm"]
     plt.close(fig)
 
 
