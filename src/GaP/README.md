@@ -296,6 +296,16 @@ uv run --extra visualization python runscripts/plot_region_fluxes.py \
 	--output work/smeaheia_hole_dynamic/hole_gas_transfer.png
 ```
 
+Plots use the SCREEN style of the one-page plot (Equinor font when available,
+200 dpi) and put one legend outside the axes, with the same colour for a case in
+every panel. For sweeps, `--label-mode changed` labels each case only with the
+recorded inputs that differ between the plotted cases (read from `scenario.json`
+and `grid_policy.json`), sorts the legend by them, and names the varied fields in
+the legend title, for example `cb_perm=50, hole_diameter_m=0.2`. The default,
+`--label-mode case`, uses the case directory names. Cases without
+`scenario.json`, or with no differing input, fall back to the case names with a
+warning.
+
 `--quantity` defaults to gas rate (`RGFR`); choose water rate (`RWFR`),
 gas total (`RGFT`), or water total (`RWFT`) instead. For example,
 `--zonation FIPHOL --quantity RGFT --all` plots all exported gas-transfer
