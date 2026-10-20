@@ -343,11 +343,12 @@ def test_qc_plot_uses_workbook_fluid_contact_pressure(tmp_path, monkeypatch):
     monkeypatch.setattr(workflow, "Pressure", FakePressure)
     monkeypatch.setattr(workflow, "WellProcessed", SimpleNamespace(from_pydantic=lambda model: SimpleNamespace(header={})))
     plotting_module = types.ModuleType("src.WellClass.libs.plotting.plot_sketch")
-    plotting_module.plot_sketch = lambda *_args, **_kwargs: None
+    plotting_module.plot_sketch = lambda *_args, **kwargs: captured.update(sketch_options=kwargs)
     monkeypatch.setitem(sys.modules, "src.WellClass.libs.plotting.plot_sketch", plotting_module)
 
     scenario = SimpleNamespace(
         case_name="pressure_case",
+        casing_hole="hole",
         z_fluid_contact=2400.0,
         p_fluid_contact=245.0,
         z_resrv=1400.0,
@@ -363,3 +364,4 @@ def test_qc_plot_uses_workbook_fluid_contact_pressure(tmp_path, monkeypatch):
     assert captured["z_fluid_datum"] == 2400.0
     assert captured["p_fluid_datum"] == 245.0
     assert captured["pressure_options"]["salinity"] == 0.032
+    assert captured["sketch_options"]["casing_hole"] == "hole"

@@ -121,6 +121,34 @@ def casings_plotter(
             ax.annotate(shoe_label, xy=(x_txt_pos, ycoord), fontsize=txt_size, va="center", ha="right", clip_on=True)
 
 
+def casing_hole_plotter(ax: matplotlib.axes.Axes, casing_hole, casing_data: List[Dict], txt_size: int, annot_bool: bool = True) -> None:
+    """
+    Marks an experimental casing hole on the +X wall of the casing it belongs to.
+
+    casing_hole: CasingHole (casing name, depth_mTVDMSL, diameter_m)
+    """
+    matches = [item for item in casing_data if item["name"] == casing_hole.casing]
+    if len(matches) != 1:
+        raise ValueError(f"casing hole must select exactly one casing named {casing_hole.casing!r}; found {len(matches)}")
+
+    x_wall = matches[0]["diameter_m"] / 2
+    depth = casing_hole.depth_mTVDMSL
+
+    # the arrow stops just short of the wall so it never covers the casing at the hole
+    label = f"Casing hole\n{casing_hole.casing}\n{depth:g} m TVDMSL, \u00d8 {casing_hole.diameter_m * 100:g} cm" if annot_bool else ""
+    ax.annotate(
+        label,
+        xy=(x_wall, depth),
+        xytext=(x_wall + 0.35 * x_wall, depth),
+        fontsize=txt_size,
+        color="red",
+        va="center",
+        bbox={"facecolor": "white", "edgecolor": "red", "alpha": 0.85, "pad": 2} if annot_bool else None,
+        arrowprops={"arrowstyle": "-|>", "color": "red", "lw": 1, "mutation_scale": 7, "shrinkA": 0, "shrinkB": 0},
+        zorder=21,
+    )
+
+
 def cement_bond_plotter(ax: matplotlib.axes.Axes, data: List[Dict], cement_bond_bool: bool) -> None:
     if cement_bond_bool:
         for row in data:
@@ -244,6 +272,11 @@ def plot_sketch(
         c_shoe_bool=kwargs.get("draw_casing_shoes", True),
         c_weld_bool=kwargs.get("draw_welded", True),
     )
+
+    # Mark the experimental casing hole, if one was supplied
+    casing_hole = kwargs.get("casing_hole")
+    if casing_hole is not None:
+        casing_hole_plotter(ax, casing_hole, casing_data, TXT_FS_LEFT, kwargs.get("draw_casing_hole_annotation", draw_annotation))
 
     # Draw cement bond
     cement_bond_plotter(ax, cement_bond, kwargs.get("draw_cement_bond", True))
