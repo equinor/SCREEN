@@ -114,7 +114,7 @@ def save_qc_plot(model, scenario, output_path: Path) -> None:
     )
     curves = pressure_scenario.display_curves()
     fig, (ax_well, ax_pressure) = plt.subplots(1, 2, figsize=(12, 8), sharey=True)
-    plot_sketch(processed_well, ax=ax_well)
+    plot_sketch(processed_well, ax=ax_well, casing_hole=scenario.casing_hole)
     ax_well.set_title("WellClass sketch")
     table = pressure.table
     ax_pressure.plot(table.hydrostatic_pressure, table.depth, color="steelblue", linestyle=":", label="hydrostatic water")
