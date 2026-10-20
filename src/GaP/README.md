@@ -111,22 +111,22 @@ the resolved grid policy is saved in `grid_policy.json`.
 
 **Adding cases to a batch that has already run.** Run
 `run_workbook_scenarios_batch.py` again on the edited workbook and the same
-`--output-root`. Each case is classified from the files in its folder, and only
-cases without results are run:
+`--output-root`. Each workbook case is compared with the case folders there, and
+only cases without a folder are run. No scheduler is needed:
 
 | State | Evidence | Action |
 | --- | --- | --- |
 | new | no case folder | run |
-| staged, no results | `scenario.json` but no `model/<stem>.UNSMRY`, and no live LSF job | run again with `--force` for that case only |
-| has results | `model/<stem>.UNSMRY` (finished, still running or stopped early) | skip |
-| queued | job id in `logs/<stem>_final.log` still active in LSF, or LSF cannot be queried | skip |
+| finished | `model/<stem>.LOG` ends with `Run completed` | skip |
+| unverified | folder exists, but the log is missing or has no `Run completed` line | not run; listed for you to check |
 
-`--dry-run` prints this plan and stops. If a skipped row's `DesignMatrix` values
-differ from the case's saved `scenario.json`, the plan warns; delete that case's
-folder to rerun it. Changes to `GridPolicy` or the well sheets are not detected,
-and a run that stopped early is not told apart from a finished one (use
-`validate_scenario_outputs.py`). `--force` still reruns every case and overwrites
-its output. `batch_manifest.json` marks skipped cases `existing`.
+An unverified case may still be running, or may have been killed or crashed.
+Check it, then delete its folder to rerun it. `--dry-run` prints this plan and
+stops. If a finished case's `DesignMatrix` values differ from its saved
+`scenario.json`, the plan warns; delete its folder to rerun. Changes to
+`GridPolicy` or the well sheets are not detected. `--force` still reruns every
+case and overwrites its output. `batch_manifest.json` marks skipped cases
+`existing` or `unverified`.
 
 ### Experimental localized casing hole
 
