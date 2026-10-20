@@ -604,11 +604,14 @@ outer edges of the coarse grid, but region 5 stayed on the bottom
 
 **Decision (2026-10-20, replaces the 2026-10-17 one):** the aquifer pore volume
 moves from all outer columns to where it can only provide water and pressure
-support. `porv_multiplier` applies to the four side walls of the water and
-overburden layers and to the whole bottom reservoir layer. Multiplied reservoir
+support. Three independent multipliers, each settable in `GridPolicy` and per
+`DesignMatrix` row: `water_overburden_wall_porv_multiplier` (four side walls of
+the water and overburden layers), `reservoir_bottom_porv_multiplier` (the whole
+bottom reservoir layer) and `reservoir_wall_porv_multiplier` (default 1). The
+first two default to the legacy `porv_multiplier` (2000). Multiplied reservoir
 side walls gave CO2 an almost unlimited sink or source, which is not realistic,
-so an optional `reservoir_wall_porv_multiplier` (default 1) covers them above the
-bottom layer. `FIPLEG` follows the multiplied cells: 7 for the water and overburden
+so the third multiplier, default 1, covers them above the bottom layer.
+`FIPLEG` follows the multiplied cells: 7 for the water and overburden
 side walls (regions 1 and 2 shrink to their interior columns), 5 for the bottom
 reservoir layer, and no new region for the reservoir walls, which stay in 3.
 `aquifer_layers` and `aquifer_permx` are unchanged. The wall boxes for `FIPLEG 7`
@@ -616,9 +619,8 @@ and `PORV` come from one shared list in `prepare_init_case.py`. The wellbore
 cells (region 6: pipe, open hole and casing-cement boxes) sit in
 a central parent cell (10, 10 in the default 20 x 20 grid), away from the edge
 columns; other grid sizes were not checked. Earlier cases are not comparable
-region-for-region or in pressure response. Open points: whether the reservoir
-walls need their own region, and a per-row `DesignMatrix` override of the new
-multiplier.
+region-for-region or in pressure response. Open point: whether the reservoir
+walls need their own region.
 
 - Trace current boundary-aquifer placement and pore-volume multipliers, then
   compare them with FIPLEG 5 assignments in generated parent and LGR outputs.

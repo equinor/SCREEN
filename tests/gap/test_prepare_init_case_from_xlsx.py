@@ -173,7 +173,8 @@ def test_pore_volume_and_fipleg_regions_of_the_aquifer(tmp_path, aquifer_layers,
     grdecl.write_text((root / "test_data/examples/wildcat-pflotran/include/TEMP_GRD.grdecl").read_text(encoding="utf-8"))
     prepare_init_case.parameterize_grdecl(
         grdecl, water_layers=3, overburden_layers=15, reservoir_layers=40, aquifer_layers=aquifer_layers,
-        aquifer_permx=250.0, reservoir_wall_porv_multiplier=wall_multiplier,
+        aquifer_permx=250.0, water_overburden_wall_porv_multiplier=1500.0, reservoir_bottom_porv_multiplier=700.0,
+        reservoir_wall_porv_multiplier=wall_multiplier,
     )
     text = grdecl.read_text(encoding="utf-8")
     fipleg, porv = _apply_boxes(text, 20, 20, 58)
@@ -181,10 +182,9 @@ def test_pore_volume_and_fipleg_regions_of_the_aquifer(tmp_path, aquifer_layers,
     edge[0, :] = edge[-1, :] = edge[:, 0] = edge[:, -1] = True
     upper, reservoir, bottom = slice(0, 18), slice(18, 58), 57
 
-    # Pore volume: walls of water and overburden and the whole bottom layer carry porv_multiplier (2000);
-    # reservoir walls carry the optional multiplier above the bottom layer; nothing else is multiplied.
-    assert (porv[upper][:, edge] == 2000).all() and (porv[upper][:, ~edge] == 1).all()
-    assert (porv[bottom] == 2000).all()
+    # Pore volume: three independent multipliers; nothing else is multiplied.
+    assert (porv[upper][:, edge] == 1500).all() and (porv[upper][:, ~edge] == 1).all()
+    assert (porv[bottom] == 700).all()
     assert (porv[18:bottom][:, edge] == wall_multiplier).all() and (porv[18:bottom][:, ~edge] == 1).all()
 
     # FIPLEG: 7 = water/overburden side walls, 5 = bottom layer; regions 1, 2, 3 keep the rest; region 4 never survives.
@@ -229,6 +229,25 @@ def test_xlsx_grid_policy_has_free_fluid_defaults(tmp_path):
     policy = xlsx_grid_policy(workbook)
     assert (policy["free_fluid_permx"], policy["free_fluid_poro"]) == (10000.0, 1.0)
     assert (policy["porv_multiplier"], policy["reservoir_wall_porv_multiplier"]) == (2000.0, 1.0)
+    assert (policy["water_overburden_wall_porv_multiplier"], policy["reservoir_bottom_porv_multiplier"]) == (2000.0, 2000.0)
+
+
+def _grid_policy_with(tmp_path, **extra):
+    workbook = tmp_path / "policy.xlsx"
+    _write_minimal_workbook(workbook)
+    excel = load_workbook(workbook)
+    for key, value in extra.items():
+        excel["GridPolicy"].append([key, value])
+    excel.save(workbook)
+    return xlsx_grid_policy(workbook)
+
+
+def test_legacy_porv_multiplier_is_the_default_of_the_two_large_multipliers(tmp_path):
+    policy = _grid_policy_with(tmp_path, porv_multiplier=500)
+    assert (policy["water_overburden_wall_porv_multiplier"], policy["reservoir_bottom_porv_multiplier"]) == (500, 500)
+    assert policy["reservoir_wall_porv_multiplier"] == 1.0
+    policy = _grid_policy_with(tmp_path, porv_multiplier=500, reservoir_bottom_porv_multiplier=700)
+    assert (policy["water_overburden_wall_porv_multiplier"], policy["reservoir_bottom_porv_multiplier"]) == (500, 700)
 
 
 def test_workbook_keeps_simulation_assumptions_outside_well_model(tmp_path):
@@ -324,6 +343,7 @@ def test_xlsx_grid_policy_applies_legacy_units_and_defaults(tmp_path):
         ("depth_unit", "ft"), ("permeability_unit", "D"), ("target_dz_water", 0), ("reservoir_permx", -1),
         ("free_fluid_permx", 0), ("free_fluid_poro", 0), ("free_fluid_poro", 1.5),
         ("porv_multiplier", 0), ("reservoir_wall_porv_multiplier", 0),
+        ("water_overburden_wall_porv_multiplier", 0), ("reservoir_bottom_porv_multiplier", -1),
     ],
 )
 def test_xlsx_grid_policy_rejects_invalid_values(tmp_path, key, value):

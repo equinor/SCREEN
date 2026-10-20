@@ -152,10 +152,13 @@ def derive_stage_args_from_policy(args: argparse.Namespace, policy: dict, well_m
         overburden_permx=float(policy.get("overburden_permx", 0.001)),
         aquifer_permx=float(policy["aquifer_permx"]) if policy.get("aquifer_permx") not in (None, "") else None,
         aquifer_layers=int(policy.get("aquifer_layers", 3)),
+        water_overburden_wall_porv_multiplier=float(
+            policy.get("water_overburden_wall_porv_multiplier", policy.get("porv_multiplier", 2000.0))
+        ),
+        reservoir_bottom_porv_multiplier=float(policy.get("reservoir_bottom_porv_multiplier", policy.get("porv_multiplier", 2000.0))),
         reservoir_wall_porv_multiplier=float(policy.get("reservoir_wall_porv_multiplier", 1.0)),
         free_fluid_permx=float(policy.get("free_fluid_permx", FREE_FLUID_PERMX)),
         free_fluid_poro=float(policy.get("free_fluid_poro", FREE_FLUID_PORO)),
-        porv_multiplier=float(policy.get("porv_multiplier", 2000.0)),
         permz_multiplier=float(policy.get("permz_multiplier", 0.1)),
         case_stem=getattr(args, "case_stem", None),
         force=args.force,

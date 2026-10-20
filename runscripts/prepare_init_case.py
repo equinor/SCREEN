@@ -115,10 +115,11 @@ def parameterize_grdecl(
     overburden_permx: float = 0.001,
     aquifer_permx: float | None = None,
     aquifer_layers: int = 3,
+    water_overburden_wall_porv_multiplier: float = 2000.0,
+    reservoir_bottom_porv_multiplier: float = 2000.0,
     reservoir_wall_porv_multiplier: float = 1.0,
     free_fluid_permx: float = FREE_FLUID_PERMX,
     free_fluid_poro: float = FREE_FLUID_PORO,
-    porv_multiplier: float = 2000.0,
     permz_multiplier: float = 0.1,
 ) -> None:
     """Parameterize the coarse-grid GRDECL ranges from the grid policy."""
@@ -200,8 +201,8 @@ def parameterize_grdecl(
             "",
             "MULTIPLY",
             "-- Multiply pore volume on the side walls of the water and overburden and on the bottom reservoir layer",
-            *edge_region("PORV", porv_multiplier, water_start, overburden_end),
-            region("PORV", porv_multiplier, reservoir_end, reservoir_end),
+            *edge_region("PORV", water_overburden_wall_porv_multiplier, water_start, overburden_end),
+            region("PORV", reservoir_bottom_porv_multiplier, reservoir_end, reservoir_end),
             *(
                 ["-- Optional pore volume multiplier on the reservoir side walls, above the bottom layer"]
                 + edge_region("PORV", reservoir_wall_porv_multiplier, reservoir_start, reservoir_end - 1)
@@ -283,10 +284,11 @@ def stage_case(args: argparse.Namespace) -> tuple[Path, Path, Path]:
         overburden_permx=getattr(args, "overburden_permx", 0.001),
         aquifer_permx=getattr(args, "aquifer_permx", None),
         aquifer_layers=getattr(args, "aquifer_layers", 3),
+        water_overburden_wall_porv_multiplier=getattr(args, "water_overburden_wall_porv_multiplier", 2000.0),
+        reservoir_bottom_porv_multiplier=getattr(args, "reservoir_bottom_porv_multiplier", 2000.0),
         reservoir_wall_porv_multiplier=getattr(args, "reservoir_wall_porv_multiplier", 1.0),
         free_fluid_permx=getattr(args, "free_fluid_permx", FREE_FLUID_PERMX),
         free_fluid_poro=getattr(args, "free_fluid_poro", FREE_FLUID_PORO),
-        porv_multiplier=getattr(args, "porv_multiplier", 2000.0),
         permz_multiplier=getattr(args, "permz_multiplier", 0.1),
     )
 

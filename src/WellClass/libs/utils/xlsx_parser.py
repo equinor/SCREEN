@@ -42,9 +42,18 @@ class GridPolicy(BaseModel):
     aquifer_layers: int = Field(default=3, gt=0)
     free_fluid_permx: float = Field(default=FREE_FLUID_PERMX, gt=0, description="Permeability of ocean, open-hole and pipe cells in mD")
     free_fluid_poro: float = Field(default=FREE_FLUID_PORO, gt=0, le=1, description="Porosity of ocean, open-hole and pipe cells")
-    porv_multiplier: float = Field(default=2000.0, gt=0, description="Pore volume multiplier on the water/overburden side walls and the bottom reservoir layer")
-    reservoir_wall_porv_multiplier: float = Field(default=1.0, gt=0, description="Optional pore volume multiplier on the reservoir side walls (bottom layer excluded)")
+    porv_multiplier: float = Field(default=2000.0, gt=0, description="Default for the water/overburden wall and reservoir bottom pore volume multipliers")
+    water_overburden_wall_porv_multiplier: float | None = Field(default=None, gt=0, description="Pore volume multiplier on the water/overburden side walls")
+    reservoir_bottom_porv_multiplier: float | None = Field(default=None, gt=0, description="Pore volume multiplier on the bottom reservoir layer")
+    reservoir_wall_porv_multiplier: float = Field(default=1.0, gt=0, description="Pore volume multiplier on the reservoir side walls, bottom layer excluded")
     permz_multiplier: float = Field(default=0.1, ge=0)
+
+    @model_validator(mode="after")
+    def resolve_porv_multipliers(self) -> GridPolicy:
+        for name in ("water_overburden_wall_porv_multiplier", "reservoir_bottom_porv_multiplier"):
+            if getattr(self, name) is None:
+                setattr(self, name, self.porv_multiplier)
+        return self
 
     @model_validator(mode="after")
     def validate_layer_limits(self) -> GridPolicy:
@@ -189,7 +198,7 @@ def xlsx_grid_policy(xlsx_file: str | Path) -> dict[str, Any]:
     - aquifer_permx (default reservoir_permx)
     - aquifer_layers (default 3)
     - free_fluid_permx (default 10000), free_fluid_poro (default 1.0): ocean, open-hole and pipe cells
-    - porv_multiplier (default 2000): water/overburden side walls and the bottom reservoir layer
+    - water_overburden_wall_porv_multiplier, reservoir_bottom_porv_multiplier (default porv_multiplier, 2000)
     - reservoir_wall_porv_multiplier (default 1): reservoir side walls, bottom layer excluded
     - permz_multiplier (default 0.1)
     """
