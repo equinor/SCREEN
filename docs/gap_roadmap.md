@@ -87,7 +87,7 @@ less often. The technical detail follows for whoever picks the item up.
 | 9 | Represent a localized casing hole | Experimental; static opening/isolation and one-year pressure-driven transfer verified |
 | 10 | Generate hole-transfer reporting from the workbook | Done; verified on CIRRUS (Smeaheia, one year) |
 | 11 | Align FIPLEG aquifer reporting with the current coarse-grid boundaries | Implemented; CIRRUS INIT check pending |
-| 12 | Run only new or unfinished workbook cases | Open; batch reruns every case and rewrites the manifest |
+| 12 | Run only new or unfinished workbook cases | Basic version done (run only new cases, flag unverified, dry run); fingerprints, retry of killed runs, orphans open |
 | 13 | Clean up the CIRRUS template deck | Partial; generated `BRINE` now matches salt tables; CIRRUS comparison and cleanup pending |
 
 ### 1. Compare scenario outputs automatically
@@ -635,11 +635,22 @@ zonation and aquifer-related transfer interpretation.
 
 ### 12. Run only new or unfinished workbook cases
 
-**Status: open; requested by the user (2026-10-12).** The batch runner
-processes every workbook scenario and rewrites `batch_manifest.json` with only
-a succeeded/failed status. After adding cases to a workbook, there is no safe
-way to start only the new ones: rerunning regenerates existing cases, can
-overwrite manual edits, and may resubmit jobs already queued or running.
+**Status: basic version implemented (2026-10-20); the rest is open.**
+Requested by the user (2026-10-12). Before this, the batch runner processed every
+workbook scenario, so after adding rows there was no safe way to start only the
+new ones.
+
+**Implemented** in `run_workbook_scenarios_batch.py`, using only files already in
+each case folder and no scheduler, so it works with or without LSF. Only cases
+without a folder are run. For an existing folder, `model/<stem>.LOG` ending with
+`Run completed` means finished (skipped); anything else is listed as unverified
+(not run) for the user to check, since the run may be live, killed or crashed.
+`--dry-run` prints the plan. A finished case whose `DesignMatrix` values differ
+from its saved `scenario.json` gets a warning. The manifest marks skipped cases
+`existing` or `unverified`; `--force` keeps its old meaning (rerun everything).
+Not done: a fingerprint covering `GridPolicy`, the well sheets and run options;
+automatic retry of killed runs; orphaned case folders; merging per-case history
+(job id, queue, timings) into the manifest.
 
 **In practice:** add rows to a workbook, ask which cases are new, changed,
 queued, running, finished, or failed, then prepare and submit only the cases

@@ -3,6 +3,7 @@
 from pathlib import Path
 import argparse
 import importlib.util
+import json
 import subprocess
 import sys
 import threading
@@ -266,3 +267,133 @@ def test_batch_rejects_non_positive_jobs(tmp_path):
 
     assert result.returncode == 2
     assert "--jobs must be at least 1" in result.stdout
+
+
+def _batch_args(tmp_path, workbook, **overrides):
+    return argparse.Namespace(
+        jobs=2, xlsx=workbook, output_root=tmp_path / "output", template_root=tmp_path, sim_command="fake",
+        run_final=False, simulation_years=1, start_date="2025-01-01", lgr_name="TEMP_LGR", oh_perm=None,
+        cb_perm=0.05, barrier_perm=0.05, ali_way=False, force=False, plot=False, dry_run=False, **overrides,
+    )
+
+
+def _existing_case(args, design, name, *, log=None, **saved):
+    stem = batch.case_stems(design, args.xlsx)[name]
+    root = args.output_root / stem
+    (root / "model").mkdir(parents=True)
+    scenario = design.select(name).model_dump(mode="json")
+    (root / "scenario.json").write_text(json.dumps({**scenario, **saved}))
+    if log is not None:
+        (root / "model" / f"{stem}.LOG").write_text(log)
+    return root
+
+
+DONE = " Time step 100\n Run completed, wall clock time =  4.1866E+03 s,  6.9776E+01 min\n"
+
+
+def test_plan_runs_only_cases_without_a_folder(tmp_path):
+    workbook = tmp_path / "multi_scenario.xlsx"
+    _write_multi_scenario_workbook(workbook, num_scenarios=5)
+    design = xlsx_to_simulation_design(workbook)
+    args = _batch_args(tmp_path, workbook)
+    _existing_case(args, design, "case_0", log=DONE)
+    _existing_case(args, design, "case_1", log=" Time step 40\n")  # killed: no final line
+    _existing_case(args, design, "case_2")  # staged, never produced a log
+    _existing_case(args, design, "case_3", log=DONE)
+
+    plan = batch.plan_scenarios(design, args)
+
+    assert {name: action for name, (action, _) in plan.items()} == {
+        "case_0": "done", "case_1": "verify", "case_2": "verify", "case_3": "done", "case_4": "run",
+    }
+    assert "killed or crashed" in plan["case_1"][1]
+    args.force = True
+    assert {action for action, _ in batch.plan_scenarios(design, args).values()} == {"run"}
+
+
+def test_completion_line_must_be_at_the_end_of_the_log(tmp_path):
+    log = tmp_path / "case.LOG"
+    log.write_text(DONE + "x" * 10000)
+    assert not batch.run_completed(log)
+    log.write_text("x" * 10000 + DONE)
+    assert batch.run_completed(log)
+    log.write_text(DONE)
+    assert batch.run_completed(log)
+    assert not batch.run_completed(tmp_path / "missing.LOG")
+
+
+def test_plan_warns_when_a_row_changed_since_it_finished(tmp_path):
+    workbook = tmp_path / "multi_scenario.xlsx"
+    _write_multi_scenario_workbook(workbook, num_scenarios=2)
+    design = xlsx_to_simulation_design(workbook)
+    args = _batch_args(tmp_path, workbook)
+    _existing_case(args, design, "case_0", log=DONE, cb_perm=5.0, z_fluid_contact=1.0)
+    _existing_case(args, design, "case_1", log=DONE)
+
+    plan = batch.plan_scenarios(design, args)
+
+    assert "WARNING" in plan["case_0"][1] and "cb_perm, z_fluid_contact" in plan["case_0"][1]
+    assert "WARNING" not in plan["case_1"][1]
+
+
+def test_older_saved_case_without_newer_fields_is_not_reported_as_changed(tmp_path):
+    workbook = tmp_path / "multi_scenario.xlsx"
+    _write_multi_scenario_workbook(workbook, num_scenarios=1)
+    design = xlsx_to_simulation_design(workbook)
+    args = _batch_args(tmp_path, workbook)
+    root = _existing_case(args, design, "case_0", log=DONE)
+    saved = json.loads((root / "scenario.json").read_text())
+    for newer in ("casing_hole_open", "free_fluid_permx", "free_fluid_poro"):
+        saved.pop(newer, None)
+    (root / "scenario.json").write_text(json.dumps(saved))
+
+    assert batch.changed_inputs(root, design.scenarios[0]) == []
+
+
+def test_main_runs_only_new_cases_and_lists_those_to_verify(tmp_path, monkeypatch, capsys):
+    workbook = tmp_path / "multi_scenario.xlsx"
+    _write_multi_scenario_workbook(workbook, num_scenarios=3)
+    design = xlsx_to_simulation_design(workbook)
+    args = _batch_args(tmp_path, workbook)
+    kept = _existing_case(args, design, "case_0", log=DONE)
+    _existing_case(args, design, "case_1", log=" Time step 40\n")
+    calls = []
+
+    def fake_run_scenario_case(_xlsx, case_name, *_rest):
+        calls.append(case_name)
+        return 0
+
+    monkeypatch.setattr(batch, "run_scenario_case", fake_run_scenario_case)
+    monkeypatch.setattr("sys.argv", [
+        "batch", "--xlsx", str(workbook), "--output-root", str(args.output_root), "--sim-command", "fake {deck}",
+    ])
+    assert batch.main() == 0
+
+    assert calls == ["case_2"]
+    manifest = json.loads((args.output_root / "batch_manifest.json").read_text())
+    assert {case["case_name"]: case["status"] for case in manifest["cases"]} == {
+        "case_0": "existing", "case_1": "unverified", "case_2": "succeeded",
+    }
+    assert (kept / "model").is_dir()
+    out = capsys.readouterr().out
+    assert "Already finished (skipped): 1" in out and "Need verification (not run): 1" in out
+    assert "NOT RUN: check whether these were killed or crashed" in out
+    assert "- case_1:" in out.split("NOT RUN")[1]
+
+
+def test_dry_run_prints_the_plan_and_changes_nothing(tmp_path, monkeypatch, capsys):
+    workbook = tmp_path / "multi_scenario.xlsx"
+    _write_multi_scenario_workbook(workbook, num_scenarios=3)
+    design = xlsx_to_simulation_design(workbook)
+    args = _batch_args(tmp_path, workbook)
+    _existing_case(args, design, "case_0", log=DONE)
+    _existing_case(args, design, "case_1")
+    monkeypatch.setattr(batch, "run_scenario_case", lambda *_: pytest.fail("dry run must not run cases"))
+    monkeypatch.setattr("sys.argv", [
+        "batch", "--xlsx", str(workbook), "--output-root", str(args.output_root), "--sim-command", "fake {deck}", "--dry-run",
+    ])
+    assert batch.main() == 0
+
+    out = capsys.readouterr().out
+    assert "DONE  case_0" in out and "VERIFY case_1" in out and "RUN   case_2: new" in out
+    assert not (args.output_root / "batch_manifest.json").exists()

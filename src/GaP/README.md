@@ -109,6 +109,25 @@ now use 1.0, so regenerated wellbore cells differ slightly from older cases.
 Effective values and targeted overrides are recorded in `scenario.json`, and
 the resolved grid policy is saved in `grid_policy.json`.
 
+**Adding cases to a batch that has already run.** Run
+`run_workbook_scenarios_batch.py` again on the edited workbook and the same
+`--output-root`. Each workbook case is compared with the case folders there, and
+only cases without a folder are run. No scheduler is needed:
+
+| State | Evidence | Action |
+| --- | --- | --- |
+| new | no case folder | run |
+| finished | `model/<stem>.LOG` ends with `Run completed` | skip |
+| unverified | folder exists, but the log is missing or has no `Run completed` line | not run; listed for you to check |
+
+An unverified case may still be running, or may have been killed or crashed.
+Check it, then delete its folder to rerun it. `--dry-run` prints this plan and
+stops. If a finished case's `DesignMatrix` values differ from its saved
+`scenario.json`, the plan warns; delete its folder to rerun. Changes to
+`GridPolicy` or the well sheets are not detected. `--force` still reruns every
+case and overwrites its output. `batch_manifest.json` marks skipped cases
+`existing` or `unverified`.
+
 ### Experimental localized casing hole
 
 One optional hole per `DesignMatrix` row is supported. Supply all three fields

@@ -29,6 +29,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from src.GaP.libs.case_naming import resolve_case_stems, well_label
+from src.GaP.libs.models.simulation_scenario import SimulationDesign
 from src.WellClass.libs.utils import xlsx_to_simulation_design, xlsx_to_well_model
 
 
@@ -48,7 +49,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--cb-perm", type=float, default=0.05)
     parser.add_argument("--barrier-perm", type=float, default=0.05)
     parser.add_argument("--ali-way", action="store_true")
-    parser.add_argument("--force", action="store_true")
+    parser.add_argument("--force", action="store_true", help="Rerun every case, overwriting existing output; by default only cases without results are run.")
+    parser.add_argument("--dry-run", action="store_true", help="Print what would run for each case and stop.")
     parser.add_argument("--plot", action="store_true", help="Save a sketch and pressure QC plot for each scenario.")
     parser.add_argument(
         "--jobs",
@@ -124,7 +126,47 @@ def case_stems(design, xlsx_file: Path) -> dict[str, str]:
     return dict(zip(names, resolve_case_stems(well_label(xlsx_to_well_model(xlsx_file)), names)))
 
 
-def write_batch_manifest(design, args: argparse.Namespace, failed_cases: list[str]) -> Path:
+def run_completed(log: Path) -> bool:
+    """True when the CIRRUS log ends with its "Run completed" line."""
+    if not log.is_file():
+        return False
+    with log.open("rb") as stream:
+        stream.seek(max(0, log.stat().st_size - 4096))
+        return b"Run completed" in stream.read()
+
+
+def changed_inputs(case_root: Path, scenario) -> list[str]:
+    """DesignMatrix fields whose value differs from the scenario.json saved with the case."""
+    saved_path = case_root / "scenario.json"
+    if not saved_path.is_file():
+        return []
+    saved = json.loads(saved_path.read_text(encoding="utf-8"))
+    fields = type(scenario).model_fields
+    current = scenario.model_dump(mode="json")
+    return sorted(key for key, value in current.items() if key != "case_name" and saved.get(key, fields[key].default) != value)
+
+
+def plan_scenarios(design, args: argparse.Namespace) -> dict[str, tuple[str, str]]:
+    """Per case, ('run' | 'done' | 'verify', reason). Only cases without a folder are run."""
+    stems = case_stems(design, args.xlsx)
+    plan = {}
+    for scenario in design.scenarios:
+        stem = stems[scenario.case_name]
+        case_root = args.output_root / stem
+        if args.force or not case_root.exists():
+            plan[scenario.case_name] = ("run", "--force: rerun everything" if args.force else "new")
+        elif run_completed(case_root / "model" / f"{stem}.LOG"):
+            reason = "finished (model/<stem>.LOG ends with 'Run completed')"
+            changed = changed_inputs(case_root, scenario)
+            if changed:
+                reason += f"; WARNING: workbook row differs from the saved case in {', '.join(changed)}; delete its folder to rerun it"
+            plan[scenario.case_name] = ("done", reason)
+        else:
+            plan[scenario.case_name] = ("verify", "folder exists but its log has no 'Run completed' line: still running, killed or crashed?")
+    return plan
+
+
+def write_batch_manifest(design, args: argparse.Namespace, failed_cases: list[str], skipped: dict[str, str] | None = None) -> Path:
     stems = case_stems(design, args.xlsx)
     manifest = {
         "workbook": str(args.xlsx),
@@ -135,7 +177,7 @@ def write_batch_manifest(design, args: argparse.Namespace, failed_cases: list[st
                 "case_name": scenario.case_name,
                 "case_stem": stems[scenario.case_name],
                 "case_dir": stems[scenario.case_name],
-                "status": "failed" if scenario.case_name in failed_cases else "succeeded",
+                "status": "failed" if scenario.case_name in failed_cases else (skipped or {}).get(scenario.case_name, "succeeded"),
             }
             for index, scenario in enumerate(design.scenarios, 1)
         ],
@@ -208,8 +250,15 @@ def main() -> int:
     scenario_names = [scenario.case_name for scenario in design.scenarios]
     print(f"Found {len(scenario_names)} scenario(s): {', '.join(scenario_names)}")
 
-    successful_cases, failed_cases = run_scenarios(design, args)
-    manifest_path = write_batch_manifest(design, args, failed_cases)
+    plan = plan_scenarios(design, args)
+    for case_name, (action, reason) in plan.items():
+        print(f"  {action.upper():5s} {case_name}: {reason}")
+    if args.dry_run:
+        return 0
+    skipped = {name: "existing" if action == "done" else "unverified" for name, (action, _) in plan.items() if action != "run"}
+    to_run = SimulationDesign(scenarios=[s for s in design.scenarios if s.case_name not in skipped])
+    successful_cases, failed_cases = run_scenarios(to_run, args) if to_run.scenarios else ([], [])
+    manifest_path = write_batch_manifest(design, args, failed_cases, skipped)
     stems = case_stems(design, args.xlsx)
 
     print(f"\n{'='*70}")
@@ -217,6 +266,8 @@ def main() -> int:
     print(f"  Total scenarios: {len(scenario_names)}")
     print(f"  Successful: {len(successful_cases)}")
     print(f"  Failed: {len(failed_cases)}")
+    print(f"  Already finished (skipped): {list(skipped.values()).count('existing')}")
+    print(f"  Need verification (not run): {list(skipped.values()).count('unverified')}")
     print(f"  Manifest: {manifest_path}")
 
     if successful_cases:
@@ -224,6 +275,12 @@ def main() -> int:
         for case_name in successful_cases:
             case_root = args.output_root / stems[case_name]
             print(f"    - {case_name}: {case_root}")
+
+    unverified = [name for name, status in skipped.items() if status == "unverified"]
+    if unverified:
+        print("\n  NOT RUN: check whether these were killed or crashed (delete the case folder to rerun it):")
+        for case_name in unverified:
+            print(f"    - {case_name}: {args.output_root / stems[case_name]}")
 
     if failed_cases:
         print("\n  Failed cases:")
