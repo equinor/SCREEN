@@ -342,6 +342,40 @@ def test_gridpolicy_free_fluid_values_reach_ocean_and_wellbore_cells(tmp_path):
     assert "conflicts with the free-fluid permeability 5000 mD" in conflict.stderr
 
 
+def test_designmatrix_free_fluid_override_beats_gridpolicy_for_that_case(tmp_path):
+    root = Path(__file__).parents[2]
+    workbook = tmp_path / "free_fluid_row.xlsx"
+    shutil.copyfile(root / "test_data/examples/wildcat/wildcat_workbook.xlsx", workbook)
+    excel = load_workbook(workbook)
+    excel["GridPolicy"].append(["free_fluid_permx", 5000])
+    sheet = excel["DesignMatrix"]
+    for column, value in ((sheet.max_column + 1, 2000), (sheet.max_column + 2, 0.8)):
+        sheet.cell(1, column).value = "free_fluid_permx" if value == 2000 else "free_fluid_poro"
+        sheet.cell(2, column).value = value
+    excel.save(workbook)
+
+    result = _run_wrapper(tmp_path, workbook, tmp_path / "case")
+    assert result.returncode == 0, result.stderr
+    grid = (tmp_path / "case/include/wildcat_baseline_GRD.grdecl").read_text(encoding="utf-8")
+    lgr = (tmp_path / "case/include/wildcat_baseline_LGR.grdecl").read_text(encoding="utf-8")
+    assert re.search(r"^PERMX 2000 1 20 1 20 1 \d+ /$", grid, re.MULTILINE)
+    assert re.search(r"^PORO 0.8 1 20 1 20 1 \d+ /$", grid, re.MULTILINE)
+    assert "PERMX  2000.0  9  14  9  14  83  150  /" in lgr
+    assert "PORO  0.8  9  14  9  14  83  150  /" in lgr
+    policy = json.loads((tmp_path / "case/grid_policy.json").read_text(encoding="utf-8"))
+    scenario = json.loads((tmp_path / "case/scenario.json").read_text(encoding="utf-8"))
+    assert (policy["free_fluid_permx"], policy["free_fluid_poro"]) == (2000, 0.8)
+    assert (scenario["free_fluid_permx"], scenario["free_fluid_poro"]) == (2000, 0.8)
+    assert scenario["effective_permeability_mD"]["oh_perm"] == 2000
+
+
+@pytest.mark.parametrize("fields", [{"free_fluid_permx": 0}, {"free_fluid_poro": 0}, {"free_fluid_poro": 1.5}])
+def test_scenario_rejects_invalid_free_fluid_overrides(fields):
+    with pytest.raises(ValueError):
+        SimulationScenario(**fields)
+    assert SimulationScenario().free_fluid_permx is None
+
+
 def test_older_workbook_without_hole_columns_remains_valid(tmp_path):
     workbook = _hole_workbook(tmp_path, "Casing 20 in")
     excel = load_workbook(workbook)

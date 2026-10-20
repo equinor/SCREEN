@@ -130,7 +130,7 @@ def create_workbook(example: dict) -> Path:
         scenarios["salinity_basis"] = "mass_fraction"
         scenarios["salinity"] = 0.032
         scenarios["permeability_unit"] = "mD"
-        for field in ("reservoir_permx", "overburden_permx", "cb_perm", "barrier_perm"):
+        for field in ("reservoir_permx", "overburden_permx", "free_fluid_permx", "free_fluid_poro", "cb_perm", "barrier_perm"):
             scenarios[field] = None
         scenarios["cb_perm_interval"] = "ALL"
         scenarios["barrier_perm_interval"] = "ALL"

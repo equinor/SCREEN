@@ -148,7 +148,7 @@ def run_workflow(args: argparse.Namespace) -> Path:
     resolve_case_identity(args, model, design, scenario)
     case_files = CaseFiles.for_stem(args.case_stem)
     policy = dict(policy)
-    for field in ("reservoir_permx", "overburden_permx"):
+    for field in ("reservoir_permx", "overburden_permx", "free_fluid_permx", "free_fluid_poro"):
         override = getattr(scenario, field)
         if override is not None:
             policy[field] = override

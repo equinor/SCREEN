@@ -26,6 +26,8 @@ class SimulationScenario(BaseModel):
     salinity: float = Field(default=0.032, ge=0, lt=1, allow_inf_nan=False, description="NaCl mass fraction of solution")
     reservoir_permx: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False, description="Reservoir PERMX override in mD")
     overburden_permx: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False, description="Overburden PERMX override in mD")
+    free_fluid_permx: Optional[float] = Field(default=None, gt=0, allow_inf_nan=False, description="Free-fluid permeability override in mD")
+    free_fluid_poro: Optional[float] = Field(default=None, gt=0, le=1, allow_inf_nan=False, description="Free-fluid porosity override")
     cb_perm: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False, description="Casing-cement permeability override in mD")
     cb_perm_interval: str = Field(default="ALL", description="HoleCasings casing-cement name to override, or ALL")
     barrier_perm: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False, description="Plug-cement permeability override in mD")

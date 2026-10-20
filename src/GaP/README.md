@@ -87,8 +87,8 @@ when interpreting water surface volumes. The simulator-level effect still
 requires paired validation on a CIRRUS host.
 
 Each `DesignMatrix` row is one case sharing the same physical well. Optional
-`reservoir_permx` and `overburden_permx` values override the corresponding
-`GridPolicy` values. `cb_perm` and `barrier_perm` override casing-cement and
+`reservoir_permx`, `overburden_permx`, `free_fluid_permx` and `free_fluid_poro`
+values override the corresponding `GridPolicy` values. `cb_perm` and `barrier_perm` override casing-cement and
 plug permeability. Their companion `cb_perm_interval` and
 `barrier_perm_interval` columns select the interval by its `name` in the
 `HoleCasings` or `Plugs` sheet; the default `ALL` applies the value to every
@@ -98,8 +98,10 @@ default when none is provided. Interval names used as targets must be unique
 within the relevant sheet and must match exactly. A target other than `ALL`
 requires its corresponding permeability value. Cells that hold only free fluid
 (the ocean layers, open hole and pipe interior) use one definition from
-`GridPolicy`: `free_fluid_permx` (mD) and `free_fluid_poro`. It is not a
-DesignMatrix sensitivity variable. `--oh-perm` and `hc_perm` on open-hole rows are
+`GridPolicy`: `free_fluid_permx` (mD) and `free_fluid_poro`. These are physical
+constants of the model, so leave the defaults alone unless you are running a
+sensitivity: a `DesignMatrix` row can override them for one case, and the
+effective values are saved in `grid_policy.json`. `--oh-perm` and `hc_perm` on open-hole rows are
 deprecated: they still work when they equal the free-fluid permeability and are
 an error when they differ. `hc_perm` on casing-cement rows is unchanged. Before
 this definition, the open hole and pipe used porosity 0.99 and the ocean 1.0; all

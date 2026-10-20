@@ -198,8 +198,8 @@ that type. For a named target, only that interval changes. Other intervals
 retain their workbook permeability where present, then use CLI defaults.
 Effective permeability values and interval targets are saved with case
 metadata. Open-hole permeability is part of the free-fluid definition in
-`GridPolicy` (`free_fluid_permx`, `free_fluid_poro`, shared with the ocean layers)
-and is deliberately not a scenario sensitivity.
+`GridPolicy` (`free_fluid_permx`, `free_fluid_poro`, shared with the ocean layers).
+The defaults are fixed; a `DesignMatrix` row can override them for a sensitivity.
 
 **Per-interval overrides:** `cb_perm_interval` and `barrier_perm_interval`
 select an interval by its `name` in the `HoleCasings` or `Plugs` sheet;
