@@ -100,6 +100,24 @@ def test_lgr_geometry_signature_ignores_property_value_changes(tmp_path):
     assert compare.lgr_geometry_signature(baseline) != compare.lgr_geometry_signature(sensitivity)
 
 
+def test_lgr_geometry_signature_ignores_generated_hole_blocks(tmp_path):
+    base = "CARFIN\nTEMP_LGR 14 14 11 11 1 2 22 22 270 /\nNXFIN\n22 /\nEQUALS\nMULTX 0 14 14 10 13 44 44 /\n/\n"
+    hole = (
+        "-- SCREEN experimental casing hole: fixed +X side\nEQUALS\nMULTX 0.0125 14 14 10 10 44 44 /\n"
+        "MULTX 0.0125 14 14 11 11 44 44 /\n/\n"
+        "-- SCREEN casing hole reporting\nEQUALS\nFIPHOL 3 1 22 1 22 1 270 /\n"
+        "FIPHOL 1 14 14 10 10 44 44 /\nFIPHOL 2 15 15 10 10 44 44 /\n/\n"
+    )
+    paths = {name: tmp_path / f"{name}.grdecl" for name in ("none", "hole")}
+    paths["none"].write_text(base + "ENDFIN\n", encoding="utf-8")
+    paths["hole"].write_text(base + hole + "ENDFIN\n", encoding="utf-8")
+    signature = compare.lgr_geometry_signature
+    assert signature(paths["hole"]) == signature(paths["none"])
+    # Only the generated blocks are skipped: a real geometry edit is still detected.
+    paths["hole"].write_text((base + hole + "ENDFIN\n").replace("22 22 270", "22 22 280"), encoding="utf-8")
+    assert signature(paths["hole"]) != signature(paths["none"])
+
+
 def test_compare_outputs_rejects_unknown_baseline(tmp_path):
     _write_case(tmp_path, "alpha")
 

@@ -16,6 +16,8 @@ SCENARIO_IDENTITY_FIELDS = {"case_name", "case_metadata"}
 DYNAMIC_KEYWORDS = ("PRESSURE", "SWAT", "SGAS")
 INIT_PROPERTIES = ("PERMX", "PERMY", "PERMZ", "PORO", "PORV", "EQLNUM", "SATNUM")
 LGR_PROPERTY_KEYWORDS = {"PERMX", "PERMY", "PERMZ", "PORO", "PORV", "EQLNUM", "SATNUM", "FIPLEG", "FIPNUM", "MULTX", "MULTY", "MULTZ"}
+# Generated casing-hole blocks (opening and FIPHOL reporting) are not grid geometry.
+HOLE_BLOCK_MARKERS = ("SCREEN experimental casing hole", "SCREEN casing hole reporting")
 GEOMETRY_POLICY_FIELDS = {
     "top_depth",
     "water_depth",
@@ -65,8 +67,15 @@ def lgr_geometry_signature(path: Path) -> tuple[str, ...] | None:
     if not path.is_file():
         return None
     normalized_lines = []
+    in_hole_block = False
     for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        if any(marker in line for marker in HOLE_BLOCK_MARKERS):
+            in_hole_block = True
+            continue
         statement = line.split("--", 1)[0].strip()
+        if in_hole_block:
+            in_hole_block = statement != "/"
+            continue
         if not statement:
             continue
         tokens = statement.split()
