@@ -6,6 +6,7 @@ from src.GaP.libs.carfin.CARFIN_barrier import CARFIN_barrier
 from src.GaP.libs.carfin.CARFIN_cement_bond import CARFIN_cement_bond
 from src.GaP.libs.carfin.CARFIN_oph import CARFIN_oph
 from src.GaP.libs.carfin.CARFIN_pipe_with_oph import CARFIN_pipe_with_oph
+from src.GaP.libs.free_fluid import FREE_FLUID_PORO
 
 
 def df_to_gap_casing(holes_df: pd.DataFrame, casings_df: pd.DataFrame, LGR_NAME: str, O: TextIO) -> None:  # noqa: E741
@@ -19,6 +20,7 @@ def df_to_gap_casing(holes_df: pd.DataFrame, casings_df: pd.DataFrame, LGR_NAME:
     """
     # assume oh_perm is the same for open hole
     oh_perm = holes_df["oh_perm"].values[0]
+    oh_poro = holes_df["oh_poro"].values[0] if "oh_poro" in holes_df else FREE_FLUID_PORO
     holes_k_maxs = holes_df["k_max"].values
 
     # saved for open hole section
@@ -53,6 +55,7 @@ def df_to_gap_casing(holes_df: pd.DataFrame, casings_df: pd.DataFrame, LGR_NAME:
             oh_perm,
             LGR_NAME,
             O,
+            oh_poro,
         )
 
     # 2. open hole sections
@@ -77,6 +80,7 @@ def df_to_gap_casing(holes_df: pd.DataFrame, casings_df: pd.DataFrame, LGR_NAME:
             oh_perm,
             LGR_NAME,
             O,
+            oh_poro,
         )
 
     # 3. cement-bond sections

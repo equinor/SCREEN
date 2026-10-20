@@ -1,6 +1,7 @@
 from pathlib import Path
 import json
 import importlib.util
+import re
 import shutil
 import subprocess
 import sys
@@ -301,6 +302,78 @@ def test_workbook_report_only_hole_keeps_fiphol_and_stays_sealed(tmp_path):
     assert fiphol == [line for line in lgrs["sealed"].splitlines() if line.startswith("FIPHOL")]
     assert "SCREEN experimental casing hole" in lgrs["open"]
     assert "SCREEN experimental casing hole" not in lgrs["sealed"]
+
+
+def _run_wrapper(tmp_path, workbook, output_root, *extra):
+    root = Path(__file__).parents[2]
+    runner = _fake_cirrus(tmp_path, root / "test_data/examples/wildcat/model/TEMP-0")
+    return subprocess.run(
+        [
+            sys.executable, "runscripts/run_workbook_to_cirrus_lgr.py",
+            "--xlsx", str(workbook), "--output-root", str(output_root),
+            "--sim-command", f"{runner} {{deck}}", "--case-name", "baseline", *extra,
+        ],
+        cwd=root, capture_output=True, text=True,
+    )
+
+
+def test_gridpolicy_free_fluid_values_reach_ocean_and_wellbore_cells(tmp_path):
+    root = Path(__file__).parents[2]
+    workbook = tmp_path / "free_fluid.xlsx"
+    shutil.copyfile(root / "test_data/examples/wildcat/wildcat_workbook.xlsx", workbook)
+    excel = load_workbook(workbook)
+    excel["GridPolicy"].append(["free_fluid_permx", 5000])
+    excel["GridPolicy"].append(["free_fluid_poro", 0.9])
+    excel.save(workbook)
+
+    result = _run_wrapper(tmp_path, workbook, tmp_path / "case")
+    assert result.returncode == 0, result.stderr
+    grid = (tmp_path / "case/include/wildcat_baseline_GRD.grdecl").read_text(encoding="utf-8")
+    lgr = (tmp_path / "case/include/wildcat_baseline_LGR.grdecl").read_text(encoding="utf-8")
+    assert re.search(r"^PERMX 5000 1 20 1 20 1 \d+ /$", grid, re.MULTILINE)
+    assert re.search(r"^PORO 0.9 1 20 1 20 1 \d+ /$", grid, re.MULTILINE)
+    assert "PERMX  5000.0  9  14  9  14  83  150  /" in lgr
+    assert "PORO  0.9  9  14  9  14  83  150  /" in lgr
+    policy = json.loads((tmp_path / "case/grid_policy.json").read_text(encoding="utf-8"))
+    assert (policy["free_fluid_permx"], policy["free_fluid_poro"]) == (5000, 0.9)
+
+    conflict = _run_wrapper(tmp_path, workbook, tmp_path / "conflict", "--oh-perm", "7000")
+    assert conflict.returncode != 0
+    assert "conflicts with the free-fluid permeability 5000 mD" in conflict.stderr
+
+
+def test_designmatrix_free_fluid_override_beats_gridpolicy_for_that_case(tmp_path):
+    root = Path(__file__).parents[2]
+    workbook = tmp_path / "free_fluid_row.xlsx"
+    shutil.copyfile(root / "test_data/examples/wildcat/wildcat_workbook.xlsx", workbook)
+    excel = load_workbook(workbook)
+    excel["GridPolicy"].append(["free_fluid_permx", 5000])
+    sheet = excel["DesignMatrix"]
+    for column, value in ((sheet.max_column + 1, 2000), (sheet.max_column + 2, 0.8)):
+        sheet.cell(1, column).value = "free_fluid_permx" if value == 2000 else "free_fluid_poro"
+        sheet.cell(2, column).value = value
+    excel.save(workbook)
+
+    result = _run_wrapper(tmp_path, workbook, tmp_path / "case")
+    assert result.returncode == 0, result.stderr
+    grid = (tmp_path / "case/include/wildcat_baseline_GRD.grdecl").read_text(encoding="utf-8")
+    lgr = (tmp_path / "case/include/wildcat_baseline_LGR.grdecl").read_text(encoding="utf-8")
+    assert re.search(r"^PERMX 2000 1 20 1 20 1 \d+ /$", grid, re.MULTILINE)
+    assert re.search(r"^PORO 0.8 1 20 1 20 1 \d+ /$", grid, re.MULTILINE)
+    assert "PERMX  2000.0  9  14  9  14  83  150  /" in lgr
+    assert "PORO  0.8  9  14  9  14  83  150  /" in lgr
+    policy = json.loads((tmp_path / "case/grid_policy.json").read_text(encoding="utf-8"))
+    scenario = json.loads((tmp_path / "case/scenario.json").read_text(encoding="utf-8"))
+    assert (policy["free_fluid_permx"], policy["free_fluid_poro"]) == (2000, 0.8)
+    assert (scenario["free_fluid_permx"], scenario["free_fluid_poro"]) == (2000, 0.8)
+    assert scenario["effective_permeability_mD"]["oh_perm"] == 2000
+
+
+@pytest.mark.parametrize("fields", [{"free_fluid_permx": 0}, {"free_fluid_poro": 0}, {"free_fluid_poro": 1.5}])
+def test_scenario_rejects_invalid_free_fluid_overrides(fields):
+    with pytest.raises(ValueError):
+        SimulationScenario(**fields)
+    assert SimulationScenario().free_fluid_permx is None
 
 
 def test_older_workbook_without_hole_columns_remains_valid(tmp_path):

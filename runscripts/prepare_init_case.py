@@ -19,6 +19,7 @@ import subprocess
 from pathlib import Path
 
 from src.GaP.libs.case_naming import CaseFiles
+from src.GaP.libs.free_fluid import FREE_FLUID_PERMX, FREE_FLUID_PORO
 from src.WellClass.libs.grid_utils import (
     CoarseGridSpec,
     build_vertical_grid_schedule,
@@ -114,6 +115,8 @@ def parameterize_grdecl(
     overburden_permx: float = 0.001,
     aquifer_permx: float | None = None,
     aquifer_layers: int = 3,
+    free_fluid_permx: float = FREE_FLUID_PERMX,
+    free_fluid_poro: float = FREE_FLUID_PORO,
     porv_multiplier: float = 2000.0,
     permz_multiplier: float = 0.1,
 ) -> None:
@@ -163,8 +166,8 @@ def parameterize_grdecl(
         "-- Overburden and water properties",
         region("PERMX", overburden_permx, overburden_start, overburden_end),
         region("FIPLEG", 2, overburden_start, overburden_end),
-        region("PERMX", 10000.0, water_start, water_end),
-        region("PORO", 1.0, water_start, water_end),
+        region("PERMX", free_fluid_permx, water_start, water_end),
+        region("PORO", free_fluid_poro, water_start, water_end),
         region("FIPLEG", 1, water_start, water_end),
         "",
         "-- Reservoir and aquifer properties",
@@ -270,6 +273,8 @@ def stage_case(args: argparse.Namespace) -> tuple[Path, Path, Path]:
         overburden_permx=getattr(args, "overburden_permx", 0.001),
         aquifer_permx=getattr(args, "aquifer_permx", None),
         aquifer_layers=getattr(args, "aquifer_layers", 3),
+        free_fluid_permx=getattr(args, "free_fluid_permx", FREE_FLUID_PERMX),
+        free_fluid_poro=getattr(args, "free_fluid_poro", FREE_FLUID_PORO),
         porv_multiplier=getattr(args, "porv_multiplier", 2000.0),
         permz_multiplier=getattr(args, "permz_multiplier", 0.1),
     )

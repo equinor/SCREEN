@@ -2,6 +2,8 @@
 """
 from typing import TextIO
 
+from ..free_fluid import FREE_FLUID_PORO
+
 def CARFIN_pipe_with_oph(ID: float,
                             x_min_pipe: int, x_max_pipe: int,
                             y_min_pipe: int, y_max_pipe: int,
@@ -9,7 +11,8 @@ def CARFIN_pipe_with_oph(ID: float,
                             k_min_hole: int, k_max_hole: int,
                             perm: float,
                             LGR_NAME: str,
-                            O: TextIO):  # noqa: E741
+                            O: TextIO,  # noqa: E741
+                            poro: float = FREE_FLUID_PORO):
     """ CARFIN for pipe with open hole sections
 
         The pipes can be mimicked by a very narrow (in the size of ID of a pipe-20 to 50 cm) and high permeability grids. 
@@ -39,6 +42,7 @@ def CARFIN_pipe_with_oph(ID: float,
             k_min_hole (int): minimum k of open hole section
             k_max_hole (int): maximum k of open hole section
             perm (float): permeability value
+            poro (float): porosity value
             LGR_NAME (str): LGR name
             O (TextIO): opened file handle
 
@@ -50,7 +54,7 @@ def CARFIN_pipe_with_oph(ID: float,
     print ('PERMX','',perm,'',x_min_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_hole,'',k_max_hole,'','/',file=O)
     print ('PERMY','',perm,'',x_min_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_hole,'',k_max_hole,'','/',file=O)
     print ('PERMZ','',perm,'',x_min_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_hole,'',k_max_hole,'','/',file=O)
-    print ('PORO','','0.99','',x_min_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_hole,'',k_max_hole,'','/',file=O)
+    print ('PORO','',poro,'',x_min_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_hole,'',k_max_hole,'','/',file=O)
     print ('SATNUM','',2,'',x_min_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_hole,'',k_max_hole,'','/',file=O)
     print ('--FIPLEG (FIPNUM) defintion',file=O)
     print ('FIPLEG','',6,'',x_min_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_hole,'',k_max_hole,'','/',file=O)

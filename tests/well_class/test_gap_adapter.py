@@ -154,3 +154,21 @@ def test_interval_permeability_override_rejects_unknown_names():
             barrier_perm=0.05,
             interval_permeability_overrides={"barrier_perm": {"missing": 0.2}},
         )
+
+def test_free_fluid_porosity_is_carried_on_open_hole_rows():
+    default = WellDataFrame(make_vertical_well(), oh_perm=10000.0, cb_perm=0.05, barrier_perm=0.05)
+    custom = WellDataFrame(make_vertical_well(), oh_perm=10000.0, cb_perm=0.05, barrier_perm=0.05, oh_poro=0.8)
+    assert set(default.drilling_df["oh_poro"]) == {1.0}
+    assert set(custom.drilling_df["oh_poro"]) == {0.8}
+
+
+def test_open_hole_hc_perm_is_deprecated_and_must_match_free_fluid_permeability():
+    well = make_vertical_well()
+    well.hole_casings[0]["hc_perm"] = 10000.0
+    with pytest.warns(FutureWarning, match="hc_perm on open-hole rows is deprecated"):
+        frames = WellDataFrame(well, oh_perm=10000.0, cb_perm=0.05, barrier_perm=0.05)
+    assert set(frames.drilling_df["oh_perm"]) == {10000.0}
+
+    well.hole_casings[0]["hc_perm"] = 500.0
+    with pytest.warns(FutureWarning), pytest.raises(ValueError, match=r"differs from the free-fluid permeability 10000 mD"):
+        WellDataFrame(well, oh_perm=10000.0, cb_perm=0.05, barrier_perm=0.05)
