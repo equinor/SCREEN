@@ -1,6 +1,7 @@
 import importlib.util
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
 
@@ -221,6 +222,31 @@ def test_ocean_layers_use_the_free_fluid_definition(tmp_path, kwargs, permx, por
     text = grdecl.read_text(encoding="utf-8")
     assert f"PERMX {permx} 1 20 1 20 1 3 /" in text
     assert f"PORO {poro} 1 20 1 20 1 3 /" in text
+
+
+def test_standalone_staging_applies_designmatrix_grid_overrides(tmp_path):
+    root = Path(__file__).parents[2]
+    workbook = tmp_path / "wb.xlsx"
+    shutil.copyfile(root / "test_data/examples/wildcat/wildcat_workbook.xlsx", workbook)
+    excel = load_workbook(workbook)
+    excel["GridPolicy"].append(["reservoir_bottom_porv_multiplier", 700])
+    sheet = excel["DesignMatrix"]
+    for name, value in (("reservoir_bottom_porv_multiplier", 900), ("reservoir_wall_porv_multiplier", 5)):
+        sheet.cell(1, sheet.max_column + 1).value = name
+        sheet.cell(2, sheet.max_column).value = value
+    excel.save(workbook)
+
+    result = subprocess.run(
+        [
+            sys.executable, "runscripts/prepare_init_case_from_xlsx.py", "--xlsx", str(workbook),
+            "--output-root", str(tmp_path / "case"), "--case-name", "baseline",
+        ],
+        cwd=root, capture_output=True, text=True,
+    )
+    assert result.returncode == 0, result.stderr
+    grid = next((tmp_path / "case/include").glob("*_GRD.grdecl")).read_text(encoding="utf-8")
+    assert re.search(r"^PORV 900 1 20 1 20 (\d+) \1 /$", grid, re.MULTILINE)  # the row beats GridPolicy's 700
+    assert re.search(r"^PORV 5 1 1 1 20 \d+ \d+ /$", grid, re.MULTILINE)
 
 
 def test_xlsx_grid_policy_has_free_fluid_defaults(tmp_path):

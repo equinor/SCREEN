@@ -148,6 +148,15 @@ without a warning**.
 | `casing_hole_open` | TRUE/FALSE | TRUE | `FALSE` keeps the hole sealed but still reports `FIPHOL`, for a control case. |
 | `depth_unit`, `pressure_unit`, `permeability_unit`, `salinity_basis` | m, bar, mD, mass fraction | as listed | Fixed; stating them documents the workbook but they cannot be varied. |
 
+**Preview a case without running CIRRUS.** Staging writes the deck and the coarse
+grid file and stops when no `--sim-command` is given. The grid file shows the
+`FIPLEG` and `PORV` boxes, with the case's `DesignMatrix` overrides applied:
+
+```bash
+python runscripts/prepare_init_case_from_xlsx.py --xlsx wb.xlsx --case-name <case> --output-root preview/<case>
+grep -E '^(FIPLEG|PORV)' preview/<case>/include/*_GRD.grdecl
+```
+
 **Not per case: set once in `GridPolicy`.** These apply to the whole workbook. To
 vary them, use separate workbooks and output roots.
 - *Grid geometry* (a different grid, so results are not comparable cell by cell;
