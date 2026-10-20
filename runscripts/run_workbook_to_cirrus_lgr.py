@@ -78,7 +78,7 @@ def validate_scenario_interval_targets(model, scenario) -> None:
 
 
 def save_qc_plot(model, scenario, output_path: Path) -> None:
-    """Save the notebook-style WellClass sketch and pressure QC plot."""
+    """Save the one-page WellClass sketch and pressure QC plot (depth zoomed on the fluid contact)."""
     try:
         import matplotlib
 
@@ -87,7 +87,7 @@ def save_qc_plot(model, scenario, output_path: Path) -> None:
     except ImportError as exc:
         raise RuntimeError("--plot requires matplotlib; install the development dependencies with `uv sync --all-groups`") from exc
 
-    from src.WellClass.libs.plotting.plot_sketch import plot_sketch
+    from src.WellClass.libs.plotting import plot_one_page
 
     if scenario.z_fluid_contact is not None and scenario.p_fluid_contact is not None:
         z_fluid_contact = scenario.z_fluid_contact
@@ -107,31 +107,18 @@ def save_qc_plot(model, scenario, output_path: Path) -> None:
         fluid_type=scenario.fluid_type,
         salinity=scenario.salinity,
     )
-    pressure_scenario = pressure.add_scenario(
+    pressure.add_scenario(
         "workbook",
         z_fluid_datum=z_fluid_contact,
         p_fluid_datum=p_fluid_contact,
     )
-    curves = pressure_scenario.display_curves()
-    fig, (ax_well, ax_pressure) = plt.subplots(1, 2, figsize=(12, 8), sharey=True)
-    plot_sketch(processed_well, ax=ax_well, casing_hole=scenario.casing_hole)
-    ax_well.set_title("WellClass sketch")
-    table = pressure.table
-    ax_pressure.plot(table.hydrostatic_pressure, table.depth, color="steelblue", linestyle=":", label="hydrostatic water")
-    ax_pressure.plot(table.min_horizontal_stress, table.depth, color="gray", linestyle="--", label="Shmin")
-    ax_pressure.plot(curves["brine_pressure"], curves["brine_depth"], color="steelblue", label="brine")
-    ax_pressure.plot(curves["fluid_pressure"], curves["fluid_depth"], color="firebrick", label=scenario.fluid_type)
-    ax_pressure.set_title("Pressure profiles")
-    ax_pressure.set_xlabel("pressure [bar]")
-    ax_pressure.set_ylim(0, float(table.depth.max()))
-    ax_pressure.invert_yaxis()
-    ax_pressure.grid(alpha=0.25)
-    ax_pressure.legend()
-    ax_pressure.set_ylabel("")
-    ax_pressure.tick_params(labelleft=False)
-    fig.suptitle(f"{scenario.case_name} WellClass QC")
-    fig.tight_layout()
-    fig.subplots_adjust(wspace=0)
+    fig, _ = plot_one_page(
+        processed_well,
+        pressure,
+        "workbook",
+        title=f"{scenario.case_name} WellClass QC",
+        casing_hole=scenario.casing_hole,
+    )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output_path, dpi=200)
     plt.close(fig)

@@ -342,9 +342,13 @@ def test_qc_plot_uses_workbook_fluid_contact_pressure(tmp_path, monkeypatch):
 
     monkeypatch.setattr(workflow, "Pressure", FakePressure)
     monkeypatch.setattr(workflow, "WellProcessed", SimpleNamespace(from_pydantic=lambda model: SimpleNamespace(header={})))
-    plotting_module = types.ModuleType("src.WellClass.libs.plotting.plot_sketch")
-    plotting_module.plot_sketch = lambda *_args, **kwargs: captured.update(sketch_options=kwargs)
-    monkeypatch.setitem(sys.modules, "src.WellClass.libs.plotting.plot_sketch", plotting_module)
+    import matplotlib.pyplot as plt
+
+    def fake_plot_one_page(well, pressure, scenario_name, **kwargs):
+        captured.update(one_page_scenario=scenario_name, one_page_options=kwargs)
+        return plt.figure(), None
+
+    monkeypatch.setattr("src.WellClass.libs.plotting.plot_one_page", fake_plot_one_page)
 
     scenario = SimpleNamespace(
         case_name="pressure_case",
@@ -364,4 +368,6 @@ def test_qc_plot_uses_workbook_fluid_contact_pressure(tmp_path, monkeypatch):
     assert captured["z_fluid_datum"] == 2400.0
     assert captured["p_fluid_datum"] == 245.0
     assert captured["pressure_options"]["salinity"] == 0.032
-    assert captured["sketch_options"]["casing_hole"] == "hole"
+    assert captured["one_page_scenario"] == captured["name"] == "workbook"
+    assert captured["one_page_options"]["casing_hole"] == "hole"
+    assert captured["one_page_options"]["title"] == "pressure_case WellClass QC"
