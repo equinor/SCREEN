@@ -86,7 +86,7 @@ less often. The technical detail follows for whoever picks the item up.
 | 8 | Give user-facing names a clear meaning | Open |
 | 9 | Represent a localized casing hole | Experimental; static opening/isolation and one-year pressure-driven transfer verified |
 | 10 | Generate hole-transfer reporting from the workbook | Done; verified on CIRRUS (Smeaheia, one year) |
-| 11 | Align FIPLEG aquifer reporting with the current coarse-grid boundaries | Implemented; CIRRUS INIT check pending |
+| 11 | Align FIPLEG aquifer reporting with the current coarse-grid boundaries | Redefined 2026-10-20 (water/overburden side walls 7, bottom layer 5); new definition not yet checked on CIRRUS |
 | 12 | Run only new or unfinished workbook cases | Basic version done (run only new cases, flag unverified, dry run); fingerprints, retry of killed runs, orphans open |
 | 13 | Clean up the CIRRUS template deck | Partial; generated `BRINE` now matches salt tables; CIRRUS comparison and cleanup pending |
 
@@ -595,27 +595,32 @@ invalid locations, and unchanged cases without reporting.
 
 ### 11. Align FIPLEG aquifer reporting with the current coarse-grid boundaries
 
-**Status: implemented; CIRRUS INIT check pending.** Outdated definition
+**Status: redefined 2026-10-20 and implemented; the new definition has not been
+checked on CIRRUS.** Outdated definition
 reported by the user (2026-10-12): FIPLEG 5 was intended to identify aquifer
 cells with multiplied pore volume. The aquifer representation moved to the
 outer edges of the coarse grid, but region 5 stayed on the bottom
 `aquifer_layers` of the reservoir.
 
-**Decision (2026-10-17):** region 5 is the four outer coarse-grid columns in the
-reservoir layers. Water and overburden edge cells keep regions 1 and 2, even
-though their pore volume is also multiplied, so ocean and overburden regions
-keep their identity. Region 3 is now the whole reservoir minus those edge
-columns, including the bottom `aquifer_layers`, which keep `aquifer_permx` but
-are no longer labelled 5. The edge boxes for `FIPLEG 5` and the `PORV`
-multiplier come from one shared list in `prepare_init_case.py`, so they cannot
-drift apart. The wellbore cells (region 6: pipe, open hole and casing-cement boxes) sit in
+**Decision (2026-10-20, replaces the 2026-10-17 one):** the aquifer pore volume
+moves from all outer columns to where it can only provide water and pressure
+support. Three independent multipliers, each settable in `GridPolicy` and per
+`DesignMatrix` row: `water_overburden_wall_porv_multiplier` (four side walls of
+the water and overburden layers), `reservoir_bottom_porv_multiplier` (the whole
+bottom reservoir layer) and `reservoir_wall_porv_multiplier` (default 1). The
+first two default to the legacy `porv_multiplier` (2000). Multiplied reservoir
+side walls gave CO2 an almost unlimited sink or source, which is not realistic,
+so the third multiplier, default 1, covers them above the bottom layer.
+`FIPLEG` follows the multiplied cells: 7 for the water and overburden
+side walls (regions 1 and 2 shrink to their interior columns), 5 for the bottom
+reservoir layer, and no new region for the reservoir walls, which stay in 3.
+`aquifer_layers` and `aquifer_permx` are unchanged. The wall boxes for `FIPLEG 7`
+and `PORV` come from one shared list in `prepare_init_case.py`. The wellbore
+cells (region 6: pipe, open hole and casing-cement boxes) sit in
 a central parent cell (10, 10 in the default 20 x 20 grid), away from the edge
-columns; other grid sizes were not checked. Cases generated earlier are not
-comparable region-for-region.
-
-**In practice:** regional inventories and transfers labelled as aquifer
-quantities should refer to the actual boundary-aquifer cells, not their former
-location.
+columns; other grid sizes were not checked. Earlier cases are not comparable
+region-for-region or in pressure response. Open point: whether the reservoir
+walls need their own region.
 
 - Trace current boundary-aquifer placement and pore-volume multipliers, then
   compare them with FIPLEG 5 assignments in generated parent and LGR outputs.
@@ -632,6 +637,17 @@ location.
 intended current aquifer cells, with no unintended changes to other regions
 or physical properties, and CIRRUS INIT/summary checks confirm the corrected
 zonation and aquifer-related transfer interpretation.
+
+**CIRRUS evidence for the superseded 2026-10-17 definition (region 5 on the outer
+reservoir columns; user-reported, 2026-10-20):** the global `FIPLEG` array of a
+case generated after the change, read from its `.INIT`, on a `20 x 20 x 63` grid
+(7 water, 16 overburden, 40 reservoir layers): region 1 had 2800 cells
+(`k 1-7`), region 2 had 6400 (`k 8-23`), region 3 had 12960 (`i, j 2-19`,
+`k 24-63`) and region 5 had 3040. Region 5 was exactly the 76 outer columns of
+the grid in layers 24-63, and the four regions add up to all 25200 cells with no
+overlap and no remaining region 4. Not checked: the second (LGR) `FIPLEG` array
+in the same `.INIT`, other grid sizes, and any summary or transfer vector that
+uses region 5.
 
 ### 12. Run only new or unfinished workbook cases
 

@@ -152,9 +152,13 @@ def derive_stage_args_from_policy(args: argparse.Namespace, policy: dict, well_m
         overburden_permx=float(policy.get("overburden_permx", 0.001)),
         aquifer_permx=float(policy["aquifer_permx"]) if policy.get("aquifer_permx") not in (None, "") else None,
         aquifer_layers=int(policy.get("aquifer_layers", 3)),
+        water_overburden_wall_porv_multiplier=float(
+            policy.get("water_overburden_wall_porv_multiplier", policy.get("porv_multiplier", 2000.0))
+        ),
+        reservoir_bottom_porv_multiplier=float(policy.get("reservoir_bottom_porv_multiplier", policy.get("porv_multiplier", 2000.0))),
+        reservoir_wall_porv_multiplier=float(policy.get("reservoir_wall_porv_multiplier", 1.0)),
         free_fluid_permx=float(policy.get("free_fluid_permx", FREE_FLUID_PERMX)),
         free_fluid_poro=float(policy.get("free_fluid_poro", FREE_FLUID_PORO)),
-        porv_multiplier=float(policy.get("porv_multiplier", 2000.0)),
         permz_multiplier=float(policy.get("permz_multiplier", 0.1)),
         case_stem=getattr(args, "case_stem", None),
         force=args.force,
@@ -212,6 +216,22 @@ def parameterize_staged_deck(args: argparse.Namespace, policy: dict, well_header
     )
 
 
+POLICY_OVERRIDE_FIELDS = (
+    "reservoir_permx", "overburden_permx", "free_fluid_permx", "free_fluid_poro",
+    "water_overburden_wall_porv_multiplier", "reservoir_bottom_porv_multiplier", "reservoir_wall_porv_multiplier",
+)
+
+
+def apply_scenario_overrides(policy: dict, scenario) -> dict:
+    """GridPolicy values with the DesignMatrix row's grid overrides applied."""
+    policy = dict(policy)
+    for field in POLICY_OVERRIDE_FIELDS:
+        override = getattr(scenario, field)
+        if override is not None:
+            policy[field] = override
+    return policy
+
+
 def resolve_case_identity(args: argparse.Namespace, model, design, scenario) -> None:
     """Store the design-matrix row index, case stem, and deck label on ``args``."""
     args.case_index, args.case_stem = resolve_case(model, design, scenario.case_name)
@@ -230,6 +250,7 @@ def main() -> int:
         print(f"Error: {exc}")
         return 1
     resolve_case_identity(args, model, design, scenario)
+    policy = apply_scenario_overrides(policy, scenario)
     stage_args = derive_stage_args_from_policy(args, policy, model)
     args.reservoir_top = stage_args.reservoir_top
     args.bottom_depth = stage_args.bottom_depth

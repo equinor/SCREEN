@@ -9,7 +9,12 @@ from pathlib import Path
 
 from build_lgr_from_json import build_lgr
 from prepare_init_case import stage_case
-from prepare_init_case_from_xlsx import derive_stage_args_from_policy, parameterize_staged_deck, resolve_case_identity
+from prepare_init_case_from_xlsx import (
+    apply_scenario_overrides,
+    derive_stage_args_from_policy,
+    parameterize_staged_deck,
+    resolve_case_identity,
+)
 
 from src.GaP.libs.case_naming import CaseFiles, well_label
 from src.GaP.libs.cirrus_backend import CirrusBackend
@@ -147,11 +152,7 @@ def run_workflow(args: argparse.Namespace) -> Path:
         )
     resolve_case_identity(args, model, design, scenario)
     case_files = CaseFiles.for_stem(args.case_stem)
-    policy = dict(policy)
-    for field in ("reservoir_permx", "overburden_permx", "free_fluid_permx", "free_fluid_poro"):
-        override = getattr(scenario, field)
-        if override is not None:
-            policy[field] = override
+    policy = apply_scenario_overrides(policy, scenario)
     stage_args = derive_stage_args_from_policy(args, policy, model)
     args.reservoir_top = stage_args.reservoir_top
     args.bottom_depth = stage_args.bottom_depth
