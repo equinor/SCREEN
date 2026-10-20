@@ -26,6 +26,7 @@ class Case(NamedTuple):
     keys: set[str]
     unit: str
     scale: float = 1.0
+    inputs: dict | None = None
 
 
 def gas_surface_density(deck: Path) -> float:
@@ -53,6 +54,52 @@ def gas_surface_density(deck: Path) -> float:
     if len(densities) != 1:
         raise ValueError(f"{deck}: expected one EOS GAS SURFACE_DENSITY, found {len(densities)}")
     return densities[0]
+
+
+def load_inputs(directory: Path) -> dict[str, object]:
+    """Scalar scenario and grid-policy inputs recorded with a case, used to label what changed."""
+    inputs: dict[str, object] = {}
+    for name in ("scenario.json", "grid_policy.json"):
+        path = directory / name
+        if path.is_file():
+            record = json.loads(path.read_text(encoding="utf-8"))
+            inputs.update({key: value for key, value in record.items() if key != "case_name" and not isinstance(value, (dict, list))})
+    return inputs
+
+
+def case_labels(cases: list[Case], mode: str) -> tuple[list[Case], list[str], str | None]:
+    """Cases, legend labels and legend title; "changed" labels only the inputs that differ, sorted by them."""
+    names = [case.name for case in cases]
+    if mode != "changed":
+        return cases, names, None
+    if len(cases) < 2 or not all(case.inputs for case in cases):
+        LOGGER.warning("changed-input labels need scenario.json in every case and at least two cases; using case names")
+        return cases, names, None
+    fields = dict.fromkeys(key for case in cases for key in case.inputs)
+    varying = [key for key in fields if len({repr(case.inputs.get(key)) for case in cases}) > 1]
+    if not varying:
+        LOGGER.warning("no recorded input differs between the cases; using case names")
+        return cases, names, None
+
+    def order(case: Case) -> tuple:
+        values = [case.inputs.get(key) for key in varying]
+        return tuple(
+            (2, "") if value is None else (0, value) if isinstance(value, (int, float)) and not isinstance(value, bool) else (1, str(value))
+            for value in values
+        )
+
+    cases = sorted(cases, key=order)
+
+    def short(key: str) -> str:
+        return key.replace("casing_hole_", "hole_")
+
+    def fmt(value: object) -> str:
+        if value is None:
+            return "default"
+        return f"{value:g}" if isinstance(value, float) else str(value)
+
+    labels = [", ".join(f"{short(key)}={fmt(case.inputs.get(key))}" for key in varying) for case in cases]
+    return cases, labels, "Varied: " + ", ".join(short(key) for key in varying)
 
 
 def check_regions(case_name: str, regions: set[int], zonation: str, key: str) -> None:
@@ -116,7 +163,7 @@ def load_cases(root: Path, zonation: str, quantity: str, pattern: str, stem: str
         dates = summary.numpy_dates
         if dates.size == 0 or np.isnat(dates).any() or np.any(dates[1:] < dates[:-1]):
             raise ValueError(f"{directory.name}: summary dates are empty, invalid, or decreasing")
-        cases.append(Case(directory.name, summary, regions, keys, unit, scale))
+        cases.append(Case(directory.name, summary, regions, keys, unit, scale, load_inputs(directory)))
     if not cases:
         raise ValueError(f"No case directories with a model directory match {pattern!r} under {root}")
     return cases
@@ -142,12 +189,17 @@ def select_vectors(cases: list[Case], zonation: str, quantity: str, requested: l
     return selected
 
 
-def plot_fluxes(cases: list[Case], keys: list[str], zonation: str, sign: int, output: Path, show: bool) -> None:
+def plot_fluxes(
+    cases: list[Case], keys: list[str], zonation: str, sign: int, output: Path, show: bool, label_mode: str = "case"
+) -> None:
     import matplotlib
 
     if not show:
         matplotlib.use("Agg")
     from matplotlib import pyplot as plt
+    from matplotlib.lines import Line2D
+
+    from src.WellClass.libs.plotting import screen_style
 
     curves = []
     for key in keys:
@@ -161,25 +213,36 @@ def plot_fluxes(cases: list[Case], keys: list[str], zonation: str, sign: int, ou
             if missing:
                 LOGGER.warning("%s: %s omitted by CIRRUS 1.9; zero direct transfer inferred", case.name, key)
             curves.append((key, case, dates, values, missing))
-    fig, axes = plt.subplots(len(keys), 1, squeeze=False, figsize=(10, 4 * len(keys)), sharex=True)
-    try:
-        for key, ax in zip(keys, axes[:, 0]):
-            for curve_key, case, dates, values, missing in curves:
-                if curve_key == key:
-                    label = f"{case.name} (inferred zero)" if missing else case.name
-                    ax.plot(dates, values, label=label, linestyle="--" if missing else "-")
-            ax.set(title=f"{key} (sign multiplier {sign:+d})", ylabel=cases[0].unit)
-            ax.grid(True, alpha=0.3)
-            ax.legend()
-        axes[-1, 0].set_xlabel("Simulation date")
-        fig.autofmt_xdate()
-        fig.tight_layout()
-        output.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(output)
-        if show:
-            plt.show()
-    finally:
-        plt.close(fig)
+    ordered, labels, legend_title = case_labels(cases, label_mode)
+    label_of = {case.name: label for case, label in zip(ordered, labels)}
+    if len(ordered) <= 10:
+        palette = plt.get_cmap("tab10").colors
+    else:
+        palette = [plt.get_cmap("turbo")(index / (len(ordered) - 1)) for index in range(len(ordered))]
+    color_of = {case.name: palette[index % len(palette)] for index, case in enumerate(ordered)}
+    with plt.rc_context(screen_style()):
+        fig, axes = plt.subplots(
+            len(keys), 1, squeeze=False, figsize=(10, max(4 * len(keys), 0.3 * len(cases) + 1)), sharex=True, layout="constrained"
+        )
+        try:
+            for key, ax in zip(keys, axes[:, 0]):
+                for curve_key, case, dates, values, missing in curves:
+                    if curve_key == key:
+                        label = f"{label_of[case.name]} (inferred zero)" if missing else label_of[case.name]
+                        ax.plot(dates, values, label=label, linestyle="--" if missing else "-", color=color_of[case.name])
+                ax.set(title=f"{key} (sign multiplier {sign:+d})", ylabel=cases[0].unit)
+                ax.grid(True, alpha=0.3)
+            axes[-1, 0].set_xlabel("Simulation date")
+            handles = [Line2D([], [], color=color_of[case.name], label=label_of[case.name]) for case in ordered]
+            if any(curve[4] for curve in curves):
+                handles.append(Line2D([], [], color="black", linestyle="--", label="inferred zero (pair not exported)"))
+            fig.legend(handles=handles, loc="outside right center", title=legend_title)
+            output.parent.mkdir(parents=True, exist_ok=True)
+            fig.savefig(output)
+            if show:
+                plt.show()
+        finally:
+            plt.close(fig)
 
 
 def main() -> None:
@@ -196,6 +259,12 @@ def main() -> None:
     parser.add_argument("--sign", type=int, choices=(-1, 1), default=1)
     parser.add_argument("--output", type=Path, help="Plot filename; required when plotting")
     parser.add_argument("--show", action="store_true")
+    parser.add_argument(
+        "--label-mode",
+        choices=("case", "changed"),
+        default="case",
+        help="Legend labels: the case name, or only the recorded inputs that differ between the plotted cases",
+    )
     parser.add_argument("--volume", action="store_true", help="Keep gas volumes; default converts gas rates/totals to kg/day or kg")
     args = parser.parse_args()
     try:
@@ -212,7 +281,7 @@ def main() -> None:
             for key in keys:
                 print(f"{key} | cases: {', '.join(case.name for case in cases if key in case.keys)}")
         else:
-            plot_fluxes(cases, keys, args.zonation, args.sign, args.output, args.show)
+            plot_fluxes(cases, keys, args.zonation, args.sign, args.output, args.show, args.label_mode)
             print(f"Saved {args.output} ({len(cases)} cases, {len(keys)} vectors)")
     except (ValueError, OSError, KeyError) as exc:
         parser.error(str(exc))

@@ -214,3 +214,52 @@ def test_water_is_not_converted_with_co2_density(tmp_path):
     case = plot.load_cases(tmp_path, "FIPHOL", "RWFR", "*", None, mass=True)[0]
     assert case.scale == 1.0
     assert case.unit == "M^3/D"
+
+
+def _case(name, **inputs):
+    return plot.Case(name, None, set(), set(), "kg", 1.0, inputs or None)
+
+
+def test_changed_labels_keep_only_varying_inputs_sorted_numerically():
+    cases = [
+        _case("c", cb_perm=50.0, casing_hole_open=True, top_depth=4),
+        _case("a", cb_perm=1600.0, casing_hole_open=True, top_depth=4),
+        _case("b", cb_perm=5.0, casing_hole_open=False, top_depth=4),
+        _case("d", cb_perm=None, casing_hole_open=True, top_depth=4),
+    ]
+    ordered, labels, title = plot.case_labels(cases, "changed")
+    assert [case.name for case in ordered] == ["b", "c", "a", "d"]
+    assert labels == [
+        "cb_perm=5, hole_open=False", "cb_perm=50, hole_open=True", "cb_perm=1600, hole_open=True", "cb_perm=default, hole_open=True",
+    ]
+    assert title == "Varied: cb_perm, hole_open"
+
+
+def test_changed_labels_fall_back_to_case_names(caplog):
+    same = [_case("a", cb_perm=5.0), _case("b", cb_perm=5.0)]
+    for cases in (same, [_case("a", cb_perm=5.0), _case("b")], [_case("a", cb_perm=5.0)]):
+        ordered, labels, title = plot.case_labels(cases, "changed")
+        assert ordered == cases and labels == [case.name for case in cases] and title is None
+    assert plot.case_labels(same, "case")[1:] == (["a", "b"], None)
+    assert "using case names" in caplog.text
+
+
+def test_plot_legend_is_outside_with_changed_labels_and_one_inferred_zero_entry(tmp_path, monkeypatch):
+    from matplotlib.figure import Figure
+
+    for name, cb, pair in (("hole", 50.0, True), ("sealed", 5000.0, False)):
+        case, _ = write_case(tmp_path, name=name, pair=pair)
+        record = json.loads((case / "scenario.json").read_text())
+        (case / "scenario.json").write_text(json.dumps({**record, "case_name": name, "cb_perm": cb}))
+    legends = []
+    original = Figure.legend
+
+    def capture(self, *args, **kwargs):
+        legends.append((kwargs["loc"], kwargs["title"], [handle.get_label() for handle in kwargs["handles"]]))
+        return original(self, *args, **kwargs)
+
+    monkeypatch.setattr(Figure, "legend", capture)
+    output = tmp_path / "labels.png"
+    run_cli(monkeypatch, tmp_path, "--vector", "1-2", "--label-mode", "changed", "--output", str(output))
+    assert output.read_bytes().startswith(b"\x89PNG")
+    assert legends == [("outside right center", "Varied: cb_perm", ["cb_perm=50", "cb_perm=5000", "inferred zero (pair not exported)"])]
