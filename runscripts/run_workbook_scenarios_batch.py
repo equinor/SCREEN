@@ -29,6 +29,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from src.GaP.libs.case_naming import resolve_case_stems, well_label
+from src.GaP.libs.cirrus_backend import LSF_SUBMISSION_PATTERN, CirrusBackend
+from src.GaP.libs.models.simulation_scenario import SimulationDesign
 from src.WellClass.libs.utils import xlsx_to_simulation_design, xlsx_to_well_model
 
 
@@ -48,7 +50,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--cb-perm", type=float, default=0.05)
     parser.add_argument("--barrier-perm", type=float, default=0.05)
     parser.add_argument("--ali-way", action="store_true")
-    parser.add_argument("--force", action="store_true")
+    parser.add_argument("--force", action="store_true", help="Rerun every case, overwriting existing output; by default only cases without results are run.")
+    parser.add_argument("--dry-run", action="store_true", help="Print what would run for each case and stop.")
     parser.add_argument("--plot", action="store_true", help="Save a sketch and pressure QC plot for each scenario.")
     parser.add_argument(
         "--jobs",
@@ -124,7 +127,58 @@ def case_stems(design, xlsx_file: Path) -> dict[str, str]:
     return dict(zip(names, resolve_case_stems(well_label(xlsx_to_well_model(xlsx_file)), names)))
 
 
-def write_batch_manifest(design, args: argparse.Namespace, failed_cases: list[str]) -> Path:
+def case_state(case_root: Path, stem: str, backend: CirrusBackend) -> str:
+    """Classify a case from the files in its directory: results, queued, staged (no results) or new."""
+    if (case_root / "model" / f"{stem}.UNSMRY").is_file():
+        return "results"  # finished, still running, or stopped early
+    final_log = case_root / "logs" / f"{stem}_final.log"
+    submission = LSF_SUBMISSION_PATTERN.search(final_log.read_text(encoding="utf-8", errors="replace")) if final_log.is_file() else None
+    if submission:
+        try:
+            active = backend.lsf_job_status(submission.group(1), final_log) not in ("DONE", "EXIT")
+        except RuntimeError:
+            active = True  # cannot ask LSF from here: never resubmit what cannot be verified
+        if active:
+            return "queued"
+    return "staged" if (case_root / "scenario.json").is_file() else "new"
+
+
+def changed_inputs(case_root: Path, scenario) -> list[str]:
+    """DesignMatrix fields whose value differs from the scenario.json saved with the case."""
+    saved_path = case_root / "scenario.json"
+    if not saved_path.is_file():
+        return []
+    saved = json.loads(saved_path.read_text(encoding="utf-8"))
+    fields = type(scenario).model_fields
+    current = scenario.model_dump(mode="json")
+    return sorted(key for key, value in current.items() if key != "case_name" and saved.get(key, fields[key].default) != value)
+
+
+def plan_scenarios(design, args: argparse.Namespace) -> dict[str, tuple[str, str]]:
+    """Per case, ('run' | 'retry' | 'skip', reason). Never plans to touch a case that has results or a live job."""
+    stems = case_stems(design, args.xlsx)
+    backend = CirrusBackend("{deck}")  # only used to ask LSF about a job
+    plan = {}
+    for scenario in design.scenarios:
+        case_root = args.output_root / stems[scenario.case_name]
+        if args.force:
+            plan[scenario.case_name] = ("run", "--force: rerun everything")
+            continue
+        state = case_state(case_root, stems[scenario.case_name], backend)
+        if state == "new":
+            plan[scenario.case_name] = ("run", "new")
+        elif state == "staged":
+            plan[scenario.case_name] = ("retry", "staged earlier but no results; its files will be regenerated")
+        else:
+            reason = "has results (finished, running or stopped early)" if state == "results" else "LSF job still active"
+            changed = changed_inputs(case_root, scenario)
+            if changed:
+                reason += f"; WARNING: workbook row differs from the saved case in {', '.join(changed)}; delete its folder to rerun it"
+            plan[scenario.case_name] = ("skip", reason)
+    return plan
+
+
+def write_batch_manifest(design, args: argparse.Namespace, failed_cases: list[str], skipped_cases: tuple[str, ...] = ()) -> Path:
     stems = case_stems(design, args.xlsx)
     manifest = {
         "workbook": str(args.xlsx),
@@ -135,7 +189,9 @@ def write_batch_manifest(design, args: argparse.Namespace, failed_cases: list[st
                 "case_name": scenario.case_name,
                 "case_stem": stems[scenario.case_name],
                 "case_dir": stems[scenario.case_name],
-                "status": "failed" if scenario.case_name in failed_cases else "succeeded",
+                "status": (
+                    "failed" if scenario.case_name in failed_cases else "existing" if scenario.case_name in skipped_cases else "succeeded"
+                ),
             }
             for index, scenario in enumerate(design.scenarios, 1)
         ],
@@ -157,6 +213,9 @@ def run_scenarios(design, args: argparse.Namespace) -> tuple[list[str], list[str
         for scenario in design.scenarios:
             case_name = scenario.case_name
             case_output_root = args.output_root / stems[case_name]
+            case_args = args
+            if case_name in getattr(args, "retry_cases", ()):
+                case_args = argparse.Namespace(**{**vars(args), "force": True})
             future = executor.submit(
                 run_scenario_case,
                 args.xlsx,
@@ -164,7 +223,7 @@ def run_scenarios(design, args: argparse.Namespace) -> tuple[list[str], list[str
                 case_output_root,
                 args.template_root,
                 args.sim_command,
-                args,
+                case_args,
             )
             futures[future] = case_name
 
@@ -208,8 +267,16 @@ def main() -> int:
     scenario_names = [scenario.case_name for scenario in design.scenarios]
     print(f"Found {len(scenario_names)} scenario(s): {', '.join(scenario_names)}")
 
-    successful_cases, failed_cases = run_scenarios(design, args)
-    manifest_path = write_batch_manifest(design, args, failed_cases)
+    plan = plan_scenarios(design, args)
+    for case_name, (action, reason) in plan.items():
+        print(f"  {action.upper():5s} {case_name}: {reason}")
+    if args.dry_run:
+        return 0
+    skipped_cases = tuple(name for name, (action, _) in plan.items() if action == "skip")
+    args.retry_cases = {name for name, (action, _) in plan.items() if action == "retry"}
+    to_run = SimulationDesign(scenarios=[s for s in design.scenarios if s.case_name not in skipped_cases])
+    successful_cases, failed_cases = run_scenarios(to_run, args) if to_run.scenarios else ([], [])
+    manifest_path = write_batch_manifest(design, args, failed_cases, skipped_cases)
     stems = case_stems(design, args.xlsx)
 
     print(f"\n{'='*70}")
@@ -217,6 +284,7 @@ def main() -> int:
     print(f"  Total scenarios: {len(scenario_names)}")
     print(f"  Successful: {len(successful_cases)}")
     print(f"  Failed: {len(failed_cases)}")
+    print(f"  Skipped (existing results or live job): {len(skipped_cases)}")
     print(f"  Manifest: {manifest_path}")
 
     if successful_cases:

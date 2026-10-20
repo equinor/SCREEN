@@ -50,7 +50,7 @@ class CirrusBackend:
         executable = Path(self.executable)
         return executable.is_file() and os.access(executable, os.X_OK) or shutil.which(self.executable) is not None
 
-    def _lsf_job_status(self, job_id: str, log_path: Path) -> str:
+    def lsf_job_status(self, job_id: str, log_path: Path) -> str:
         if not shutil.which("bjobs"):
             raise RuntimeError(f"LSF job {job_id} was submitted but 'bjobs' is not available; monitor it manually. Log: {log_path}")
 
@@ -73,7 +73,7 @@ class CirrusBackend:
     def _wait_for_lsf_job(self, job_id: str, log_path: Path) -> None:
         started = time.monotonic()
         while True:
-            status = self._lsf_job_status(job_id, log_path)
+            status = self.lsf_job_status(job_id, log_path)
             if status == "DONE":
                 with log_path.open("a", encoding="utf-8") as stream:
                     stream.write(f"\nLSF job {job_id} finished with status DONE.\n")
