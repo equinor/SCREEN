@@ -3,7 +3,8 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from src.WellClass.libs.utils.xlsx_parser import xlsx_grid_policy, xlsx_to_simulation_design, xlsx_to_well_model
+from src.GaP.libs.models.simulation_scenario import SimulationScenario
+from src.WellClass.libs.utils.xlsx_parser import GridPolicy, xlsx_grid_policy, xlsx_to_simulation_design, xlsx_to_well_model
 
 
 @pytest.mark.parametrize(
@@ -41,3 +42,14 @@ def test_example_workbooks_parse_to_canonical_wells(name, well_identifier):
         assert assumptions.loc[0, "p_fluid_contact"] == 129.99
         assert assumptions.loc[0, "z_resrv"] == assumptions.loc[0, "z_fluid_contact"]
         assert assumptions.loc[0, "p_resrv"] == assumptions.loc[0, "p_fluid_contact"]
+
+
+def test_every_scenario_and_grid_policy_field_is_documented():
+    """The "Parameters you can sensitise per case" section of the GaP README must name every field."""
+    readme = (Path(__file__).parents[2] / "src/GaP/README.md").read_text(encoding="utf-8")
+    start = readme.index("### Parameters you can sensitise per case")
+    section = readme[start : readme.index("\n### ", start + 1)]
+    missing = [
+        name for name in (*SimulationScenario.model_fields, *GridPolicy.model_fields) if f"`{name}`" not in section
+    ]
+    assert not missing, f"add these to the README sensitivity section: {missing}"

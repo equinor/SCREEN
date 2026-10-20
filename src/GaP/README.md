@@ -90,8 +90,8 @@ when interpreting water surface volumes. The simulator-level effect still
 requires paired validation on a CIRRUS host.
 
 Each `DesignMatrix` row is one case sharing the same physical well. Optional
-`reservoir_permx`, `overburden_permx`, `free_fluid_permx` and `free_fluid_poro`
-values override the corresponding `GridPolicy` values. `cb_perm` and `barrier_perm` override casing-cement and
+columns override the corresponding `GridPolicy` values (the full list is in
+[Parameters you can sensitise per case](#parameters-you-can-sensitise-per-case)). `cb_perm` and `barrier_perm` override casing-cement and
 plug permeability. Their companion `cb_perm_interval` and
 `barrier_perm_interval` columns select the interval by its `name` in the
 `HoleCasings` or `Plugs` sheet; the default `ALL` applies the value to every
@@ -112,7 +112,62 @@ now use 1.0, so regenerated wellbore cells differ slightly from older cases.
 Effective values and targeted overrides are recorded in `scenario.json`, and
 the resolved grid policy is saved in `grid_policy.json`.
 
-**Adding cases to a batch that has already run.** Run
+### Parameters you can sensitise per case
+
+Each name below is a `DesignMatrix` column. **A column does not have to exist in
+your workbook**: leave it out, or leave a cell blank, and the case uses the value
+from `GridPolicy`, the well sheets or the built-in default. To vary a parameter,
+add its column and fill it for the rows that differ. Precedence: `DesignMatrix`
+row, then `GridPolicy` or the well sheets, then the built-in default. The
+effective values are saved in each case's `scenario.json` and `grid_policy.json`.
+Check `scenario.json` after the first run: **a misspelled column name is ignored
+without a warning**.
+
+| Column | Unit | If blank | What it changes |
+| --- | --- | --- | --- |
+| `case_name` | text | `default` | Names the case; must be unique. Becomes the case folder and file stem. |
+| `temperature_gradient` | degC/km | 31 | Temperature increase with depth, for fluid properties and the CIRRUS temperature table. |
+| `ground_temperature` | degC | 4 | Temperature at the ground or seafloor. |
+| `salinity` | kg/kg (NaCl mass fraction) | 0.032 | Brine density in the pressure profile, the CIRRUS salt tables and the global `BRINE`. |
+| `fluid_type` | text | `co2` | Only `co2` is available. |
+| `z_fluid_contact`, `p_fluid_contact` | m TVDMSL, bar | `z_resrv` / `p_resrv`, else 1500 m / 144.5 bar | Fluid-contact depth and pressure: the CIRRUS gas-water datum and contact. Each value falls back on its own, so give both values of one pair. |
+| `z_resrv`, `p_resrv` | m TVDMSL, bar | none | Reservoir reference depth and pressure, used only where the matching fluid-contact value is blank. |
+| `overburden_datum_depth` | m TVDMSL | midpoint of seafloor and reservoir top | Depth where the overburden pressure is specified; must lie between the water depth and the reservoir top. |
+| `reservoir_permx` | mD | `GridPolicy` (1000) | Reservoir horizontal permeability. |
+| `overburden_permx` | mD | `GridPolicy` (0.001) | Overburden horizontal permeability. |
+| `free_fluid_permx` | mD | `GridPolicy` (10000) | Permeability of the ocean layers, open hole and pipe interior. |
+| `free_fluid_poro` | fraction | `GridPolicy` (1.0) | Porosity of the same free-fluid cells. |
+| `water_overburden_wall_porv_multiplier` | factor | `GridPolicy`, else `porv_multiplier` (2000) | Pore volume of the four outer side walls of the water and overburden layers. |
+| `reservoir_bottom_porv_multiplier` | factor | `GridPolicy`, else `porv_multiplier` (2000) | Pore volume of the whole bottom reservoir layer (the bottom aquifer). |
+| `reservoir_wall_porv_multiplier` | factor | `GridPolicy` (1, no effect) | Pore volume of the four outer reservoir walls above the bottom layer. |
+| `cb_perm` | mD | cement row `hc_perm`, else 0.05 | Casing-cement permeability. |
+| `cb_perm_interval` | text | `ALL` | Which `HoleCasings` casing-cement `name` `cb_perm` applies to, or `ALL`. |
+| `barrier_perm` | mD | `Plugs` `cement_perm`, else 0.05 | Plug permeability. |
+| `barrier_perm_interval` | text | `ALL` | Which `Plugs` `name` `barrier_perm` applies to, or `ALL`. |
+| `casing_hole_casing`, `casing_hole_depth_mTVDMSL`, `casing_hole_diameter_m` | name, m TVDMSL, m | none | The localized casing hole; all three or none. See [the experimental hole](#experimental-localized-casing-hole). |
+| `casing_hole_open` | TRUE/FALSE | TRUE | `FALSE` keeps the hole sealed but still reports `FIPHOL`, for a control case. |
+| `depth_unit`, `pressure_unit`, `permeability_unit`, `salinity_basis` | m, bar, mD, mass fraction | as listed | Fixed; stating them documents the workbook but they cannot be varied. |
+
+**Not per case: set once in `GridPolicy`.** These apply to the whole workbook. To
+vary them, use separate workbooks and output roots.
+- *Grid geometry* (a different grid, so results are not comparable cell by cell;
+  `compare_scenario_outputs.py` reports it as a grid study): `top_depth`,
+  `target_dz_water`, `target_dz_overburden`, `target_dz_reservoir`,
+  `reservoir_thickness`, `cells_per_layer`, `min_water_layers`,
+  `min_overburden_layers`, `min_reservoir_layers`, `max_water_layers`,
+  `max_overburden_layers`, `max_reservoir_layers`, `nx`, `ny`, `dx`, `dy` and
+  `aquifer_layers`. `water_depth` is derived from `Header.ground_elevation`.
+- *Physics* (same grid): `aquifer_permx`, `permz_multiplier`, and
+  `porv_multiplier`, which only supplies the default of the two large pore volume
+  multipliers.
+
+**Command-line options** apply to the whole batch: `--simulation-years`,
+`--start-date`, `--lgr-name`, `--cb-perm` and `--barrier-perm` (the fallbacks in
+the table), `--ali-way` and `--template-root`.
+
+### Adding cases to a batch that has already run
+
+Run
 `run_workbook_scenarios_batch.py` again on the edited workbook and the same
 `--output-root`. Each workbook case is compared with the case folders there, and
 only cases without a folder are run. No scheduler is needed:
