@@ -50,6 +50,7 @@ units. Required fields are `top_depth` and `target_dz_water`,
 400 m; `cells_per_layer` 400; minimum layer counts 1; maximum layer counts
 unset; `nx`/`ny` 20; `dx`/`dy` 200 m; `reservoir_permx` 1000 mD;
 `overburden_permx` 0.001 mD; `aquifer_permx` unset; `aquifer_layers` 3;
+`free_fluid_permx` 10000 mD; `free_fluid_poro` 1.0;
 `porv_multiplier` 2000; `permz_multiplier` 0.1. Spacing and layer counts must
 be positive, permeabilities nonnegative, and maximum layer counts cannot be
 below their minimums. `water_depth` comes from `Header.ground_elevation`
@@ -95,8 +96,14 @@ interval of that type. For a named interval, only that interval changes. Other
 intervals retain their own workbook permeability, falling back to the CLI
 default when none is provided. Interval names used as targets must be unique
 within the relevant sheet and must match exactly. A target other than `ALL`
-requires its corresponding permeability value. `oh_perm` remains a fixed
-high-permeability workflow default, not a DesignMatrix sensitivity variable.
+requires its corresponding permeability value. Cells that hold only free fluid
+(the ocean layers, open hole and pipe interior) use one definition from
+`GridPolicy`: `free_fluid_permx` (mD) and `free_fluid_poro`. It is not a
+DesignMatrix sensitivity variable. `--oh-perm` and `hc_perm` on open-hole rows are
+deprecated: they still work when they equal the free-fluid permeability and are
+an error when they differ. `hc_perm` on casing-cement rows is unchanged. Before
+this definition, the open hole and pipe used porosity 0.99 and the ocean 1.0; all
+now use 1.0, so regenerated wellbore cells differ slightly from older cases.
 Effective values and targeted overrides are recorded in `scenario.json`, and
 the resolved grid policy is saved in `grid_policy.json`.
 

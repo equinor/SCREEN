@@ -171,6 +171,26 @@ def test_fipleg_aquifer_marks_reservoir_edge_columns_with_multiplied_pore_volume
     assert ("PERMX 250 1 20 1 20 56 58 /" in text) == bool(aquifer_layers)
 
 
+@pytest.mark.parametrize(
+    ("kwargs", "permx", "poro"), [({}, "10000", "1"), ({"free_fluid_permx": 5000.0, "free_fluid_poro": 0.9}, "5000", "0.9")]
+)
+def test_ocean_layers_use_the_free_fluid_definition(tmp_path, kwargs, permx, poro):
+    root = Path(__file__).parents[2]
+    grdecl = tmp_path / "grid.grdecl"
+    grdecl.write_text((root / "test_data/examples/wildcat-pflotran/include/TEMP_GRD.grdecl").read_text(encoding="utf-8"))
+    prepare_init_case.parameterize_grdecl(grdecl, water_layers=3, overburden_layers=15, reservoir_layers=40, **kwargs)
+    text = grdecl.read_text(encoding="utf-8")
+    assert f"PERMX {permx} 1 20 1 20 1 3 /" in text
+    assert f"PORO {poro} 1 20 1 20 1 3 /" in text
+
+
+def test_xlsx_grid_policy_has_free_fluid_defaults(tmp_path):
+    workbook = tmp_path / "defaults.xlsx"
+    _write_minimal_workbook(workbook)
+    policy = xlsx_grid_policy(workbook)
+    assert (policy["free_fluid_permx"], policy["free_fluid_poro"]) == (10000.0, 1.0)
+
+
 def test_workbook_keeps_simulation_assumptions_outside_well_model(tmp_path):
     workbook = tmp_path / "well_input.xlsx"
     _write_minimal_workbook(workbook)
@@ -260,7 +280,10 @@ def test_xlsx_grid_policy_applies_legacy_units_and_defaults(tmp_path):
 
 @pytest.mark.parametrize(
     ("key", "value"),
-    [("depth_unit", "ft"), ("permeability_unit", "D"), ("target_dz_water", 0), ("reservoir_permx", -1)],
+    [
+        ("depth_unit", "ft"), ("permeability_unit", "D"), ("target_dz_water", 0), ("reservoir_permx", -1),
+        ("free_fluid_permx", 0), ("free_fluid_poro", 0), ("free_fluid_poro", 1.5),
+    ],
 )
 def test_xlsx_grid_policy_rejects_invalid_values(tmp_path, key, value):
     workbook = tmp_path / "invalid_policy.xlsx"

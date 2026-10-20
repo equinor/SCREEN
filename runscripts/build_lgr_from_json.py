@@ -9,6 +9,7 @@ import json
 from math import pi
 from pathlib import Path
 
+from src.GaP.libs.free_fluid import FREE_FLUID_PORO, resolve_free_fluid_permx
 from src.GaP.libs.grid_utils.lgr_equilibration import restrict_co2_equilibration
 from src.GaP.libs.models.simulation_scenario import SimulationScenario
 from src.WellClass.libs.grid_utils import LGRBuilder, WellDataFrame
@@ -27,7 +28,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-folder", type=Path, required=True, help="Folder for the generated LGR GRDECL.")
     parser.add_argument("--lgr-name", default="TEMP_LGR", help="CARFIN LGR name; also the file stem unless --lgr-file-stem is set.")
     parser.add_argument("--lgr-file-stem", default=None, help="Generated LGR GRDECL file stem.")
-    parser.add_argument("--oh-perm", type=float, default=10000.0, help="Open-hole permeability default in mD.")
+    parser.add_argument("--free-fluid-permx", type=float, help="Free-fluid (open hole, pipe) permeability in mD; default 10000.")
+    parser.add_argument("--free-fluid-poro", type=float, help="Free-fluid (open hole, pipe) porosity; default 1.0.")
+    parser.add_argument("--oh-perm", type=float, help="Deprecated: use --free-fluid-permx.")
     parser.add_argument("--cb-perm", type=float, default=0.05, help="Cement-bond permeability default in mD.")
     parser.add_argument("--barrier-perm", type=float, default=0.05, help="Barrier permeability default in mD.")
     parser.add_argument("--ali-way", action="store_true", help="Use the legacy Ali refinement mode.")
@@ -60,7 +63,8 @@ def build_lgr(args: argparse.Namespace) -> Path:
         )
     well_frames = WellDataFrame(
         processed_well,
-        oh_perm=args.oh_perm,
+        oh_perm=resolve_free_fluid_permx(getattr(args, "free_fluid_permx", None), getattr(args, "oh_perm", None)),
+        oh_poro=FREE_FLUID_PORO if getattr(args, "free_fluid_poro", None) is None else args.free_fluid_poro,
         cb_perm=args.cb_perm,
         barrier_perm=args.barrier_perm,
         permeability_overrides=getattr(args, "permeability_overrides", None),

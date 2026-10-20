@@ -30,7 +30,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--simulation-years", type=int, default=100, help="Final duration in years.")
     parser.add_argument("--start-date", default="2025-01-01", help="Simulation start date in ISO format.")
     parser.add_argument("--lgr-name", default="TEMP_LGR", help="CARFIN LGR name inside the generated LGR file.")
-    parser.add_argument("--oh-perm", type=float, default=10000.0, help="Open-hole permeability default in mD.")
+    parser.add_argument("--oh-perm", type=float, help="Deprecated: set free_fluid_permx in GridPolicy.")
     parser.add_argument("--cb-perm", type=float, default=0.05, help="Cement-bond permeability default in mD.")
     parser.add_argument("--barrier-perm", type=float, default=0.05, help="Barrier permeability default in mD.")
     parser.add_argument("--ali-way", action="store_true")
@@ -167,7 +167,7 @@ def run_workflow(args: argparse.Namespace) -> Path:
     scenario_record["effective_permeability_mD"] = {
         "reservoir_permx": policy.get("reservoir_permx", 1000.0),
         "overburden_permx": policy.get("overburden_permx", 0.001),
-        "oh_perm": args.oh_perm,
+        "oh_perm": policy["free_fluid_permx"],
         "cb_perm": (
             args.cb_perm
             if scenario.cb_perm_interval != "ALL"
@@ -218,6 +218,8 @@ def run_workflow(args: argparse.Namespace) -> Path:
         output_folder=args.output_root / "include",
         lgr_name=args.lgr_name,
         lgr_file_stem=case_files.lgr.stem,
+        free_fluid_permx=policy["free_fluid_permx"],
+        free_fluid_poro=policy["free_fluid_poro"],
         oh_perm=args.oh_perm,
         cb_perm=args.cb_perm,
         barrier_perm=args.barrier_perm,

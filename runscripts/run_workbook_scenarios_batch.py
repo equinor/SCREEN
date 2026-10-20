@@ -44,7 +44,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--simulation-years", type=int, default=100, help="Final duration in years.")
     parser.add_argument("--start-date", default="2025-01-01", help="Simulation start date in ISO format.")
     parser.add_argument("--lgr-name", default="TEMP_LGR", help="CARFIN LGR name inside each generated LGR file.")
-    parser.add_argument("--oh-perm", type=float, default=10000.0)
+    parser.add_argument("--oh-perm", type=float, help="Deprecated: set free_fluid_permx in GridPolicy.")
     parser.add_argument("--cb-perm", type=float, default=0.05)
     parser.add_argument("--barrier-perm", type=float, default=0.05)
     parser.add_argument("--ali-way", action="store_true")
@@ -92,14 +92,14 @@ def run_scenario_case(
         args.start_date,
         "--lgr-name",
         args.lgr_name,
-        "--oh-perm",
-        str(args.oh_perm),
         "--cb-perm",
         str(args.cb_perm),
         "--barrier-perm",
         str(args.barrier_perm),
     ]
 
+    if args.oh_perm is not None:
+        command += ["--oh-perm", str(args.oh_perm)]
     if args.run_final:
         command.append("--run-final")
     if args.ali_way:

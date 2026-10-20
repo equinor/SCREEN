@@ -6,6 +6,7 @@ from typing import Any, Literal
 import pandas as pd
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from src.GaP.libs.free_fluid import FREE_FLUID_PERMX, FREE_FLUID_PORO
 from src.GaP.libs.models.simulation_scenario import SimulationDesign
 
 from ..models.well_model import WellModel
@@ -39,6 +40,8 @@ class GridPolicy(BaseModel):
     overburden_permx: float = Field(default=0.001, ge=0, description="Overburden permeability in mD")
     aquifer_permx: float | None = Field(default=None, ge=0, description="Aquifer permeability in mD")
     aquifer_layers: int = Field(default=3, gt=0)
+    free_fluid_permx: float = Field(default=FREE_FLUID_PERMX, gt=0, description="Permeability of ocean, open-hole and pipe cells in mD")
+    free_fluid_poro: float = Field(default=FREE_FLUID_PORO, gt=0, le=1, description="Porosity of ocean, open-hole and pipe cells")
     porv_multiplier: float = Field(default=2000.0, gt=0)
     permz_multiplier: float = Field(default=0.1, ge=0)
 
@@ -184,6 +187,7 @@ def xlsx_grid_policy(xlsx_file: str | Path) -> dict[str, Any]:
     - overburden_permx (default 0.001)
     - aquifer_permx (default reservoir_permx)
     - aquifer_layers (default 3)
+    - free_fluid_permx (default 10000), free_fluid_poro (default 1.0): ocean, open-hole and pipe cells
     - porv_multiplier (default 2000)
     - permz_multiplier (default 0.1)
     """

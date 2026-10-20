@@ -2,13 +2,16 @@
 """
 from typing import TextIO
 
+from ..free_fluid import FREE_FLUID_PORO
+
 def CARFIN_oph(ID: float,
                 x_min_oph: int, x_max_oph: int,
                 y_min_oph: int, y_max_oph: int,
                 k_min_hole: int, k_max_hole: int,
                 perm: float,
                 LGR_NAME: str,
-                O: TextIO):  # noqa: E741
+                O: TextIO,  # noqa: E741
+                poro: float = FREE_FLUID_PORO):
     """ CARFIN for open hole sections
 
         The open hole sections can be modelled the same as pipe, but without zero transmissibility around the high perm. area 
@@ -27,6 +30,7 @@ def CARFIN_oph(ID: float,
             k_min_hole (int): minimum k of open hole section
             k_max_hole (int): maximum k of open hole section
             perm (float): permeability value
+            poro (float): porosity value
             LGR_NAME (str): LGR name
             O (TextIO): opened file handle
 
@@ -38,7 +42,7 @@ def CARFIN_oph(ID: float,
     print ('PERMX','',perm,'',x_min_oph,'',x_max_oph,'',y_min_oph,'',y_max_oph,'',k_min_hole,'',k_max_hole,'','/',file=O)
     print ('PERMY','',perm,'',x_min_oph,'',x_max_oph,'',y_min_oph,'',y_max_oph,'',k_min_hole,'',k_max_hole,'','/',file=O)
     print ('PERMZ','',perm,'',x_min_oph,'',x_max_oph,'',y_min_oph,'',y_max_oph,'',k_min_hole,'',k_max_hole,'','/',file=O)
-    print ('PORO','','0.99','',x_min_oph,'',x_max_oph,'',y_min_oph,'',y_max_oph,'',k_min_hole,'',k_max_hole,'','/',file=O)
+    print ('PORO','',poro,'',x_min_oph,'',x_max_oph,'',y_min_oph,'',y_max_oph,'',k_min_hole,'',k_max_hole,'','/',file=O)
     
     print ('SATNUM','',2,'',x_min_oph,'',x_max_oph,'',y_min_oph,'',y_max_oph,'',k_min_hole,'',k_max_hole,'','/',file=O)
     print ('FIPLEG','',6,'',x_min_oph,'',x_max_oph,'',y_min_oph,'',y_max_oph,'',k_min_hole,'',k_max_hole,'','/',file=O)

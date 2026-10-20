@@ -23,6 +23,7 @@ from prepare_init_case import run_initialization, stage_case
 
 from src.GaP.libs.case_naming import CaseFiles, case_label, resolve_case
 from src.GaP.libs.deck_config import CirrusDeckParameters, parameterize_cirrus_deck
+from src.GaP.libs.free_fluid import FREE_FLUID_PERMX, FREE_FLUID_PORO
 from src.WellClass.libs.utils import xlsx_grid_policy, xlsx_to_simulation_design, xlsx_to_well_model
 from src.WellClass.libs.well_class.well_processed import WellProcessed
 from src.WellClass.libs.well_pressure.pressure_table import PressureTable
@@ -151,6 +152,8 @@ def derive_stage_args_from_policy(args: argparse.Namespace, policy: dict, well_m
         overburden_permx=float(policy.get("overburden_permx", 0.001)),
         aquifer_permx=float(policy["aquifer_permx"]) if policy.get("aquifer_permx") not in (None, "") else None,
         aquifer_layers=int(policy.get("aquifer_layers", 3)),
+        free_fluid_permx=float(policy.get("free_fluid_permx", FREE_FLUID_PERMX)),
+        free_fluid_poro=float(policy.get("free_fluid_poro", FREE_FLUID_PORO)),
         porv_multiplier=float(policy.get("porv_multiplier", 2000.0)),
         permz_multiplier=float(policy.get("permz_multiplier", 0.1)),
         case_stem=getattr(args, "case_stem", None),

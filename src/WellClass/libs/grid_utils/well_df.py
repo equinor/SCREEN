@@ -1,7 +1,10 @@
+import warnings
 from collections.abc import Mapping
 
 import numpy as np
 import pandas as pd
+
+from src.GaP.libs.free_fluid import FREE_FLUID_PORO
 
 
 class WellDataFrame:
@@ -12,6 +15,7 @@ class WellDataFrame:
         oh_perm=None,
         cb_perm=None,
         barrier_perm=None,
+        oh_poro=FREE_FLUID_PORO,
         permeability_unit="mD",
         permeability_overrides=None,
         interval_permeability_overrides: Mapping[str, Mapping[str, float]] | None = None,
@@ -28,6 +32,7 @@ class WellDataFrame:
                 oh_perm,
                 cb_perm,
                 barrier_perm,
+                oh_poro,
                 permeability_overrides or {},
                 interval_permeability_overrides or {},
             )
@@ -56,6 +61,7 @@ class WellDataFrame:
         oh_perm,
         cb_perm,
         barrier_perm,
+        oh_poro,
         permeability_overrides,
         interval_permeability_overrides,
     ):
@@ -74,6 +80,18 @@ class WellDataFrame:
         casings = [record for record in records if record["type"] == "casing"]
         casing_cement = [record for record in records if record["type"] == "casing cement"]
 
+        explicit_hole_perms = {float(r["hc_perm"]) for r in holes if r.get("hc_perm") is not None}
+        if explicit_hole_perms:
+            warnings.warn(
+                "hc_perm on open-hole rows is deprecated; open hole uses the free-fluid permeability (GridPolicy free_fluid_permx)",
+                FutureWarning,
+                stacklevel=2,
+            )
+            if oh_perm is not None and explicit_hole_perms != {float(oh_perm)}:
+                raise ValueError(
+                    f"hc_perm {sorted(explicit_hole_perms)} on open-hole rows differs from the free-fluid permeability {oh_perm:g} mD; "
+                    "remove it or set free_fluid_permx in GridPolicy"
+                )
         self.drilling_df = self._interval_frame(
             holes,
             diameter_field="diameter_m",
@@ -83,6 +101,7 @@ class WellDataFrame:
         if "oh_perm" in permeability_overrides:
             self.drilling_df["hc_perm"] = permeability_overrides["oh_perm"]
         self.drilling_df["oh_perm"] = self.drilling_df["hc_perm"]
+        self.drilling_df["oh_poro"] = float(oh_poro)
         self._require_permeability(self.drilling_df, "oh_perm", "oh_perm")
 
         casing_frame = self._interval_frame(casings, diameter_field="diameter_m")
