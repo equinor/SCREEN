@@ -471,6 +471,40 @@ These results support dynamic direct hole connectivity for this setup, not
 ocean arrival or a calibrated physical hole-flow law. FIPHOL is now generated
 from the workbook (item 10).
 
+**Smeaheia 100-year cement sweep (runs reported 2026-10-20; end totals only):**
+
+- Setup: the Smeaheia workbook with `mplug2` removed (test only), `Casing 13 3/8 in`
+  opened at 650 m TVDMSL, `overburden_permx = 0` in `GridPolicy`, and
+  `Cement 13 3/8 in` permeability set per `DesignMatrix` row. All 11 cases
+  reached 2125-01-01 and passed `validate_scenario_outputs.py`. The sealed
+  control (5000 mD cement, 0.2 m, `casing_hole_open=FALSE`) has no `1-2` pair
+  and an exactly zero `2-3` total.
+- `RGFT_HOL:1-2` at 100 years, in kg using the case's gas surface density:
+
+| Cement perm (mD) | 0.2 m hole | 0.05 m hole |
+| --- | --- | --- |
+| 0.0005 | 3 | not run |
+| 5 | 15,206 | not run |
+| 50 | 371,232 | 370,603 |
+| 200 | 1,947,466 | 1,943,622 |
+| 500 | 4,761,288 | 4,752,087 |
+| 1,600 | 12,345,627 | not run |
+| 5,000 | 23,857,467 | not run |
+
+- A 16x larger opening area changed the total by 0.17-0.20% at the three
+  permeabilities run with both sizes: cement permeability, not hole area, set
+  the transfer. This agrees with the one-year runs above.
+- Transfer per mD of cement permeability rises from about 3,000 kg (5 mD) to a
+  maximum near 9,700 kg (200 mD), then falls to about 4,800 kg (5000 mD). The
+  5 to 50 mD step is superlinear (24x for 10x) and the 1600 to 5000 mD step is
+  sublinear (1.9x for 3.1x). What limits the high end was not determined.
+- Not established: the rate history (plots were not reviewed), ocean or
+  overburden arrival (`FIPLEG` pairs were not examined), and any case with a
+  permeable overburden. These totals do not give a calibrated hole-flow law.
+- The `compare_scenario_outputs.py` report initially failed every case on
+  "grid geometry changed". The cause was the comparison counting generated
+  hole blocks as geometry, not a grid change; it ignores those blocks now.
+
 **Area-equivalent opening:**
 
 - Locate the depth layer and the selected casing's sealed interface. Define
