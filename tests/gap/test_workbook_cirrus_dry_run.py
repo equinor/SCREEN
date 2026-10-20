@@ -342,6 +342,23 @@ def test_gridpolicy_free_fluid_values_reach_ocean_and_wellbore_cells(tmp_path):
     assert "conflicts with the free-fluid permeability 5000 mD" in conflict.stderr
 
 
+def test_gridpolicy_reservoir_wall_multiplier_reaches_the_coarse_grid(tmp_path):
+    root = Path(__file__).parents[2]
+    workbook = tmp_path / "wall_porv.xlsx"
+    shutil.copyfile(root / "test_data/examples/wildcat/wildcat_workbook.xlsx", workbook)
+    excel = load_workbook(workbook)
+    excel["GridPolicy"].append(["reservoir_wall_porv_multiplier", 3])
+    excel.save(workbook)
+
+    result = _run_wrapper(tmp_path, workbook, tmp_path / "case")
+    assert result.returncode == 0, result.stderr
+    grid = (tmp_path / "case/include/wildcat_baseline_GRD.grdecl").read_text(encoding="utf-8")
+    assert re.search(r"^PORV 3 1 1 1 20 \d+ \d+ /$", grid, re.MULTILINE)
+    assert re.search(r"^PORV 2000 1 20 1 20 (\d+) \1 /$", grid, re.MULTILINE)
+    policy = json.loads((tmp_path / "case/grid_policy.json").read_text(encoding="utf-8"))
+    assert policy["reservoir_wall_porv_multiplier"] == 3
+
+
 def test_designmatrix_free_fluid_override_beats_gridpolicy_for_that_case(tmp_path):
     root = Path(__file__).parents[2]
     workbook = tmp_path / "free_fluid_row.xlsx"

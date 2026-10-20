@@ -51,7 +51,7 @@ units. Required fields are `top_depth` and `target_dz_water`,
 unset; `nx`/`ny` 20; `dx`/`dy` 200 m; `reservoir_permx` 1000 mD;
 `overburden_permx` 0.001 mD; `aquifer_permx` unset; `aquifer_layers` 3;
 `free_fluid_permx` 10000 mD; `free_fluid_poro` 1.0;
-`porv_multiplier` 2000; `permz_multiplier` 0.1. Spacing and layer counts must
+`porv_multiplier` 2000; `reservoir_wall_porv_multiplier` 1; `permz_multiplier` 0.1. Spacing and layer counts must
 be positive, permeabilities nonnegative, and maximum layer counts cannot be
 below their minimums. `water_depth` comes from `Header.ground_elevation`
 (converted from ft when declared); legacy GridPolicy values for water depth,
@@ -292,13 +292,20 @@ uv run --extra visualization python runscripts/plot_region_fluxes.py \
 	--output-root cases --zonation FIPLEG --list-vectors
 ```
 
-Generated coarse grids label `FIPLEG` as: 1 water, 2 overburden, 3 reservoir,
-5 aquifer boundary, and 6 the wellbore cells inside the LGR (pipe, open hole
-and casing-cement boxes; the rest of the LGR is not labelled 6). Region 5 is the four outer coarse-grid
-columns in the reservoir layers, the cells whose pore volume is multiplied
-(`porv_multiplier`); the water and overburden edge cells keep 1 and 2. Cases
-generated before this definition (region 5 on the bottom `aquifer_layers`) are
-not comparable region-for-region.
+Generated coarse grids put the aquifer pore volume where it can only supply water
+and pressure support. `porv_multiplier` (default 2000) multiplies the pore volume
+of the four outer side walls of the water and overburden layers and of the whole
+bottom reservoir layer. An optional `reservoir_wall_porv_multiplier` (default 1,
+no effect) multiplies the four outer walls of the reservoir above the bottom
+layer; a large value there gives CO2 an almost unlimited sink or source, so leave
+it at 1 unless that is the sensitivity. `FIPLEG` is labelled: 1 water, 2 overburden
+(interior columns, away from the side walls), 3 reservoir, 5 the bottom reservoir
+layer, 6 the wellbore cells inside the LGR (pipe, open hole and casing-cement
+boxes; the rest of the LGR is not labelled 6) and 7 the water and overburden side
+walls. The reservoir side walls stay in region 3 even when their multiplier is
+changed. Cases generated with the older definitions (pore volume on all outer
+columns, or region 5 on the outer reservoir columns) are not comparable with new
+ones, in results or region by region.
 
 The list reports the exact keys and the cases exporting each one. If `1-6`
 exists but `6-1` does not, only `1-6` is selectable; reversing a pair is not

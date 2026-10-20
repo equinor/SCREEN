@@ -115,6 +115,7 @@ def parameterize_grdecl(
     overburden_permx: float = 0.001,
     aquifer_permx: float | None = None,
     aquifer_layers: int = 3,
+    reservoir_wall_porv_multiplier: float = 1.0,
     free_fluid_permx: float = FREE_FLUID_PERMX,
     free_fluid_poro: float = FREE_FLUID_PORO,
     porv_multiplier: float = 2000.0,
@@ -145,7 +146,7 @@ def parameterize_grdecl(
         formatted_value = f"{value:g}" if isinstance(value, (int, float)) else str(value)
         return f"{keyword} {formatted_value} 1 {nx} 1 {ny} {start} {end} /"
 
-    # Outer coarse-grid columns (i0 i1 j0 j1): the aquifer boundary used for both PORV and FIPLEG 5.
+    # Outer coarse-grid columns (i0 i1 j0 j1), shared by the side-wall FIPLEG and PORV boxes.
     edge_columns = ((1, 1, 1, ny), (nx, nx, 1, ny), (2, nx - 1, 1, 1), (2, nx - 1, ny, ny))
 
     def edge_region(keyword: str, value: object, start: int, end: int) -> list[str]:
@@ -169,6 +170,8 @@ def parameterize_grdecl(
         region("PERMX", free_fluid_permx, water_start, water_end),
         region("PORO", free_fluid_poro, water_start, water_end),
         region("FIPLEG", 1, water_start, water_end),
+        "-- FIPLEG 7: side walls of the water and overburden, where pore volume is multiplied",
+        *edge_region("FIPLEG", 7, water_start, overburden_end),
         "",
         "-- Reservoir and aquifer properties",
     ]
@@ -179,8 +182,8 @@ def parameterize_grdecl(
         if aquifer_start > reservoir_start:
             lines.append(region("PERMX", reservoir_permx, reservoir_start, aquifer_start - 1))
         lines.append(region("PERMX", aquifer_permx, aquifer_start, reservoir_end))
-    lines.append("-- FIPLEG 5: aquifer boundary, the outer coarse-grid columns in reservoir layers")
-    lines.extend(edge_region("FIPLEG", 5, reservoir_start, reservoir_end))
+    lines.append("-- FIPLEG 5: bottom reservoir layer, where pore volume is multiplied (bottom aquifer)")
+    lines.append(region("FIPLEG", 5, reservoir_end, reservoir_end))
     lines.extend(
         [
             "",
@@ -196,8 +199,15 @@ def parameterize_grdecl(
             "/",
             "",
             "MULTIPLY",
-            "-- Multiply pore volume on the four outer coarse-grid sides",
-            *edge_region("PORV", porv_multiplier, 1, nz),
+            "-- Multiply pore volume on the side walls of the water and overburden and on the bottom reservoir layer",
+            *edge_region("PORV", porv_multiplier, water_start, overburden_end),
+            region("PORV", porv_multiplier, reservoir_end, reservoir_end),
+            *(
+                ["-- Optional pore volume multiplier on the reservoir side walls, above the bottom layer"]
+                + edge_region("PORV", reservoir_wall_porv_multiplier, reservoir_start, reservoir_end - 1)
+                if reservoir_wall_porv_multiplier != 1 and reservoir_end > reservoir_start
+                else []
+            ),
             "",
             "-- Do not reduce permeability in the water layer",
             f"PERMZ {permz_multiplier:g} 1 {nx} 1 {ny} {water_end + 1} {nz} /",
@@ -273,6 +283,7 @@ def stage_case(args: argparse.Namespace) -> tuple[Path, Path, Path]:
         overburden_permx=getattr(args, "overburden_permx", 0.001),
         aquifer_permx=getattr(args, "aquifer_permx", None),
         aquifer_layers=getattr(args, "aquifer_layers", 3),
+        reservoir_wall_porv_multiplier=getattr(args, "reservoir_wall_porv_multiplier", 1.0),
         free_fluid_permx=getattr(args, "free_fluid_permx", FREE_FLUID_PERMX),
         free_fluid_poro=getattr(args, "free_fluid_poro", FREE_FLUID_PORO),
         porv_multiplier=getattr(args, "porv_multiplier", 2000.0),
