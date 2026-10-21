@@ -31,6 +31,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--free-fluid-permx", type=float, help="Free-fluid (open hole, pipe) permeability in mD; default 10000.")
     parser.add_argument("--free-fluid-poro", type=float, help="Free-fluid (open hole, pipe) porosity; default 1.0.")
     parser.add_argument("--oh-perm", type=float, help="Deprecated: use --free-fluid-permx.")
+    parser.add_argument(
+        "--wellbore-porv-reset",
+        type=float,
+        help="Experimental: divide PORV by this on the bottom-layer open-hole cells, to undo an inherited bottom-layer multiplier.",
+    )
     parser.add_argument("--cb-perm", type=float, default=0.05, help="Cement-bond permeability default in mD.")
     parser.add_argument("--barrier-perm", type=float, default=0.05, help="Barrier permeability default in mD.")
     parser.add_argument("--ali-way", action="store_true", help="Use the legacy Ali refinement mode.")
@@ -79,6 +84,7 @@ def build_lgr(args: argparse.Namespace) -> Path:
         well_frames.barrier_regions_df,
         casing_hole=hole,
         open_casing_hole=scenario.casing_hole_open,
+        wellbore_porv_reset=getattr(args, "wellbore_porv_reset", None),
     )
     lgr_path = args.output_folder / f"{args.lgr_name}.grdecl"
     lgr_file_stem = getattr(args, "lgr_file_stem", None)

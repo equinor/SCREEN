@@ -133,6 +133,7 @@ def create_workbook(example: dict) -> Path:
         for field in (
             "reservoir_permx", "overburden_permx", "free_fluid_permx", "free_fluid_poro", "cb_perm", "barrier_perm",
             "water_overburden_wall_porv_multiplier", "reservoir_bottom_porv_multiplier", "reservoir_wall_porv_multiplier",
+            "reservoir_bottom_exclusion",
         ):
             scenarios[field] = None
         scenarios["cb_perm_interval"] = "ALL"

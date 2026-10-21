@@ -117,6 +117,7 @@ def parameterize_grdecl(
     aquifer_layers: int = 3,
     water_overburden_wall_porv_multiplier: float = 2000.0,
     reservoir_bottom_porv_multiplier: float = 2000.0,
+    reservoir_bottom_exclusion: str = "none",
     reservoir_wall_porv_multiplier: float = 1.0,
     free_fluid_permx: float = FREE_FLUID_PERMX,
     free_fluid_poro: float = FREE_FLUID_PORO,
@@ -152,6 +153,18 @@ def parameterize_grdecl(
 
     def edge_region(keyword: str, value: object, start: int, end: int) -> list[str]:
         return [f"{keyword} {value:g} {i0} {i1} {j0} {j1} {start} {end} /" for i0, i1, j0, j1 in edge_columns]
+
+    def bottom_porv() -> list[str]:
+        """Bottom-layer PORV boxes; "parent_cell" leaves out the well's parent cell (the grid centre, as the LGR builder picks it)."""
+        if reservoir_bottom_exclusion != "parent_cell":
+            return [region("PORV", reservoir_bottom_porv_multiplier, reservoir_end, reservoir_end)]
+        ci, cj = (nx - 1) // 2 + 1, (ny - 1) // 2 + 1
+        boxes = [(1, nx, 1, cj - 1), (1, ci - 1, cj, cj), (ci + 1, nx, cj, cj), (1, nx, cj + 1, ny)]
+        return [
+            f"PORV {reservoir_bottom_porv_multiplier:g} {i0} {i1} {j0} {j1} {reservoir_end} {reservoir_end} /"
+            for i0, i1, j0, j1 in boxes
+            if i0 <= i1 and j0 <= j1
+        ]
 
     lines = [
         "EQUALS",
@@ -202,7 +215,7 @@ def parameterize_grdecl(
             "MULTIPLY",
             "-- Multiply pore volume on the side walls of the water and overburden and on the bottom reservoir layer",
             *edge_region("PORV", water_overburden_wall_porv_multiplier, water_start, overburden_end),
-            region("PORV", reservoir_bottom_porv_multiplier, reservoir_end, reservoir_end),
+            *bottom_porv(),
             *(
                 ["-- Optional pore volume multiplier on the reservoir side walls, above the bottom layer"]
                 + edge_region("PORV", reservoir_wall_porv_multiplier, reservoir_start, reservoir_end - 1)
@@ -286,6 +299,7 @@ def stage_case(args: argparse.Namespace) -> tuple[Path, Path, Path]:
         aquifer_layers=getattr(args, "aquifer_layers", 3),
         water_overburden_wall_porv_multiplier=getattr(args, "water_overburden_wall_porv_multiplier", 2000.0),
         reservoir_bottom_porv_multiplier=getattr(args, "reservoir_bottom_porv_multiplier", 2000.0),
+        reservoir_bottom_exclusion=getattr(args, "reservoir_bottom_exclusion", "none"),
         reservoir_wall_porv_multiplier=getattr(args, "reservoir_wall_porv_multiplier", 1.0),
         free_fluid_permx=getattr(args, "free_fluid_permx", FREE_FLUID_PERMX),
         free_fluid_poro=getattr(args, "free_fluid_poro", FREE_FLUID_PORO),

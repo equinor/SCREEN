@@ -378,6 +378,31 @@ def test_scenario_rejects_non_positive_porv_overrides(field):
     assert getattr(SimulationScenario(), field) is None
 
 
+@pytest.mark.parametrize("exclusion", ["parent_cell", "wellbore", "none"])
+def test_bottom_exclusion_reaches_the_coarse_grid_or_the_lgr(tmp_path, exclusion):
+    root = Path(__file__).parents[2]
+    workbook = tmp_path / "exclusion.xlsx"
+    shutil.copyfile(root / "test_data/examples/wildcat/wildcat_workbook.xlsx", workbook)
+    excel = load_workbook(workbook)
+    sheet = excel["DesignMatrix"]
+    sheet.cell(1, sheet.max_column + 1).value = "reservoir_bottom_exclusion"
+    sheet.cell(2, sheet.max_column).value = exclusion
+    excel.save(workbook)
+
+    result = _run_wrapper(tmp_path, workbook, tmp_path / "case")
+    assert result.returncode == 0, result.stderr
+    grid = (tmp_path / "case/include/wildcat_baseline_GRD.grdecl").read_text(encoding="utf-8")
+    lgr = (tmp_path / "case/include/wildcat_baseline_LGR.grdecl").read_text(encoding="utf-8")
+    bottom_boxes = re.findall(r"^PORV 2000 (\d+) (\d+) (\d+) (\d+) (\d+) \5 /$", grid, re.MULTILINE)
+    layer = {box[4] for box in bottom_boxes}
+    assert len(bottom_boxes) == (4 if exclusion == "parent_cell" else 1)
+    assert len(layer) == 1
+    assert ("PORV 0.0005 " in lgr) == (exclusion == "wellbore")
+    assert ("MULTIPLY" in lgr) == (exclusion == "wellbore")
+    policy = json.loads((tmp_path / "case/grid_policy.json").read_text(encoding="utf-8"))
+    assert policy["reservoir_bottom_exclusion"] == exclusion
+
+
 def test_designmatrix_free_fluid_override_beats_gridpolicy_for_that_case(tmp_path):
     root = Path(__file__).parents[2]
     workbook = tmp_path / "free_fluid_row.xlsx"

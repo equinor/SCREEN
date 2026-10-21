@@ -622,6 +622,21 @@ columns; other grid sizes were not checked. Earlier cases are not comparable
 region-for-region or in pressure response. Open point: whether the reservoir
 walls need their own region.
 
+**CIRRUS `.INIT` evidence for this layout (user-reported, 2026-10-21):** on a
+`20 x 20 x 63` case with a `22 x 22 x 270` LGR, the global `FIPLEG` array had
+region 1 on 2268 cells, 2 on 5184, 3 on 15600, 5 on the 400 bottom-layer cells and
+7 on the 1748 outer-column cells of layers 1-23. Unlabelled LGR cells inherited
+their parent's region; region 5 had 468 LGR cells and region 6 (wellbore) 10476,
+16 of them in the bottom layer. `PORV / (PORO * NTG * DX * DY * DZ)` gave x2000 on
+the 76 outer columns of layers 1-23 and on the whole bottom layer, x1 elsewhere,
+and the LGR bottom layer, including its 16 wellbore cells, inherited x2000 (the
+layer above was x1). **Open decision:** whether the open-hole cells at the base of
+the well should sit in the multiplied bottom layer. `reservoir_bottom_exclusion`
+(`parent_cell` or `wellbore`, per `DesignMatrix` row) and
+`reservoir_bottom_porv_multiplier` = 1 make it possible to compare the whole
+layer, no bottom multiplier and the two exclusions on one hole case. `wellbore`
+is untested on CIRRUS (a `MULTIPLY PORV` block in the LGR include).
+
 - Trace current boundary-aquifer placement and pore-volume multipliers, then
   compare them with FIPLEG 5 assignments in generated parent and LGR outputs.
 - Define region 5 ownership at coarse-grid edges and parent/LGR interfaces,

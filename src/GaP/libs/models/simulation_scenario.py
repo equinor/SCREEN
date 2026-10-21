@@ -7,6 +7,9 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 from .casing_hole import CasingHole
 
 
+BottomExclusion = Literal["none", "parent_cell", "wellbore"]
+
+
 class SimulationScenario(BaseModel):
     """GaP/CIRRUS inputs for one simulation case of a physical wellbore."""
 
@@ -29,6 +32,7 @@ class SimulationScenario(BaseModel):
     water_overburden_wall_porv_multiplier: Optional[float] = Field(default=None, gt=0, allow_inf_nan=False, description="Water/overburden side-wall pore volume multiplier override")
     reservoir_bottom_porv_multiplier: Optional[float] = Field(default=None, gt=0, allow_inf_nan=False, description="Bottom reservoir layer pore volume multiplier override")
     reservoir_wall_porv_multiplier: Optional[float] = Field(default=None, gt=0, allow_inf_nan=False, description="Reservoir side-wall pore volume multiplier override")
+    reservoir_bottom_exclusion: Optional[BottomExclusion] = Field(default=None, description="Bottom-layer cells left out of the bottom pore volume multiplier override")
     free_fluid_permx: Optional[float] = Field(default=None, gt=0, allow_inf_nan=False, description="Free-fluid permeability override in mD")
     free_fluid_poro: Optional[float] = Field(default=None, gt=0, le=1, allow_inf_nan=False, description="Free-fluid porosity override")
     cb_perm: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False, description="Casing-cement permeability override in mD")

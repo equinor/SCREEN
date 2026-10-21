@@ -67,6 +67,7 @@ def _generate_scenario_variations(
                 "free_fluid_poro": None,
                 "water_overburden_wall_porv_multiplier": None,
                 "reservoir_bottom_porv_multiplier": None,
+                "reservoir_bottom_exclusion": None,
                 "reservoir_wall_porv_multiplier": None,
                 "cb_perm": None,
                 "cb_perm_interval": "ALL",

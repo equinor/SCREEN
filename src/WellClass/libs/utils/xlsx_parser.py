@@ -7,7 +7,7 @@ import pandas as pd
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from src.GaP.libs.free_fluid import FREE_FLUID_PERMX, FREE_FLUID_PORO
-from src.GaP.libs.models.simulation_scenario import SimulationDesign
+from src.GaP.libs.models.simulation_scenario import BottomExclusion, SimulationDesign
 
 from ..models.well_model import WellModel
 
@@ -46,6 +46,7 @@ class GridPolicy(BaseModel):
     water_overburden_wall_porv_multiplier: float | None = Field(default=None, gt=0, description="Pore volume multiplier on the water/overburden side walls")
     reservoir_bottom_porv_multiplier: float | None = Field(default=None, gt=0, description="Pore volume multiplier on the bottom reservoir layer")
     reservoir_wall_porv_multiplier: float = Field(default=1.0, gt=0, description="Pore volume multiplier on the reservoir side walls, bottom layer excluded")
+    reservoir_bottom_exclusion: BottomExclusion = Field(default="none", description="Bottom-layer cells left out of the bottom pore volume multiplier")
     permz_multiplier: float = Field(default=0.1, ge=0)
 
     @model_validator(mode="after")
@@ -200,6 +201,7 @@ def xlsx_grid_policy(xlsx_file: str | Path) -> dict[str, Any]:
     - free_fluid_permx (default 10000), free_fluid_poro (default 1.0): ocean, open-hole and pipe cells
     - water_overburden_wall_porv_multiplier, reservoir_bottom_porv_multiplier (default porv_multiplier, 2000)
     - reservoir_wall_porv_multiplier (default 1): reservoir side walls, bottom layer excluded
+    - reservoir_bottom_exclusion (none | parent_cell | wellbore): bottom-layer cells left out of the bottom multiplier
     - permz_multiplier (default 0.1)
     """
 

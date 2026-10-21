@@ -50,6 +50,7 @@ class LGRBuilder(LGRBuilderBase):
         *,
         casing_hole: CasingHole | None = None,
         open_casing_hole: bool = True,
+        wellbore_porv_reset: float | None = None,
     ) -> pd.DataFrame:
         """build .grdecl file and output it
 
@@ -62,6 +63,7 @@ class LGRBuilder(LGRBuilderBase):
             barrier_regions_df (pd.DataFrame): GaP barrier material regions
             casing_hole (CasingHole | None): hole location; always adds FIPHOL reporting
             open_casing_hole (bool): False keeps the location sealed for reporting only
+            wellbore_porv_reset (float | None): divide PORV by this on the bottom-layer open-hole cells
         """
 
         ##### 4. build LGR
@@ -105,6 +107,7 @@ class LGRBuilder(LGRBuilderBase):
             self.lgr_info.min_grd_size,
             self.casing_hole_faces,
             open_casing_hole,
+            wellbore_porv_reset,
         )
 
         return gap_casing_df

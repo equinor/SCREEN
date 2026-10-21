@@ -140,6 +140,7 @@ without a warning**.
 | `water_overburden_wall_porv_multiplier` | factor | `GridPolicy`, else `porv_multiplier` (2000) | Pore volume of the four outer side walls of the water and overburden layers. |
 | `reservoir_bottom_porv_multiplier` | factor | `GridPolicy`, else `porv_multiplier` (2000) | Pore volume of the whole bottom reservoir layer (the bottom aquifer). |
 | `reservoir_wall_porv_multiplier` | factor | `GridPolicy` (1, no effect) | Pore volume of the four outer reservoir walls above the bottom layer. |
+| `reservoir_bottom_exclusion` | `none`, `parent_cell`, `wellbore` | `GridPolicy` (`none`) | Which bottom-layer cells are left out of the bottom multiplier: `parent_cell` the whole parent cell the LGR refines (the centre of the coarse grid; its LGR cells inherit the unmultiplied value); `wellbore` only the open-hole cells of the last LGR layer, by dividing their inherited pore volume (experimental: needs a CIRRUS check, see below). |
 | `cb_perm` | mD | cement row `hc_perm`, else 0.05 | Casing-cement permeability. |
 | `cb_perm_interval` | text | `ALL` | Which `HoleCasings` casing-cement `name` `cb_perm` applies to, or `ALL`. |
 | `barrier_perm` | mD | `Plugs` `cement_perm`, else 0.05 | Plug permeability. |
@@ -369,9 +370,21 @@ default to `porv_multiplier` (2000), so a workbook that only sets that key is
 unchanged. A large reservoir wall value gives CO2 an almost unlimited sink or
 source, so leave it at 1 unless that is the sensitivity. Each can be set in
 `GridPolicy` and overridden per case in `DesignMatrix`; the effective values are
-saved in `grid_policy.json`. `FIPLEG` is labelled: 1 water, 2 overburden
+saved in `grid_policy.json`.
+
+**Aquifer sensitivities.** LGR cells inherit the pore volume multiplier of their
+parent cell. A set of cases that differ only in the aquifer can combine the
+multipliers with `reservoir_bottom_exclusion`: the whole bottom layer (default),
+no bottom multiplier (`reservoir_bottom_porv_multiplier` 1), `parent_cell` (all
+of the bottom layer except the cell under the well) and `wellbore` (only the
+open-hole cells in the bottom LGR layer left out). After a run, the effective
+multiplier of every cell can be read from the `.INIT` as
+`PORV / (PORO * NTG * DX * DY * DZ)`, for the global grid and the LGR. `wellbore`
+writes a `MULTIPLY PORV` block in the LGR include; whether CIRRUS applies it on
+top of the inherited multiplier has not been confirmed, so check the open-hole
+cells of the last LGR layer in the `.INIT`. `FIPLEG` is labelled: 1 water, 2 overburden
 (interior columns, away from the side walls), 3 reservoir, 5 the bottom reservoir
-layer, 6 the wellbore cells inside the LGR (pipe, open hole and casing-cement
+layer (whatever its multiplier, so the regions are the same in every aquifer sensitivity), 6 the wellbore cells inside the LGR (pipe, open hole and casing-cement
 boxes; the rest of the LGR is not labelled 6) and 7 the water and overburden side
 walls. The reservoir side walls stay in region 3 even when their multiplier is
 changed. Cases generated with the older definitions (pore volume on all outer

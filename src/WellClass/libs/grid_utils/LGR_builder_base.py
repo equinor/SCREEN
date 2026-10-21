@@ -4,6 +4,7 @@ import pandas as pd
 
 from src.GaP.libs.carfin.CARFIN_core import CARFIN_keywords, endCARFIN2, pre_CARFIN
 from src.GaP.libs.grid_utils.casing_hole import HoleFace, write_casing_hole, write_hole_reporting
+from src.GaP.libs.grid_utils.wellbore_porv import write_wellbore_porv_reset
 
 from .LGR2GaP import df_to_gap_barrier, df_to_gap_casing
 from .LGR_bbox import compute_bbox_for_reopen
@@ -29,6 +30,7 @@ class LGRBuilderBase:
         min_grd_size: float,
         hole_faces: tuple[HoleFace, ...] = (),
         open_hole: bool = True,
+        wellbore_porv_reset: float | None = None,
     ):
         """build grdecl file and output it"""
         # 0. prepare file for output
@@ -61,6 +63,8 @@ class LGRBuilderBase:
         if open_hole:
             write_casing_hole(hole_faces, O)
         write_hole_reporting(hole_faces, len(LGR_sizes_x), len(LGR_sizes_x), int(sum(LGR_numb_z)), O)
+        if wellbore_porv_reset is not None:
+            write_wellbore_porv_reset(holes_df, int(sum(LGR_numb_z)), wellbore_porv_reset, O)
 
         # 4. handle reopen hole
         nz_ovb = 10 * no_of_layers_in_OB  # total number of ovb layers (refined grid)

@@ -200,6 +200,38 @@ def test_pore_volume_and_fipleg_regions_of_the_aquifer(tmp_path, aquifer_layers,
     assert ("Optional pore volume multiplier" in text) == (wall_multiplier != 1)
 
 
+@pytest.mark.parametrize(("nx", "ny", "centre"), [(20, 20, (10, 10)), (21, 6, (11, 3)), (3, 3, (2, 2))])
+def test_parent_cell_exclusion_leaves_only_the_wells_cell_out_of_the_bottom_multiplier(tmp_path, nx, ny, centre):
+    root = Path(__file__).parents[2]
+    grdecl = tmp_path / "grid.grdecl"
+    grdecl.write_text((root / "test_data/examples/wildcat-pflotran/include/TEMP_GRD.grdecl").read_text(encoding="utf-8"))
+    prepare_init_case.parameterize_grdecl(
+        grdecl, water_layers=3, overburden_layers=15, reservoir_layers=40, nx=nx, ny=ny,
+        reservoir_bottom_porv_multiplier=700.0, reservoir_bottom_exclusion="parent_cell",
+    )
+    text = grdecl.read_text(encoding="utf-8")
+    fipleg, porv = _apply_boxes(text, nx, ny, 58)
+    expected = np.full((ny, nx), 700.0)
+    expected[centre[1] - 1, centre[0] - 1] = 1.0
+    assert (porv[57] == expected).all()
+    assert (fipleg[57] == 5).all()  # region 5 labels the bottom layer whatever its multiplier
+    assert (porv[18:57] == 1).all()
+
+
+@pytest.mark.parametrize("exclusion", ["none", "wellbore"])
+def test_other_exclusions_do_not_change_the_coarse_grid(tmp_path, exclusion):
+    root = Path(__file__).parents[2]
+    texts = []
+    for value in ("none", exclusion):
+        grdecl = tmp_path / f"{value}.grdecl"
+        grdecl.write_text((root / "test_data/examples/wildcat-pflotran/include/TEMP_GRD.grdecl").read_text(encoding="utf-8"))
+        prepare_init_case.parameterize_grdecl(
+            grdecl, water_layers=3, overburden_layers=15, reservoir_layers=40, reservoir_bottom_exclusion=value
+        )
+        texts.append(grdecl.read_text(encoding="utf-8"))
+    assert texts[0] == texts[1]
+
+
 def test_single_layer_reservoir_has_no_reservoir_wall_boxes(tmp_path):
     root = Path(__file__).parents[2]
     grdecl = tmp_path / "grid.grdecl"
@@ -370,6 +402,7 @@ def test_xlsx_grid_policy_applies_legacy_units_and_defaults(tmp_path):
         ("free_fluid_permx", 0), ("free_fluid_poro", 0), ("free_fluid_poro", 1.5),
         ("porv_multiplier", 0), ("reservoir_wall_porv_multiplier", 0),
         ("water_overburden_wall_porv_multiplier", 0), ("reservoir_bottom_porv_multiplier", -1),
+        ("reservoir_bottom_exclusion", "everything"),
     ],
 )
 def test_xlsx_grid_policy_rejects_invalid_values(tmp_path, key, value):

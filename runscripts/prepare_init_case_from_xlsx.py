@@ -156,6 +156,7 @@ def derive_stage_args_from_policy(args: argparse.Namespace, policy: dict, well_m
             policy.get("water_overburden_wall_porv_multiplier", policy.get("porv_multiplier", 2000.0))
         ),
         reservoir_bottom_porv_multiplier=float(policy.get("reservoir_bottom_porv_multiplier", policy.get("porv_multiplier", 2000.0))),
+        reservoir_bottom_exclusion=policy.get("reservoir_bottom_exclusion", "none"),
         reservoir_wall_porv_multiplier=float(policy.get("reservoir_wall_porv_multiplier", 1.0)),
         free_fluid_permx=float(policy.get("free_fluid_permx", FREE_FLUID_PERMX)),
         free_fluid_poro=float(policy.get("free_fluid_poro", FREE_FLUID_PORO)),
@@ -219,6 +220,7 @@ def parameterize_staged_deck(args: argparse.Namespace, policy: dict, well_header
 POLICY_OVERRIDE_FIELDS = (
     "reservoir_permx", "overburden_permx", "free_fluid_permx", "free_fluid_poro",
     "water_overburden_wall_porv_multiplier", "reservoir_bottom_porv_multiplier", "reservoir_wall_porv_multiplier",
+    "reservoir_bottom_exclusion",
 )
 
 
