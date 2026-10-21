@@ -139,7 +139,8 @@ def test_prepare_init_case_from_xlsx_stages_files(tmp_path):
     assert "FIPLEG 3 1 20 1 20 19 58 /" in grdecl_text
     assert "FIPLEG 5 1 20 1 20 58 58 /" in grdecl_text
     assert "FIPLEG 7 1 1 1 20 1 18 /" in grdecl_text
-    assert "PORV 2000 1 20 1 20 58 58 /" in grdecl_text
+    assert "PORV 2000 1 20 1 9 58 58 /" in grdecl_text  # the bottom layer, centre cell left out
+    assert "PORV 2000 1 20 1 20 58 58 /" not in grdecl_text
     assert "PERMX 1000 1 20 1 20 56 58 /" in grdecl_text
     assert "TRANZ 0 1 20 1 20 19 19 /" in grdecl_text
     assert "PERMZ 0.1 1 20 1 20 4 58 /" in grdecl_text
@@ -185,7 +186,9 @@ def test_pore_volume_and_fipleg_regions_of_the_aquifer(tmp_path, aquifer_layers,
 
     # Pore volume: three independent multipliers; nothing else is multiplied.
     assert (porv[upper][:, edge] == 1500).all() and (porv[upper][:, ~edge] == 1).all()
-    assert (porv[bottom] == 700).all()
+    expected_bottom = np.full((20, 20), 700.0)
+    expected_bottom[9, 9] = 1.0  # the cell under the well (and its LGR) is not multiplied
+    assert (porv[bottom] == expected_bottom).all()
     assert (porv[18:bottom][:, edge] == wall_multiplier).all() and (porv[18:bottom][:, ~edge] == 1).all()
 
     # FIPLEG: 7 = water/overburden side walls, 5 = bottom layer; regions 1, 2, 3 keep the rest; region 4 never survives.
@@ -200,6 +203,22 @@ def test_pore_volume_and_fipleg_regions_of_the_aquifer(tmp_path, aquifer_layers,
     assert ("Optional pore volume multiplier" in text) == (wall_multiplier != 1)
 
 
+@pytest.mark.parametrize(("nx", "ny", "centre"), [(20, 20, (10, 10)), (21, 6, (11, 3)), (3, 3, (2, 2)), (1, 1, (1, 1))])
+def test_the_wells_parent_cell_is_the_only_bottom_cell_without_the_multiplier(tmp_path, nx, ny, centre):
+    root = Path(__file__).parents[2]
+    grdecl = tmp_path / "grid.grdecl"
+    grdecl.write_text((root / "test_data/examples/wildcat-pflotran/include/TEMP_GRD.grdecl").read_text(encoding="utf-8"))
+    prepare_init_case.parameterize_grdecl(
+        grdecl, water_layers=3, overburden_layers=15, reservoir_layers=40, nx=nx, ny=ny, reservoir_bottom_porv_multiplier=700.0
+    )
+    fipleg, porv = _apply_boxes(grdecl.read_text(encoding="utf-8"), nx, ny, 58)
+    expected = np.full((ny, nx), 700.0)
+    expected[centre[1] - 1, centre[0] - 1] = 1.0
+    assert (porv[57] == expected).all()
+    assert (fipleg[57] == 5).all()  # region 5 still labels the whole bottom layer
+    assert (porv[18:57] == 1).all()
+
+
 def test_single_layer_reservoir_has_no_reservoir_wall_boxes(tmp_path):
     root = Path(__file__).parents[2]
     grdecl = tmp_path / "grid.grdecl"
@@ -208,7 +227,9 @@ def test_single_layer_reservoir_has_no_reservoir_wall_boxes(tmp_path):
         grdecl, water_layers=3, overburden_layers=15, reservoir_layers=1, aquifer_layers=0, reservoir_wall_porv_multiplier=5.0
     )
     _, porv = _apply_boxes(grdecl.read_text(encoding="utf-8"), 20, 20, 19)
-    assert (porv[18] == 2000).all()
+    expected = np.full((20, 20), 2000.0)
+    expected[9, 9] = 1.0
+    assert (porv[18] == expected).all()
 
 
 @pytest.mark.parametrize(
@@ -245,7 +266,8 @@ def test_standalone_staging_applies_designmatrix_grid_overrides(tmp_path):
     )
     assert result.returncode == 0, result.stderr
     grid = next((tmp_path / "case/include").glob("*_GRD.grdecl")).read_text(encoding="utf-8")
-    assert re.search(r"^PORV 900 1 20 1 20 (\d+) \1 /$", grid, re.MULTILINE)  # the row beats GridPolicy's 700
+    boxes = re.findall(r"^PORV 900 (\d+) (\d+) (\d+) (\d+) (\d+) \5 /$", grid, re.MULTILINE)  # the row beats GridPolicy's 700
+    assert len(boxes) == 4 and sum((int(b) - int(a) + 1) * (int(d) - int(c) + 1) for a, b, c, d, _ in boxes) == 399
     assert re.search(r"^PORV 5 1 1 1 20 \d+ \d+ /$", grid, re.MULTILINE)
 
 

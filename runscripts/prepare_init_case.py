@@ -153,6 +153,16 @@ def parameterize_grdecl(
     def edge_region(keyword: str, value: object, start: int, end: int) -> list[str]:
         return [f"{keyword} {value:g} {i0} {i1} {j0} {j1} {start} {end} /" for i0, i1, j0, j1 in edge_columns]
 
+    def bottom_porv() -> list[str]:
+        """Bottom-layer PORV boxes: the whole layer except the well's parent cell, whose LGR cells inherit its value."""
+        ci, cj = (nx - 1) // 2 + 1, (ny - 1) // 2 + 1  # the grid centre, as the LGR builder picks it
+        boxes = [(1, nx, 1, cj - 1), (1, ci - 1, cj, cj), (ci + 1, nx, cj, cj), (1, nx, cj + 1, ny)]
+        return [
+            f"PORV {reservoir_bottom_porv_multiplier:g} {i0} {i1} {j0} {j1} {reservoir_end} {reservoir_end} /"
+            for i0, i1, j0, j1 in boxes
+            if i0 <= i1 and j0 <= j1
+        ]
+
     lines = [
         "EQUALS",
         "FIPLEG 4  /",
@@ -183,7 +193,7 @@ def parameterize_grdecl(
         if aquifer_start > reservoir_start:
             lines.append(region("PERMX", reservoir_permx, reservoir_start, aquifer_start - 1))
         lines.append(region("PERMX", aquifer_permx, aquifer_start, reservoir_end))
-    lines.append("-- FIPLEG 5: bottom reservoir layer, where pore volume is multiplied (bottom aquifer)")
+    lines.append("-- FIPLEG 5: bottom reservoir layer (bottom aquifer; the well's parent cell is labelled too but not multiplied)")
     lines.append(region("FIPLEG", 5, reservoir_end, reservoir_end))
     lines.extend(
         [
@@ -200,9 +210,9 @@ def parameterize_grdecl(
             "/",
             "",
             "MULTIPLY",
-            "-- Multiply pore volume on the side walls of the water and overburden and on the bottom reservoir layer",
+            "-- Multiply pore volume on the side walls of the water and overburden and on the bottom reservoir layer (not the well's cell)",
             *edge_region("PORV", water_overburden_wall_porv_multiplier, water_start, overburden_end),
-            region("PORV", reservoir_bottom_porv_multiplier, reservoir_end, reservoir_end),
+            *bottom_porv(),
             *(
                 ["-- Optional pore volume multiplier on the reservoir side walls, above the bottom layer"]
                 + edge_region("PORV", reservoir_wall_porv_multiplier, reservoir_start, reservoir_end - 1)
