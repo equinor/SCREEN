@@ -138,7 +138,7 @@ without a warning**.
 | `free_fluid_permx` | mD | `GridPolicy` (10000) | Permeability of the ocean layers, open hole and pipe interior. |
 | `free_fluid_poro` | fraction | `GridPolicy` (1.0) | Porosity of the same free-fluid cells. |
 | `water_overburden_wall_porv_multiplier` | factor | `GridPolicy`, else `porv_multiplier` (2000) | Pore volume of the four outer side walls of the water and overburden layers. |
-| `reservoir_bottom_porv_multiplier` | factor | `GridPolicy`, else `porv_multiplier` (2000) | Pore volume of the whole bottom reservoir layer (the bottom aquifer). |
+| `reservoir_bottom_porv_multiplier` | factor | `GridPolicy`, else `porv_multiplier` (2000) | Pore volume of the bottom reservoir layer (the bottom aquifer), except the grid centre cell, where the well and its LGR are built. |
 | `reservoir_wall_porv_multiplier` | factor | `GridPolicy` (1, no effect) | Pore volume of the four outer reservoir walls above the bottom layer. |
 | `cb_perm` | mD | cement row `hc_perm`, else 0.05 | Casing-cement permeability. |
 | `cb_perm_interval` | text | `ALL` | Which `HoleCasings` casing-cement `name` `cb_perm` applies to, or `ALL`. |
@@ -362,14 +362,18 @@ uv run --extra visualization python runscripts/plot_region_fluxes.py \
 Generated coarse grids put the aquifer pore volume where it can only supply water
 and pressure support, with three independent multipliers:
 `water_overburden_wall_porv_multiplier` on the four outer side walls of the water
-and overburden layers, `reservoir_bottom_porv_multiplier` on the whole bottom
-reservoir layer, and `reservoir_wall_porv_multiplier` (default 1, no effect) on
+and overburden layers, `reservoir_bottom_porv_multiplier` on the bottom reservoir
+layer, and `reservoir_wall_porv_multiplier` (default 1, no effect) on
 the four outer walls of the reservoir above the bottom layer. The first two
 default to `porv_multiplier` (2000), so a workbook that only sets that key is
 unchanged. A large reservoir wall value gives CO2 an almost unlimited sink or
 source, so leave it at 1 unless that is the sensitivity. Each can be set in
 `GridPolicy` and overridden per case in `DesignMatrix`; the effective values are
-saved in `grid_policy.json`. `FIPLEG` is labelled: 1 water, 2 overburden
+saved in `grid_policy.json`. The bottom layer is multiplied in every column
+except the centre one, the parent cell of the LGR. LGR cells inherit the
+multiplier of their parent cell, so leaving that cell out keeps the wellbore, which
+runs down to the last layer, out of the aquifer volume without cutting the well.
+That cell is still labelled region 5. `FIPLEG` is labelled: 1 water, 2 overburden
 (interior columns, away from the side walls), 3 reservoir, 5 the bottom reservoir
 layer, 6 the wellbore cells inside the LGR (pipe, open hole and casing-cement
 boxes; the rest of the LGR is not labelled 6) and 7 the water and overburden side

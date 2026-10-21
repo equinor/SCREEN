@@ -358,7 +358,8 @@ def test_porv_multipliers_come_from_gridpolicy_and_designmatrix_overrides_win(tm
     assert result.returncode == 0, result.stderr
     grid = (tmp_path / "case/include/wildcat_baseline_GRD.grdecl").read_text(encoding="utf-8")
     assert re.search(r"^PORV 1500 1 1 1 20 1 \d+ /$", grid, re.MULTILINE)
-    assert re.search(r"^PORV 900 1 20 1 20 (\d+) \1 /$", grid, re.MULTILINE)  # the row beats GridPolicy's 700
+    boxes = re.findall(r"^PORV 900 (\d+) (\d+) (\d+) (\d+) (\d+) \5 /$", grid, re.MULTILINE)  # the row beats GridPolicy's 700
+    assert len(boxes) == 4 and sum((int(b) - int(a) + 1) * (int(d) - int(c) + 1) for a, b, c, d, _ in boxes) == 399
     assert re.search(r"^PORV 3 1 1 1 20 \d+ \d+ /$", grid, re.MULTILINE)
     policy = json.loads((tmp_path / "case/grid_policy.json").read_text(encoding="utf-8"))
     assert (

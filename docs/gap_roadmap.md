@@ -607,7 +607,8 @@ moves from all outer columns to where it can only provide water and pressure
 support. Three independent multipliers, each settable in `GridPolicy` and per
 `DesignMatrix` row: `water_overburden_wall_porv_multiplier` (four side walls of
 the water and overburden layers), `reservoir_bottom_porv_multiplier` (the whole
-bottom reservoir layer) and `reservoir_wall_porv_multiplier` (default 1). The
+bottom reservoir layer, except the grid centre cell) and
+`reservoir_wall_porv_multiplier` (default 1). The
 first two default to the legacy `porv_multiplier` (2000). Multiplied reservoir
 side walls gave CO2 an almost unlimited sink or source, which is not realistic,
 so the third multiplier, default 1, covers them above the bottom layer.
@@ -621,6 +622,31 @@ a central parent cell (10, 10 in the default 20 x 20 grid), away from the edge
 columns; other grid sizes were not checked. Earlier cases are not comparable
 region-for-region or in pressure response. Open point: whether the reservoir
 walls need their own region.
+
+**CIRRUS evidence for this layout (user-reported, 2026-10-21):** on a
+`20 x 20 x 63` case with a `22 x 22 x 270` LGR, the global `FIPLEG` array had
+region 1 on 2268 cells, 2 on 5184, 3 on 15600, 5 on the 400 bottom-layer cells and
+7 on the 1748 outer-column cells of layers 1-23. Unlabelled LGR cells inherited
+their parent's region. `PORV / (PORO * NTG * DX * DY * DZ)` read from the
+`.INIT` gave x2000 on the 76 outer columns of layers 1-23 and on the whole bottom
+layer, x1 elsewhere. The LGR bottom layer inherited its parent cell's multiplier,
+including the 16 wellbore cells: the open hole runs past the grid bottom (the grid
+ends 400 m below the reservoir top, the hole at the well's total depth), so it
+ended in the last layer, where one wellbore cell held 50 m3 of pore volume against
+0.025 m3 for the cell above.
+
+**Aquifer sensitivity (10 years, 0.2 m hole, 500 mD cement; user-reported):** the
+bottom layer at x2000, at x1, x2000 except the parent cell under the well, and
+x2000 with a `MULTIPLY PORV` block in the LGR include undoing the multiplier on the
+16 open-hole cells of the last layer. The region-to-region leakage rates looked the
+same in all four; end values were not recorded. The generated deck has no active
+well, so nothing is injected and the pore volume only changes the compressive
+storage. Excluding the parent cell worked as intended: its LGR cells inherited x1.
+The `MULTIPLY` block did not: those 16 cells (`k 270, i 10-13, j 10-13`) came out
+inactive (`PORV = 0`). Cutting the wellbore short of the last layer was tried and
+dropped. **Decision (2026-10-21):** the bottom layer is multiplied everywhere except
+the centre cell where the LGR is built, with no option. Region 5 still labels the
+whole bottom layer. Not checked on CIRRUS: a case generated with this layout.
 
 - Trace current boundary-aquifer placement and pore-volume multipliers, then
   compare them with FIPLEG 5 assignments in generated parent and LGR outputs.
