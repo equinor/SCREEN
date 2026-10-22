@@ -13,6 +13,7 @@ import pytest
 from openpyxl import load_workbook
 
 from src.GaP.libs.models.simulation_scenario import SimulationScenario
+from src.GaP.libs.pressure_inputs import resolve_pressure_inputs
 from src.WellClass.libs.utils.xlsx_parser import xlsx_to_simulation_design, xlsx_to_well_model
 
 WORKFLOW_PATH = Path(__file__).parents[2] / "runscripts/run_workbook_to_cirrus_lgr.py"
@@ -350,8 +351,8 @@ def test_porv_multipliers_come_from_gridpolicy_and_designmatrix_overrides_win(tm
     for key, value in (("water_overburden_wall_porv_multiplier", 1500), ("reservoir_bottom_porv_multiplier", 700), ("reservoir_wall_porv_multiplier", 3)):
         excel["GridPolicy"].append([key, value])
     sheet = excel["DesignMatrix"]
-    sheet.cell(1, sheet.max_column + 1).value = "reservoir_bottom_porv_multiplier"
-    sheet.cell(2, sheet.max_column).value = 900
+    columns = {cell.value: cell.column for cell in sheet[1]}
+    sheet.cell(2, columns["reservoir_bottom_porv_multiplier"]).value = 900
     excel.save(workbook)
 
     result = _run_wrapper(tmp_path, workbook, tmp_path / "case")
@@ -386,9 +387,9 @@ def test_designmatrix_free_fluid_override_beats_gridpolicy_for_that_case(tmp_pat
     excel = load_workbook(workbook)
     excel["GridPolicy"].append(["free_fluid_permx", 5000])
     sheet = excel["DesignMatrix"]
-    for column, value in ((sheet.max_column + 1, 2000), (sheet.max_column + 2, 0.8)):
-        sheet.cell(1, column).value = "free_fluid_permx" if value == 2000 else "free_fluid_poro"
-        sheet.cell(2, column).value = value
+    columns = {cell.value: cell.column for cell in sheet[1]}
+    for field, value in (("free_fluid_permx", 2000), ("free_fluid_poro", 0.8)):
+        sheet.cell(2, columns[field]).value = value
     excel.save(workbook)
 
     result = _run_wrapper(tmp_path, workbook, tmp_path / "case")
@@ -424,7 +425,12 @@ def test_older_workbook_without_hole_columns_remains_valid(tmp_path):
     assert all(scenario.casing_hole is None for scenario in xlsx_to_simulation_design(workbook).scenarios)
 
 
-def test_qc_plot_uses_workbook_fluid_contact_pressure(tmp_path, monkeypatch):
+@pytest.mark.parametrize("values", [
+    {"z_fluid_contact": 2400.0, "p_fluid_contact": 245.0},
+    {"z_fluid_contact": 1400.0, "z_resrv": 1217.0, "p_resrv": 125.0},
+    {"z_fluid_contact": 1400.0},
+])
+def test_qc_plot_uses_workbook_fluid_contact_pressure(tmp_path, monkeypatch, values):
     """Verify that the WellClass QC curve uses the scenario pressure datum."""
     captured = {}
 
@@ -460,24 +466,52 @@ def test_qc_plot_uses_workbook_fluid_contact_pressure(tmp_path, monkeypatch):
 
     monkeypatch.setattr("src.WellClass.libs.plotting.plot_one_page", fake_plot_one_page)
 
-    scenario = SimpleNamespace(
+    scenario = SimulationScenario(
         case_name="pressure_case",
-        casing_hole="hole",
-        z_fluid_contact=2400.0,
-        p_fluid_contact=245.0,
-        z_resrv=1400.0,
-        p_resrv=250.0,
         ground_temperature=4.0,
         temperature_gradient=31.0,
         fluid_type="co2",
         salinity=0.032,
+        **values,
     )
 
-    workflow.save_qc_plot(SimpleNamespace(), scenario, tmp_path / "qc_plot.png")
+    model = xlsx_to_well_model(Path("test_data/examples/wildcat/wildcat_workbook.xlsx"))
+    workflow.save_qc_plot(model, scenario, tmp_path / "qc_plot.png")
 
-    assert captured["z_fluid_datum"] == 2400.0
-    assert captured["p_fluid_datum"] == 245.0
+    resolved = resolve_pressure_inputs(scenario, model.spec.well_header)
+    assert captured["z_fluid_datum"] == resolved.z_fluid_contact
+    assert captured["p_fluid_datum"] == resolved.p_fluid_contact
     assert captured["pressure_options"]["salinity"] == 0.032
     assert captured["one_page_scenario"] == captured["name"] == "workbook"
-    assert captured["one_page_options"]["casing_hole"] == "hole"
+    assert captured["one_page_options"]["casing_hole"] is None
     assert captured["one_page_options"]["title"] == "pressure_case WellClass QC"
+
+
+def test_reservoir_datum_reaches_final_deck_and_metadata(tmp_path):
+    root = Path(__file__).parents[2]
+    workbook = tmp_path / "pressure.xlsx"
+    shutil.copyfile(root / "test_data/examples/smeaheia/smeaheia_workbook.xlsx", workbook)
+    excel = load_workbook(workbook)
+    sheet = excel["DesignMatrix"]
+    columns = {cell.value: cell.column for cell in sheet[1]}
+    for field, value in {"z_fluid_contact": 1400, "p_fluid_contact": None, "z_resrv": 1217, "p_resrv": 125}.items():
+        sheet.cell(2, columns[field]).value = value
+    excel.save(workbook)
+    runner = _fake_cirrus(tmp_path, root / "test_data/examples/smeaheia/model/TEMP-0")
+    output = tmp_path / "case"
+    result = subprocess.run(
+        [sys.executable, "runscripts/run_workbook_to_cirrus_lgr.py", "--xlsx", str(workbook),
+         "--case-name", "baseline", "--output-root", str(output), "--sim-command", f"{runner} {{deck}}",
+         "--run-final", "--simulation-years", "10"],
+        cwd=root, capture_output=True, text=True,
+    )
+    assert result.returncode == 0, result.stderr
+    saved = json.loads((output / "scenario.json").read_text(encoding="utf-8"))
+    assert saved["p_fluid_contact"] is None
+    resolved = saved["resolved_pressure"]
+    assert resolved["z_resrv"] == 1217 and resolved["p_resrv"] == 125
+    assert resolved["z_fluid_contact"] == 1400 and resolved["p_fluid_contact"] > 125
+    deck = (output / "model/smeaheia_baseline.in").read_text(encoding="utf-8")
+    assert f"PRESSURE  {resolved['p_fluid_contact']:g} Bar" in deck
+    assert "DATUM_D  1400 m" in deck and "WGC_D  1400 m" in deck
+    assert "FINAL_DATE  1 JAN 2035" in deck

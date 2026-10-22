@@ -24,6 +24,7 @@ from prepare_init_case import run_initialization, stage_case
 from src.GaP.libs.case_naming import CaseFiles, case_label, resolve_case
 from src.GaP.libs.deck_config import CirrusDeckParameters, parameterize_cirrus_deck
 from src.GaP.libs.free_fluid import FREE_FLUID_PERMX, FREE_FLUID_PORO
+from src.GaP.libs.pressure_inputs import resolve_pressure_inputs
 from src.WellClass.libs.utils import xlsx_grid_policy, xlsx_to_simulation_design, xlsx_to_well_model
 from src.WellClass.libs.well_class.well_processed import WellProcessed
 from src.WellClass.libs.well_pressure.pressure_table import PressureTable
@@ -177,7 +178,7 @@ def _add_years(start_date: date, years: int) -> date:
 def parameterize_staged_deck(args: argparse.Namespace, policy: dict, well_header, scenario) -> None:
     start_date = date.fromisoformat(str(policy.get("start_date", args.start_date)))
     final_date = _add_years(start_date, args.simulation_years) if args.final_run else start_date
-    assumptions = scenario.model_dump(exclude_none=True)
+    assumptions = resolve_pressure_inputs(scenario, well_header).model_dump(exclude_none=True)
     seafloor_depth = float(policy["water_depth"])
     reservoir_top = float(args.reservoir_top)
     overburden_datum_depth = float(assumptions.get("overburden_datum_depth", (seafloor_depth + reservoir_top) / 2))
@@ -199,8 +200,8 @@ def parameterize_staged_deck(args: argparse.Namespace, policy: dict, well_header
         bottom_depth=float(args.bottom_depth),
         overburden_datum_depth=overburden_datum_depth,
         overburden_pressure_bar=pressure_table.get_values_at_depth(overburden_datum_depth)["hydrostatic_pressure"],
-        fluid_contact_depth=float(assumptions.get("z_fluid_contact", assumptions.get("z_resrv", 1500.0))),
-        fluid_contact_pressure_bar=float(assumptions.get("p_fluid_contact", assumptions.get("p_resrv", 144.5))),
+        fluid_contact_depth=float(assumptions["z_fluid_contact"]),
+        fluid_contact_pressure_bar=float(assumptions["p_fluid_contact"]),
         salinity_mass_fraction=float(assumptions.get("salinity", 0.032)),
         ground_temperature_c=float(assumptions.get("ground_temperature", 4.0)),
         geothermal_gradient_c_per_km=float(assumptions.get("temperature_gradient", 31.0)),
@@ -250,6 +251,7 @@ def main() -> int:
         print(f"Error: {exc}")
         return 1
     resolve_case_identity(args, model, design, scenario)
+    resolve_pressure_inputs(scenario, model.spec.well_header)
     policy = apply_scenario_overrides(policy, scenario)
     stage_args = derive_stage_args_from_policy(args, policy, model)
     args.reservoir_top = stage_args.reservoir_top

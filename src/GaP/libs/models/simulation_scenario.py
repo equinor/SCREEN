@@ -19,7 +19,7 @@ class SimulationScenario(BaseModel):
     permeability_unit: Literal["mD"] = "mD"
     salinity_basis: Literal["mass_fraction"] = "mass_fraction"
     z_fluid_contact: Optional[float] = Field(default=None, allow_inf_nan=False, description="Fluid-contact TVDMSL depth in m")
-    p_fluid_contact: Optional[float] = Field(default=None, allow_inf_nan=False, description="Fluid-contact pressure in bar")
+    p_fluid_contact: Optional[float] = Field(default=None, allow_inf_nan=False, description="Fluid-contact pressure in bar; derived from reservoir pair or hydrostatic pressure when absent")
     overburden_datum_depth: Optional[float] = Field(default=None, allow_inf_nan=False, description="Overburden datum TVDMSL depth in m")
     z_resrv: Optional[float] = Field(default=None, allow_inf_nan=False, description="Reservoir TVDMSL depth in m")
     p_resrv: Optional[float] = Field(default=None, allow_inf_nan=False, description="Reservoir pressure in bar")

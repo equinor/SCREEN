@@ -39,6 +39,7 @@ Completed coarse-grid preparation slices:
     - `runscripts/run_workbook_to_cirrus_lgr.py`
 - Staged grids derive two equilibration regions from layer counts: `EQLNUM 1` for water/overburden and `EQLNUM 2` for reservoir layers.
 - The two CIRRUS equilibration blocks share generated temperature and salt tables. The overburden datum uses WellClass hydrostatic pressure; the `CO2_column` datum and gas-water contact use the workbook fluid-contact pair.
+- Workbook pressure inputs now resolve through the existing WellClass `PressureScenario`: contact-only inputs use hydrostatic or explicit contact pressure, while a reservoir depth/pressure pair anchors the CO2 curve and derives pressure at a deeper contact. QC and deck generation use the same resolved contact pair, saved as `resolved_pressure` in `scenario.json`. Inconsistent explicit pairs fail; generated cases with distinct reservoir/contact depths need regeneration and CIRRUS confirmation.
 - Ready-to-edit workbook examples are included for Wildcat and Smeaheia, including optional survey sheets:
     - `test_data/examples/wildcat/wildcat_workbook.xlsx`
     - `test_data/examples/smeaheia/smeaheia_workbook.xlsx`

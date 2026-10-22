@@ -18,6 +18,7 @@ from prepare_init_case_from_xlsx import (
 
 from src.GaP.libs.case_naming import CaseFiles, well_label
 from src.GaP.libs.cirrus_backend import CirrusBackend
+from src.GaP.libs.pressure_inputs import resolve_pressure_inputs
 from src.WellClass.libs.utils import xlsx_grid_policy, xlsx_to_simulation_design, xlsx_to_well_model
 from src.WellClass.libs.well_class.well_processed import WellProcessed
 from src.WellClass.libs.well_pressure import Pressure
@@ -94,14 +95,9 @@ def save_qc_plot(model, scenario, output_path: Path) -> None:
 
     from src.WellClass.libs.plotting import plot_one_page
 
-    if scenario.z_fluid_contact is not None and scenario.p_fluid_contact is not None:
-        z_fluid_contact = scenario.z_fluid_contact
-        p_fluid_contact = scenario.p_fluid_contact
-    elif scenario.z_resrv is not None and scenario.p_resrv is not None:
-        z_fluid_contact = scenario.z_resrv
-        p_fluid_contact = scenario.p_resrv
-    else:
-        raise ValueError("--plot requires a complete fluid-contact or reservoir depth/pressure pair")
+    resolved = resolve_pressure_inputs(scenario, model.spec.well_header)
+    z_fluid_contact = resolved.z_fluid_contact
+    p_fluid_contact = resolved.p_fluid_contact
 
     processed_well = WellProcessed.from_pydantic(model)
     pressure = Pressure(
@@ -143,6 +139,7 @@ def run_workflow(args: argparse.Namespace) -> Path:
     except ValueError as exc:
         raise ValueError(f"Invalid case-name '{args.case_name}': {exc}") from None
     validate_scenario_interval_targets(model, scenario)
+    resolved_pressure = resolve_pressure_inputs(scenario, model.spec.well_header)
     if scenario.casing_hole is not None:
         processed_well = WellProcessed.from_pydantic(model)
         scenario.casing_hole.validate_casing(
@@ -165,6 +162,10 @@ def run_workflow(args: argparse.Namespace) -> Path:
     output_json = args.output_root / "well_input.json"
     output_json.parent.mkdir(parents=True, exist_ok=True)
     scenario_record = scenario.model_dump(mode="json")
+    scenario_record["resolved_pressure"] = {
+        field: getattr(resolved_pressure, field)
+        for field in ("z_fluid_contact", "p_fluid_contact", "z_resrv", "p_resrv")
+    }
     scenario_record["effective_permeability_mD"] = {
         "reservoir_permx": policy.get("reservoir_permx", 1000.0),
         "overburden_permx": policy.get("overburden_permx", 0.001),

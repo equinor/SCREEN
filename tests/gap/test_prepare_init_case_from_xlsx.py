@@ -12,6 +12,7 @@ import pytest
 
 from src.WellClass.libs.utils.xlsx_parser import xlsx_grid_policy, xlsx_to_simulation_design, xlsx_to_well_model
 from src.WellClass.libs.well_pressure.pressure_table import PressureTable
+from src.GaP.libs.pressure_inputs import resolve_pressure_inputs
 
 
 PREPARE_PATH = Path(__file__).parents[2] / "runscripts/prepare_init_case.py"
@@ -64,8 +65,8 @@ def _write_minimal_workbook(path: Path, *, salinity: float = 0.032) -> None:
                 "z_fluid_contact": [2400.0],
                 "p_fluid_contact": [210.0],
                 "overburden_datum_depth": [500.0],
-                "z_resrv": [1400.0],
-                "p_resrv": [250.0],
+                "z_resrv": [2400.0],
+                "p_resrv": [210.0],
             }
         ).to_excel(writer, sheet_name="SubsurfaceAssumptions", index=False)
         pd.DataFrame(
@@ -144,6 +145,35 @@ def test_prepare_init_case_from_xlsx_stages_files(tmp_path):
     assert "PERMX 1000 1 20 1 20 56 58 /" in grdecl_text
     assert "TRANZ 0 1 20 1 20 19 19 /" in grdecl_text
     assert "PERMZ 0.1 1 20 1 20 4 58 /" in grdecl_text
+
+
+@pytest.mark.parametrize("values", [
+    {"z_fluid_contact": 1400.0},
+    {"z_fluid_contact": 1400.0, "p_fluid_contact": 125.0},
+    {"z_fluid_contact": 1400.0, "z_resrv": 1217.0, "p_resrv": 125.0},
+    {"z_resrv": 1217.0, "p_resrv": 125.0},
+])
+def test_standalone_deck_uses_resolved_contact_pressure(tmp_path, values):
+    workbook = tmp_path / "well.xlsx"
+    _write_minimal_workbook(workbook)
+    excel = load_workbook(workbook)
+    sheet = excel["SubsurfaceAssumptions"]
+    columns = {cell.value: cell.column for cell in sheet[1]}
+    for field in ("z_fluid_contact", "p_fluid_contact", "z_resrv", "p_resrv"):
+        sheet.cell(2, columns[field]).value = values.get(field)
+    excel.save(workbook)
+    result = subprocess.run(
+        [sys.executable, "runscripts/prepare_init_case_from_xlsx.py", "--xlsx", str(workbook),
+         "--output-root", str(tmp_path / "case")],
+        cwd=Path(__file__).parents[2], capture_output=True, text=True,
+    )
+    assert result.returncode == 0, result.stderr
+    scenario = xlsx_to_simulation_design(workbook).select()
+    expected = resolve_pressure_inputs(scenario, xlsx_to_well_model(workbook).spec.well_header)
+    deck = (tmp_path / "case/model/xlsx_test_default.in").read_text(encoding="utf-8")
+    assert f"DATUM_D  {expected.z_fluid_contact:g} m" in deck
+    assert f"WGC_D  {expected.z_fluid_contact:g} m" in deck
+    assert f"PRESSURE  {expected.p_fluid_contact:g} Bar" in deck
 
 
 BOX = re.compile(r"^(FIPLEG|PORV)\s+(\S+)(?:\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+))?\s*/\s*$")
@@ -252,9 +282,9 @@ def test_standalone_staging_applies_designmatrix_grid_overrides(tmp_path):
     excel = load_workbook(workbook)
     excel["GridPolicy"].append(["reservoir_bottom_porv_multiplier", 700])
     sheet = excel["DesignMatrix"]
+    columns = {cell.value: cell.column for cell in sheet[1]}
     for name, value in (("reservoir_bottom_porv_multiplier", 900), ("reservoir_wall_porv_multiplier", 5)):
-        sheet.cell(1, sheet.max_column + 1).value = name
-        sheet.cell(2, sheet.max_column).value = value
+        sheet.cell(2, columns[name]).value = value
     excel.save(workbook)
 
     result = subprocess.run(
