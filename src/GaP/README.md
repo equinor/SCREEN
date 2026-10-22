@@ -69,6 +69,36 @@ depths in TVDMSL metres and all open-hole, casing-cement, and barrier
 permeabilities in mD. Unsupported units, missing required permeabilities, and
 negative or non-finite permeability values fail before LGR generation.
 
+Workbook pressure inputs are resolved by WellClass `PressureScenario` before
+staging either CIRRUS run:
+
+- `z_fluid_contact` alone uses the WellClass hydrostatic pressure at that depth.
+  The resolved `z_resrv`/`p_resrv` pair is the same contact pair.
+- `z_fluid_contact` with `p_fluid_contact` anchors the curve at the contact;
+  absent reservoir inputs resolve to that same pair.
+- A complete `z_resrv`/`p_resrv` pair anchors the variable-density CO2 curve.
+  If `z_fluid_contact` is supplied, its pressure is derived from that curve;
+  otherwise the contact is placed at `z_resrv`. The reservoir datum must be
+  shallower than or equal to the contact.
+- Partial reservoir pairs, a contact pressure without contact depth, and missing
+  depth inputs are errors. If both pressure pairs are explicit, their contact
+  pressures must agree within 0.01 bar (allowing rounding), otherwise generation
+  fails rather than silently choosing one.
+
+The generated CO2 equilibration block uses the resolved contact depth for
+`DATUM_D` and `WGC_D`, and the resolved contact pressure for `PRESSURE`. The QC
+plot uses that same resolved pair. `scenario.json` retains the workbook inputs
+and adds `resolved_pressure` containing all four resolved depth/pressure values.
+Depth-only pressure is the existing WellClass constant-reference-density brine
+approximation; reservoir-to-contact integration uses the existing CO2 PVT model.
+
+Previously, a blank `p_fluid_contact` copied `p_resrv` directly to the contact
+depth without accounting for the distinct reservoir depth. Existing generated
+cases are not modified. Regenerate such cases into a new output directory;
+older workbooks with inconsistent explicit pairs now fail and must be corrected.
+Example workbooks keep their contact and reservoir pairs identical to preserve
+their previous CIRRUS pressure datums.
+
 Scenario salinity is the NaCl mass fraction of the solution (`kg salt / kg
 solution`), default `0.032`; new workbooks declare `salinity_basis=mass_fraction`
 and legacy values are interpreted the same way. The PVT model uses this
