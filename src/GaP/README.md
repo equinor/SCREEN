@@ -472,6 +472,23 @@ independent file lists. Use `--summary-stem` when legacy cases have multiple
 outputs. `--case-pattern` filters case directories; `--show` also opens the
 saved plot interactively.
 
+Add `--reference-case <directory-name>` to include one reference under the same
+output root even when it does not match `--case-pattern`. It is included only
+once if it already matches. The reference is black with linewidth 2; sensitivity
+curves use linewidth 1. Its legend label includes `(reference)`, including with
+`--label-mode changed`. Without a reference, the existing styling is unchanged.
+Missing references fail explicitly; the reference undergoes the same output,
+region, and unit checks as every selected case.
+
+```bash
+uv run --extra visualization python runscripts/plot_region_fluxes.py \
+    --output-root work/smeaheia_oat_100yr_results \
+    --case-pattern 'smeaheia_cement_perm_*' \
+    --reference-case smeaheia_reference \
+    --zonation FIPHOL --vector 1-2 --label-mode changed \
+    --output work/cement_sensitivity.png
+```
+
 Before plotting, it checks the requested FIP partition and positive region
 IDs in all exported INIT occurrences, including LGRs. Missing zonations
 and invalid requested regions produce explicit errors. A requested pair

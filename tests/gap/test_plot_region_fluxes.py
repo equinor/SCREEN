@@ -139,6 +139,62 @@ def test_case_filter_and_missing_cases(tmp_path):
         plot.load_cases(tmp_path, "FIPHOL", "RGFR", "absent", None)
 
 
+@pytest.mark.parametrize("pattern", ["sweep_*", "*", "reference"])
+def test_reference_is_included_once_regardless_of_pattern(tmp_path, pattern):
+    write_case(tmp_path, name="sweep_low")
+    write_case(tmp_path, name="reference")
+    cases = plot.load_cases(tmp_path, "FIPHOL", "RGFR", pattern, None, reference_case="reference")
+    names = [case.name for case in cases]
+    assert names.count("reference") == 1
+    assert ("sweep_low" in names) == (pattern != "reference")
+
+
+@pytest.mark.parametrize("reference", ["absent", "../reference", ".", ""])
+def test_invalid_reference_fails_explicitly(tmp_path, reference):
+    write_case(tmp_path)
+    with pytest.raises(ValueError, match="reference|--reference-case"):
+        plot.load_cases(tmp_path, "FIPHOL", "RGFR", "*", None, reference_case=reference)
+
+
+def test_reference_uses_the_same_unit_validation(tmp_path):
+    write_case(tmp_path, name="sweep_low")
+    write_case(tmp_path, name="reference", unit="SM3/D")
+    with pytest.raises(ValueError, match="unit.*differs"):
+        plot.load_cases(tmp_path, "FIPHOL", "RGFR", "sweep_*", None, reference_case="reference")
+
+
+@pytest.mark.parametrize("label_mode", ["case", "changed"])
+def test_reference_plot_is_black_with_thinner_sensitivity_lines(tmp_path, monkeypatch, label_mode):
+    from matplotlib.figure import Figure
+
+    for name, cb, pair in (("sweep_low", 1.0, True), ("reference", 100.0, False)):
+        case, _ = write_case(tmp_path, name=name, pair=pair)
+        record = json.loads((case / "scenario.json").read_text())
+        (case / "scenario.json").write_text(json.dumps({**record, "cb_perm": cb}))
+
+    def verify(figure, *_args, **_kwargs):
+        lines = figure.axes[0].lines
+        assert len(lines) == 2
+        reference = next(line for line in lines if "(reference)" in line.get_label())
+        sensitivity = next(line for line in lines if "(reference)" not in line.get_label())
+        assert reference.get_color() == "black"
+        assert reference.get_linewidth() > sensitivity.get_linewidth()
+        assert reference.get_zorder() > sensitivity.get_zorder()
+        assert reference.get_linestyle() == "--"
+        assert "inferred zero" in reference.get_label()
+        np.testing.assert_array_equal(reference.get_ydata(), [0, 0])
+        handles = figure.legends[0].legend_handles
+        reference_handle = next(handle for handle in handles if "(reference)" in handle.get_label())
+        assert reference_handle.get_color() == "black"
+        assert reference_handle.get_linewidth() == reference.get_linewidth()
+
+    monkeypatch.setattr(Figure, "savefig", verify)
+    run_cli(
+        monkeypatch, tmp_path, "--case-pattern", "sweep_*", "--reference-case", "reference",
+        "--vector", "1-2", "--label-mode", label_mode, "--output", str(tmp_path / "reference.png"),
+    )
+
+
 @pytest.mark.parametrize(("quantity", "unit"), [("RWFR", "M^3/D"), ("RGFT", "M^3"), ("RWFT", "M^3")])
 def test_other_quantities(tmp_path, quantity, unit):
     write_case(tmp_path, quantity=quantity, unit=unit)

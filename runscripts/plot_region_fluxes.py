@@ -108,11 +108,23 @@ def check_regions(case_name: str, regions: set[int], zonation: str, key: str) ->
             raise ValueError(f"{case_name}: region {region} does not exist in {zonation}; available regions: {sorted(regions)}")
 
 
-def load_cases(root: Path, zonation: str, quantity: str, pattern: str, stem: str | None, mass: bool = False) -> list[Case]:
+def load_cases(
+    root: Path, zonation: str, quantity: str, pattern: str, stem: str | None,
+    mass: bool = False, reference_case: str | None = None,
+) -> list[Case]:
     keyword = f"{quantity}_{zonation[3:]}"
     pair_pattern = re.compile(rf"{keyword}:([1-9][0-9]*)-([1-9][0-9]*)")
     cases = []
-    for directory in sorted(root.glob(pattern)):
+    directories = sorted(root.glob(pattern))
+    if reference_case is not None:
+        if not reference_case or reference_case in (".", "..") or Path(reference_case).name != reference_case:
+            raise ValueError("--reference-case must be a case directory name under --output-root, not a path")
+        reference = root / reference_case
+        if not (reference / "model").is_dir():
+            raise ValueError(f"{reference_case}: reference case model directory not found under {root}")
+        if reference not in directories:
+            directories.append(reference)
+    for directory in directories:
         model = directory / "model"
         if not model.is_dir():
             continue
@@ -190,7 +202,8 @@ def select_vectors(cases: list[Case], zonation: str, quantity: str, requested: l
 
 
 def plot_fluxes(
-    cases: list[Case], keys: list[str], zonation: str, sign: int, output: Path, show: bool, label_mode: str = "case"
+    cases: list[Case], keys: list[str], zonation: str, sign: int, output: Path, show: bool,
+    label_mode: str = "case", reference_case: str | None = None,
 ) -> None:
     import matplotlib
 
@@ -220,7 +233,14 @@ def plot_fluxes(
     else:
         palette = [plt.get_cmap("turbo")(index / (len(ordered) - 1)) for index in range(len(ordered))]
     color_of = {case.name: palette[index % len(palette)] for index, case in enumerate(ordered)}
+    if reference_case is not None:
+        color_of[reference_case] = "black"
+        label_of[reference_case] += " (reference)"
     with plt.rc_context(screen_style()):
+        width_of = {
+            case.name: (2.0 if case.name == reference_case else 1.0) if reference_case is not None else plt.rcParams["lines.linewidth"]
+            for case in ordered
+        }
         fig, axes = plt.subplots(
             len(keys), 1, squeeze=False, figsize=(10, max(4 * len(keys), 0.3 * len(cases) + 1)), sharex=True, layout="constrained"
         )
@@ -229,11 +249,17 @@ def plot_fluxes(
                 for curve_key, case, dates, values, missing in curves:
                     if curve_key == key:
                         label = f"{label_of[case.name]} (inferred zero)" if missing else label_of[case.name]
-                        ax.plot(dates, values, label=label, linestyle="--" if missing else "-", color=color_of[case.name])
+                        ax.plot(
+                            dates, values, label=label, linestyle="--" if missing else "-", color=color_of[case.name],
+                            linewidth=width_of[case.name], zorder=3 if case.name == reference_case else 2,
+                        )
                 ax.set(title=f"{key} (sign multiplier {sign:+d})", ylabel=cases[0].unit)
                 ax.grid(True, alpha=0.3)
             axes[-1, 0].set_xlabel("Simulation date")
-            handles = [Line2D([], [], color=color_of[case.name], label=label_of[case.name]) for case in ordered]
+            handles = [
+                Line2D([], [], color=color_of[case.name], linewidth=width_of[case.name], label=label_of[case.name])
+                for case in ordered
+            ]
             if any(curve[4] for curve in curves):
                 handles.append(Line2D([], [], color="black", linestyle="--", label="inferred zero (pair not exported)"))
             fig.legend(handles=handles, loc="outside right center", title=legend_title)
@@ -255,6 +281,7 @@ def main() -> None:
     selection.add_argument("--all", action="store_true")
     selection.add_argument("--vector", action="append", help="Existing pair or full key; repeat for multiple panels")
     parser.add_argument("--case-pattern", default="*", help="Case-directory glob")
+    parser.add_argument("--reference-case", help="Case directory name under output-root; included regardless of pattern and plotted in black")
     parser.add_argument("--summary-stem", help="Override the metadata stem for ambiguous legacy cases")
     parser.add_argument("--sign", type=int, choices=(-1, 1), default=1)
     parser.add_argument("--output", type=Path, help="Plot filename; required when plotting")
@@ -275,13 +302,14 @@ def main() -> None:
         cases = load_cases(
             args.output_root, args.zonation, args.quantity, args.case_pattern, args.summary_stem,
             mass=not args.volume and not args.list_vectors,
+            reference_case=args.reference_case,
         )
         keys = select_vectors(cases, args.zonation, args.quantity, args.vector)
         if args.list_vectors:
             for key in keys:
                 print(f"{key} | cases: {', '.join(case.name for case in cases if key in case.keys)}")
         else:
-            plot_fluxes(cases, keys, args.zonation, args.sign, args.output, args.show, args.label_mode)
+            plot_fluxes(cases, keys, args.zonation, args.sign, args.output, args.show, args.label_mode, args.reference_case)
             print(f"Saved {args.output} ({len(cases)} cases, {len(keys)} vectors)")
     except (ValueError, OSError, KeyError) as exc:
         parser.error(str(exc))
