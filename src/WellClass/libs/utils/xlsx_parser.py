@@ -24,6 +24,7 @@ class GridPolicy(BaseModel):
     water_depth: float = Field(ge=0, description="Derived from Header.ground_elevation in metres")
     target_dz_water: float = Field(gt=0, description="Water-layer thickness in metres")
     target_dz_overburden: float = Field(gt=0, description="Overburden-layer thickness in metres")
+    seal_dz: float = Field(default=1.0, gt=0, le=10, description="Thickness in metres of the sealed layer at the base of the overburden, just above the reservoir; at most 10 m so the LGR keeps it unrefined")
     target_dz_reservoir: float = Field(gt=0, description="Reservoir-layer thickness in metres")
     reservoir_top_dz: str | None = Field(default=None, description="Finer layers from the reservoir top down, as count*dz in metres, e.g. '20*1'")
     reservoir_thickness: float = Field(default=400.0, gt=0, description="Reservoir interval thickness in metres")
@@ -200,7 +201,7 @@ def xlsx_grid_policy(xlsx_file: str | Path) -> dict[str, Any]:
     - max_water_layers
     - max_overburden_layers
     - max_reservoir_layers
-    - reservoir_top_dz: finer layers from the reservoir top down, e.g. '20*1'    - nx, ny (default 20)
+    - seal_dz (default 1 m): sealed layer at the base of the overburden, above the reservoir    - reservoir_top_dz: finer layers from the reservoir top down, e.g. '20*1'    - nx, ny (default 20)
     - dx, dy (default 200 m)
     - reservoir_permx (default 1000.0)
     - overburden_permx (default 0.001)

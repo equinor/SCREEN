@@ -50,6 +50,10 @@ units. Required fields are `top_depth` and `target_dz_water`,
 gives finer layers from the reservoir top down in `count*dz` notation (metres),
 e.g. `20*1` (twenty 1 m layers) or `10*1 4*5`; the rest of the reservoir uses
 `target_dz_reservoir`, and the reservoir layer limits apply to that rest only.
+`seal_dz` (default 1 m, at most 10 m) is the sealed layer (`TRANX/TRANY/TRANZ 0`)
+at the base of the overburden, just above the reservoir; `target_dz_overburden`
+and the overburden layer limits apply to the overburden above it. The LGR keeps
+it as one unrefined layer, and CARFIN reopens only the borehole through it.
 Defaults: `reservoir_thickness`
 400 m; `cells_per_layer` 400; minimum layer counts 1; maximum layer counts
 unset; `nx`/`ny` 20; `dx`/`dy` 200 m; `reservoir_permx` 1000 mD;
@@ -195,7 +199,7 @@ grep -E '^(FIPLEG|PORV)' preview/<case>/include/*_GRD.grdecl
 vary them, use separate workbooks and output roots.
 - *Grid geometry* (a different grid, so results are not comparable cell by cell;
   `compare_scenario_outputs.py` reports it as a grid study): `top_depth`,
-  `target_dz_water`, `target_dz_overburden`, `target_dz_reservoir`,
+  `target_dz_water`, `target_dz_overburden`, `seal_dz`, `target_dz_reservoir`,
   `reservoir_top_dz`, `reservoir_thickness`, `cells_per_layer`, `min_water_layers`,
   `min_overburden_layers`, `min_reservoir_layers`, `max_water_layers`,
   `max_overburden_layers`, `max_reservoir_layers`, `nx`, `ny`, `dx`, `dy` and

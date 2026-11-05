@@ -37,6 +37,16 @@ def test_reservoir_top_dz_must_leave_a_uniform_part(top_dz):
         CoarseGridSpec(0.0, 100.0, 1000.0, 1100.0, reservoir_layers=28, reservoir_top_dz=top_dz)
 
 
+def test_seal_dz_is_the_last_overburden_layer():
+    spec = CoarseGridSpec(0.0, 100.0, 1000.0, 1100.0, overburden_layers=4, reservoir_layers=10, seal_dz=1.0)
+    schedule = build_vertical_grid_schedule(spec)
+
+    assert np.allclose(schedule.dz[1:5], [899 / 3] * 3 + [1.0])
+    assert schedule.sections[4] == "overburden" and schedule.sections[5] == "reservoir"
+    with pytest.raises(ValueError, match="seal_dz"):
+        CoarseGridSpec(0.0, 100.0, 1000.0, 1100.0, overburden_layers=1, seal_dz=1.0)
+
+
 def test_coarse_grid_envelope_projects_deviated_wells_vertically():
     wells = [
         type("WellStub", (), {"wellpath": type("PathStub", (), {"x": [10.0, 20.0], "y": [0.0, 5.0]})(), "borehole": [{"top_tvd_msl": 100.0, "bottom_tvd_msl": 500.0}]})(),

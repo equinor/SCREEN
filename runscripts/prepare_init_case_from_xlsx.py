@@ -122,8 +122,11 @@ def derive_stage_args_from_policy(args: argparse.Namespace, policy: dict, well_m
         min_layers=int(policy.get("min_water_layers", 1)),
         max_layers=_as_optional_int(policy, "max_water_layers"),
     )
-    overburden_layers = _bounded_layer_count(
-        reservoir_top - water_depth,
+    seal_dz = float(policy.get("seal_dz", 1.0))
+    if not 0 < seal_dz < reservoir_top - water_depth:
+        raise ValueError("seal_dz must be positive and thinner than the overburden")
+    overburden_layers = 1 + _bounded_layer_count(
+        reservoir_top - water_depth - seal_dz,
         float(policy["target_dz_overburden"]),
         min_layers=int(policy.get("min_overburden_layers", 1)),
         max_layers=_as_optional_int(policy, "max_overburden_layers"),
@@ -150,6 +153,7 @@ def derive_stage_args_from_policy(args: argparse.Namespace, policy: dict, well_m
         overburden_layers=overburden_layers,
         reservoir_layers=reservoir_layers,
         reservoir_top_dz=reservoir_top_dz,
+        seal_dz=seal_dz,
         cells_per_layer=int(policy.get("cells_per_layer", 400)),
         nx=int(policy.get("nx", 20)),
         ny=int(policy.get("ny", 20)),

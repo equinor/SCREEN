@@ -29,7 +29,9 @@ class CoarseGridSpec:
     The specification describes the domain; it does not write simulator files.
     ``reservoir_top_dz`` lists the thicknesses of the first reservoir layers
     from the reservoir top down; the remaining ``reservoir_layers`` share the
-    rest of the reservoir evenly.
+    rest of the reservoir evenly. A positive ``seal_dz`` makes the last of the
+    ``overburden_layers`` a thin seal of that thickness just above the
+    reservoir; the other overburden layers share the rest evenly.
     """
 
     top_depth: float
@@ -40,6 +42,7 @@ class CoarseGridSpec:
     overburden_layers: int = 9
     reservoir_layers: int = 50
     reservoir_top_dz: tuple[float, ...] = ()
+    seal_dz: float = 0.0
 
     def __post_init__(self):
         depths = (self.top_depth, self.water_depth, self.reservoir_top, self.bottom_depth)
@@ -54,6 +57,10 @@ class CoarseGridSpec:
             raise ValueError("reservoir_top_dz thicknesses must be positive and finite")
         if len(self.reservoir_top_dz) >= self.reservoir_layers or sum(self.reservoir_top_dz) >= self.bottom_depth - self.reservoir_top:
             raise ValueError("reservoir_top_dz must leave at least one layer and some thickness below it")
+        if not math.isfinite(self.seal_dz) or self.seal_dz < 0:
+            raise ValueError("seal_dz must be a non-negative finite number")
+        if self.seal_dz and (self.overburden_layers < 2 or self.seal_dz >= self.reservoir_top - self.water_depth):
+            raise ValueError("seal_dz needs at least two overburden layers and must be thinner than the overburden")
 
 
 @dataclass(frozen=True)
@@ -161,10 +168,13 @@ def build_vertical_grid_schedule(spec: CoarseGridSpec, well=None) -> VerticalGri
 
     refined = spec.reservoir_top_dz
     uniform_layers = spec.reservoir_layers - len(refined)
+    seal = (spec.seal_dz,) if spec.seal_dz else ()
+    overburden_layers = spec.overburden_layers - len(seal)
     dz = np.concatenate(
         [
             np.full(spec.water_layers, (spec.water_depth - spec.top_depth) / spec.water_layers),
-            np.full(spec.overburden_layers, (spec.reservoir_top - spec.water_depth) / spec.overburden_layers),
+            np.full(overburden_layers, (spec.reservoir_top - spec.water_depth - spec.seal_dz) / overburden_layers),
+            np.asarray(seal, dtype=float),
             np.asarray(refined, dtype=float),
             np.full(uniform_layers, (spec.bottom_depth - spec.reservoir_top - sum(refined)) / uniform_layers),
         ]

@@ -24,6 +24,7 @@ GEOMETRY_POLICY_FIELDS = {
     "reservoir_thickness",
     "target_dz_water",
     "target_dz_overburden",
+    "seal_dz",
     "target_dz_reservoir",
     "reservoir_top_dz",
     "min_water_layers",
