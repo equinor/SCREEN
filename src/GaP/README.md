@@ -86,8 +86,12 @@ staging either CIRRUS run:
   absent reservoir inputs resolve to that same pair.
 - A complete `z_resrv`/`p_resrv` pair anchors the variable-density CO2 curve.
   If `z_fluid_contact` is supplied, its pressure is derived from that curve;
-  otherwise the contact is placed at `z_resrv`. The reservoir datum must be
-  shallower than or equal to the contact.
+  otherwise the contact is placed at `z_resrv`.
+- If the contact is shallower than `z_resrv`, generation warns and treats the
+  supplied reference as being in the water zone. The existing brine hydrostatic
+  curve is shifted to pass through `z_resrv`/`p_resrv`; its pressure at the
+  contact anchors the CO2 curve. The supplied reservoir reference pair remains
+  unchanged. This supports contact-depth sensitivities with a fixed reference.
 - Partial reservoir pairs, a contact pressure without contact depth, and missing
   depth inputs are errors. If both pressure pairs are explicit, their contact
   pressures must agree within 0.01 bar (allowing rounding), otherwise generation
