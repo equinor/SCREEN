@@ -25,6 +25,7 @@ from src.GaP.libs.case_naming import CaseFiles, case_label, resolve_case
 from src.GaP.libs.deck_config import CirrusDeckParameters, parameterize_cirrus_deck
 from src.GaP.libs.free_fluid import FREE_FLUID_PERMX, FREE_FLUID_PORO
 from src.GaP.libs.pressure_inputs import resolve_pressure_inputs
+from src.WellClass.libs.grid_utils import parse_dz_sequence
 from src.WellClass.libs.utils import xlsx_grid_policy, xlsx_to_simulation_design, xlsx_to_well_model
 from src.WellClass.libs.well_class.well_processed import WellProcessed
 from src.WellClass.libs.well_pressure.pressure_table import PressureTable
@@ -127,8 +128,12 @@ def derive_stage_args_from_policy(args: argparse.Namespace, policy: dict, well_m
         min_layers=int(policy.get("min_overburden_layers", 1)),
         max_layers=_as_optional_int(policy, "max_overburden_layers"),
     )
-    reservoir_layers = _bounded_layer_count(
-        bottom_depth - reservoir_top,
+    reservoir_top_dz = parse_dz_sequence(policy.get("reservoir_top_dz") or "")
+    refined_thickness = sum(reservoir_top_dz)
+    if refined_thickness >= bottom_depth - reservoir_top:
+        raise ValueError("reservoir_top_dz must be thinner than reservoir_thickness")
+    reservoir_layers = len(reservoir_top_dz) + _bounded_layer_count(
+        bottom_depth - reservoir_top - refined_thickness,
         float(policy["target_dz_reservoir"]),
         min_layers=int(policy.get("min_reservoir_layers", 1)),
         max_layers=_as_optional_int(policy, "max_reservoir_layers"),
@@ -144,6 +149,7 @@ def derive_stage_args_from_policy(args: argparse.Namespace, policy: dict, well_m
         water_layers=water_layers,
         overburden_layers=overburden_layers,
         reservoir_layers=reservoir_layers,
+        reservoir_top_dz=reservoir_top_dz,
         cells_per_layer=int(policy.get("cells_per_layer", 400)),
         nx=int(policy.get("nx", 20)),
         ny=int(policy.get("ny", 20)),

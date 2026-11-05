@@ -6,8 +6,35 @@ from src.WellClass.libs.grid_utils import (
     CoarseGridSpec,
     build_vertical_grid_schedule,
     format_vertical_grid_recipe,
+    parse_dz_sequence,
     write_vertical_grid_recipe,
 )
+
+
+def test_parse_dz_sequence_uses_repeat_notation():
+    assert parse_dz_sequence("2*1, 3 1*5") == (1.0, 1.0, 3.0, 5.0)
+    assert parse_dz_sequence("") == ()
+    for bad in ("0*1", "2*0", "a*1", "2*"):
+        with pytest.raises(ValueError, match="invalid dz token"):
+            parse_dz_sequence(bad)
+
+
+def test_reservoir_top_dz_refines_the_top_and_spreads_the_rest():
+    spec = CoarseGridSpec(
+        top_depth=0.0, water_depth=100.0, reservoir_top=1000.0, bottom_depth=1100.0,
+        overburden_layers=1, reservoir_layers=28, reservoir_top_dz=(1.0,) * 20,
+    )
+    schedule = build_vertical_grid_schedule(spec)
+
+    assert schedule.sections.count("reservoir") == 28
+    assert np.allclose(schedule.dz[2:], [1.0] * 20 + [10.0] * 8)
+    assert "DZ\n400*100\n400*900\n8000*1\n3200*10\n/" in format_vertical_grid_recipe(spec, schedule, cells_per_layer=400)
+
+
+@pytest.mark.parametrize("top_dz", [(1.0,) * 28, (50.0, 50.0), (0.0,)])
+def test_reservoir_top_dz_must_leave_a_uniform_part(top_dz):
+    with pytest.raises(ValueError, match="reservoir_top_dz"):
+        CoarseGridSpec(0.0, 100.0, 1000.0, 1100.0, reservoir_layers=28, reservoir_top_dz=top_dz)
 
 
 def test_coarse_grid_envelope_projects_deviated_wells_vertically():

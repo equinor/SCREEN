@@ -147,6 +147,23 @@ def test_prepare_init_case_from_xlsx_stages_files(tmp_path):
     assert "PERMZ 0.1 1 20 1 20 4 58 /" in grdecl_text
 
 
+def test_reservoir_top_dz_refines_the_staged_reservoir_top(tmp_path):
+    workbook = tmp_path / "well_input.xlsx"
+    _write_minimal_workbook(workbook)
+    excel = load_workbook(workbook)
+    excel["GridPolicy"].append(["reservoir_top_dz", "20*1"])
+    excel.save(workbook)
+    output_root = tmp_path / "staged_case"
+    command = [sys.executable, "runscripts/prepare_init_case_from_xlsx.py", "--xlsx", str(workbook), "--output-root", str(output_root)]
+    subprocess.run(command, check=True, cwd=Path(__file__).parents[2], capture_output=True, text=True)
+
+    recipe = (output_root / "include" / "tops_dz.inc").read_text(encoding="utf-8")
+    grdecl = (output_root / "include" / "xlsx_test_default_GRD.grdecl").read_text(encoding="utf-8")
+    assert "6000*59.6667\n8000*1\n15200*10\n/" in recipe  # 20 x 1 m, then 38 x 10 m over the remaining 380 m
+    assert "FIPLEG 3 1 20 1 20 19 76 /" in grdecl
+    assert "TRANZ 0 1 20 1 20 19 19 /" in grdecl
+
+
 @pytest.mark.parametrize("values", [
     {"z_fluid_contact": 1400.0},
     {"z_fluid_contact": 1400.0, "p_fluid_contact": 125.0},
@@ -422,6 +439,7 @@ def test_xlsx_grid_policy_applies_legacy_units_and_defaults(tmp_path):
         ("free_fluid_permx", 0), ("free_fluid_poro", 0), ("free_fluid_poro", 1.5),
         ("porv_multiplier", 0), ("reservoir_wall_porv_multiplier", 0),
         ("water_overburden_wall_porv_multiplier", 0), ("reservoir_bottom_porv_multiplier", -1),
+        ("reservoir_top_dz", "20*0"),
     ],
 )
 def test_xlsx_grid_policy_rejects_invalid_values(tmp_path, key, value):
