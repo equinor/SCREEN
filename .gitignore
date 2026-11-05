@@ -13,6 +13,7 @@ src/**/data/**/*.grdecl
 *.gif
 *.jpeg
 !docs/imgs/*.png
+*Thumbs.db
 
 # venv
 venv_*/
@@ -43,6 +44,7 @@ test_data/**/include/*LGR.grdecl
 
 # Artifacts/uploaded data
 work/
+work_old/
 notebooks/results
 imported_cases
 

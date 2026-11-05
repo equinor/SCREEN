@@ -204,7 +204,9 @@ def select_vectors(cases: list[Case], zonation: str, quantity: str, requested: l
 def plot_fluxes(
     cases: list[Case], keys: list[str], zonation: str, sign: int, output: Path, show: bool,
     label_mode: str = "case", reference_case: str | None = None,
+    figsize: tuple[float, float] | None = None, dpi: int | None = None,
 ) -> None:
+    """Plot the selected vectors; figsize is (width, height) in inches and defaults to a size scaled to the panels and cases."""
     import matplotlib
 
     if not show:
@@ -236,13 +238,18 @@ def plot_fluxes(
     if reference_case is not None:
         color_of[reference_case] = "black"
         label_of[reference_case] += " (reference)"
-    with plt.rc_context(screen_style()):
+    style = screen_style()
+    if dpi is not None:
+        style["figure.dpi"] = dpi
+    if figsize is None:
+        figsize = (10, max(4 * len(keys), 0.3 * len(cases) + 1))
+    with plt.rc_context(style):
         width_of = {
             case.name: (2.0 if case.name == reference_case else 1.0) if reference_case is not None else plt.rcParams["lines.linewidth"]
             for case in ordered
         }
         fig, axes = plt.subplots(
-            len(keys), 1, squeeze=False, figsize=(10, max(4 * len(keys), 0.3 * len(cases) + 1)), sharex=True, layout="constrained"
+            len(keys), 1, squeeze=False, figsize=figsize, sharex=True, layout="constrained"
         )
         try:
             for key, ax in zip(keys, axes[:, 0]):
@@ -286,6 +293,8 @@ def main() -> None:
     parser.add_argument("--sign", type=int, choices=(-1, 1), default=1)
     parser.add_argument("--output", type=Path, help="Plot filename; required when plotting")
     parser.add_argument("--show", action="store_true")
+    parser.add_argument("--figsize", type=float, nargs=2, metavar=("WIDTH", "HEIGHT"), help="Figure size in inches; default scales with panels and cases")
+    parser.add_argument("--dpi", type=int, help="Figure resolution; default is the SCREEN style (200)")
     parser.add_argument(
         "--label-mode",
         choices=("case", "changed"),
@@ -299,6 +308,10 @@ def main() -> None:
             raise ValueError("Zonation must be an exported FIP partition, e.g. FIPLEG or FIPHOL")
         if not args.list_vectors and args.output is None:
             raise ValueError("--output is required when plotting")
+        if args.figsize is not None and min(args.figsize) <= 0:
+            raise ValueError("--figsize width and height must be positive")
+        if args.dpi is not None and args.dpi <= 0:
+            raise ValueError("--dpi must be positive")
         cases = load_cases(
             args.output_root, args.zonation, args.quantity, args.case_pattern, args.summary_stem,
             mass=not args.volume and not args.list_vectors,
@@ -309,7 +322,8 @@ def main() -> None:
             for key in keys:
                 print(f"{key} | cases: {', '.join(case.name for case in cases if key in case.keys)}")
         else:
-            plot_fluxes(cases, keys, args.zonation, args.sign, args.output, args.show, args.label_mode, args.reference_case)
+            plot_fluxes(cases, keys, args.zonation, args.sign, args.output, args.show, args.label_mode, args.reference_case,
+                        tuple(args.figsize) if args.figsize else None, args.dpi)
             print(f"Saved {args.output} ({len(cases)} cases, {len(keys)} vectors)")
     except (ValueError, OSError, KeyError) as exc:
         parser.error(str(exc))
