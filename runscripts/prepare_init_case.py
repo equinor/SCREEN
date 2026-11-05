@@ -46,7 +46,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--reservoir-top", type=float, required=True, help="Reservoir top depth (MSL).")
     parser.add_argument("--bottom-depth", type=float, required=True, help="Bottom model depth (MSL).")
     parser.add_argument("--water-layers", type=int, default=1, help="Number of water-column layers.")
-    parser.add_argument("--overburden-layers", type=int, default=9, help="Number of overburden layers.")
+    parser.add_argument("--overburden-layers", type=int, default=9, help="Number of overburden layers, including the seal layer.")
+    parser.add_argument("--seal-dz", type=float, default=1.0, help="Thickness of the sealed bottom overburden layer, just above the reservoir.")
     parser.add_argument("--reservoir-layers", type=int, default=50, help="Number of reservoir layers.")
     parser.add_argument(
         "--cells-per-layer",
@@ -198,10 +199,10 @@ def parameterize_grdecl(
     lines.extend(
         [
             "",
-            "-- Isolate the top reservoir layer",
-            region("TRANZ", 0, reservoir_start, reservoir_start),
-            region("TRANX", 0, reservoir_start, reservoir_start),
-            region("TRANY", 0, reservoir_start, reservoir_start),
+            "-- Seal layer: the bottom overburden layer, just above the reservoir",
+            region("TRANZ", 0, overburden_end, overburden_end),
+            region("TRANX", 0, overburden_end, overburden_end),
+            region("TRANY", 0, overburden_end, overburden_end),
             "/",
             "",
             "COPY",
@@ -279,6 +280,7 @@ def stage_case(args: argparse.Namespace) -> tuple[Path, Path, Path]:
         overburden_layers=args.overburden_layers,
         reservoir_layers=args.reservoir_layers,
         reservoir_top_dz=tuple(getattr(args, "reservoir_top_dz", ())),
+        seal_dz=getattr(args, "seal_dz", 1.0),
     )
     schedule = build_vertical_grid_schedule(spec)
     write_vertical_grid_recipe(spec, schedule, output_tops, cells_per_layer=args.cells_per_layer)

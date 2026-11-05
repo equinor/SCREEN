@@ -123,8 +123,7 @@ def test_prepare_init_case_from_xlsx_stages_files(tmp_path):
     recipe = tops.read_text(encoding="utf-8")
     assert "TOPS 4" in recipe
     assert "1200*33.6667" in recipe
-    assert "6000*59.6667" in recipe
-    assert "16000*10" in recipe
+    assert "6000*59.6\n400*1\n16000*10\n" in recipe  # 1 m seal layer at the base of the overburden
     deck_text = deck.read_text(encoding="utf-8")
     assert "DATABASE ../include/co2_db_new.dat" in deck_text
     assert "\n BRINE  0.032 MASS\n" in deck_text
@@ -132,19 +131,20 @@ def test_prepare_init_case_from_xlsx_stages_files(tmp_path):
     assert deck_text.startswith("# SCREEN case: xlsx_test_default | scenario 'default' (DesignMatrix row 1) | template ")
     assert "_LGR.grdecl" not in grdecl.read_text(encoding="utf-8")
     grdecl_text = grdecl.read_text(encoding="utf-8")
-    assert "EQLNUM 1 1 20 1 20 1 18 /" in grdecl_text
-    assert "EQLNUM 2 1 20 1 20 19 58 /" in grdecl_text
+    assert "EQLNUM 1 1 20 1 20 1 19 /" in grdecl_text
+    assert "EQLNUM 2 1 20 1 20 20 59 /" in grdecl_text
     assert "PERMX 10000 1 20 1 20 1 3 /" in grdecl_text
-    assert "PERMX 0.001 1 20 1 20 4 18 /" in grdecl_text
+    assert "PERMX 0.001 1 20 1 20 4 19 /" in grdecl_text
     assert "PORO 1 1 20 1 20 1 3 /" in grdecl_text
-    assert "FIPLEG 3 1 20 1 20 19 58 /" in grdecl_text
-    assert "FIPLEG 5 1 20 1 20 58 58 /" in grdecl_text
-    assert "FIPLEG 7 1 1 1 20 1 18 /" in grdecl_text
-    assert "PORV 2000 1 20 1 9 58 58 /" in grdecl_text  # the bottom layer, centre cell left out
-    assert "PORV 2000 1 20 1 20 58 58 /" not in grdecl_text
-    assert "PERMX 1000 1 20 1 20 56 58 /" in grdecl_text
-    assert "TRANZ 0 1 20 1 20 19 19 /" in grdecl_text
-    assert "PERMZ 0.1 1 20 1 20 4 58 /" in grdecl_text
+    assert "FIPLEG 3 1 20 1 20 20 59 /" in grdecl_text
+    assert "FIPLEG 5 1 20 1 20 59 59 /" in grdecl_text
+    assert "FIPLEG 7 1 1 1 20 1 19 /" in grdecl_text
+    assert "PORV 2000 1 20 1 9 59 59 /" in grdecl_text  # the bottom layer, centre cell left out
+    assert "PORV 2000 1 20 1 20 59 59 /" not in grdecl_text
+    assert "PERMX 1000 1 20 1 20 57 59 /" in grdecl_text
+    assert "TRANZ 0 1 20 1 20 19 19 /" in grdecl_text  # the seal layer, not the reservoir top
+    assert "TRANZ 0 1 20 1 20 20 20 /" not in grdecl_text
+    assert "PERMZ 0.1 1 20 1 20 4 59 /" in grdecl_text
 
 
 def test_reservoir_top_dz_refines_the_staged_reservoir_top(tmp_path):
@@ -159,8 +159,8 @@ def test_reservoir_top_dz_refines_the_staged_reservoir_top(tmp_path):
 
     recipe = (output_root / "include" / "tops_dz.inc").read_text(encoding="utf-8")
     grdecl = (output_root / "include" / "xlsx_test_default_GRD.grdecl").read_text(encoding="utf-8")
-    assert "6000*59.6667\n8000*1\n15200*10\n/" in recipe  # 20 x 1 m, then 38 x 10 m over the remaining 380 m
-    assert "FIPLEG 3 1 20 1 20 19 76 /" in grdecl
+    assert "400*1\n8000*1\n15200*10\n/" in recipe  # seal, then 20 x 1 m and 38 x 10 m over the remaining 380 m
+    assert "FIPLEG 3 1 20 1 20 20 77 /" in grdecl
     assert "TRANZ 0 1 20 1 20 19 19 /" in grdecl
 
 
@@ -439,7 +439,7 @@ def test_xlsx_grid_policy_applies_legacy_units_and_defaults(tmp_path):
         ("free_fluid_permx", 0), ("free_fluid_poro", 0), ("free_fluid_poro", 1.5),
         ("porv_multiplier", 0), ("reservoir_wall_porv_multiplier", 0),
         ("water_overburden_wall_porv_multiplier", 0), ("reservoir_bottom_porv_multiplier", -1),
-        ("reservoir_top_dz", "20*0"),
+        ("reservoir_top_dz", "20*0"), ("seal_dz", 0), ("seal_dz", 11),
     ],
 )
 def test_xlsx_grid_policy_rejects_invalid_values(tmp_path, key, value):
