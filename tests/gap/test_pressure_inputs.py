@@ -87,7 +87,6 @@ def test_reservoir_pair_only_becomes_contact_pair(header):
     ({"p_fluid_contact": 125.0}, "requires z_fluid_contact"),
     ({"z_resrv": 1217.0}, "must be provided together"),
     ({"p_resrv": 125.0, "z_fluid_contact": 1400.0}, "must be provided together"),
-    ({"z_resrv": 1400.0, "p_resrv": 125.0, "z_fluid_contact": 1217.0}, "cannot be deeper"),
     ({"z_resrv": 1217.0, "p_resrv": 125.0, "z_fluid_contact": 1400.0, "p_fluid_contact": 125.0}, "conflicts"),
     ({"z_resrv": 1217.0, "p_resrv": 125.0, "z_fluid_contact": 1217.0, "p_fluid_contact": 130.0}, "conflicts"),
     ({"z_fluid_contact": 100.0}, "deeper than ground_elevation"),
@@ -102,3 +101,31 @@ def test_rounded_consistent_pressure_pairs_are_accepted(header):
     resolved = resolve_pressure_inputs(source, header)
     rounded = source.model_copy(update={"p_fluid_contact": round(resolved.p_fluid_contact, 2)})
     assert resolve_pressure_inputs(rounded, header).p_fluid_contact == resolved.p_fluid_contact
+
+
+@pytest.mark.parametrize("salinity", [0.0, 0.032])
+def test_shallow_contact_uses_brine_gradient_and_keeps_reference(header, salinity):
+    source = SimulationScenario(
+        case_name="contact_1215p5", z_resrv=1217.0, p_resrv=125.0,
+        z_fluid_contact=1215.5, salinity=salinity,
+    )
+    table = PressureTable(
+        name="expected", depth=np.array([1215.5, 1217.0]),
+        ground_elevation=header.ground_elevation, ground_temperature=4.0,
+        geothermal_gradient=31.0, salinity=salinity,
+    )
+    expected = 125.0 + table.hydrostatic_pressure[0] - table.hydrostatic_pressure[1]
+    with pytest.warns(UserWarning, match="below.*contact.*brine"):
+        resolved = resolve_pressure_inputs(source, header)
+    assert resolved.z_resrv == 1217.0
+    assert resolved.p_resrv == 125.0
+    assert resolved.z_fluid_contact == 1215.5
+    assert resolved.p_fluid_contact == pytest.approx(expected)
+    assert source.p_fluid_contact is None
+    with pytest.warns(UserWarning):
+        assert resolve_pressure_inputs(resolved, header) == resolved
+    with pytest.warns(UserWarning):
+        rounded = source.model_copy(update={"p_fluid_contact": round(expected, 2)})
+        assert resolve_pressure_inputs(rounded, header).p_fluid_contact == pytest.approx(expected)
+    with pytest.raises(ValueError, match="conflicts"):
+        resolve_pressure_inputs(source.model_copy(update={"p_fluid_contact": 125.0}), header)

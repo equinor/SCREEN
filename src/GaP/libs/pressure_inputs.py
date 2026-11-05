@@ -1,6 +1,7 @@
 """Resolve workbook contact and reservoir pressure datums using WellClass."""
 
 from math import isclose
+import warnings
 
 import numpy as np
 
@@ -32,13 +33,24 @@ def resolve_pressure_inputs(scenario: SimulationScenario, header: WellHeaderMode
         geothermal_gradient=scenario.temperature_gradient,
         salinity=scenario.salinity,
     )
+    reference_below_contact = (
+        contact_depth is not None and reservoir_depth is not None
+        and reservoir_pressure is not None and reservoir_depth > contact_depth
+    )
+    contact_anchor = scenario.p_fluid_contact if reservoir_depth is None else None
+    if reference_below_contact:
+        contact_anchor = float(
+            reservoir_pressure
+            + np.interp(contact_depth, table.depth, table.hydrostatic_pressure)
+            - np.interp(reservoir_depth, table.depth, table.hydrostatic_pressure)
+        )
     pressure = PressureScenario(
         name=scenario.case_name,
         table=table,
         z_fluid_datum=contact_depth,
-        p_fluid_datum=scenario.p_fluid_contact if reservoir_depth is None else None,
-        z_store=reservoir_depth,
-        p_store=reservoir_pressure,
+        p_fluid_datum=contact_anchor,
+        z_store=None if reference_below_contact else reservoir_depth,
+        p_store=None if reference_below_contact else reservoir_pressure,
         fluid_type=scenario.fluid_type,
     )
     contact_pressure = pressure.p_fluid_datum
@@ -48,12 +60,20 @@ def resolve_pressure_inputs(scenario: SimulationScenario, header: WellHeaderMode
     if scenario.p_fluid_contact is not None and not isclose(scenario.p_fluid_contact, contact_pressure, rel_tol=0.0, abs_tol=0.01):
         raise ValueError(
             f"p_fluid_contact={scenario.p_fluid_contact:g} bar conflicts with "
-            f"the reservoir-anchored pressure {contact_pressure:g} bar at z_fluid_contact={contact_depth:g} m "
+            f"the reference-derived pressure {contact_pressure:g} bar at z_fluid_contact={contact_depth:g} m "
             "(tolerance 0.01 bar); provide only one pressure pair or consistent pairs"
+        )
+    if reference_below_contact:
+        warnings.warn(
+            f"Case {scenario.case_name!r}: reservoir reference at {reservoir_depth:g} m is below "
+            f"the contact at {contact_depth:g} m; using the reference-anchored brine gradient "
+            f"to derive contact pressure {contact_pressure:g} bar and anchor the CO2 curve there. "
+            "The supplied reservoir reference pair is unchanged.",
+            stacklevel=2,
         )
     return scenario.model_copy(update={
         "z_fluid_contact": contact_depth,
         "p_fluid_contact": contact_pressure,
-        "z_resrv": pressure.z_store,
-        "p_resrv": pressure.p_store,
+        "z_resrv": reservoir_depth if reference_below_contact else pressure.z_store,
+        "p_resrv": reservoir_pressure if reference_below_contact else pressure.p_store,
     })

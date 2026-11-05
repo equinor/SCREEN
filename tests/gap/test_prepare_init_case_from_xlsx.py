@@ -169,6 +169,7 @@ def test_reservoir_top_dz_refines_the_staged_reservoir_top(tmp_path):
     {"z_fluid_contact": 1400.0, "p_fluid_contact": 125.0},
     {"z_fluid_contact": 1400.0, "z_resrv": 1217.0, "p_resrv": 125.0},
     {"z_resrv": 1217.0, "p_resrv": 125.0},
+    {"z_fluid_contact": 1215.5, "z_resrv": 1217.0, "p_resrv": 125.0},
 ])
 def test_standalone_deck_uses_resolved_contact_pressure(tmp_path, values):
     workbook = tmp_path / "well.xlsx"
