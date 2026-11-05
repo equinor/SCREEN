@@ -90,6 +90,7 @@ less often. The technical detail follows for whoever picks the item up.
 | 11 | Align FIPLEG aquifer reporting with the current coarse-grid boundaries | Redefined 2026-10-20 (water/overburden side walls 7, bottom layer 5); new definition not yet checked on CIRRUS |
 | 12 | Run only new or unfinished workbook cases | Basic version done (run only new cases, flag unverified, dry run); fingerprints, retry of killed runs, orphans open |
 | 13 | Clean up the CIRRUS template deck | Partial; generated `BRINE` now matches salt tables; CIRRUS comparison and cleanup pending |
+| 14 | Keep the reservoir top open and refinable | Implemented 2026-11-05 (`seal_dz`, `reservoir_top_dz`); not yet checked on CIRRUS |
 
 ### 1. Compare scenario outputs automatically
 
@@ -781,6 +782,46 @@ every remaining keyword is either generated, deliberately fixed and
 commented, or removed; the template asset hashes in
 `tests/gap/test_template_assets.py` are updated; and a cleaned deck
 reproduces an existing CIRRUS run, apart from documented `BRINE` effects.
+
+### 14. Keep the reservoir top open and refinable
+
+**Status: implemented (2026-11-05); not yet checked on CIRRUS.** Not planned
+work: it came up while setting up a Smeaheia study that needed finer layers
+near the reservoir top.
+
+**In practice:** the whole reservoir is open to flow, and the top of it can be
+made finer without making every reservoir layer thin. The defaults change the
+grid, so new runs are not cell-for-cell comparable with earlier ones.
+
+- **The seal was inside the reservoir.** The coarse grid seals one layer
+  (`TRANX/TRANY/TRANZ 0`) between overburden and reservoir; CARFIN reopens it
+  only along the borehole. It inherited this from the original template, where
+  that layer was a low-permeability caprock, but the generator applied it to
+  the first reservoir layer. With `target_dz_reservoir = 10`, the top 10 m of
+  the reservoir held pore volume but could not flow.
+- **Seal layer (`GridPolicy.seal_dz`, default 1 m, at most 10 m).** The seal
+  is now a separate layer at the base of the overburden, just above the
+  reservoir, and its thickness comes off the overburden;
+  `target_dz_overburden` and the overburden layer limits apply to the
+  overburden above it. It always exists. The 10 m cap matters because the LGR
+  builder classifies parent layers by thickness (thicker than 10 m is
+  overburden and split into 10, otherwise kept), so the seal stays one
+  unrefined layer and the existing CARFIN reopening at the base of the thick
+  overburden layers still lines up with it.
+- **Reservoir top refinement (`GridPolicy.reservoir_top_dz`, optional).** Layer
+  thicknesses from the reservoir top down in `count*dz` notation, e.g. `20*1`
+  or `10*1 4*5`. The rest of the reservoir keeps `target_dz_reservoir`, and the
+  reservoir layer limits apply to that rest only. For Smeaheia
+  (`reservoir_top` 1214.5 m) `20*1` gives 1 m layers to 1234.5 m, then 10 m
+  layers, 82 coarse layers in total instead of 63.
+- Both are grid settings for the whole workbook, reported by
+  `compare_scenario_outputs.py`. Notebook 3 plots the old and new layering
+  for the Smeaheia workbook.
+
+**Done when:** a CIRRUS `.INIT` shows the seal as one 1 m layer above the
+reservoir top in both the coarse grid and the LGR, the 1 m reservoir layers
+follow it, and leakage still passes only through the borehole compared with a
+sealed case.
 
 ## Later
 
