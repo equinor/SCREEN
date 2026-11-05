@@ -5,12 +5,31 @@ from pathlib import Path
 import numpy as np
 
 
+def parse_dz_sequence(text: str) -> tuple[float, ...]:
+    """Parse layer thicknesses in Eclipse repeat notation, e.g. ``"20*1 4*5"``."""
+
+    dz: list[float] = []
+    for token in str(text).replace(",", " ").split():
+        count, _, value = token.rpartition("*")
+        try:
+            repeat, thickness = (int(count) if count else 1), float(value)
+        except ValueError as exc:
+            raise ValueError(f"invalid dz token {token!r}; use count*dz, e.g. 20*1") from exc
+        if repeat <= 0 or not math.isfinite(thickness) or thickness <= 0:
+            raise ValueError(f"invalid dz token {token!r}; count and dz must be positive")
+        dz.extend([thickness] * repeat)
+    return tuple(dz)
+
+
 @dataclass(frozen=True)
 class CoarseGridSpec:
     """Explicit vertical assumptions for a coarse grid recipe.
 
     Depths use the same positive-downward MSL convention as GaP grid inputs.
     The specification describes the domain; it does not write simulator files.
+    ``reservoir_top_dz`` lists the thicknesses of the first reservoir layers
+    from the reservoir top down; the remaining ``reservoir_layers`` share the
+    rest of the reservoir evenly.
     """
 
     top_depth: float
@@ -20,6 +39,7 @@ class CoarseGridSpec:
     water_layers: int = 1
     overburden_layers: int = 9
     reservoir_layers: int = 50
+    reservoir_top_dz: tuple[float, ...] = ()
 
     def __post_init__(self):
         depths = (self.top_depth, self.water_depth, self.reservoir_top, self.bottom_depth)
@@ -30,6 +50,10 @@ class CoarseGridSpec:
         layers = (self.water_layers, self.overburden_layers, self.reservoir_layers)
         if not all(isinstance(count, int) and count > 0 for count in layers):
             raise ValueError("coarse-grid layer counts must be positive integers")
+        if not all(math.isfinite(dz) and dz > 0 for dz in self.reservoir_top_dz):
+            raise ValueError("reservoir_top_dz thicknesses must be positive and finite")
+        if len(self.reservoir_top_dz) >= self.reservoir_layers or sum(self.reservoir_top_dz) >= self.bottom_depth - self.reservoir_top:
+            raise ValueError("reservoir_top_dz must leave at least one layer and some thickness below it")
 
 
 @dataclass(frozen=True)
@@ -135,15 +159,16 @@ def build_vertical_grid_schedule(spec: CoarseGridSpec, well=None) -> VerticalGri
         if well_bottom > spec.bottom_depth:
             raise ValueError(f"coarse-grid bottom {spec.bottom_depth} does not cover well bottom {well_bottom}")
 
-    thicknesses = np.array(
+    refined = spec.reservoir_top_dz
+    uniform_layers = spec.reservoir_layers - len(refined)
+    dz = np.concatenate(
         [
-            (spec.water_depth - spec.top_depth) / spec.water_layers,
-            (spec.reservoir_top - spec.water_depth) / spec.overburden_layers,
-            (spec.bottom_depth - spec.reservoir_top) / spec.reservoir_layers,
+            np.full(spec.water_layers, (spec.water_depth - spec.top_depth) / spec.water_layers),
+            np.full(spec.overburden_layers, (spec.reservoir_top - spec.water_depth) / spec.overburden_layers),
+            np.asarray(refined, dtype=float),
+            np.full(uniform_layers, (spec.bottom_depth - spec.reservoir_top - sum(refined)) / uniform_layers),
         ]
     )
-    counts = (spec.water_layers, spec.overburden_layers, spec.reservoir_layers)
-    dz = np.concatenate([np.full(count, thickness) for count, thickness in zip(counts, thicknesses)])
     sections = ("water",) * spec.water_layers + ("overburden",) * spec.overburden_layers + ("reservoir",) * spec.reservoir_layers
     return VerticalGridSchedule(dz=dz, sections=sections)
 

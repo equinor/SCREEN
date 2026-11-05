@@ -10,5 +10,6 @@ from .coarse_grid import (
 	VerticalGridSchedule,
 	build_vertical_grid_schedule,
 	format_vertical_grid_recipe,
+	parse_dz_sequence,
 	write_vertical_grid_recipe,
 )

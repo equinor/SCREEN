@@ -278,6 +278,7 @@ def stage_case(args: argparse.Namespace) -> tuple[Path, Path, Path]:
         water_layers=args.water_layers,
         overburden_layers=args.overburden_layers,
         reservoir_layers=args.reservoir_layers,
+        reservoir_top_dz=tuple(getattr(args, "reservoir_top_dz", ())),
     )
     schedule = build_vertical_grid_schedule(spec)
     write_vertical_grid_recipe(spec, schedule, output_tops, cells_per_layer=args.cells_per_layer)

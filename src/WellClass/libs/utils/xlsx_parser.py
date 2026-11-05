@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from src.GaP.libs.free_fluid import FREE_FLUID_PERMX, FREE_FLUID_PORO
 from src.GaP.libs.models.simulation_scenario import SimulationDesign
 
+from ..grid_utils.coarse_grid import parse_dz_sequence
 from ..models.well_model import WellModel
 
 
@@ -24,6 +25,7 @@ class GridPolicy(BaseModel):
     target_dz_water: float = Field(gt=0, description="Water-layer thickness in metres")
     target_dz_overburden: float = Field(gt=0, description="Overburden-layer thickness in metres")
     target_dz_reservoir: float = Field(gt=0, description="Reservoir-layer thickness in metres")
+    reservoir_top_dz: str | None = Field(default=None, description="Finer layers from the reservoir top down, as count*dz in metres, e.g. '20*1'")
     reservoir_thickness: float = Field(default=400.0, gt=0, description="Reservoir interval thickness in metres")
     cells_per_layer: int = Field(default=400, gt=0)
     min_water_layers: int = Field(default=1, gt=0)
@@ -53,6 +55,13 @@ class GridPolicy(BaseModel):
         for name in ("water_overburden_wall_porv_multiplier", "reservoir_bottom_porv_multiplier"):
             if getattr(self, name) is None:
                 setattr(self, name, self.porv_multiplier)
+        return self
+
+    @model_validator(mode="after")
+    def validate_reservoir_top_dz(self) -> GridPolicy:
+        if self.reservoir_top_dz is not None:
+            self.reservoir_top_dz = str(self.reservoir_top_dz).strip()
+            parse_dz_sequence(self.reservoir_top_dz)
         return self
 
     @model_validator(mode="after")
@@ -191,7 +200,7 @@ def xlsx_grid_policy(xlsx_file: str | Path) -> dict[str, Any]:
     - max_water_layers
     - max_overburden_layers
     - max_reservoir_layers
-    - nx, ny (default 20)
+    - reservoir_top_dz: finer layers from the reservoir top down, e.g. '20*1'    - nx, ny (default 20)
     - dx, dy (default 200 m)
     - reservoir_permx (default 1000.0)
     - overburden_permx (default 0.001)

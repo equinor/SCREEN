@@ -46,7 +46,11 @@ python runscripts/create_example_well_workbooks.py
 `dy` are metres, and permeability uses mD. New workbooks state
 `depth_unit=m` and `permeability_unit=mD`; legacy workbooks default to those
 units. Required fields are `top_depth` and `target_dz_water`,
-`target_dz_overburden`, and `target_dz_reservoir`. Defaults: `reservoir_thickness`
+`target_dz_overburden`, and `target_dz_reservoir`. Optional `reservoir_top_dz`
+gives finer layers from the reservoir top down in `count*dz` notation (metres),
+e.g. `20*1` (twenty 1 m layers) or `10*1 4*5`; the rest of the reservoir uses
+`target_dz_reservoir`, and the reservoir layer limits apply to that rest only.
+Defaults: `reservoir_thickness`
 400 m; `cells_per_layer` 400; minimum layer counts 1; maximum layer counts
 unset; `nx`/`ny` 20; `dx`/`dy` 200 m; `reservoir_permx` 1000 mD;
 `overburden_permx` 0.001 mD; `aquifer_permx` unset; `aquifer_layers` 3;
@@ -192,7 +196,7 @@ vary them, use separate workbooks and output roots.
 - *Grid geometry* (a different grid, so results are not comparable cell by cell;
   `compare_scenario_outputs.py` reports it as a grid study): `top_depth`,
   `target_dz_water`, `target_dz_overburden`, `target_dz_reservoir`,
-  `reservoir_thickness`, `cells_per_layer`, `min_water_layers`,
+  `reservoir_top_dz`, `reservoir_thickness`, `cells_per_layer`, `min_water_layers`,
   `min_overburden_layers`, `min_reservoir_layers`, `max_water_layers`,
   `max_overburden_layers`, `max_reservoir_layers`, `nx`, `ny`, `dx`, `dy` and
   `aquifer_layers`. `water_depth` is derived from `Header.ground_elevation`.
