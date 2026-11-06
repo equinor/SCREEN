@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from math import isfinite
 from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -31,7 +32,10 @@ class SimulationScenario(BaseModel):
     reservoir_wall_porv_multiplier: Optional[float] = Field(default=None, gt=0, allow_inf_nan=False, description="Reservoir side-wall pore volume multiplier override")
     free_fluid_permx: Optional[float] = Field(default=None, gt=0, allow_inf_nan=False, description="Free-fluid permeability override in mD")
     free_fluid_poro: Optional[float] = Field(default=None, gt=0, le=1, allow_inf_nan=False, description="Free-fluid porosity override")
-    cb_perm: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False, description="Casing-cement permeability override in mD")
+    cb_perm: Optional[float | Literal["free_fluid"]] = Field(
+        default=None,
+        description="Casing-cement permeability in mD, or free_fluid to use free-fluid permeability and SATNUM",
+    )
     cb_perm_interval: str = Field(default="ALL", description="HoleCasings casing-cement name to override, or ALL")
     barrier_perm: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False, description="Plug-cement permeability override in mD")
     barrier_perm_interval: str = Field(default="ALL", description="Plugs name to override, or ALL")
@@ -72,6 +76,13 @@ class SimulationScenario(BaseModel):
         if not value.strip():
             raise ValueError("permeability interval target must not be blank; use ALL for every interval")
         return value.strip()
+
+    @field_validator("cb_perm")
+    @classmethod
+    def casing_cement_permeability_is_valid(cls, value: float | Literal["free_fluid"] | None):
+        if value is not None and value != "free_fluid" and (not isfinite(value) or value < 0):
+            raise ValueError("cb_perm must be finite and nonnegative in mD, or 'free_fluid'")
+        return value
 
     @model_validator(mode="after")
     def interval_overrides_require_values(self) -> SimulationScenario:

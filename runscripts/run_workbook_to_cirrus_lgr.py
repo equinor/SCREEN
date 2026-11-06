@@ -150,6 +150,8 @@ def run_workflow(args: argparse.Namespace) -> Path:
     resolve_case_identity(args, model, design, scenario)
     case_files = CaseFiles.for_stem(args.case_stem)
     policy = apply_scenario_overrides(policy, scenario)
+    cb_uses_free_fluid = scenario.cb_perm == "free_fluid"
+    scenario_cb_perm = policy["free_fluid_permx"] if cb_uses_free_fluid else scenario.cb_perm
     stage_args = derive_stage_args_from_policy(args, policy, model)
     args.reservoir_top = stage_args.reservoir_top
     args.bottom_depth = stage_args.bottom_depth
@@ -173,10 +175,18 @@ def run_workflow(args: argparse.Namespace) -> Path:
         "cb_perm": (
             args.cb_perm
             if scenario.cb_perm_interval != "ALL"
-            else scenario.cb_perm if scenario.cb_perm is not None else args.cb_perm
+            else scenario_cb_perm if scenario_cb_perm is not None else args.cb_perm
         ),
         "cb_perm_interval_overrides": (
-            {scenario.cb_perm_interval: scenario.cb_perm} if scenario.cb_perm_interval != "ALL" else {}
+            {scenario.cb_perm_interval: scenario_cb_perm}
+            if scenario.cb_perm_interval != "ALL" and scenario_cb_perm is not None
+            else {}
+        ),
+        "cb_satnum": 2 if cb_uses_free_fluid and scenario.cb_perm_interval == "ALL" else 1,
+        "cb_satnum_interval_overrides": (
+            {scenario.cb_perm_interval: 2}
+            if cb_uses_free_fluid and scenario.cb_perm_interval != "ALL"
+            else {}
         ),
         "barrier_perm": (
             args.barrier_perm
@@ -225,10 +235,22 @@ def run_workflow(args: argparse.Namespace) -> Path:
         oh_perm=args.oh_perm,
         cb_perm=args.cb_perm,
         barrier_perm=args.barrier_perm,
+        ali_way=args.ali_way,
+        casing_hole_casing=scenario.casing_hole_casing,
+        casing_hole_depth_mTVDMSL=scenario.casing_hole_depth_mTVDMSL,
+        casing_hole_diameter_m=scenario.casing_hole_diameter_m,
+        casing_hole_open=scenario.casing_hole_open,
+        casing_satnum_overrides=(
+            {"ALL": 2}
+            if cb_uses_free_fluid and scenario.cb_perm_interval == "ALL"
+            else {scenario.cb_perm_interval: 2}
+            if cb_uses_free_fluid
+            else {}
+        ),
         permeability_overrides={
             key: value
             for key, value in {
-                "cb_perm": scenario.cb_perm if scenario.cb_perm_interval == "ALL" else None,
+                "cb_perm": scenario_cb_perm if scenario.cb_perm_interval == "ALL" else None,
                 "barrier_perm": scenario.barrier_perm if scenario.barrier_perm_interval == "ALL" else None,
             }.items()
             if value is not None
@@ -236,16 +258,11 @@ def run_workflow(args: argparse.Namespace) -> Path:
         interval_permeability_overrides={
             field: {target: value}
             for field, target, value in (
-                ("cb_perm", scenario.cb_perm_interval, scenario.cb_perm),
+                ("cb_perm", scenario.cb_perm_interval, scenario_cb_perm),
                 ("barrier_perm", scenario.barrier_perm_interval, scenario.barrier_perm),
             )
             if target != "ALL" and value is not None
         },
-        ali_way=args.ali_way,
-        casing_hole_casing=scenario.casing_hole_casing,
-        casing_hole_depth_mTVDMSL=scenario.casing_hole_depth_mTVDMSL,
-        casing_hole_diameter_m=scenario.casing_hole_diameter_m,
-        casing_hole_open=scenario.casing_hole_open,
     )
     lgr_path = build_lgr(lgr_args)
     if scenario.casing_hole is not None:

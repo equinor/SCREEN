@@ -69,6 +69,7 @@ def build_lgr(args: argparse.Namespace) -> Path:
         barrier_perm=args.barrier_perm,
         permeability_overrides=getattr(args, "permeability_overrides", None),
         interval_permeability_overrides=getattr(args, "interval_permeability_overrides", None),
+        casing_satnum_overrides=getattr(args, "casing_satnum_overrides", None),
     )
     builder = LGRBuilder(str(args.sim_case), well_frames.annulus_df, well_frames.holes_df, args.ali_way)
     builder.build_grdecl(

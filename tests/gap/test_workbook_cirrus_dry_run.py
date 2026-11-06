@@ -5,7 +5,6 @@ import re
 import shutil
 import subprocess
 import sys
-import types
 from types import SimpleNamespace
 
 import numpy as np
@@ -150,6 +149,8 @@ def test_design_matrix_permeability_overrides_reach_case_outputs(tmp_path):
         "oh_perm": 10000.0,
         "cb_perm": 0.2,
         "cb_perm_interval_overrides": {},
+        "cb_satnum": 1,
+        "cb_satnum_interval_overrides": {},
         "barrier_perm": 0.3,
         "barrier_perm_interval_overrides": {},
     }
@@ -216,6 +217,57 @@ def test_workbook_interval_permeability_overrides_are_isolated(tmp_path):
     assert scenario["effective_permeability_mD"]["cb_perm_interval_overrides"] == {"Cement 9 5/8 in": 0.25}
     assert scenario["effective_permeability_mD"]["barrier_perm"] == 0.05
     assert scenario["effective_permeability_mD"]["barrier_perm_interval_overrides"] == {"cplug9": 0.75}
+
+
+def test_free_fluid_cement_override_uses_case_permeability_and_satnum(tmp_path):
+    root = Path(__file__).parents[2]
+    workbook = tmp_path / "free_fluid_cement.xlsx"
+    shutil.copyfile(root / "test_data/examples/smeaheia/smeaheia_workbook.xlsx", workbook)
+    excel = load_workbook(workbook)
+    design_matrix = excel["DesignMatrix"]
+    columns = {design_matrix.cell(1, column).value: column for column in range(1, design_matrix.max_column + 1)}
+    design_matrix.cell(2, columns["cb_perm"]).value = "free_fluid"
+    design_matrix.cell(2, columns["cb_perm_interval"]).value = "Cement 9 5/8 in"
+    policy = excel["GridPolicy"]
+    policy_rows = {policy.cell(row, 1).value: row for row in range(2, policy.max_row + 1)}
+    row = policy_rows.get("free_fluid_permx", policy.max_row + 1)
+    policy.cell(row, 1).value = "free_fluid_permx"
+    policy.cell(row, 2).value = 4321.0
+    excel.save(workbook)
+
+    fixture_prefix = root / "test_data/examples/smeaheia/model/TEMP-0"
+    runner = _fake_cirrus(tmp_path, fixture_prefix)
+    output_root = tmp_path / "free_fluid_cement"
+    subprocess.run(
+        [
+            sys.executable,
+            "runscripts/run_workbook_to_cirrus_lgr.py",
+            "--xlsx",
+            str(workbook),
+            "--output-root",
+            str(output_root),
+            "--sim-command",
+            f"{runner} {{deck}}",
+            "--case-name",
+            "baseline",
+        ],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    lgr = (output_root / "include/smeaheia_baseline_LGR.grdecl").read_text(encoding="utf-8")
+    assert "PERMX  4321.0  9  14  9  9  49  91  /" in lgr
+    assert "SATNUM  2  9  14  9  9  49  91  /" in lgr
+    assert "SATNUM  1  9  14  9  9  49  91  /" not in lgr
+    scenario = json.loads((output_root / "scenario.json").read_text(encoding="utf-8"))
+    assert scenario["effective_permeability_mD"]["cb_perm_interval_overrides"] == {
+        "Cement 9 5/8 in": 4321.0
+    }
+    assert scenario["effective_permeability_mD"]["cb_satnum_interval_overrides"] == {
+        "Cement 9 5/8 in": 2
+    }
 
 
 def _hole_workbook(tmp_path, casing, **extra):

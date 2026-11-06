@@ -19,6 +19,7 @@ class WellDataFrame:
         permeability_unit="mD",
         permeability_overrides=None,
         interval_permeability_overrides: Mapping[str, Mapping[str, float]] | None = None,
+        casing_satnum_overrides: Mapping[str, int] | None = None,
     ):
         """Expose canonical/legacy GaP frames; processed depths are TVDMSL m and permeability is mD."""
 
@@ -35,6 +36,7 @@ class WellDataFrame:
                 oh_poro,
                 permeability_overrides or {},
                 interval_permeability_overrides or {},
+                casing_satnum_overrides or {},
             )
         else:
             raise TypeError("WellDataFrame requires a legacy Well or WellProcessed instance")
@@ -64,6 +66,7 @@ class WellDataFrame:
         oh_poro,
         permeability_overrides,
         interval_permeability_overrides,
+        casing_satnum_overrides,
     ):
         """Adapt WellProcessed records to the fields consumed by GaP."""
         if not hasattr(my_well, "borehole") or not hasattr(my_well, "annulus"):
@@ -136,6 +139,7 @@ class WellDataFrame:
             "casing-cement",
         )
         self._require_permeability(self.casings_df, "cb_perm", "cb_perm")
+        self._apply_casing_satnum_overrides(casing_satnum_overrides)
 
         self.borehole_df = pd.DataFrame(my_well.borehole)
         if not self.borehole_df.empty:
@@ -185,6 +189,29 @@ class WellDataFrame:
                 raise ValueError(f"ambiguous {interval_type} interval {identifier!r}; names must be unique")
             frame[value_column] = pd.to_numeric(frame[value_column], errors="coerce").astype(float)
             frame.loc[matches, value_column] = numeric_value
+
+    def _apply_casing_satnum_overrides(self, overrides):
+        if self.casings_df.empty:
+            if overrides:
+                raise ValueError("casing-cement SATNUM overrides require casing intervals")
+            return
+        self.casings_df["cb_satnum"] = 1
+        for identifier, satnum in overrides.items():
+            if satnum not in {1, 2}:
+                raise ValueError(f"casing-cement SATNUM override must be 1 or 2; got {satnum!r}")
+            if identifier == "ALL":
+                self.casings_df["cb_satnum"] = satnum
+                continue
+            if not isinstance(identifier, str) or not identifier.strip():
+                raise ValueError(f"invalid casing-cement SATNUM interval identifier: {identifier!r}")
+            matches = self.casings_df["cement_name"] == identifier
+            match_count = int(matches.sum())
+            if match_count == 0:
+                available = sorted(self.casings_df["cement_name"].dropna().unique().tolist())
+                raise ValueError(f"unknown casing-cement SATNUM interval {identifier!r}; available intervals: {available}")
+            if match_count > 1:
+                raise ValueError(f"ambiguous casing-cement SATNUM interval {identifier!r}; names must be unique")
+            self.casings_df.loc[matches, "cb_satnum"] = satnum
 
     def _set_canonical_aliases(self):
         self.holes_df = self.drilling_df

@@ -126,6 +126,13 @@ def test_scenario_depth_and_pressure_units_are_validated():
         SimulationScenario(barrier_perm_interval=" ")
 
 
+def test_scenario_accepts_free_fluid_cement_sensitivity():
+    scenario = SimulationScenario(cb_perm="free_fluid", cb_perm_interval="Cement 13 3/8 in")
+
+    assert scenario.cb_perm == "free_fluid"
+    assert scenario.cb_perm_interval == "Cement 13 3/8 in"
+
+
 def test_design_matrix_parses_interval_permeability_targets(tmp_path):
     workbook = tmp_path / "interval-overrides.xlsx"
     with pd.ExcelWriter(workbook, engine="openpyxl") as writer:

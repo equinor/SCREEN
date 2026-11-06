@@ -139,7 +139,12 @@ plug permeability. Their companion `cb_perm_interval` and
 `HoleCasings` or `Plugs` sheet; the default `ALL` applies the value to every
 interval of that type. For a named interval, only that interval changes. Other
 intervals retain their own workbook permeability, falling back to the CLI
-default when none is provided. Interval names used as targets must be unique
+default when none is provided. Set `cb_perm` to the text `free_fluid` to model
+the selected cement interval(s) as uncimented free flow: permeability comes
+from that case's `GridPolicy.free_fluid_permx` and SATNUM changes to 2. This
+does not remove the cement interval from the well, and affects only the
+selected interval(s) in that DesignMatrix case. Numeric `cb_perm` values keep
+the porous-media SATNUM 1. Interval names used as targets must be unique
 within the relevant sheet and must match exactly. A target other than `ALL`
 requires its corresponding permeability value. Cells that hold only free fluid
 (the ocean layers, open hole and pipe interior) use one definition from
@@ -162,7 +167,8 @@ selects the free-flow curves for the ocean column, pipe/open borehole and
 uncemented annulus. The staged coarse grid assigns SATNUM 1 globally and
 overrides the ocean layers to SATNUM 2. In generated LGRs, the drilled-hole
 footprint receives SATNUM 2, then cement cells are explicitly reset to
-SATNUM 1. Barriers also remain on SATNUM 1; although some decks define
+SATNUM 1 unless `cb_perm` is `free_fluid` for that cement interval. Barriers
+also remain on SATNUM 1; although some decks define
 plug-specific curves, GaP does not currently assign a separate saturation
 number to them. This treats annulus cells without cement as free flow.
 
@@ -194,7 +200,7 @@ without a warning**.
 | `water_overburden_wall_porv_multiplier` | factor | `GridPolicy`, else `porv_multiplier` (2000) | Pore volume of the four outer side walls of the water and overburden layers. |
 | `reservoir_bottom_porv_multiplier` | factor | `GridPolicy`, else `porv_multiplier` (2000) | Pore volume of the bottom reservoir layer (the bottom aquifer), except the grid centre cell, where the well and its LGR are built. |
 | `reservoir_wall_porv_multiplier` | factor | `GridPolicy` (1, no effect) | Pore volume of the four outer reservoir walls above the bottom layer. |
-| `cb_perm` | mD | cement row `hc_perm`, else 0.05 | Casing-cement permeability. |
+| `cb_perm` | mD or `free_fluid` | cement row `hc_perm`, else 0.05 | Casing-cement permeability. `free_fluid` uses `GridPolicy.free_fluid_permx` and assigns SATNUM 2 to the selected cement interval(s). |
 | `cb_perm_interval` | text | `ALL` | Which `HoleCasings` casing-cement `name` `cb_perm` applies to, or `ALL`. |
 | `barrier_perm` | mD | `Plugs` `cement_perm`, else 0.05 | Plug permeability. |
 | `barrier_perm_interval` | text | `ALL` | Which `Plugs` `name` `barrier_perm` applies to, or `ALL`. |

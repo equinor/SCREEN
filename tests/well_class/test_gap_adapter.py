@@ -82,6 +82,23 @@ def test_processed_well_requires_explicit_permeability():
         raise AssertionError("Expected missing open-hole permeability to fail")
 
 
+def test_casing_satnum_override_is_limited_to_selected_cement_interval():
+    root = Path(__file__).parents[2]
+    well = WellProcessed.from_json(root / "test_data/examples/smeaheia/smeaheia.json")
+    frames = WellDataFrame(
+        well,
+        oh_perm=10000.0,
+        cb_perm=10000.0,
+        barrier_perm=0.05,
+        casing_satnum_overrides={"Cement 9 5/8 in": 2},
+    )
+
+    selected = frames.casings_df.loc[frames.casings_df["cement_name"] == "Cement 9 5/8 in", "cb_satnum"]
+    other = frames.casings_df.loc[frames.casings_df["cement_name"] != "Cement 9 5/8 in", "cb_satnum"]
+    assert set(selected) == {2}
+    assert set(other) == {1}
+
+
 def test_processed_well_permeability_is_millidarcy_and_nonnegative():
     with pytest.raises(ValueError, match="permeability_unit must be 'mD'"):
         WellDataFrame(make_vertical_well(), oh_perm=1.0, cb_perm=1.0, barrier_perm=1.0, permeability_unit="D")

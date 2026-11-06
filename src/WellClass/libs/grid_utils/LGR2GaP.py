@@ -65,7 +65,7 @@ def df_to_gap_casing(holes_df: pd.DataFrame, casings_df: pd.DataFrame, LGR_NAME:
         )
 
     # Free-flow SATNUM covers the full drilled footprint, including any uncemented annulus.
-    # Cement writers below override their own cells to the porous-media SATNUM.
+    # Cement writers below apply the SATNUM configured for each cement interval.
     for idx in holes_df.index:
         ij_min, ij_max, k_min, k_max = holes_df.loc[idx, ["ij_min", "ij_max", "k_min", "k_max"]]
         if min(ij_min, ij_max, k_min, k_max) < 0 or ij_max < ij_min or k_max < k_min:
@@ -102,6 +102,7 @@ def df_to_gap_casing(holes_df: pd.DataFrame, casings_df: pd.DataFrame, LGR_NAME:
         # bbox for cement bond
         cb_columns = ["diameter_m", "ij_min", "ij_max", "toc_k_min", "toc_k_max", "cb_perm"]
         ID_pipe, ij_min_pipe, ij_max_pipe, toc_k_min_cb, toc_k_max_cb, cb_perm = casings_df.loc[idx, cb_columns]
+        cb_satnum = int(casings_df.loc[idx].get("cb_satnum", 1))
 
         # locate the intervals of cement-bond within drilling
         df_kmin = holes_df[(holes_df.k_min <= toc_k_min_cb) & (holes_df.k_max > toc_k_min_cb)]
@@ -139,6 +140,7 @@ def df_to_gap_casing(holes_df: pd.DataFrame, casings_df: pd.DataFrame, LGR_NAME:
                 x_bd=x_thickness,
                 y_bd=x_thickness,
                 perm=cb_perm,
+                satnum=cb_satnum,
                 LGR_NAME=LGR_NAME,
                 O=O,
             )
