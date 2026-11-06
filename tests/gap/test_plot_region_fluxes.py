@@ -73,7 +73,7 @@ def test_plot_real_summary_with_labelled_zero(tmp_path, monkeypatch, caplog, sel
     assert output.read_bytes().startswith(b"\x89PNG\r\n\x1a\n")
     if selection[0] == "--vector":
         dates, values, style = curves["hole"]
-        np.testing.assert_allclose(values, [0, -3.082 * 1.871], rtol=1e-6)
+        np.testing.assert_allclose(values, [0, -3.082 * 1.871 * 365.25 / 1000], rtol=1e-6)
         assert dates[-1] == np.datetime64("2026-01-01")
         assert style == "-"
         _, values, style = curves["sealed (inferred zero)"]
@@ -262,11 +262,35 @@ def test_mass_plot_values_and_axis_units(tmp_path, monkeypatch, quantity, unit, 
     cases = plot.load_cases(tmp_path, "FIPHOL", quantity, "*", None, mass=True)
 
     def verify(figure, *_args, **_kwargs):
-        assert figure.axes[0].get_ylabel() == label
-        np.testing.assert_allclose(figure.axes[0].lines[0].get_ydata(), [0, 3.082 * 1.871], rtol=1e-6)
+        if quantity == "RGFR":
+            assert figure.axes[0].get_ylabel() == "tonnes/year"
+            np.testing.assert_allclose(figure.axes[0].lines[0].get_ydata(), [0, 3.082 * 1.871 * 365.25 / 1000], rtol=1e-6)
+        else:
+            assert figure.axes[0].get_ylabel() == label
+            np.testing.assert_allclose(figure.axes[0].lines[0].get_ydata(), [0, 3.082 * 1.871], rtol=1e-6)
 
     monkeypatch.setattr(Figure, "savefig", verify)
     plot.plot_fluxes(cases, [f"{quantity}_HOL:1-2"], "FIPHOL", 1, tmp_path / "mass.png", False)
+
+
+@pytest.mark.parametrize(
+    ("kg_per_day", "expected_scale", "expected_label"),
+    [
+        (1000.0, 365.25 / 1000, "tonnes/year"),
+        (100_000.0, 365.25 / 1_000_000, "kilotonnes/year"),
+        (10_000_000.0, 365.25 / 1_000_000_000, "megatonnes/year"),
+    ],
+)
+def test_annual_mass_rate_auto_selects_metric_prefix(kg_per_day, expected_scale, expected_label):
+    scale, label = plot.annual_mass_rate_scale([np.array([0.0, kg_per_day])])
+    assert scale == expected_scale
+    assert label == expected_label
+
+
+def test_annual_mass_rate_uses_all_cases_to_select_prefix():
+    scale, label = plot.annual_mass_rate_scale([np.array([10.0]), np.array([-1_000_000.0])])
+    assert scale == 365.25 / 1_000_000
+    assert label == "kilotonnes/year"
 
 
 def test_mass_conversion_rejects_unsupported_volume_units(tmp_path):
@@ -305,12 +329,50 @@ def test_volume_option_needs_no_deck(tmp_path, monkeypatch):
         plot.load_cases(tmp_path, "FIPHOL", "RGFR", "*", None, mass=True)
 
 
-def test_water_is_not_converted_with_co2_density(tmp_path):
+@pytest.mark.parametrize(("quantity", "summary_unit", "output_unit"), [("RWFR", "M^3/D", "kg/day"), ("RWFT", "M^3", "kg")])
+def test_water_uses_water_surface_density(tmp_path, quantity, summary_unit, output_unit):
+    _, prefix = write_case(tmp_path, quantity=quantity, unit=summary_unit)
+    case = plot.load_cases(tmp_path, "FIPHOL", quantity, "*", None, mass=True)[0]
+    assert case.scale == 1050.0
+    assert case.unit == output_unit
+
+
+@pytest.mark.parametrize("phase", ["GAS", "WATER"])
+def test_surface_density_reads_only_requested_eos_block(tmp_path, phase):
+    deck = tmp_path / "case.in"
+    deck.write_text(
+        "EOS WATER\n SURFACE_DENSITY 1050.0 kg/m^3\nEND\n"
+        "EOS GAS\n SURFACE_DENSITY 1.871 kg/m^3\nEND\n"
+    )
+    expected = 1.871 if phase == "GAS" else 1050.0
+    assert plot.surface_density(deck, phase) == expected
+
+
+@pytest.mark.parametrize(("quantity", "summary_unit"), [("RWFR", "M^3/D"), ("RWFT", "M^3")])
+def test_water_mass_plot_values_and_axis_units(tmp_path, monkeypatch, quantity, summary_unit):
+    from matplotlib.figure import Figure
+
+    write_case(tmp_path, quantity=quantity, unit=summary_unit)
+    cases = plot.load_cases(tmp_path, "FIPHOL", quantity, "*", None, mass=True)
+
+    def verify(figure, *_args, **_kwargs):
+        ax = figure.axes[0]
+        if quantity == "RWFR":
+            assert ax.get_ylabel() == "kilotonnes/year"
+            np.testing.assert_allclose(ax.lines[0].get_ydata(), [0, 3.082 * 1050 * 365.25 / 1_000_000])
+        else:
+            assert ax.get_ylabel() == "kg"
+            np.testing.assert_allclose(ax.lines[0].get_ydata(), [0, 3.082 * 1050])
+
+    monkeypatch.setattr(Figure, "savefig", verify)
+    plot.plot_fluxes(cases, [f"{quantity}_HOL:1-2"], "FIPHOL", 1, tmp_path / "water.png", False)
+
+
+def test_water_mass_conversion_rejects_missing_water_density(tmp_path):
     _, prefix = write_case(tmp_path, quantity="RWFR")
-    Path(f"{prefix}.in").unlink()
-    case = plot.load_cases(tmp_path, "FIPHOL", "RWFR", "*", None, mass=True)[0]
-    assert case.scale == 1.0
-    assert case.unit == "M^3/D"
+    Path(f"{prefix}.in").write_text("EOS GAS\nSURFACE_DENSITY 1.871 kg/m^3\nEND\n")
+    with pytest.raises(ValueError, match="EOS WATER SURFACE_DENSITY"):
+        plot.load_cases(tmp_path, "FIPHOL", "RWFR", "*", None, mass=True)
 
 
 def _case(name, **inputs):

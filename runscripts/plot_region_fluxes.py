@@ -17,6 +17,7 @@ from resdata.resfile import ResdataFile
 from resdata.summary import Summary
 
 LOGGER = logging.getLogger(__name__)
+DAYS_PER_YEAR = 365.25
 
 
 class Case(NamedTuple):
@@ -29,8 +30,11 @@ class Case(NamedTuple):
     inputs: dict | None = None
 
 
-def gas_surface_density(deck: Path) -> float:
-    in_gas = False
+def surface_density(deck: Path, phase: str) -> float:
+    phase = phase.upper()
+    if phase not in {"GAS", "WATER"}:
+        raise ValueError(f"unsupported EOS phase {phase!r}")
+    in_phase = False
     densities = []
     for line in deck.read_text(encoding="utf-8").splitlines():
         tokens = re.split(r"[!#]", line, maxsplit=1)[0].split()
@@ -38,22 +42,26 @@ def gas_surface_density(deck: Path) -> float:
             continue
         upper = [token.upper() for token in tokens]
         if upper[0] == "EOS":
-            in_gas = upper == ["EOS", "GAS"]
+            in_phase = upper == ["EOS", phase]
         elif upper[0] == "END":
-            in_gas = False
-        elif in_gas and upper[0] == "SURFACE_DENSITY":
+            in_phase = False
+        elif in_phase and upper[0] == "SURFACE_DENSITY":
             if len(tokens) != 3 or upper[2] != "KG/M^3":
-                raise ValueError(f"{deck}: EOS GAS SURFACE_DENSITY must use kg/m^3")
+                raise ValueError(f"{deck}: EOS {phase} SURFACE_DENSITY must use kg/m^3")
             try:
                 density = float(upper[1].replace("D", "E"))
             except ValueError as exc:
-                raise ValueError(f"{deck}: invalid EOS GAS SURFACE_DENSITY value") from exc
+                raise ValueError(f"{deck}: invalid EOS {phase} SURFACE_DENSITY value") from exc
             if not np.isfinite(density) or density <= 0:
-                raise ValueError(f"{deck}: EOS GAS SURFACE_DENSITY must be finite and positive")
+                raise ValueError(f"{deck}: EOS {phase} SURFACE_DENSITY must be finite and positive")
             densities.append(density)
     if len(densities) != 1:
-        raise ValueError(f"{deck}: expected one EOS GAS SURFACE_DENSITY, found {len(densities)}")
+        raise ValueError(f"{deck}: expected one EOS {phase} SURFACE_DENSITY, found {len(densities)}")
     return densities[0]
+
+
+def gas_surface_density(deck: Path) -> float:
+    return surface_density(deck, "GAS")
 
 
 def load_inputs(directory: Path) -> dict[str, object]:
@@ -110,6 +118,19 @@ def check_regions(case_name: str, regions: set[int], zonation: str, key: str) ->
 
 def has_pair_regions(regions: set[int], key: str) -> bool:
     return all(int(region) in regions for region in key.split(":")[1].split("-"))
+
+
+def annual_mass_rate_scale(values: list[np.ndarray]) -> tuple[float, str]:
+    """Scale kg/day values to tonnes, kilotonnes, or megatonnes per year."""
+    tonnes_per_year = max(
+        (float(np.max(np.abs(value), initial=0.0)) for value in values),
+        default=0.0,
+    ) * DAYS_PER_YEAR / 1000.0
+    if tonnes_per_year >= 1_000_000:
+        return DAYS_PER_YEAR / 1_000_000_000.0, "megatonnes/year"
+    if tonnes_per_year >= 1_000:
+        return DAYS_PER_YEAR / 1_000_000.0, "kilotonnes/year"
+    return DAYS_PER_YEAR / 1000.0, "tonnes/year"
 
 
 def load_cases(
@@ -179,12 +200,14 @@ def load_cases(
             raise ValueError(f"{directory.name}: inconsistent or missing units for {keyword}")
         unit = units.pop()
         scale = 1.0
-        if mass and quantity in ("RGFR", "RGFT"):
-            expected = "M^3/D" if quantity == "RGFR" else "M^3"
+        if mass and quantity in ("RGFR", "RGFT", "RWFR", "RWFT"):
+            is_rate = quantity.endswith("FR")
+            phase = "GAS" if quantity.startswith("RG") else "WATER"
+            expected = "M^3/D" if is_rate else "M^3"
             if unit.upper() != expected:
-                raise ValueError(f"{directory.name}: gas mass conversion requires {expected}, found {unit!r}")
-            scale = gas_surface_density(Path(f"{prefix}.in"))
-            unit = "kg/day" if quantity == "RGFR" else "kg"
+                raise ValueError(f"{directory.name}: {phase.lower()} mass conversion requires {expected}, found {unit!r}")
+            scale = surface_density(Path(f"{prefix}.in"), phase)
+            unit = "kg/day" if is_rate else "kg"
         if cases and unit != cases[0].unit:
             raise ValueError(f"{directory.name}: unit {unit!r} differs from {cases[0].unit!r}")
         dates = summary.numpy_dates
@@ -272,14 +295,18 @@ def plot_fluxes(
         )
         try:
             for key, ax in zip(keys, axes[:, 0]):
-                for curve_key, case, dates, values, missing in curves:
-                    if curve_key == key:
-                        label = f"{label_of[case.name]} (inferred zero)" if missing else label_of[case.name]
-                        ax.plot(
-                            dates, values, label=label, linestyle="--" if missing else "-", color=color_of[case.name],
-                            linewidth=width_of[case.name], zorder=3 if case.name == reference_case else 2,
-                        )
-                ax.set(title=f"{key} (sign multiplier {sign:+d})", ylabel=cases[0].unit)
+                key_curves = [curve for curve in curves if curve[0] == key]
+                if cases[0].unit == "kg/day":
+                    value_scale, ylabel = annual_mass_rate_scale([curve[3] for curve in key_curves])
+                else:
+                    value_scale, ylabel = 1.0, cases[0].unit
+                for curve_key, case, dates, values, missing in key_curves:
+                    label = f"{label_of[case.name]} (inferred zero)" if missing else label_of[case.name]
+                    ax.plot(
+                        dates, values * value_scale, label=label, linestyle="--" if missing else "-", color=color_of[case.name],
+                        linewidth=width_of[case.name], zorder=3 if case.name == reference_case else 2,
+                    )
+                ax.set(title=f"{key} (sign multiplier {sign:+d})", ylabel=ylabel)
                 ax.grid(True, alpha=0.3)
             axes[-1, 0].set_xlabel("Simulation date")
             handles = [
@@ -320,7 +347,7 @@ def main() -> None:
         default="case",
         help="Legend labels: the case name, or only the recorded inputs that differ between the plotted cases",
     )
-    parser.add_argument("--volume", action="store_true", help="Keep gas volumes; default converts gas rates/totals to kg/day or kg")
+    parser.add_argument("--volume", action="store_true", help="Keep gas/water volumes; default converts them to mass using the matching EOS surface density")
     args = parser.parse_args()
     try:
         if re.fullmatch(r"FIP[A-Z0-9]{1,3}", args.zonation) is None:
