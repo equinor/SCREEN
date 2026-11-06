@@ -507,11 +507,13 @@ and invalid requested regions produce explicit errors. A requested pair
 absent from every selected case is rejected with the available keys.
 When a selected pair is omitted from one case, the script draws a dashed
 curve labelled "inferred zero" and logs a warning. Both regions must exist
-in that case's INIT, and other pair vectors must confirm reporting of the
-same partition and quantity. Missing reporting, invalid values, reader
-failures, and missing or inconsistent units stop the command. Selection
-still uses exact keys exported in at least one case; reverse keys and pairs
-absent from the whole batch are not invented.
+in that case's INIT for zero to be inferred; cases without the selected
+regions are skipped for that pair. Cases missing required simulator files or
+all pair vectors for the selected quantity are also skipped with a warning.
+Other pair vectors must confirm reporting of the same partition and quantity.
+Invalid values, reader failures, and missing or inconsistent units stop the
+command. Selection still uses exact keys exported in at least one case;
+reverse keys and pairs absent from the whole batch are not invented.
 
 This behavior follows CIRRUS 1.9 source revision `00028b774`:
 `BuildFIPNUMConnectionMap` constructs connectivity from cell connections;

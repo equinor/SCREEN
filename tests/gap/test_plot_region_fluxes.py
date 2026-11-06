@@ -16,7 +16,7 @@ assert SPEC.loader is not None
 SPEC.loader.exec_module(plot)
 
 
-def write_case(root, name="hole", unit="M^3/D", partition="FIPHOL", pair=True, quantity="RGFR"):
+def write_case(root, name="hole", unit="M^3/D", partition="FIPHOL", pair=True, quantity="RGFR", regions=(1, 2, 3)):
     case = root / name
     model = case / "model"
     model.mkdir(parents=True)
@@ -33,7 +33,7 @@ def write_case(root, name="hole", unit="M^3/D", partition="FIPHOL", pair=True, q
         Path(f"{prefix}.{suffix}").rename(f"{prefix}.{suffix.upper()}")
     init = FortIO(f"{prefix}.INIT", mode=FortIO.WRITE_MODE)
     try:
-        for region in (1, 2, 3):
+        for region in regions:
             keyword = ResdataKW(partition, 1, ResDataType.RD_INT)
             keyword[0] = region
             keyword.fwrite(init)
@@ -104,11 +104,27 @@ def test_missing_partition(tmp_path, monkeypatch, capsys):
     assert "FIPHOL zonation was not found in INIT" in capsys.readouterr().err
 
 
-def test_missing_quantity_reporting_cannot_infer_zero(tmp_path):
-    write_case(tmp_path)
+def test_case_without_quantity_vectors_is_skipped(tmp_path, caplog):
+    write_case(tmp_path, name="ready")
     write_case(tmp_path, name="sealed", quantity="RWFR")
-    with pytest.raises(ValueError, match="sealed: FIPHOL exists, but no RGFR_HOL pair vectors confirm reporting"):
-        plot.load_cases(tmp_path, "FIPHOL", "RGFR", "*", None)
+
+    cases = plot.load_cases(tmp_path, "FIPHOL", "RGFR", "*", None)
+
+    assert [case.name for case in cases] == ["ready"]
+    assert "sealed: no RGFR_HOL pair vectors found; skipping case" in caplog.text
+
+
+def test_case_without_requested_regions_is_skipped_from_plot(tmp_path, caplog):
+    write_case(tmp_path, name="ready")
+    write_case(tmp_path, name="other_regions", pair=False, regions=(1, 3, 5))
+    cases = plot.load_cases(tmp_path, "FIPHOL", "RGFR", "*", None)
+    keys = plot.select_vectors(cases, "FIPHOL", "RGFR", ["1-2"])
+
+    output = tmp_path / "plot.png"
+    plot.plot_fluxes(cases, keys, "FIPHOL", 1, output, False)
+
+    assert output.is_file()
+    assert "other_regions: RGFR_HOL:1-2 requires regions not present in FIPHOL; skipping case" in caplog.text
 
 
 def test_units_must_match(tmp_path):
@@ -127,8 +143,33 @@ def test_metadata_and_legacy_stem_selection(tmp_path):
         plot.load_cases(tmp_path, "FIPHOL", "RGFR", "*", None)
     assert plot.load_cases(tmp_path, "FIPHOL", "RGFR", "*", prefix.name)[0].name == "hole"
     Path(f"{prefix}.UNSMRY").unlink()
-    with pytest.raises(ValueError, match="required output file not found"):
+    with pytest.raises(ValueError, match="No case directories"):
         plot.load_cases(tmp_path, "FIPHOL", "RGFR", "*", prefix.name)
+
+
+def test_incomplete_cases_are_skipped_while_available_cases_load(tmp_path, caplog):
+    write_case(tmp_path, name="ready")
+    _, pending_prefix = write_case(tmp_path, name="pending")
+    Path(f"{pending_prefix}.UNSMRY").unlink()
+    write_case(tmp_path, name="not_started")
+    for path in (tmp_path / "not_started" / "model").iterdir():
+        path.unlink()
+    (tmp_path / "not_started" / "scenario.json").unlink()
+
+    cases = plot.load_cases(tmp_path, "FIPHOL", "RGFR", "*", None)
+
+    assert [case.name for case in cases] == ["ready"]
+    assert "pending: required output file(s) not found" in caplog.text
+    assert "not_started: no SMSPEC summary file found" in caplog.text
+
+
+def test_incomplete_reference_case_is_not_skipped(tmp_path):
+    write_case(tmp_path, name="ready")
+    _, prefix = write_case(tmp_path, name="reference")
+    Path(f"{prefix}.UNSMRY").unlink()
+
+    with pytest.raises(ValueError, match="reference: required output file"):
+        plot.load_cases(tmp_path, "FIPHOL", "RGFR", "*", None, reference_case="reference")
 
 
 def test_case_filter_and_missing_cases(tmp_path):

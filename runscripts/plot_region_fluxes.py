@@ -108,6 +108,10 @@ def check_regions(case_name: str, regions: set[int], zonation: str, key: str) ->
             raise ValueError(f"{case_name}: region {region} does not exist in {zonation}; available regions: {sorted(regions)}")
 
 
+def has_pair_regions(regions: set[int], key: str) -> bool:
+    return all(int(region) in regions for region in key.split(":")[1].split("-"))
+
+
 def load_cases(
     root: Path, zonation: str, quantity: str, pattern: str, stem: str | None,
     mass: bool = False, reference_case: str | None = None,
@@ -134,15 +138,25 @@ def load_cases(
             case_stem = json.loads(metadata.read_text(encoding="utf-8")).get("case_metadata", {}).get("case_stem")
         if case_stem is None:
             candidates = sorted(model.glob("*.SMSPEC"))
+            if not candidates:
+                message = f"{directory.name}: no SMSPEC summary file found"
+                if directory.name == reference_case:
+                    raise ValueError(message)
+                LOGGER.warning("%s; skipping case (run may not have started)", message)
+                continue
             if len(candidates) != 1:
                 raise ValueError(f"{directory.name}: expected one SMSPEC, found {len(candidates)}; use --summary-stem")
             case_stem = candidates[0].stem
         if not isinstance(case_stem, str) or not case_stem or Path(case_stem).name != case_stem:
             raise ValueError(f"{directory.name}: summary stem must be a file stem, not a path")
         prefix = model / case_stem
-        for suffix in (".SMSPEC", ".UNSMRY", ".INIT"):
-            if not Path(f"{prefix}{suffix}").is_file():
-                raise ValueError(f"{directory.name}: required output file not found: {prefix}{suffix}")
+        missing = [Path(f"{prefix}{suffix}") for suffix in (".SMSPEC", ".UNSMRY", ".INIT") if not Path(f"{prefix}{suffix}").is_file()]
+        if missing:
+            message = f"{directory.name}: required output file(s) not found: {', '.join(map(str, missing))}"
+            if directory.name == reference_case:
+                raise ValueError(message)
+            LOGGER.warning("%s; skipping incomplete case (run may not have started)", message)
+            continue
         with closing(ResdataFile(f"{prefix}.INIT")) as init:
             if zonation not in init:
                 raise ValueError(f"{directory.name}: {zonation} zonation was not found in INIT")
@@ -156,7 +170,8 @@ def load_cases(
             raise OSError(f"{directory.name}: cannot load summary {prefix}: {exc}") from exc
         keys = {str(key) for key in summary.keys() if pair_pattern.fullmatch(str(key))}
         if not keys:
-            raise ValueError(f"{directory.name}: {zonation} exists, but no {keyword} pair vectors confirm reporting")
+            LOGGER.warning("%s: no %s pair vectors found; skipping case (run may not have started)", directory.name, keyword)
+            continue
         for key in keys:
             check_regions(directory.name, regions, zonation, key)
         units = {summary.unit(key).strip() for key in keys}
@@ -177,7 +192,7 @@ def load_cases(
             raise ValueError(f"{directory.name}: summary dates are empty, invalid, or decreasing")
         cases.append(Case(directory.name, summary, regions, keys, unit, scale, load_inputs(directory)))
     if not cases:
-        raise ValueError(f"No case directories with a model directory match {pattern!r} under {root}")
+        raise ValueError(f"No case directories with complete outputs and a model directory match {pattern!r} under {root}")
     return cases
 
 
@@ -192,9 +207,9 @@ def select_vectors(cases: list[Case], zonation: str, quantity: str, requested: l
         match = re.fullmatch(rf"{keyword}:([1-9][0-9]*)-([1-9][0-9]*)", key)
         if match is None or match[1] == match[2]:
             raise ValueError(f"Invalid pair {value!r}; expected e.g. 1-2 or {keyword}:1-2")
-        for case in cases:
-            check_regions(case.name, case.regions, zonation, key)
         if key not in available:
+            for case in cases:
+                check_regions(case.name, case.regions, zonation, key)
             raise ValueError(f"{key} was not exported; available vectors: {', '.join(sorted(available))}")
         if key not in selected:
             selected.append(key)
@@ -217,9 +232,12 @@ def plot_fluxes(
     from src.WellClass.libs.plotting import screen_style
 
     curves = []
+    plotted_cases: dict[str, Case] = {}
     for key in keys:
         for case in cases:
-            check_regions(case.name, case.regions, zonation, key)
+            if not has_pair_regions(case.regions, key):
+                LOGGER.warning("%s: %s requires regions not present in %s; skipping case", case.name, key, zonation)
+                continue
             dates = case.summary.numpy_dates
             missing = key not in case.keys
             values = np.zeros(dates.shape) if missing else np.asarray(case.summary.numpy_vector(key), dtype=float) * sign * case.scale
@@ -228,7 +246,8 @@ def plot_fluxes(
             if missing:
                 LOGGER.warning("%s: %s omitted by CIRRUS 1.9; zero direct transfer inferred", case.name, key)
             curves.append((key, case, dates, values, missing))
-    ordered, labels, legend_title = case_labels(cases, label_mode)
+            plotted_cases[case.name] = case
+    ordered, labels, legend_title = case_labels(list(plotted_cases.values()), label_mode)
     label_of = {case.name: label for case, label in zip(ordered, labels)}
     if len(ordered) <= 10:
         palette = plt.get_cmap("tab10").colors
