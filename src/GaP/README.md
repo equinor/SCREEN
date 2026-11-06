@@ -495,6 +495,27 @@ curves use linewidth 1. Its legend label includes `(reference)`, including with
 Missing references fail explicitly; the reference undergoes the same output,
 region, and unit checks as every selected case.
 
+For an x-parameter versus rate-statistic sensitivity plot, use the separate
+`plot_region_sensitivity.py` script. It shares case loading, vector validation,
+and EOS mass conversion with the time-series plot. The `--x-parameter` value is
+a scalar field from `scenario.json` or `grid_policy.json`; select one rate
+vector with `--vector`. Rates are converted to mass and displayed as annualized
+tonnes using the matching EOS density. `--rate-stat` selects `last` (default),
+`min`, `max`, or `mean`, computed from absolute logged rate magnitudes; `min`
+includes all logged records, including an initial zero if present. Use
+`--x-label`, `--x-scale`, and `--y-scale` to label and scale the axes. For
+example:
+
+```bash
+uv run --extra visualization python runscripts/plot_region_sensitivity.py \
+    --output-root work/smeaheia_oat_100yr_results \
+    --case-pattern 'smeaheia_cement_perm_*' \
+    --reference-case smeaheia_reference \
+    --zonation FIPHOL --vector 1-2 \
+    --x-parameter cb_perm --x-label "Cement permeability (mD)" --x-scale log \
+    --rate-stat max --output work/cement_max_rate_sensitivity.png
+```
+
 ```bash
 uv run --extra visualization python runscripts/plot_region_fluxes.py \
     --output-root work/smeaheia_oat_100yr_results \

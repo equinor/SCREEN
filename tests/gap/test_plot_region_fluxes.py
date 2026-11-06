@@ -9,11 +9,19 @@ from resdata import ResDataType
 from resdata.resfile import FortIO, ResdataKW
 from resdata.summary import Summary
 
+from src.GaP.libs import region_fluxes
+
 SCRIPT_PATH = Path(__file__).parents[2] / "runscripts/plot_region_fluxes.py"
 SPEC = importlib.util.spec_from_file_location("plot_region_fluxes", SCRIPT_PATH)
 plot = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
 SPEC.loader.exec_module(plot)
+
+SENSITIVITY_PATH = Path(__file__).parents[2] / "runscripts/plot_region_sensitivity.py"
+SENSITIVITY_SPEC = importlib.util.spec_from_file_location("plot_region_sensitivity", SENSITIVITY_PATH)
+sensitivity = importlib.util.module_from_spec(SENSITIVITY_SPEC)
+assert SENSITIVITY_SPEC.loader is not None
+SENSITIVITY_SPEC.loader.exec_module(sensitivity)
 
 
 def write_case(root, name="hole", unit="M^3/D", partition="FIPHOL", pair=True, quantity="RGFR", regions=(1, 2, 3)):
@@ -45,6 +53,11 @@ def write_case(root, name="hole", unit="M^3/D", partition="FIPHOL", pair=True, q
 def run_cli(monkeypatch, root, *args):
     monkeypatch.setattr("sys.argv", [str(SCRIPT_PATH), "--output-root", str(root), "--zonation", "FIPHOL", *args])
     plot.main()
+
+
+def run_sensitivity_cli(monkeypatch, root, *args):
+    monkeypatch.setattr("sys.argv", [str(SENSITIVITY_PATH), "--output-root", str(root), "--zonation", "FIPHOL", *args])
+    sensitivity.main()
 
 
 def test_list_exact_exported_pairs_and_case_availability(tmp_path, monkeypatch, capsys):
@@ -293,6 +306,74 @@ def test_annual_mass_rate_uses_all_cases_to_select_prefix():
     assert label == "kilotonnes/year"
 
 
+@pytest.mark.parametrize(
+    ("statistic", "expected"),
+    [("last", 5.0), ("min", 0.0), ("max", 8.0), ("mean", 4.25)],
+)
+def test_summarize_rate_uses_absolute_magnitudes(statistic, expected):
+    assert sensitivity.summarize_rate(np.array([0.0, -8.0, 4.0, -5.0]), statistic) == expected
+
+
+def test_summarize_rate_rejects_empty_or_nonfinite_values():
+    with pytest.raises(ValueError, match="finite values"):
+        sensitivity.summarize_rate(np.array([]), "last")
+    with pytest.raises(ValueError, match="finite values"):
+        sensitivity.summarize_rate(np.array([np.nan]), "mean")
+
+
+def test_sensitivity_plot_aggregates_rate_and_highlights_reference(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+    from matplotlib.figure import Figure
+
+    key = "RGFR_LEG:1-6"
+    dates = np.array(["2025-01-01", "2025-07-01", "2026-01-01"], dtype="datetime64[D]")
+    cases = [
+        plot.Case(
+            "low", SimpleNamespace(numpy_dates=dates, numpy_vector=lambda _key: np.array([0.0, -4.0, 2.0])),
+            {1, 6}, {key}, "kg/day", 2.0, {"permx": 10.0},
+        ),
+        plot.Case(
+            "smeaheia_reference",
+            SimpleNamespace(numpy_dates=dates, numpy_vector=lambda _key: np.array([0.0, 5.0, -3.0])),
+            {1, 6}, {key}, "kg/day", 1.0, {"permx": 100.0},
+        ),
+    ]
+    captured = {}
+
+    def savefig(figure, *_args, **_kwargs):
+        ax = figure.axes[0]
+        captured["ylabel"] = ax.get_ylabel()
+        captured["collections"] = ax.collections
+        captured["labels"] = [legend.get_text() for legend in ax.get_legend().get_texts()]
+
+    monkeypatch.setattr(Figure, "savefig", savefig)
+    rows = sensitivity.sensitivity_rows(cases, key, "permx", "max", "FIPLEG")
+    sensitivity.plot_sensitivity(
+        rows, key, "permx", "max", "smeaheia_reference",
+        tmp_path / "sensitivity.png", False, "log", "linear", None, (8, 5), None,
+    )
+    assert captured["ylabel"] == "Max rate magnitude (tonnes/year)"
+    assert captured["labels"] == ["Sensitivity", "Reference"]
+    np.testing.assert_allclose(captured["collections"][0].get_offsets(), [[10.0, 4.0 * 2.0 * 365.25 / 1000]])
+    np.testing.assert_allclose(captured["collections"][1].get_offsets(), [[100.0, 5.0 * 365.25 / 1000]])
+
+
+def test_sensitivity_cli_reuses_case_inputs_and_mass_conversion(tmp_path, monkeypatch, capsys):
+    case_dir, _ = write_case(tmp_path, name="sweep_low")
+    record_path = case_dir / "scenario.json"
+    record = json.loads(record_path.read_text())
+    record_path.write_text(json.dumps({**record, "cb_perm": 0.1}))
+    output = tmp_path / "sensitivity.png"
+
+    run_sensitivity_cli(
+        monkeypatch, tmp_path, "--vector", "1-2", "--x-parameter", "cb_perm",
+        "--rate-stat", "max", "--output", str(output),
+    )
+
+    assert output.read_bytes().startswith(b"\x89PNG\r\n\x1a\n")
+    assert "Saved" in capsys.readouterr().out
+
+
 def test_mass_conversion_rejects_unsupported_volume_units(tmp_path):
     write_case(tmp_path, unit="FT3/D")
     with pytest.raises(ValueError, match="gas mass conversion requires M"):
@@ -314,7 +395,7 @@ def test_invalid_gas_density(tmp_path, text, message):
     deck = tmp_path / "case.in"
     deck.write_text(text)
     with pytest.raises(ValueError, match=message):
-        plot.gas_surface_density(deck)
+        region_fluxes.gas_surface_density(deck)
 
 
 def test_volume_option_needs_no_deck(tmp_path, monkeypatch):
@@ -345,7 +426,7 @@ def test_surface_density_reads_only_requested_eos_block(tmp_path, phase):
         "EOS GAS\n SURFACE_DENSITY 1.871 kg/m^3\nEND\n"
     )
     expected = 1.871 if phase == "GAS" else 1050.0
-    assert plot.surface_density(deck, phase) == expected
+    assert region_fluxes.surface_density(deck, phase) == expected
 
 
 @pytest.mark.parametrize(("quantity", "summary_unit"), [("RWFR", "M^3/D"), ("RWFT", "M^3")])
