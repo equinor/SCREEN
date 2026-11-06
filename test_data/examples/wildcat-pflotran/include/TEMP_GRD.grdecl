@@ -27,6 +27,8 @@ DX    200   /
 DY    200  /
 PORO   0.2   /
 PERMX  1000 / 
+-- SATNUM 1: porous media; SATNUM 2: free-flow cells
+SATNUM 1 /
 
 
 ----------------------------------------------------
@@ -43,6 +45,7 @@ FIPLEG 2 4* 1 10 /
 --models sea bed conditions 
 PERMX  10000 4* 1 1 / 
 PORO  1.0    4* 1 1 / 
+SATNUM 2 4* 1 1 /
 FIPLEG  1    4* 1 1 / 
 --models the Reservoir conditions 
 PERMX  0.01 4* 11 11 /
@@ -77,4 +80,3 @@ MINPV
 
 --dpcf
 --0.2 1 /
-

@@ -77,6 +77,8 @@ NEWTON_SOLVER FLOW
   
 END
 
+# SATNUM 1: porous media (reservoir, overburden and cement)
+# SATNUM 2: free flow (ocean, open borehole, pipe and uncemented annulus)
 #=========================== material properties ==============================
 
 MATERIAL_PROPERTY formation
@@ -108,7 +110,7 @@ KRW_TABLE swfn_table
   PRESSURE_UNITS Pa
 
   SGFN
-!-- Perm region 1
+!-- Porous-media relative permeability
 !-- SATNUM 1
 !-- Swi 0.3
 !-- DCI1 drainage curves
@@ -142,7 +144,7 @@ KRW_TABLE swfn_table
   PRESSURE_UNITS Pa
 
   SWFN
-!-- Perm region 1
+!-- Porous-media relative permeability
 !-- SATNUM 1
 !-- Swi 0.4
 !-- DCI1 drainage curves
@@ -172,7 +174,7 @@ KRW_TABLE swfn_table
 
  END
 END 
-###############Table 2##################
+############### Table 2: free-flow relative permeability ##################
 CHARACTERISTIC_CURVES ch2
 
  KRW_TABLE swfn_table_lin
@@ -183,7 +185,7 @@ CHARACTERISTIC_CURVES ch2
   PRESSURE_UNITS Pa
 
   SGFN
-!-- Perm region 1
+!-- Free-flow relative permeability
 !-- SATNUM 2
 !-- Swi 0
 !-- DCI1 drainage curves
@@ -199,7 +201,7 @@ CHARACTERISTIC_CURVES ch2
   PRESSURE_UNITS Pa
 
   SWFN
-!-- Perm region 1
+!-- Free-flow relative permeability
 !-- SATNUM 2
 !-- Swi 0.0
 !-- DCI1 drainage curves

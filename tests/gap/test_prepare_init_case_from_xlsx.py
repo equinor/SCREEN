@@ -291,6 +291,8 @@ def test_ocean_layers_use_the_free_fluid_definition(tmp_path, kwargs, permx, por
     text = grdecl.read_text(encoding="utf-8")
     assert f"PERMX {permx} 1 20 1 20 1 3 /" in text
     assert f"PORO {poro} 1 20 1 20 1 3 /" in text
+    assert "SATNUM 1 /" in text
+    assert "SATNUM 2 1 20 1 20 1 3 /" in text
 
 
 def test_standalone_staging_applies_designmatrix_grid_overrides(tmp_path):

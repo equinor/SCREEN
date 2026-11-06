@@ -758,11 +758,13 @@ settings in the deck agree.
 - **Isothermal inputs.** The run is `ISOTHERMAL`, so the energy equation is
   off. Confirm in the source whether `SPECIFIC_HEAT` and the thermal
   conductivities have any effect, then remove or label them.
+- **SATNUM policy.** `SATNUM 1` selects porous-media curves for reservoir,
+  overburden, cement and barriers; `SATNUM 2` selects free-flow curves for the
+  ocean, pipe/open borehole and uncemented annulus. Coarse-grid and LGR writers
+  now make those assignments explicit. The Smeaheia plug-specific `ch3` still
+  has no explicit SATNUM mapping; confirm its intended use before assigning it.
 - **Stale comments.** Remove the "symmetrical cold injection" title, the old
-  pressure-datum notes, the incorrect `BRINE ... PPM` comment, and the
-  "Perm region 1 / SATNUM 1" labels on `ch2`. Keep `ch2`: the generated LGR
-  assigns `SATNUM 2` to pipe and open-hole cells for linear relative
-  permeability; label it as such.
+  pressure-datum notes, and the incorrect `BRINE ... PPM` comment.
 - **Template sprawl.** Four `TEMP-0.in` variants have drifted (inline vs
   external temperature table, active injector, `FINAL_DATE 2525`), and the
   default folder is named `wildcat-pflotran` but holds the CIRRUS template.

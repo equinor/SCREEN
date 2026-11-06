@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 import numpy as np
 import pytest
@@ -100,5 +101,16 @@ def test_json_builds_reviewable_lgr_grdecl(
         assert "PERMX  10000.0  6  17  6  17  11  13  /" in output
         assert "EQLNUM  2  6  17  6  17  11  13  /" in output
         assert "PERMX  0.5  8  15  8  15  11  12  /" in output
+        assert "SATNUM 2 4 19 4 19 11 15 /" in output
+        assert "SATNUM  1  4  19  4  5  11  15  /" in output
+        assert "SATNUM  1  8  15  8  15  11  12  /" in output
+        assert "SATNUM 2 0 0 0 0 0 0 /" not in output
+        assert (
+            output.index("SATNUM 2 4 19 4 19 11 15 /")
+            < output.index("SATNUM  1  4  19  4  5  11  15  /")
+        )
         golden = root / "tests/gap/fixtures/wildcat_TEMP-0_LGR.grdecl"
-        assert output == golden.read_text(encoding="utf-8")
+        output_without_satnum = re.sub(r"(?m)^EQUALS\n(?=SATNUM\b)[^\n]*\n/\n", "", output)
+        output_without_satnum = re.sub(r"(?m)^SATNUM 2 \d+[^\n]*\n", "", output_without_satnum)
+        output_without_satnum = re.sub(r"(?m)^SATNUM  1 [^\n]*\n", "", output_without_satnum)
+        assert output_without_satnum == golden.read_text(encoding="utf-8")

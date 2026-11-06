@@ -9,6 +9,12 @@ from src.GaP.libs.carfin.CARFIN_pipe_with_oph import CARFIN_pipe_with_oph
 from src.GaP.libs.free_fluid import FREE_FLUID_PORO
 
 
+def _write_satnum_region(value: int, ij_min: int, ij_max: int, k_min: int, k_max: int, O: TextIO) -> None:  # noqa: E741
+    print("EQUALS", file=O)
+    print("SATNUM", value, ij_min, ij_max, ij_min, ij_max, k_min, k_max, "/", file=O)
+    print("/", file=O)
+
+
 def df_to_gap_casing(holes_df: pd.DataFrame, casings_df: pd.DataFrame, LGR_NAME: str, O: TextIO) -> None:  # noqa: E741
     """convert casing dataframe to gap format
 
@@ -57,6 +63,14 @@ def df_to_gap_casing(holes_df: pd.DataFrame, casings_df: pd.DataFrame, LGR_NAME:
             O,
             oh_poro,
         )
+
+    # Free-flow SATNUM covers the full drilled footprint, including any uncemented annulus.
+    # Cement writers below override their own cells to the porous-media SATNUM.
+    for idx in holes_df.index:
+        ij_min, ij_max, k_min, k_max = holes_df.loc[idx, ["ij_min", "ij_max", "k_min", "k_max"]]
+        if min(ij_min, ij_max, k_min, k_max) < 0 or ij_max < ij_min or k_max < k_min:
+            continue
+        _write_satnum_region(2, int(ij_min + 1), int(ij_max + 1), int(k_min + 1), int(k_max + 1), O)
 
     # 2. open hole sections
     for idx in holes_df.index:

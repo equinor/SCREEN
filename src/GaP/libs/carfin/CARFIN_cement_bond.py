@@ -38,6 +38,7 @@ def CARFIN_cement_bond(ID: float,
     print ('PERMY','',perm,'',x_min_pipe-x_bd,'',x_max_pipe+x_bd,'',y_min_pipe-y_bd,'',y_min_pipe-1,'',k_min_CB,'',k_max_CB,'','/',file=O)
     print ('PERMZ','',perm,'',x_min_pipe-x_bd,'',x_max_pipe+x_bd,'',y_min_pipe-y_bd,'',y_min_pipe-1,'',k_min_CB,'',k_max_CB,'','/',file=O)
     print ('PORO','', 0.01,'',x_min_pipe-x_bd,'',x_max_pipe+x_bd,'',y_min_pipe-y_bd,'',y_min_pipe-1,'',k_min_CB,'',k_max_CB,'','/',file=O)
+    print ('SATNUM','',1,'',x_min_pipe-x_bd,'',x_max_pipe+x_bd,'',y_min_pipe-y_bd,'',y_min_pipe-1,'',k_min_CB,'',k_max_CB,'','/',file=O)
     print ('FIPLEG','',6,'',  x_min_pipe-x_bd,'',x_max_pipe+x_bd,'',y_min_pipe-y_bd,'',y_min_pipe-1,'',k_min_CB,'',k_max_CB,'','/',file=O)
     print ('EQLNUM','',1,'',  x_min_pipe-x_bd,'',x_max_pipe+x_bd,'',y_min_pipe-y_bd,'',y_min_pipe-1,'',k_min_CB,'',k_max_CB,'','/',file=O)
 
@@ -48,6 +49,7 @@ def CARFIN_cement_bond(ID: float,
     print ('PERMY','',perm,'',x_min_pipe-x_bd,'',x_max_pipe+x_bd,'',y_max_pipe+1,'',y_max_pipe+y_bd,'',k_min_CB,'',k_max_CB,'','/',file=O)
     print ('PERMZ','',perm,'',x_min_pipe-x_bd,'',x_max_pipe+x_bd,'',y_max_pipe+1,'',y_max_pipe+y_bd,'',k_min_CB,'',k_max_CB,'','/',file=O)
     print ('PORO','', 0.01,'',x_min_pipe-x_bd,'',x_max_pipe+x_bd,'',y_max_pipe+1,'',y_max_pipe+y_bd,'',k_min_CB,'',k_max_CB,'','/',file=O)
+    print ('SATNUM','',1,'',x_min_pipe-x_bd,'',x_max_pipe+x_bd,'',y_max_pipe+1,'',y_max_pipe+y_bd,'',k_min_CB,'',k_max_CB,'','/',file=O)
     print ('FIPLEG','',6,''  ,x_min_pipe-x_bd,'',x_max_pipe+x_bd,'',y_max_pipe+1,'',y_max_pipe+y_bd,'',k_min_CB,'',k_max_CB,'','/',file=O)
     print ('EQLNUM','',1,''  ,x_min_pipe-x_bd,'',x_max_pipe+x_bd,'',y_max_pipe+1,'',y_max_pipe+y_bd,'',k_min_CB,'',k_max_CB,'','/',file=O)
 
@@ -58,6 +60,7 @@ def CARFIN_cement_bond(ID: float,
     print ('PERMY','',perm,'',x_min_pipe-x_bd,'',x_min_pipe-1,'',y_min_pipe,'',y_max_pipe,'',k_min_CB,'',k_max_CB,'','/',file=O)
     print ('PERMZ','',perm,'',x_min_pipe-x_bd,'',x_min_pipe-1,'',y_min_pipe,'',y_max_pipe,'',k_min_CB,'',k_max_CB,'','/',file=O)
     print ('PORO','', 0.01,'',x_min_pipe-x_bd,'',x_min_pipe-1,'',y_min_pipe,'',y_max_pipe,'',k_min_CB,'',k_max_CB,'','/',file=O)
+    print ('SATNUM','',1,'',x_min_pipe-x_bd,'',x_min_pipe-1,'',y_min_pipe,'',y_max_pipe,'',k_min_CB,'',k_max_CB,'','/',file=O)
     print ('FIPLEG','',6,  '',x_min_pipe-x_bd,'',x_min_pipe-1,'',y_min_pipe,'',y_max_pipe,'',k_min_CB,'',k_max_CB,'','/',file=O)
     print ('EQLNUM','',1,  '',x_min_pipe-x_bd,'',x_min_pipe-1,'',y_min_pipe,'',y_max_pipe,'',k_min_CB,'',k_max_CB,'','/',file=O)
 
@@ -67,6 +70,7 @@ def CARFIN_cement_bond(ID: float,
     print ('PERMY','',perm,'',x_max_pipe+1,'',x_max_pipe+x_bd,'',y_min_pipe,'',y_max_pipe,'',k_min_CB,'',k_max_CB,'','/',file=O)
     print ('PERMZ','',perm,'',x_max_pipe+1,'',x_max_pipe+x_bd,'',y_min_pipe,'',y_max_pipe,'',k_min_CB,'',k_max_CB,'','/',file=O)
     print ('PORO','', 0.01,'',x_max_pipe+1,'',x_max_pipe+x_bd,'',y_min_pipe,'',y_max_pipe,'',k_min_CB,'',k_max_CB,'','/',file=O)
+    print ('SATNUM','',1,'',x_max_pipe+1,'',x_max_pipe+x_bd,'',y_min_pipe,'',y_max_pipe,'',k_min_CB,'',k_max_CB,'','/',file=O)
     print ('FIPLEG','',6,''  ,x_max_pipe+1,'',x_max_pipe+x_bd,'',y_min_pipe,'',y_max_pipe,'',k_min_CB,'',k_max_CB,'','/',file=O)
     print ('EQLNUM','',1,''  ,x_max_pipe+1,'',x_max_pipe+x_bd,'',y_min_pipe,'',y_max_pipe,'',k_min_CB,'',k_max_CB,'','/',file=O)
 

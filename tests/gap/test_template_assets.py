@@ -21,8 +21,8 @@ def test_canonical_template_assets_exist():
 def test_canonical_template_assets_hashes():
     root = Path(__file__).parents[2]
     expected_hashes = {
-        root / "test_data/examples/wildcat-pflotran/model/TEMP-0.in": "4b38c3d19222d4b0797b1f3b0eddb85c39d9e16bb3cf13a07607ed47a80518d8",
-        root / "test_data/examples/wildcat-pflotran/include/TEMP_GRD.grdecl": "588b1004cdc5e75362208bd7ca9cda8d4f712018bf8263662d1fbdd80e5b2ce3",
+        root / "test_data/examples/wildcat-pflotran/model/TEMP-0.in": "a709723d98d939bd0efc7a12b8728849d219ea5a03396b2196f8c53670535086",
+        root / "test_data/examples/wildcat-pflotran/include/TEMP_GRD.grdecl": "d4aabda9f7f87a2dd4dfa42f21cceb3be87877a39b084321291ee3a0cd53ca5c",
         root / "test_data/examples/wildcat-pflotran/include/tops_dz.inc": "8b5a09f464d63e5579c108c94e5f52ee778dc1f204f7759d41a0ef061e7e207d",
     }
 

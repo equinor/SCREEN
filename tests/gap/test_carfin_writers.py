@@ -56,7 +56,12 @@ def test_cement_and_barrier_writers_emit_expected_regions():
     barrier_text = barrier_output.getvalue()
     assert "--Top side" in cement_text
     assert "PERMX  0.05  1  5  0  1  5  8  /" in cement_text
+    assert "SATNUM  1  1  5  0  1  5  8  /" in cement_text
+    assert "SATNUM  1  1  5  5  6  5  8  /" in cement_text
+    assert "SATNUM  1  1  1  2  4  5  8  /" in cement_text
+    assert "SATNUM  1  5  5  2  4  5  8  /" in cement_text
     assert "PERMX  0.001  2  4  2  4  10  12  /" in barrier_text
+    assert "SATNUM  1  2  4  2  4  10  12  /" in barrier_text
     assert cement_text.rstrip().endswith("/")
     assert barrier_text.rstrip().endswith("/")
 

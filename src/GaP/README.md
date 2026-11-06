@@ -154,6 +154,18 @@ now use 1.0, so regenerated wellbore cells differ slightly from older cases.
 Effective values and targeted overrides are recorded in `scenario.json`, and
 the resolved grid policy is saved in `grid_policy.json`.
 
+### Relative-permeability regions
+
+The canonical deck defines two saturation-number regions: `SATNUM 1` selects
+the porous-media curves for reservoir, overburden and cement; `SATNUM 2`
+selects the free-flow curves for the ocean column, pipe/open borehole and
+uncemented annulus. The staged coarse grid assigns SATNUM 1 globally and
+overrides the ocean layers to SATNUM 2. In generated LGRs, the drilled-hole
+footprint receives SATNUM 2, then cement cells are explicitly reset to
+SATNUM 1. Barriers also remain on SATNUM 1; although some decks define
+plug-specific curves, GaP does not currently assign a separate saturation
+number to them. This treats annulus cells without cement as free flow.
+
 ### Parameters you can sensitise per case
 
 Each name below is a `DesignMatrix` column. **A column does not have to exist in

@@ -33,5 +33,6 @@ def CARFIN_barrier(ID: float,
     print ('PERMY','',perm,'',x_min_bar,'',x_max_bar,'',y_min_bar,'',y_max_bar,'',k_min_bar,'',k_max_bar,'','/',file=O)
     print ('PERMZ','',perm,'',x_min_bar,'',x_max_bar,'',y_min_bar,'',y_max_bar,'',k_min_bar,'',k_max_bar,'','/',file=O)
     print ('PORO','','0.01','',x_min_bar,'',x_max_bar,'',y_min_bar,'',y_max_bar,'',k_min_bar,'',k_max_bar,'','/',file=O)
+    print ('SATNUM','',1,'',x_min_bar,'',x_max_bar,'',y_min_bar,'',y_max_bar,'',k_min_bar,'',k_max_bar,'','/',file=O)
     
     print ('/',file=O)
