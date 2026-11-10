@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Plot a recorded case input against a statistic of one region-pair rate.
 
-The plateau statistic returns the last magnitude only if at least five distinct
-sample times cover the final 30 days and the tail's peak-to-peak variation is at
+The plateau statistic returns the last magnitude only if at least three distinct
+sample times cover at least the final 30 days and the tail's peak-to-peak variation is at
 most 1% of its mean magnitude. The sample at or immediately before the window
-boundary is included to establish coverage. Non-plateau cases are warned about
+boundary is included to establish coverage; sparse tails extend backward until
+three distinct sample times are available. Non-plateau cases are warned about
 and skipped. This is a flat-tail check, not proof of physical steady state.
 """
 
@@ -18,7 +19,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from src.GaP.libs.region_fluxes import Case, annual_mass_rate_scale, has_pair_regions, load_cases, select_vectors
+from src.GaP.libs.region_fluxes import Case, annual_mass_rate_scale, has_pair_regions, has_rate_plateau, load_cases, select_vectors
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -42,18 +43,6 @@ def summarize_rate(values: np.ndarray, statistic: str) -> float:
     raise ValueError(f"unknown rate statistic {statistic!r}")
 
 
-def has_rate_plateau(values: np.ndarray, dates: np.ndarray) -> bool:
-    """Check a validated, time-ordered rate vector for a 30-day, 1% plateau."""
-    cutoff = dates[-1] - np.timedelta64(30, "D")
-    if dates[0] > cutoff:
-        return False
-    start = int(np.searchsorted(dates, cutoff, side="right")) - 1
-    if np.unique(dates[start:]).size < 5:
-        return False
-    tail = np.abs(values[start:])
-    return bool(np.ptp(tail) <= 0.01 * np.mean(tail))
-
-
 def sensitivity_rows(cases: list[Case], key: str, parameter: str, statistic: str, zonation: str) -> list[tuple[Case, float, float]]:
     rows = []
     for case in cases:
@@ -75,7 +64,7 @@ def sensitivity_rows(cases: list[Case], key: str, parameter: str, statistic: str
             raise ValueError(f"{case.name}: invalid dates/vector length for {key}")
         if statistic == "plateau" and not has_rate_plateau(values, dates):
             LOGGER.warning(
-                "%s: %s has no plateau (need 5 distinct sample times covering the final "
+                "%s: %s has no plateau (need 3 distinct sample times covering at least "
                 "30 days with <=1%% magnitude variation); skipping case", case.name, key,
             )
             continue
@@ -160,8 +149,8 @@ def main() -> None:
     parser.add_argument("--summary-stem", help="Override the metadata stem for ambiguous legacy cases")
     parser.add_argument(
         "--rate-stat", choices=("last", "min", "max", "mean", "plateau"), default="last",
-        help="plateau: last magnitude only after 5 distinct sample times covering the final "
-        "30 days with <=1%% variation; warns and skips cases that fail (default: last)",
+        help="plateau: last magnitude after 3 distinct sample times covering at least "
+        "30 days with <=1%% variation; extends sparse tails backward (default: last)",
     )
     parser.add_argument("--x-label", help="X-axis label; defaults to the parameter name")
     parser.add_argument("--x-scale", choices=("linear", "log"), default="linear")
