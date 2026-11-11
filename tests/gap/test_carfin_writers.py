@@ -1,6 +1,7 @@
 from io import StringIO
 
 import numpy as np
+import pytest
 
 from src.GaP.libs.carfin.CARFIN_barrier import CARFIN_barrier
 from src.GaP.libs.carfin.CARFIN_cement_bond import CARFIN_cement_bond
@@ -28,8 +29,43 @@ def test_pipe_writer_emits_open_hole_and_edge_transmissibility():
 
     assert "PERMX  1000.0  2  4  2  4  6  9  /" in text
     assert "MULTX  0  1  1  2  4  5  8  /" in text
-    assert "MULTY  0  1  4  1  1  5  8  /" in text
+    assert "MULTY  0  2  4  1  1  5  8  /" in text
     assert text.rstrip().endswith("/")
+
+
+@pytest.mark.parametrize("bounds", [(2, 4, 2, 4), (3, 6, 8, 9), (2, 2, 3, 3)])
+def test_pipe_multipliers_block_exactly_the_casing_perimeter(bounds):
+    imin, imax, jmin, jmax = bounds
+    output = StringIO()
+    CARFIN_pipe_with_oph(0.3, *bounds, 5, 8, 5, 10, 1000.0, "TEST", output)
+    blocked = {"MULTX": set(), "MULTY": set()}
+    for line in output.getvalue().splitlines():
+        record = line.split()
+        if record and record[0] in blocked:
+            assert float(record[1]) == 0
+            i0, i1, j0, j1, k0, k1 = map(int, record[2:8])
+            blocked[record[0]].update(
+                (i, j, k)
+                for i in range(i0, i1 + 1)
+                for j in range(j0, j1 + 1)
+                for k in range(k0, k1 + 1)
+            )
+    assert blocked["MULTX"] == {
+        (i, j, k) for i in (imin - 1, imax)
+        for j in range(jmin, jmax + 1) for k in range(5, 9)
+    }
+    assert blocked["MULTY"] == {
+        (i, j, k) for i in range(imin, imax + 1)
+        for j in (jmin - 1, jmax) for k in range(5, 9)
+    }
+    # Every blocked face must separate a pipe cell from a non-pipe cell.
+    def inside(i, j):
+        return imin <= i <= imax and jmin <= j <= jmax
+    for name, (di, dj) in (("MULTX", (1, 0)), ("MULTY", (0, 1))):
+        assert all(
+            inside(i, j) != inside(i + di, j + dj)
+            for i, j, _ in blocked[name]
+        )
 
 
 def test_cement_and_barrier_writers_emit_expected_regions():

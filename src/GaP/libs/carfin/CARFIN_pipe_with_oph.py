@@ -67,15 +67,8 @@ def CARFIN_pipe_with_oph(ID: float,
     print ('MULTX','',0,'',x_min_pipe-1,'',x_min_pipe-1,'',y_min_pipe,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
     print ('MULTX','',0,'',x_max_pipe,'',x_max_pipe,'',y_min_pipe,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
 
-    # # TODO(hzh): Not sure about the next two lines of codes
-    # print ('MULTX','',0,'',x_min_pipe-1,'',x_max_pipe,'',y_min_pipe-1,'',y_min_pipe-1,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
-    # print ('MULTX','',0,'',x_min_pipe-1,'',x_max_pipe,'',y_max_pipe,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
-
-    print ('MULTY','',0,'',x_min_pipe-1,'',x_max_pipe,'',y_min_pipe-1,'',y_min_pipe-1,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
-    print ('MULTY','',0,'',x_min_pipe-1,'',x_max_pipe,'',y_max_pipe,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
-
-    # # TODO(hzh): Not sure about the next two lines of codes    
-    # print ('MULTY','',0,'',x_min_pipe-1,'',x_min_pipe-1,'',y_min_pipe-1,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
-    # print ('MULTY','',0,'',x_max_pipe,'',x_max_pipe,'',y_min_pipe-1,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
+    # Multipliers act on positive faces: offset only the wall-normal index.
+    print ('MULTY','',0,'',x_min_pipe,'',x_max_pipe,'',y_min_pipe-1,'',y_min_pipe-1,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
+    print ('MULTY','',0,'',x_min_pipe,'',x_max_pipe,'',y_max_pipe,'',y_max_pipe,'',k_min_pipe,'',k_max_pipe,'','/',file=O)
 
     print ('/',file=O)

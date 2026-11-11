@@ -37,8 +37,8 @@ EQLNUM  2  6  17  6  17  11  13  /
 --Transmisibilities of the edge of the pipe set to zero
 MULTX  0  5  5  6  17  11  13  /
 MULTX  0  17  17  6  17  11  13  /
-MULTY  0  5  17  5  5  11  13  /
-MULTY  0  5  17  17  17  11  13  /
+MULTY  0  6  17  5  5  11  13  /
+MULTY  0  6  17  17  17  11  13  /
 /
 EQUALS
 --pipe with ID of 19.999959999999998 and perm of 10000.0  were set in WILDCAT_TEMP-0_LGR Local Grid refinement
@@ -54,8 +54,8 @@ EQLNUM  2  8  15  8  15  11  27  /
 --Transmisibilities of the edge of the pipe set to zero
 MULTX  0  7  7  8  15  11  27  /
 MULTX  0  15  15  8  15  11  27  /
-MULTY  0  7  15  7  7  11  27  /
-MULTY  0  7  15  15  15  11  27  /
+MULTY  0  8  15  7  7  11  27  /
+MULTY  0  8  15  15  15  11  27  /
 /
 EQUALS
 --pipe with ID of 13.374973249999998 and perm of 10000.0  were set in WILDCAT_TEMP-0_LGR Local Grid refinement
@@ -71,8 +71,8 @@ EQLNUM  2  9  14  9  14  14  83  /
 --Transmisibilities of the edge of the pipe set to zero
 MULTX  0  8  8  9  14  14  82  /
 MULTX  0  14  14  9  14  14  82  /
-MULTY  0  8  14  8  8  14  82  /
-MULTY  0  8  14  14  14  14  82  /
+MULTY  0  9  14  8  8  14  82  /
+MULTY  0  9  14  14  14  14  82  /
 /
 EQUALS
 --Open-hole section with ID of 17.499965 and perm of 10000.0  were set in WILDCAT_TEMP-0_LGR Local Grid refinement

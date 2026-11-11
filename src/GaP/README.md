@@ -172,6 +172,22 @@ also remain on SATNUM 1; although some decks define
 plug-specific curves, GaP does not currently assign a separate saturation
 number to them. This treats annulus cells without cement as free flow.
 
+### Casing-wall transmissibility
+
+Casings block lateral flow only across the pipe perimeter over their cased
+depth interval. `MULTX(I,J,K)` acts on the face between `(I,J,K)` and
+`(I+1,J,K)`; `MULTY(I,J,K)` acts between `(I,J,K)` and `(I,J+1,K)`.
+For pipe cells `I=imin..imax`, `J=jmin..jmax`, the writer therefore sets:
+
+- `MULTX=0` at `I=imin-1` and `I=imax`, over `J=jmin..jmax`.
+- `MULTY=0` at `J=jmin-1` and `J=jmax`, over `I=imin..imax`.
+
+The casing-hole option can subsequently reopen selected positive-X faces.
+Earlier generated LGRs extended both `MULTY` strips one cell too far toward
+negative X, blocking two extra faces per cased layer in the adjacent annulus
+or cement. Regenerate affected decks and rerun simulations to apply the
+correction; existing decks and results are not modified.
+
 ### Parameters you can sensitise per case
 
 Each name below is a `DesignMatrix` column. **A column does not have to exist in

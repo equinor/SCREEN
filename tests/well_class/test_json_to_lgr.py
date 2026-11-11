@@ -97,6 +97,20 @@ def test_json_builds_reviewable_lgr_grdecl(
     for expected_range in expected_barrier_permx_ranges:
         assert expected_range in output.splitlines()
 
+    if well_name == "smeaheia" and grid_case == "TEMP-0":
+        blocked = {"MULTX": set(), "MULTY": set()}
+        for line in output.splitlines():
+            record = line.split()
+            if record and record[0] in blocked:
+                i0, i1, j0, j1, k0, k1 = map(int, record[2:8])
+                if k0 <= 75 <= k1:
+                    assert float(record[1]) == 0
+                    blocked[record[0]].update(
+                        (i, j) for i in range(i0, i1 + 1) for j in range(j0, j1 + 1)
+                    )
+        assert blocked["MULTX"] == {(i, j) for i in (9, 13) for j in range(10, 14)}
+        assert blocked["MULTY"] == {(i, j) for i in range(10, 14) for j in (9, 13)}
+
     if well_name == "wildcat" and grid_case == "TEMP-0":
         assert "PERMX  10000.0  6  17  6  17  11  13  /" in output
         assert "EQLNUM  2  6  17  6  17  11  13  /" in output
