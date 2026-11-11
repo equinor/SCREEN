@@ -59,8 +59,9 @@ def plot_fluxes(
     cases: list[Case], keys: list[str], zonation: str, sign: int, output: Path, show: bool,
     label_mode: str = "case", reference_case: str | None = None,
     figsize: tuple[float, float] | None = None, dpi: int | None = None,
+    ylim: tuple[float | None, float | None] | None = None,
 ) -> None:
-    """Plot the selected vectors; figsize is (width, height) in inches and defaults to a size scaled to the panels and cases."""
+    """Plot vectors; figsize is in inches, and ylim applies to every panel in displayed units before saving/showing."""
     import matplotlib
 
     if not show:
@@ -123,6 +124,8 @@ def plot_fluxes(
                         linewidth=width_of[case.name], zorder=3 if case.name == reference_case else 2,
                     )
                 ax.set(title=f"{key} (sign multiplier {sign:+d})", ylabel=ylabel)
+                if ylim is not None:
+                    ax.set_ylim(*ylim)
                 ax.grid(True, alpha=0.3)
             axes[-1, 0].set_xlabel("Simulation date")
             handles = [

@@ -140,6 +140,36 @@ def test_case_without_requested_regions_is_skipped_from_plot(tmp_path, caplog):
     assert "other_regions: RGFR_HOL:1-2 requires regions not present in FIPHOL; skipping case" in caplog.text
 
 
+@pytest.mark.parametrize("ylim", [(0, 100), (None, 100), (0, None)])
+def test_plot_limits_apply_before_save_and_show(tmp_path, monkeypatch, ylim):
+    from matplotlib import pyplot as plt
+    from matplotlib.figure import Figure
+
+    write_case(tmp_path)
+    cases = plot.load_cases(tmp_path, "FIPHOL", "RGFR", "*", None)
+    checked = []
+
+    def verify(figure):
+        lower, upper = figure.axes[0].get_ylim()
+        if ylim[0] is not None:
+            assert lower == ylim[0]
+        if ylim[1] is not None:
+            assert upper == ylim[1]
+
+    def savefig(figure, *_args, **_kwargs):
+        verify(figure)
+        checked.append("saved")
+
+    def show():
+        verify(plt.gcf())
+        checked.append("shown")
+
+    monkeypatch.setattr(Figure, "savefig", savefig)
+    monkeypatch.setattr(plt, "show", show)
+    plot.plot_fluxes(cases, ["RGFR_HOL:1-2"], "FIPHOL", 1, tmp_path / "plot.png", True, ylim=ylim)
+    assert checked == ["saved", "shown"]
+
+
 def test_units_must_match(tmp_path):
     write_case(tmp_path)
     write_case(tmp_path, name="other", unit="SM3/D")
@@ -321,6 +351,79 @@ def test_summarize_rate_rejects_empty_or_nonfinite_values():
         sensitivity.summarize_rate(np.array([np.nan]), "mean")
 
 
+@pytest.mark.parametrize(
+    ("days", "values", "expected"),
+    [
+        ([0, 7, 14, 21, 30], [100, 100, 100, 100, 100], True),
+        ([0, 7, 14, 21, 30], [-100, -100, -100, -100, -100], True),
+        ([0, 7, 14, 21, 30], [99.5, 100, 100, 100, 100.5], True),
+        ([0, 7, 14, 21, 30], [99, 100, 100, 100, 101], False),
+        ([0, 7, 14, 21, 30], [100, 100, 110, 100, 100], False),
+        ([0, 7, 14, 21, 30], [0, 0, 0, 0, 0], True),
+        ([0, 7, 14, 21, 30], [0, 0, 0, 0, 1e-12], False),
+        ([0, 7, 14, 21, 29], [100, 100, 100, 100, 100], False),
+        ([0, 10, 20, 30], [100, 100, 100, 100], True),
+        ([0, 0, 10, 20, 30], [100, 100, 100, 100, 100], True),
+        ([0, 31, 38, 45, 52, 61], [0, 100, 100, 100, 100, 100], True),
+        ([0, 32, 38, 45, 52, 61], [0, 100, 100, 100, 100, 100], False),
+    ],
+)
+def test_rate_plateau_requires_stable_tail_and_time_coverage(days, values, expected):
+    dates = np.datetime64("2025-01-01") + np.array(days, dtype="timedelta64[D]")
+    assert sensitivity.has_rate_plateau(np.array(values, dtype=float), dates) is expected
+
+
+def test_sensitivity_plateau_skips_unsettled_cases_and_keeps_last_magnitude(caplog):
+    from types import SimpleNamespace
+
+    key = "RGFR_LEG:1-6"
+    dates = np.datetime64("2025-01-01") + np.array([0, 7, 14, 21, 30], dtype="timedelta64[D]")
+
+    def case(name, values):
+        return plot.Case(
+            name, SimpleNamespace(numpy_dates=dates, numpy_vector=lambda _key: np.array(values)),
+            {1, 6}, {key}, "kg/day", 2.0, {"permx": 10.0},
+        )
+
+    stable = case("stable", [-100, -100, -100, -100, -100])
+    unsettled = case("unsettled", [10, 20, 30, 40, 50])
+    rows = sensitivity.sensitivity_rows([stable, unsettled], key, "permx", "plateau", "FIPLEG")
+    assert rows == [(stable, 10.0, 200.0)]
+    assert "unsettled: RGFR_LEG:1-6 has no plateau" in caplog.text
+    assert len(sensitivity.sensitivity_rows([stable, unsettled], key, "permx", "last", "FIPLEG")) == 2
+    with pytest.raises(ValueError, match="No selected cases.*passed the plateau check"):
+        sensitivity.sensitivity_rows([unsettled], key, "permx", "plateau", "FIPLEG")
+
+
+def test_sensitivity_plateau_rejects_unordered_dates():
+    from types import SimpleNamespace
+
+    key = "RGFR_LEG:1-6"
+    dates = np.array(["2025-01-01", "2025-02-01", "2025-01-15"], dtype="datetime64[D]")
+    case = plot.Case(
+        "unordered", SimpleNamespace(numpy_dates=dates, numpy_vector=lambda _key: np.ones(3)),
+        {1, 6}, {key}, "kg/day", 1.0, {"permx": 10.0},
+    )
+    with pytest.raises(ValueError, match="unordered: invalid dates"):
+        sensitivity.sensitivity_rows([case], key, "permx", "plateau", "FIPLEG")
+
+
+def test_sensitivity_cli_reports_no_plateau_without_writing_plot(tmp_path, monkeypatch, capsys, caplog):
+    case_dir, _ = write_case(tmp_path)
+    record_path = case_dir / "scenario.json"
+    record_path.write_text(json.dumps({**json.loads(record_path.read_text()), "cb_perm": 0.1}))
+    output = tmp_path / "plateau.png"
+    with pytest.raises(SystemExit) as exc:
+        run_sensitivity_cli(
+            monkeypatch, tmp_path, "--vector", "1-2", "--x-parameter", "cb_perm",
+            "--rate-stat", "plateau", "--output", str(output),
+        )
+    assert exc.value.code == 2
+    assert "passed the plateau check" in capsys.readouterr().err
+    assert "has no plateau" in caplog.text
+    assert not output.exists()
+
+
 def test_sensitivity_plot_aggregates_rate_and_highlights_reference(tmp_path, monkeypatch):
     from types import SimpleNamespace
     from matplotlib.figure import Figure
@@ -356,6 +459,34 @@ def test_sensitivity_plot_aggregates_rate_and_highlights_reference(tmp_path, mon
     assert captured["labels"] == ["Sensitivity", "Reference"]
     np.testing.assert_allclose(captured["collections"][0].get_offsets(), [[10.0, 4.0 * 2.0 * 365.25 / 1000]])
     np.testing.assert_allclose(captured["collections"][1].get_offsets(), [[100.0, 5.0 * 365.25 / 1000]])
+
+
+def test_sensitivity_plot_preserves_caller_axis_and_shared_units(tmp_path, monkeypatch):
+    import matplotlib
+    from matplotlib import pyplot as plt
+
+    case = plot.Case("sweep", None, {1, 6}, {"RGFR_LEG:1-6"}, "kg/day")
+    fig, ax = plt.subplots()
+
+    def reject_backend_change(*_args, **_kwargs):
+        pytest.fail("Plotting into a caller-owned axis must not change its backend")
+
+    monkeypatch.setattr(matplotlib, "use", reject_backend_change)
+    try:
+        output = tmp_path / "not_saved_by_helper.png"
+        sensitivity.plot_sensitivity(
+            [(case, 10.0, 100.0)], "RGFR_LEG:1-6", "permx", "last", None,
+            output, False, "linear", "linear", None, (8, 5), None,
+            ax=ax, rate_scale=(365.25 / 1_000_000, "kilotonnes/year"),
+        )
+        assert plt.fignum_exists(fig.number)
+        assert not output.exists()
+        assert ax.get_ylabel() == "Last rate magnitude (kilotonnes/year)"
+        np.testing.assert_allclose(ax.collections[0].get_offsets(), [[10.0, 100.0 * 365.25 / 1_000_000]])
+        ax.set_xlim(5, 15)
+        assert ax.get_xlim() == (5, 15)
+    finally:
+        plt.close(fig)
 
 
 def test_sensitivity_cli_reuses_case_inputs_and_mass_conversion(tmp_path, monkeypatch, capsys):

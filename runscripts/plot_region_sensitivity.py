@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-"""Plot a recorded case input against a statistic of one region-pair rate."""
+"""Plot a recorded case input against a statistic of one region-pair rate.
+
+The plateau statistic returns the last magnitude only if at least three distinct
+sample times cover at least the final 30 days and the tail's peak-to-peak variation is at
+most 1% of its mean magnitude. The sample at or immediately before the window
+boundary is included to establish coverage; sparse tails extend backward until
+three distinct sample times are available. Non-plateau cases are warned about
+and skipped. This is a flat-tail check, not proof of physical steady state.
+"""
 
 from __future__ import annotations
 
@@ -7,10 +15,14 @@ import argparse
 import logging
 import re
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import numpy as np
 
-from src.GaP.libs.region_fluxes import Case, annual_mass_rate_scale, has_pair_regions, load_cases, select_vectors
+from src.GaP.libs.region_fluxes import Case, annual_mass_rate_scale, has_pair_regions, has_rate_plateau, load_cases, select_vectors
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
 
 LOGGER = logging.getLogger(__name__)
 
@@ -47,11 +59,20 @@ def sensitivity_rows(cases: list[Case], key: str, parameter: str, statistic: str
             raise ValueError(f"{case.name}: missing or invalid recorded parameter {parameter!r}")
         dates = case.summary.numpy_dates
         values = np.asarray(case.summary.numpy_vector(key), dtype=float)
-        if dates.size == 0 or np.isnat(dates).any() or values.shape != dates.shape or not np.isfinite(values).all():
+        if (dates.size == 0 or np.isnat(dates).any() or np.any(dates[1:] < dates[:-1])
+                or values.shape != dates.shape or not np.isfinite(values).all()):
             raise ValueError(f"{case.name}: invalid dates/vector length for {key}")
-        rate = summarize_rate(values * case.scale, statistic)
+        if statistic == "plateau" and not has_rate_plateau(values, dates):
+            LOGGER.warning(
+                "%s: %s has no plateau (need 3 distinct sample times covering at least "
+                "30 days with <=1%% magnitude variation); skipping case", case.name, key,
+            )
+            continue
+        rate = summarize_rate(values * case.scale, "last" if statistic == "plateau" else statistic)
         rows.append((case, float(parameter_value), rate))
     if not rows:
+        if statistic == "plateau":
+            raise ValueError(f"No selected cases with logged {key} passed the plateau check")
         raise ValueError(f"No selected cases logged {key}")
     return sorted(rows, key=lambda row: (row[1], row[0].name))
 
@@ -60,10 +81,12 @@ def plot_sensitivity(
     rows: list[tuple[Case, float, float]], key: str, parameter: str, statistic: str,
     reference_case: str | None, output: Path, show: bool, xscale: str, yscale: str,
     xlabel: str | None, figsize: tuple[float, float], dpi: int | None,
+    ax: Axes | None = None, rate_scale: tuple[float, str] | None = None,
 ) -> None:
+    """Plot into a new figure or an existing notebook axis, optionally sharing rate units."""
     import matplotlib
 
-    if not show:
+    if not show and ax is None:
         matplotlib.use("Agg")
     from matplotlib import pyplot as plt
     from src.WellClass.libs.plotting import screen_style
@@ -72,12 +95,16 @@ def plot_sensitivity(
         raise ValueError("Logarithmic x-axis requires positive parameter values")
     if yscale == "log" and any(rate <= 0 for _, _, rate in rows):
         raise ValueError("Logarithmic y-axis requires positive rates; use a different statistic or linear y-scale")
-    value_scale, ylabel = annual_mass_rate_scale([np.asarray([rate]) for _, _, rate in rows])
+    value_scale, ylabel = rate_scale if rate_scale is not None else annual_mass_rate_scale([np.asarray([rate]) for _, _, rate in rows])
     style = screen_style()
     if dpi is not None:
         style["figure.dpi"] = dpi
+    owns_figure = ax is None
     with plt.rc_context(style):
-        fig, ax = plt.subplots(figsize=figsize, layout="constrained")
+        if ax is None:
+            fig, ax = plt.subplots(figsize=figsize, layout="constrained")
+        else:
+            fig = ax.get_figure()
         try:
             sensitivity = [row for row in rows if row[0].name != reference_case]
             reference = [row for row in rows if row[0].name == reference_case]
@@ -100,12 +127,14 @@ def plot_sensitivity(
             )
             ax.grid(True, alpha=0.3)
             ax.legend()
-            output.parent.mkdir(parents=True, exist_ok=True)
-            fig.savefig(output)
-            if show:
-                plt.show()
+            if owns_figure:
+                output.parent.mkdir(parents=True, exist_ok=True)
+                fig.savefig(output)
+                if show:
+                    plt.show()
         finally:
-            plt.close(fig)
+            if owns_figure:
+                plt.close(fig)
 
 
 def main() -> None:
@@ -118,7 +147,11 @@ def main() -> None:
     parser.add_argument("--case-pattern", default="*", help="Case-directory glob")
     parser.add_argument("--reference-case", help="Reference directory name under output-root; plotted in black")
     parser.add_argument("--summary-stem", help="Override the metadata stem for ambiguous legacy cases")
-    parser.add_argument("--rate-stat", choices=("last", "min", "max", "mean"), default="last")
+    parser.add_argument(
+        "--rate-stat", choices=("last", "min", "max", "mean", "plateau"), default="last",
+        help="plateau: last magnitude after 3 distinct sample times covering at least "
+        "30 days with <=1%% variation; extends sparse tails backward (default: last)",
+    )
     parser.add_argument("--x-label", help="X-axis label; defaults to the parameter name")
     parser.add_argument("--x-scale", choices=("linear", "log"), default="linear")
     parser.add_argument("--y-scale", choices=("linear", "log"), default="linear")

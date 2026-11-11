@@ -83,6 +83,28 @@ def has_pair_regions(regions: set[int], key: str) -> bool:
     return all(int(region) in regions for region in key.split(":")[1].split("-"))
 
 
+def rate_plateau_start(dates: np.ndarray) -> int | None:
+    """Select a tail covering at least 30 days and three distinct sample times."""
+    cutoff = dates[-1] - np.timedelta64(30, "D")
+    if dates[0] > cutoff:
+        return None
+    start = int(np.searchsorted(dates, cutoff, side="right")) - 1
+    while start > 0 and np.unique(dates[start:]).size < 3:
+        start -= 1
+    if np.unique(dates[start:]).size < 3:
+        return None
+    return start
+
+
+def has_rate_plateau(values: np.ndarray, dates: np.ndarray) -> bool:
+    """Check a tail of at least 30 days and 3 distinct samples for <=1% range."""
+    start = rate_plateau_start(dates)
+    if start is None:
+        return False
+    tail = np.abs(values[start:])
+    return bool(np.ptp(tail) <= 0.01 * np.mean(tail))
+
+
 def annual_mass_rate_scale(values: list[np.ndarray]) -> tuple[float, str]:
     """Scale kg/day values to tonnes, kilotonnes, or megatonnes per year."""
     tonnes_per_year = max(
